@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Data never enters git: licences are research only and not redistributable
+data/
+datasets/
+participant_data/
+
+# Weights, checkpoints and run outputs
+weights/
+checkpoints/
+outputs/
+runs/
+wandb/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.bin
+
+# Cluster job logs
+slurm-*.out
+logs/
+
+# Local
+.env
+.DS_Store
