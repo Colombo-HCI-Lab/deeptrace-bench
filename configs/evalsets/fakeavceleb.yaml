@@ -1,0 +1,9 @@
+id: fakeavceleb
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: fakeavceleb
+group_by: [g_ethnicity, g_gender, method]
+status: pending_access
+notes: The South Asian group against the other four. HAVIC is refused here (fine-tuned on FakeAVCeleb).

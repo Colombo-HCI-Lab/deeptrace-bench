@@ -1,0 +1,9 @@
+id: banglafake
+modality: audio
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: banglafake
+group_by: [subject_id]
+status: ready
+notes: One generator (VITS) and 7 speakers, so per-speaker gaps are as far as grouping goes. Licence undeclared; ask the authors before publishing.

@@ -1,0 +1,20 @@
+id: effort
+name: Effort (CLIP ViT-L/14)
+modality: video
+status: workable
+licence: none published (README badge says CC BY-NC 4.0; issue 3 asks for a licence file)
+paper: Yan et al., ICML 2025
+upstream:
+  repo: YZY-stack/Effort-AIGI-Detection
+  commit: 96f5dea2b534d400cfd7003f053c7e93c8e16461
+weights:
+  - name: effort_clip_L14_trainOn_FaceForensic.pth
+    kind: gdrive
+    drive_id: 1m4fyJecABU-Yk3bJ4b1WhUwQa0xCkMLI
+training_data:
+  - {dataset: clip_wit, level: pretrain}
+  - {dataset: ffpp, level: train, split: train, note: "c23"}
+input:
+  crop: {size: 224, margin: 1.3, align: five_point, normalize: clip}
+  frames_per_clip: 32
+notes: Second wave. Hard-coded local CLIP path (issue 15), a reported reproduction gap (CDF-v2 AUC 0.885 vs 0.956, issue 19) and parameters reported missing from the FF++ checkpoint (issue 18).

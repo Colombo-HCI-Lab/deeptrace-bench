@@ -1,0 +1,115 @@
+"""Resumable scoring: items in, one score per item out, safe to kill at any point.
+
+Scores are appended as parquet parts (``part-00000.parquet``...) in the run directory, keyed
+by ``item_id``. On restart the items already in a part are skipped, so a job that hits
+Curnagl's 3-day limit or gets pre-empted picks up where it stopped. Items that can't be
+preprocessed get a status instead of a score, so failures can be counted per group.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import logging
+from collections.abc import Callable
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+from .models.base import Detector
+from .preprocess import PreprocessError
+
+log = logging.getLogger(__name__)
+
+AGGREGATIONS: dict[str, Callable[[np.ndarray], float]] = {
+    "mean": lambda s: float(np.mean(s)),
+    "max": lambda s: float(np.max(s)),
+    "median": lambda s: float(np.median(s)),
+}
+
+
+def shard_items(items: pd.DataFrame, index: int, count: int) -> pd.DataFrame:
+    """Return shard ``index`` of ``count``, by a stable hash of ``item_id``.
+
+    Stable across runs and machines (unlike Python's ``hash``), so array job ``i`` always
+    gets the same items.
+    """
+    if not 0 <= index < count:
+        raise ValueError(f"shard {index} out of range for {count} shards")
+    keys = items["item_id"].map(lambda s: int(hashlib.sha1(s.encode()).hexdigest()[:8], 16))
+    return items[keys % count == index]
+
+
+def read_scores(directory: Path) -> pd.DataFrame:
+    """All score parts in a run directory, as one table."""
+    parts = sorted(directory.glob("part-*.parquet"))
+    if not parts:
+        return pd.DataFrame(columns=["item_id", "score", "n_windows", "status"])
+    return pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True)
+
+
+def score_items(
+    detector: Detector,
+    items: pd.DataFrame,
+    load_inputs: Callable[[pd.Series], np.ndarray],
+    directory: Path,
+    aggregate: str = "mean",
+    flush_every: int = 256,
+    max_items: int | None = None,
+) -> int:
+    """Score every item not yet scored in ``directory``.
+
+    Args:
+        detector: a loaded detector.
+        items: rows with at least ``item_id``; passed whole to ``load_inputs``.
+        load_inputs: turns a row into the detector's input array, or raises
+            ``PreprocessError``.
+        directory: the run directory.
+        aggregate: how window scores become one item score (``mean``, ``max``, ``median``).
+        flush_every: rows per parquet part.
+        max_items: stop after this many new items (tests use it to simulate a kill).
+
+    Returns:
+        Number of items scored or marked failed in this call.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    done = set(read_scores(directory)["item_id"])
+    todo = items[~items["item_id"].isin(done)]
+    if max_items is not None:
+        todo = todo.head(max_items)
+    log.info("%d items already scored, %d to go", len(done), len(todo))
+
+    combine = AGGREGATIONS[aggregate]
+    next_part = len(list(directory.glob("part-*.parquet")))
+    buffer: list[dict] = []
+    for _, row in todo.iterrows():
+        try:
+            inputs = load_inputs(row)
+            window_scores = np.asarray(detector.score(inputs), dtype=np.float64)
+            buffer.append(
+                {
+                    "item_id": row["item_id"],
+                    "score": combine(window_scores),
+                    "n_windows": int(len(window_scores)),
+                    "status": "ok",
+                }
+            )
+        except PreprocessError as exc:
+            buffer.append(
+                {"item_id": row["item_id"], "score": np.nan, "n_windows": 0, "status": exc.reason}
+            )
+        if len(buffer) >= flush_every:
+            _flush(buffer, directory, next_part)
+            next_part += 1
+            buffer = []
+    if buffer:
+        _flush(buffer, directory, next_part)
+    return len(todo)
+
+
+def _flush(rows: list[dict], directory: Path, part: int) -> None:
+    path = directory / f"part-{part:05d}.parquet"
+    tmp = path.with_name(path.name + ".tmp")
+    pd.DataFrame(rows).to_parquet(tmp, index=False)
+    tmp.rename(path)
+    log.info("wrote %s (%d rows)", path.name, len(rows))

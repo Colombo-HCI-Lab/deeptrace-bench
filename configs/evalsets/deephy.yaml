@@ -1,0 +1,8 @@
+id: deephy
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: deephy
+group_by: [g_gender, g_age, g_skin_tone, method]
+status: pending_access

@@ -1,0 +1,10 @@
+id: asvspoof2019_la_eval
+modality: audio
+role: reproduction
+pairing: same_corpus
+components:
+  - dataset: asvspoof2019_la
+    filter: {split: eval}
+group_by: [method]
+status: ready
+notes: Reproduce each audio model's published EER here and settle score direction (AUC must be above 0.5).

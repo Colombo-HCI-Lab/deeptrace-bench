@@ -1,0 +1,25 @@
+id: sbi
+name: SBI (Self-Blended Images, EfficientNet-B4)
+modality: video
+status: ready
+wave: 1
+licence: research use only (commercial use needs a licence from the authors)
+paper: Shiohara and Yamasaki, CVPR 2022
+upstream:
+  repo: mapooon/SelfBlendedImages
+  commit: d6d9a351f32334ae9a3a250872c05836e0dd0f2c
+weights:
+  - name: FFc23.tar
+    kind: gdrive
+    drive_id: 1X0-NYT8KPursLZZdxduRQju6E52hauV0
+  - name: FFraw.tar
+    kind: gdrive
+    drive_id: 12sLyqBp0VFwdpA-oZLdIOkOTkz_ZnIhV
+training_data:
+  - {dataset: imagenet, level: pretrain}
+  - {dataset: ffpp, level: train, split: train, note: "real videos only, self-blended into fakes"}
+adapter: deeptrace_bench.models.sbi:SBIDetector
+input:
+  crop: {size: 380, margin: 1.3, align: none, normalize: imagenet}
+  frames_per_clip: 32
+notes: The only video repo with a script that scores any video, which makes the parity check easy.

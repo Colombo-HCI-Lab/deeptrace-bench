@@ -1,0 +1,10 @@
+id: ffpp_test
+modality: video
+role: reproduction
+pairing: same_corpus
+components:
+  - dataset: ffpp
+    filter: {split: test}
+group_by: [method]
+status: pending_access
+notes: Reproduce each video model's published FF++ (c23) numbers here first, in native preprocessing mode, before any comparison run.

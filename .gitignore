@@ -10,10 +10,44 @@ dist/
 .mypy_cache/
 .ipynb_checkpoints/
 
-# Data never enters git: licences are research only and not redistributable
+# Upstream detector repos, cloned at pinned commits by scripts/setup_models.py
+third_party/
+
+# Data never enters git: licences are research only, and several forbid passing on
+# derived data, which includes item ids, manifests and per-item scores
 data/
 datasets/
 participant_data/
+manifests/
+splits/
+scores/
+results/raw/
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.npy
+*.npz
+
+# Media and archives
+*.wav
+*.flac
+*.mp3
+*.m4a
+*.ogg
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.jpg
+*.jpeg
+*.png
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
 
 # Weights, checkpoints and run outputs
 weights/
@@ -27,6 +61,7 @@ wandb/
 *.safetensors
 *.onnx
 *.bin
+*.dat
 
 # Cluster job logs
 slurm-*.out
@@ -35,3 +70,7 @@ logs/
 # Local
 .env
 .DS_Store
+
+# Figures for the docs are fine
+!docs/**/*.png
+!docs/**/*.svg

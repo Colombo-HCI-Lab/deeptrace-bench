@@ -1,0 +1,23 @@
+id: aasist_l
+name: AASIST-L
+modality: audio
+status: ready
+wave: 1
+licence: MIT
+paper: Jung et al., ICASSP 2022
+upstream:
+  repo: clovaai/aasist
+  commit: a04c9863f63d44471dde8a6abcb3b082b07cd1d1
+weights:
+  - name: AASIST-L.pth
+    kind: github_raw
+    url: https://raw.githubusercontent.com/clovaai/aasist/a04c9863f63d44471dde8a6abcb3b082b07cd1d1/models/weights/AASIST-L.pth
+    size_bytes: 426428
+training_data:
+  - {dataset: asvspoof2019_la, level: train, split: train}
+adapter: deeptrace_bench.models.aasist:AASISTDetector
+input:
+  variant: AASIST-L
+  sample_rate: 16000
+  segment_samples: 64600
+notes: The 85k-parameter version of AASIST; same adapter.

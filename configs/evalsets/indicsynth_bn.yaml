@@ -1,0 +1,15 @@
+id: indicsynth_bn
+modality: audio
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: indicsynth
+    filter: {language: bn}
+    label: fake
+  - dataset: indicsuperb
+    filter: {language: bn}
+    label: real
+match_on: [language, subject_id]
+group_by: [g_gender, method]
+status: ready
+notes: IndicSynth fakes against real speech from IndicSUPERB, the corpus they were generated from, matched by speaker where the ids line up. Recording conditions match, so this counts as same-corpus.

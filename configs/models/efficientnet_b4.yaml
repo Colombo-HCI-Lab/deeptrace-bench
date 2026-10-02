@@ -1,0 +1,23 @@
+id: efficientnet_b4
+name: EfficientNet-B4 (DeepfakeBench)
+modality: video
+status: ready
+wave: 1
+licence: CC BY-NC 4.0 (DeepfakeBench)
+paper: Bonettini et al., ICPR 2020
+upstream:
+  repo: SCLBD/DeepfakeBench
+  commit: f188b1c105465e2e5377eb536a95022ae0e4522d
+weights:
+  - name: effnb4_best.pth
+    kind: github_release
+    url: https://github.com/SCLBD/DeepfakeBench/releases/download/v1.0.1/effnb4_best.pth
+    size_bytes: 70979261
+training_data:
+  - {dataset: imagenet, level: pretrain}
+  - {dataset: ffpp, level: train, split: train, note: "c23 per the DeepfakeBench README"}
+adapter: deeptrace_bench.models.deepfakebench:EfficientNetB4Detector
+input:
+  crop: {size: 256, margin: 1.3, align: five_point, normalize: imagenet}
+  frames_per_clip: 32
+notes: Shares the Xception wrapper, so it costs almost nothing extra. DeepfakeBench issue 79 reports an architecture mismatch; check at parity.

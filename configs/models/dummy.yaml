@@ -1,0 +1,7 @@
+id: dummy
+name: Dummy detector (tests only)
+modality: audio
+status: test
+licence: n/a
+adapter: deeptrace_bench.models.dummy:DummyDetector
+notes: Deterministic stand-in for tests and dry runs. Never used for results.

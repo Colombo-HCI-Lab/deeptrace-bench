@@ -1,0 +1,10 @@
+id: dfplatter_sample
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: dfplatter
+    filter: {split: sample}
+group_by: [g_gender, g_age, g_skin_tone, method]
+status: pending_access
+notes: A stratified sample (by skin tone, gender and method), since the full set is 133,260 videos. The builder marks sampled items with split "sample".

@@ -1,0 +1,32 @@
+id: xlsr_aasist
+name: XLS-R 300M + AASIST
+modality: audio
+status: workable
+wave: 1
+licence: MIT
+paper: Tak et al., Odyssey 2022
+upstream:
+  repo: TakHemlata/SSL_Anti-spoofing
+  commit: 4acaa61dcef5f7610f43aa4d0b29c4559b970cd2
+weights:
+  - name: pretrained
+    kind: gdrive_folder
+    drive_id: 1c4ywztEVlYVijfwbGLl9OEa1SNtFKppB
+  - name: xls_r_300m.bin
+    kind: hf
+    repo: facebook/wav2vec2-xls-r-300m
+    filename: pytorch_model.bin
+    revision: 1a640f32ac3e39899438a2931f9924c02f080a54
+training_data:
+  - {dataset: commonvoice, level: pretrain}
+  - {dataset: babel, level: pretrain}
+  - {dataset: mls, level: pretrain}
+  - {dataset: voxpopuli, level: pretrain}
+  - {dataset: voxlingua107, level: pretrain}
+  - {dataset: asvspoof2019_la, level: train, split: train}
+adapter: deeptrace_bench.models.xlsr_aasist:XLSRAASISTDetector
+input:
+  sample_rate: 16000
+  segment_samples: 64600
+  checkpoint: pretrained/LA_model.pth
+notes: Port off fairseq onto the transformers XLS-R (key remap, about 1 to 2 days). The Drive folder holds LA_model.pth and Best_LA_model_for_DF.pth.

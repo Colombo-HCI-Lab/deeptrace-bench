@@ -1,0 +1,9 @@
+id: urdu_csalt
+modality: audio
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: urdu_csalt
+group_by: [method, subject_id]
+status: ready
+notes: Real and fake from the same speakers. The first South Asian run.

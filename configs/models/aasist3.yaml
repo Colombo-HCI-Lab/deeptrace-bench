@@ -1,0 +1,20 @@
+id: aasist3
+name: AASIST3
+modality: audio
+status: dropped
+licence: CC BY-NC-ND 4.0 (repo LICENSE; the model card says CC BY-NC 4.0)
+paper: Borodin et al., 2024
+upstream:
+  repo: lab260ru/AASIST3
+  commit: 33c39c24525c871225ad3abe3c8ec3b0e1ce86de
+weights:
+  - name: model.safetensors
+    kind: hf
+    repo: lab260/AASIST3
+    filename: model.safetensors
+training_data:
+  - {dataset: asvspoof2019_la, level: train, split: train}
+  - {dataset: asvspoof5, level: train}
+  - {dataset: mlaad, level: train}
+  - {dataset: m_ailabs, level: train}
+notes: Dropped. The repo says the released weights are not the paper's, independent tests give 28 to 32% EER, and it was trained on MLAAD, one of our test sets.

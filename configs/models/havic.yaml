@@ -1,0 +1,23 @@
+id: havic
+name: HAVIC (audio-visual)
+modality: audio_video
+status: later
+licence: MIT
+paper: CVPR 2026 Findings (arXiv 2603.23960)
+upstream:
+  repo: tuffy-studio/HAVIC
+  commit: 66f4908552e1781c27a31d7dd8dfeb3cccccc69c
+weights:
+  - name: best_ft_model.pth
+    kind: hf
+    repo: JielunPeng/HAVIC
+    filename: best_ft_model.pth
+    revision: dbac156e0e172985cc2f732d8e36f5928675f615
+training_data:
+  - {dataset: lrs2, level: pretrain}
+  - {dataset: fakeavceleb, level: finetune, note: "random 70% of FakeAVCeleb; the item list isn't published, so FakeAVCeleb is refused"}
+input:
+  window_frames: 16
+  frame_stride: 2
+  fps: 5
+notes: The only open audio-visual detector. Useful once DeePhy, DF-Platter or InDeepFake arrive; never on FakeAVCeleb.

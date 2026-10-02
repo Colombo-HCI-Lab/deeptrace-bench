@@ -1,0 +1,38 @@
+# The one evaluation setup every run uses. Changing anything here changes every run id, so
+# results from different settings never mix (see runs.py).
+#
+# status: proposed until the team settles decision 5 (due 2026-10-09). Once settled, switch
+# to `settled` and treat changes as a new benchmark version.
+status: proposed
+
+video:
+  face_detector: retinaface_onnx   # one shared detector, run once per dataset and cached
+  frames_per_clip: 32
+  frame_sampling: uniform
+  crop: per_model                  # each model's config carries its CropSpec
+  min_face_frames: 8               # fewer frames with a face than this: status no_face
+  aggregation: mean                # item score = mean of frame scores
+
+audio:
+  sample_rate: 16000
+  segment_samples: 64600           # ~4 s, what AASIST and XLS-R + AASIST were trained on
+  min_seconds: 1.0                 # shorter clips: status too_short, not tiled
+  aggregation: mean                # item score = mean of window scores
+
+metrics:
+  primary: [auc, eer]
+  bootstrap:
+    n: 1000
+    ci: 0.95
+    seed: 0
+  min_group_n: 30                  # groups with fewer real or fake items are flagged small
+  threshold: overall_eer           # one global threshold for per-group FPR and FNR
+  fixed_fpr_reference: 0.05        # also report the fake detection rate at 5% FPR
+
+reporting:
+  headline_pairing: same_corpus    # cross-corpus evalsets never enter headline numbers
+  allowed_verdicts: [clean, source_overlap, overlap_excluded]
+  attribute_rule:                  # decision 4 (proposed): keep a dictionary field if
+    metric: auc                    # both models in a modality shift by this much
+    min_shift: 0.05
+    models_agree: 2

@@ -1,0 +1,22 @@
+id: xlsr_mamba
+name: XLSR-Mamba
+modality: audio
+status: dropped
+licence: MIT
+paper: Xiao and Das, 2024
+upstream:
+  repo: swagshaw/XLSR-Mamba
+  commit: 10ec73810d24091028a2aa5454c8dfd1a239e441
+weights:
+  - name: model.safetensors
+    kind: hf
+    repo: AustinXiao/XLSR-Mamba-LA
+    filename: model.safetensors
+training_data:
+  - {dataset: commonvoice, level: pretrain}
+  - {dataset: babel, level: pretrain}
+  - {dataset: mls, level: pretrain}
+  - {dataset: voxpopuli, level: pretrain}
+  - {dataset: voxlingua107, level: pretrain}
+  - {dataset: asvspoof2019_la, level: train, split: train}
+notes: Dropped for now. Needs fairseq plus compiled mamba-ssm and causal-conv1d kernels. Revisit if XLS-R + AASIST porting goes smoothly.

@@ -1,0 +1,41 @@
+# Corpora that appear only as training, pretraining or source data. We never evaluate on
+# them, but the contamination guard needs to know them by id. See registry.py.
+
+- id: imagenet
+  name: ImageNet-1k
+  note: Backbone initialisation for the CNN video detectors.
+- id: clip_wit
+  name: OpenAI CLIP pretraining data (WIT, 400M image-text pairs)
+  note: Not public, so overlap with our data can't be checked.
+- id: lrs2
+  name: LRS2 (BBC lip reading sentences)
+- id: lrw
+  name: LRW (lip reading in the wild)
+  note: LipForensics' lip-reading pretraining.
+- id: voxceleb2
+  name: VoxCeleb2
+  note: Source of FakeAVCeleb's real videos.
+- id: vctk
+  name: VCTK
+  note: Source corpus of ASVspoof 2019.
+- id: commonvoice
+  name: Mozilla Common Voice
+- id: babel
+  name: IARPA BABEL
+- id: mls
+  name: Multilingual LibriSpeech
+- id: voxpopuli
+  name: VoxPopuli
+- id: voxlingua107
+  name: VoxLingua107
+- id: m_ailabs
+  name: M-AILABS speech corpus
+  note: MLAAD's intended real counterpart; no South Asian languages.
+- id: asvspoof5
+  name: ASVspoof 5
+- id: genimage
+  name: GenImage
+  note: Effort's AI-image checkpoint, not the face checkpoint we use.
+- id: youtube
+  name: YouTube videos (unspecified)
+  note: Where FF++, DF-Platter and similar sets took their real videos from.

@@ -1,0 +1,8 @@
+id: indeepfake
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: indeepfake
+group_by: [language, g_gender, g_age, method]
+status: pending_access

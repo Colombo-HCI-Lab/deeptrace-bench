@@ -1,0 +1,16 @@
+id: altfreezing
+name: AltFreezing
+modality: video
+status: blocked
+licence: MIT
+paper: Wang et al., CVPR 2023
+upstream:
+  repo: ZhendongWang6/AltFreezing
+  commit: f76b061717f534dd9b21dd932e6ec53540925a8d
+weights:
+  - name: model.pth
+    kind: manual
+    instructions: Weights are only on RecDrive (https://rec.ustc.edu.cn/share/e87360b0-7b2e-11ef-aeef-a9fd0832d537) and Baidu (https://pan.baidu.com/s/1lH4R1NlHoW_16Xv_ArQhvw), both with password altf. Someone with a working session must fetch them.
+training_data:
+  - {dataset: ffpp, level: train, split: train, note: "compression level not stated"}
+notes: Blocked until the weights are confirmed to download.

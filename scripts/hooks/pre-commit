@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Refuse commits that would put data, or anything naming items, into git.
+# Enable once per clone:  git config core.hooksPath scripts/hooks
+#
+# Several dataset licences forbid passing on derived data, and item ids count, so manifests
+# and per-item scores stay in DTB_ROOT. Aggregate tables (counts, metrics per group) are fine.
+set -euo pipefail
+
+blocked_ext='\.(parquet|feather|h5|hdf5|npy|npz|wav|flac|mp3|m4a|ogg|mp4|avi|mov|mkv|webm|zip|tar|tgz|7z|pt|pth|ckpt|safetensors|onnx|bin|dat)$'
+max_bytes=$((5 * 1024 * 1024))
+status=0
+
+while IFS= read -r -d '' file; do
+  if [[ "$file" =~ $blocked_ext ]]; then
+    echo "pre-commit: refusing $file (data, media, archive or weights)" >&2
+    status=1
+    continue
+  fi
+  size=$(git cat-file -s ":$file")
+  if (( size > max_bytes )); then
+    echo "pre-commit: refusing $file ($size bytes; over 5 MB)" >&2
+    status=1
+    continue
+  fi
+  case "$file" in
+    *.csv|*.tsv|*.json|*.jsonl)
+      header=$(git show ":$file" | head -c 4096 | head -n 1)
+      if [[ "$header" =~ (^|[^a-z_])(item_id|rel_path)([^a-z_]|$) ]]; then
+        echo "pre-commit: refusing $file (has an item_id or rel_path column: per-item data stays in DTB_ROOT)" >&2
+        status=1
+      fi
+      ;;
+  esac
+done < <(git diff --cached --name-only --diff-filter=ACM -z)
+
+exit $status
