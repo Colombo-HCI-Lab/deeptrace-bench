@@ -4,12 +4,18 @@ Weight hashes live in ``configs/weights.lock.yaml``: the first fetch records eac
 sha256 there (with ``--record``), and every later fetch must match it. Google Drive is the
 only host for several checkpoints, so a recorded hash is what tells us a re-upload or a
 quota page didn't slip in.
+
+Every download lands in a staging folder first and is checked there (not an HTML page, hash
+matches the lock) before it is moved to its final path, so a bad file never sits where an
+adapter would load it. Dataset archives are checked against ``access.sha256`` the same way
+before they are extracted, and archive members may not escape the dataset folder.
 """
 
 from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import shutil
 import tarfile
 import zipfile
@@ -42,6 +48,28 @@ def sha256_file(path: Path) -> str:
         while chunk := fh.read(_CHUNK):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+_HTML_MARKERS = (b"<!doctype html", b"<html", b"<head", b"<body")
+
+
+def looks_like_html(path: Path) -> bool:
+    """True if a file starts like an HTML page (a quota notice or login wall saved as data)."""
+    with path.open("rb") as fh:
+        head = fh.read(1024).lstrip().lower()
+    return head.startswith(_HTML_MARKERS)
+
+
+def ensure_inside(base: Path, path: Path) -> Path:
+    """Return ``path`` if it resolves inside ``base``.
+
+    Raises:
+        ValueError: if it escapes ``base`` (via ``..``, an absolute path or a symlink).
+    """
+    resolved = path.resolve()
+    if not resolved.is_relative_to(base.resolve()):
+        raise ValueError(f"{path} escapes {base}")
+    return path
 
 
 def download_url(url: str, dest: Path) -> Path:
@@ -86,51 +114,82 @@ def record_hash(model_id: str, name: str, digest: str) -> None:
 
 
 def fetch_weight(model_id: str, spec: WeightSpec, dest_dir: Path, record: bool = False) -> Path:
-    """Fetch one weight file into ``dest_dir`` and check it against the lock file.
+    """Fetch one weight (file or Drive folder) into ``dest_dir`` and check it.
 
-    An existing file is re-checked rather than re-downloaded.
+    A new download goes to ``dest_dir/.incoming/`` first; it is moved into place only after
+    every file in it passes the checks. An existing file or folder is re-checked rather than
+    re-downloaded.
 
     Args:
         model_id: owning model, the key in the lock file.
         spec: the weight to fetch.
         dest_dir: the model's weights directory.
-        record: write the hash into the lock file when none is recorded yet.
+        record: write hashes into the lock file where none is recorded yet.
 
     Returns:
         Path of the file (or folder, for ``gdrive_folder``).
 
     Raises:
-        ManualStepRequiredError: for weights a person must fetch by hand.
-        ChecksumMismatchError: if the file differs from the recorded hash.
+        ManualStepRequiredError: for weights a person must fetch by hand, and for downloads
+            that turn out to be HTML pages.
+        ChecksumMismatchError: if a file differs from its recorded hash.
     """
-    dest = dest_dir / spec.name
-    if not dest.exists():
-        _download_weight(spec, dest)
-    if dest.is_dir():
+    dest = ensure_inside(dest_dir, dest_dir / spec.name)
+    if dest.exists():
+        _verify_weight(model_id, spec, dest, record)
         return dest
 
-    digest = sha256_file(dest)
-    expected = read_lock().get(model_id, {}).get(spec.name)
-    if expected is None:
-        if record:
-            record_hash(model_id, spec.name, digest)
-            log.info("%s/%s: recorded sha256 %s", model_id, spec.name, digest)
-        else:
-            log.warning(
-                "%s/%s: no recorded sha256 (got %s); re-run with --record to pin it",
-                model_id,
-                spec.name,
-                digest,
-            )
-    elif digest != expected:
-        raise ChecksumMismatchError(
-            f"{model_id}/{spec.name}: sha256 {digest} != recorded {expected}"
-        )
+    staging = ensure_inside(dest_dir, dest_dir / ".incoming" / spec.name)
+    _remove(staging)
+    staging.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        _download_weight(spec, staging)
+        _verify_weight(model_id, spec, staging, record)
+    except BaseException:
+        _remove(staging)
+        raise
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(staging, dest)
     return dest
 
 
+def _verify_weight(model_id: str, spec: WeightSpec, path: Path, record: bool) -> None:
+    files = [path] if path.is_file() else sorted(p for p in path.rglob("*") if p.is_file())
+    if not files:
+        raise ManualStepRequiredError(f"{model_id}/{spec.name}: download is empty")
+    lock = read_lock().get(model_id, {})
+    for file in files:
+        key = spec.name if file == path else f"{spec.name}/{file.relative_to(path).as_posix()}"
+        if looks_like_html(file):
+            raise ManualStepRequiredError(
+                f"{model_id}/{key} is an HTML page, not weights (quota or login wall); fetch "
+                "it by hand"
+            )
+        digest = sha256_file(file)
+        expected = lock.get(key)
+        if expected is None:
+            if record:
+                record_hash(model_id, key, digest)
+                log.info("%s/%s: recorded sha256 %s", model_id, key, digest)
+            else:
+                log.warning(
+                    "%s/%s: no recorded sha256 (got %s); re-run with --record to pin it",
+                    model_id,
+                    key,
+                    digest,
+                )
+        elif digest != expected:
+            raise ChecksumMismatchError(f"{model_id}/{key}: sha256 {digest} != recorded {expected}")
+
+
+def _remove(path: Path) -> None:
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    elif path.exists() or path.is_symlink():
+        path.unlink()
+
+
 def _download_weight(spec: WeightSpec, dest: Path) -> None:
-    dest.parent.mkdir(parents=True, exist_ok=True)
     match spec.kind:
         case "github_release" | "github_raw" | "url":
             assert spec.url is not None
@@ -148,7 +207,7 @@ def _download_weight(spec: WeightSpec, dest: Path) -> None:
             if out is None or not dest.exists():
                 raise ManualStepRequiredError(
                     f"Google Drive refused {spec.drive_id} (quota or permissions); fetch "
-                    f"{spec.name} by hand into {dest.parent}"
+                    f"{spec.name} by hand"
                 )
         case "gdrive_folder":
             import gdown
@@ -156,10 +215,12 @@ def _download_weight(spec: WeightSpec, dest: Path) -> None:
             files = gdown.download_folder(id=spec.drive_id, output=str(dest), quiet=False)
             if not files:
                 raise ManualStepRequiredError(
-                    f"Google Drive refused folder {spec.drive_id}; fetch it by hand into {dest}"
+                    f"Google Drive refused folder {spec.drive_id}; fetch {spec.name} by hand"
                 )
         case "manual":
-            raise ManualStepRequiredError(f"{spec.name}: {spec.instructions} Place it at {dest}.")
+            raise ManualStepRequiredError(
+                f"{spec.name}: {spec.instructions} Place it in the model's weights folder."
+            )
 
 
 # --- datasets -----------------------------------------------------------------------------
@@ -185,9 +246,10 @@ def fetch_dataset(config: DatasetConfig, dest: Path, languages: list[str] | None
         case "url":
             assert access.urls is not None
             for name, url in access.urls.items():
-                archive = dest / name
+                archive = ensure_inside(dest, dest / name)
                 if not archive.exists():
                     download_url(url, archive)
+                _check_archive(config, name, archive)
                 _extract(archive, dest)
             return dest
         case "manual":
@@ -230,6 +292,24 @@ def _fetch_hf_dataset(config: DatasetConfig, dest: Path, languages: list[str] | 
     return dest
 
 
+def _check_archive(config: DatasetConfig, name: str, archive: Path) -> None:
+    """Refuse HTML pages and archives that don't match ``access.sha256``."""
+    if looks_like_html(archive):
+        archive.unlink()
+        raise ManualStepRequiredError(f"{config.id}/{name} downloaded as an HTML page")
+    expected = config.access.sha256.get(name)
+    digest = sha256_file(archive)
+    if expected is None:
+        log.warning(
+            "%s/%s: no sha256 in the config (got %s); add it under access.sha256",
+            config.id,
+            name,
+            digest,
+        )
+    elif digest != expected:
+        raise ChecksumMismatchError(f"{config.id}/{name}: sha256 {digest} != expected {expected}")
+
+
 def _extract(archive: Path, dest: Path) -> None:
     marker = dest / f".extracted-{archive.name}"
     if marker.exists():
@@ -237,9 +317,14 @@ def _extract(archive: Path, dest: Path) -> None:
     log.info("extracting %s", archive)
     if zipfile.is_zipfile(archive):
         with zipfile.ZipFile(archive) as zf:
+            # zipfile already strips ".." and absolute paths; check anyway, so a malformed
+            # archive fails loudly instead of being silently rewritten.
+            for member in zf.namelist():
+                ensure_inside(dest, dest / member)
             zf.extractall(dest)
     elif tarfile.is_tarfile(archive):
         with tarfile.open(archive) as tf:
+            # The "data" filter refuses absolute paths, "..", and links pointing outside.
             tf.extractall(dest, filter="data")
     else:
         return
@@ -258,7 +343,7 @@ def verify_supplied(config: DatasetConfig, source: Path, dest: Path) -> Path:
     source = source.expanduser().resolve()
     if not source.exists():
         raise FileNotFoundError(source)
-    missing = [p for p in config.access.expect if not (source / p).exists()]
+    missing = [p for p in config.access.expect if not ensure_inside(source, source / p).exists()]
     if missing:
         raise FileNotFoundError(f"{config.id}: {source} lacks expected paths {missing}")
     dest.parent.mkdir(parents=True, exist_ok=True)

@@ -31,7 +31,8 @@ def test_every_model_lists_training_data(registry):
 def test_lock_only_names_known_weights(registry):
     for model_id, files in read_lock().items():
         names = {w.name for w in registry.model(model_id).weights}
-        assert set(files) <= names, f"lock has unknown files for {model_id}"
+        # Folder weights are locked per file, as "<folder>/<relative path>".
+        assert {key.split("/")[0] for key in files} <= names, f"unknown files for {model_id}"
 
 
 def test_eval_config_is_still_proposed(registry):

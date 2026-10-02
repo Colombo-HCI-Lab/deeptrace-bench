@@ -40,6 +40,14 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+def _safe_relpath(value: str) -> str:
+    """Accept only plain relative paths: no absolute paths, no "..", no backslashes."""
+    parts = Path(value).parts
+    if not value or Path(value).is_absolute() or ".." in parts or "\\" in value:
+        raise ValueError(f"{value!r} must be a plain relative path")
+    return value
+
+
 # --- models -------------------------------------------------------------------------------
 
 ModelStatus = Literal["ready", "workable", "later", "blocked", "dropped", "test"]
@@ -76,6 +84,7 @@ class WeightSpec(_Strict):
 
     @model_validator(mode="after")
     def _kind_fields(self) -> WeightSpec:
+        _safe_relpath(self.name)
         required = {
             "github_release": ["url"],
             "github_raw": ["url"],
@@ -142,6 +151,16 @@ class Access(_Strict):
     urls: dict[str, str] | None = None
     request: str | None = None
     expect: list[str] = []
+    sha256: dict[str, str] = {}
+
+    @model_validator(mode="after")
+    def _safe_paths(self) -> Access:
+        for value in [*(self.urls or {}), *self.expect, *self.sha256]:
+            _safe_relpath(value)
+        unknown = set(self.sha256) - set(self.urls or {})
+        if unknown:
+            raise ValueError(f"sha256 given for files not in urls: {sorted(unknown)}")
+        return self
 
 
 class DatasetConfig(_Strict):
