@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-import numpy as np
+from pathlib import Path
 
-from deeptrace_bench.preprocess.scrfd import distance2bbox, distance2kps, nms
+import numpy as np
+import pytest
+
+from deeptrace_bench.preprocess.scrfd import SCRFD, distance2bbox, distance2kps, nms
 
 
 def test_distances_decode_to_boxes():
@@ -30,3 +33,18 @@ def test_overlapping_boxes_keep_the_best():
         dtype=np.float32,
     )
     assert nms(dets, threshold=0.4) == [0, 2]
+
+
+def test_the_detector_turns_off_onnxruntime_telemetry(monkeypatch):
+    import onnxruntime
+
+    calls = []
+
+    def no_session(*args, **kwargs):
+        raise RuntimeError("stop before loading a model")
+
+    monkeypatch.setattr(onnxruntime, "disable_telemetry_events", lambda: calls.append("off"))
+    monkeypatch.setattr(onnxruntime, "InferenceSession", no_session)
+    with pytest.raises(RuntimeError, match="stop"):
+        SCRFD(Path("det.onnx"))
+    assert calls == ["off"]

@@ -80,6 +80,10 @@ class SCRFD:
     ) -> None:
         import onnxruntime
 
+        # onnxruntime's telemetry uploads usage events from a background thread, which races
+        # interpreter shutdown on macOS and aborts the process after scoring has finished.
+        # The detector has no reason to send anything anywhere.
+        onnxruntime.disable_telemetry_events()
         options = onnxruntime.SessionOptions()
         options.intra_op_num_threads = threads or min(4, os.cpu_count() or 1)
         options.inter_op_num_threads = 1
