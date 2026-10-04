@@ -6,12 +6,19 @@ Examples:
     uv run scripts/setup_datasets.py indicsynth --languages hi bn ur
     uv run scripts/setup_datasets.py fakeavceleb --from /work/.../FakeAVCeleb_v1.2
     uv run scripts/setup_datasets.py urdu_csalt --manifest
+    uv run scripts/setup_datasets.py mendeley_roop_akool unidatapro_videos --sample 2 --manifest
 
 Open datasets are downloaded into ``DTB_ROOT/datasets/<id>/``. Request-only datasets can't
 be downloaded by a script: once someone has a copy, ``--from PATH`` checks it and links it
 into the store. ``--manifest`` runs the dataset's builder and writes the manifest to
 ``DTB_ROOT/manifests/<id>.parquet``, plus a committable summary (counts only) under
 ``results/manifests/``.
+
+``--sample N`` fetches only N real and N fake items per dataset (from a Hugging Face file
+list, a remote zip read by range requests, or a ``--from`` copy) for a pipeline test. It
+always works in the smoke namespace, ``DTB_ROOT/smoke/``, so a partial dataset can never
+land in the main store; its manifest summary stays there too. ``--smoke`` uses that
+namespace without sampling (for example to rebuild a sample's manifest).
 """
 
 from __future__ import annotations
@@ -24,8 +31,16 @@ from pathlib import Path
 
 from deeptrace_bench.fetch import ManualStepRequiredError, fetch_dataset, verify_supplied
 from deeptrace_bench.manifest import summarize, write_manifest
-from deeptrace_bench.paths import PUBLISHED_RESULTS_DIR, dataset_dir
+from deeptrace_bench.paths import (
+    PUBLISHED_RESULTS_DIR,
+    dataset_dir,
+    manifest_path,
+    namespace,
+    prepare_store,
+    use_namespace,
+)
 from deeptrace_bench.registry import DatasetConfig, Registry, resolve
+from deeptrace_bench.sample import SampleError, sample_dataset
 
 log = logging.getLogger("setup_datasets")
 
@@ -53,12 +68,19 @@ def print_table(registry: Registry) -> None:
 
 
 def build(config: DatasetConfig) -> None:
-    """Run a dataset's builder, write its manifest and a committable summary."""
+    """Run a dataset's builder, write its manifest and a summary (counts only).
+
+    In the main store the summary goes to the repo's ``results/manifests/`` to be committed;
+    in a namespace it stays next to the manifest, since a sample's counts mean nothing.
+    """
     if config.builder is None:
         raise ManualStepRequiredError(f"{config.id} has no builder")
     df = resolve(config.builder)(dataset_dir(config.id))
     path = write_manifest(df, config.id)
-    summary_path = PUBLISHED_RESULTS_DIR / "manifests" / f"{config.id}.json"
+    if namespace():
+        summary_path = manifest_path(config.id).with_suffix(".summary.json")
+    else:
+        summary_path = PUBLISHED_RESULTS_DIR / "manifests" / f"{config.id}.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(json.dumps(summarize(df), indent=2, sort_keys=True) + "\n")
     log.info("%s: %d items -> %s (summary %s)", config.id, len(df), path, summary_path)
@@ -73,8 +95,15 @@ def main() -> int:
     parser.add_argument("--from", dest="source", type=Path, help="link a copy obtained by hand")
     parser.add_argument("--manifest", action="store_true", help="build the manifest")
     parser.add_argument("--skip-download", action="store_true", help="only build manifests")
+    parser.add_argument(
+        "--sample", type=int, metavar="N", help="fetch N real and N fake items (smoke namespace)"
+    )
+    parser.add_argument("--seed", type=int, default=0, help="which sample (with --sample)")
+    parser.add_argument("--smoke", action="store_true", help="use the smoke namespace")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    if args.sample is not None or args.smoke:
+        use_namespace("smoke")
 
     registry = Registry.load()
     if args.list:
@@ -85,18 +114,24 @@ def main() -> int:
     if args.source and len(args.datasets) != 1:
         parser.error("--from takes exactly one dataset")
 
+    prepare_store()
     failed = []
     for dataset_id in args.datasets:
         config = registry.dataset(dataset_id)
         dest = dataset_dir(dataset_id)
         try:
-            if args.source:
+            if args.sample is not None:
+                record = sample_dataset(
+                    config, dest, args.sample, args.seed, args.source, args.languages
+                )
+                log.info("%s: sample of %d items in %s", dataset_id, len(record["chosen"]), dest)
+            elif args.source:
                 verify_supplied(config, args.source, dest)
             elif not args.skip_download:
                 fetch_dataset(config, dest, args.languages)
             if args.manifest:
                 build(config)
-        except ManualStepRequiredError as exc:
+        except (ManualStepRequiredError, SampleError) as exc:
             log.warning("%s", exc)
             failed.append(dataset_id)
         except NotImplementedError as exc:

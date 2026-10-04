@@ -91,3 +91,76 @@ def test_zip_members_cannot_escape(tmp_path):
     with pytest.raises(ValueError, match="escapes"):
         fetch._extract(archive, dest)
     assert not (tmp_path / "escaped.txt").exists()
+
+
+def _zip_bytes(members: dict[str, bytes]) -> bytes:
+    import io
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        for name, data in members.items():
+            zf.writestr(name, data)
+    return buf.getvalue()
+
+
+def test_a_zip_member_weight_is_read_out_and_pinned(tmp_path, lock, monkeypatch):
+    import io
+
+    from deeptrace_bench import remote_zip
+
+    data = _zip_bytes({"pack/det.onnx": b"detector", "pack/other.onnx": b"big"})
+    monkeypatch.setattr(
+        remote_zip, "open_remote_zip", lambda url: zipfile.ZipFile(io.BytesIO(data))
+    )
+    spec = WeightSpec(
+        name="det.onnx", kind="url", url="https://example.invalid/p.zip", member="pack/det.onnx"
+    )
+    path = fetch_weight("tool", spec, tmp_path / "weights", record=True)
+    assert path.read_bytes() == b"detector"
+    assert set(fetch.read_lock()["tool"]) == {"det.onnx"}
+
+
+def test_a_host_without_ranges_falls_back_to_the_whole_archive(tmp_path, lock, monkeypatch):
+    from deeptrace_bench import remote_zip
+
+    def refuse(url):
+        raise remote_zip.RangeNotSupportedError(url)
+
+    def download(url, dest):
+        dest.write_bytes(_zip_bytes({"det.onnx": b"detector"}))
+        return dest
+
+    monkeypatch.setattr(remote_zip, "open_remote_zip", refuse)
+    monkeypatch.setattr(fetch, "download_url", download)
+    spec = WeightSpec(
+        name="det.onnx", kind="url", url="https://example.invalid/p.zip", member="det.onnx"
+    )
+    path = fetch_weight("tool", spec, tmp_path / "weights", record=True)
+    assert path.read_bytes() == b"detector"
+    assert not [p for p in path.parent.rglob("*") if p.is_file() and p != path]  # no archive
+
+
+def test_a_snapshot_copies_matching_files_and_pins_each(tmp_path, lock, monkeypatch):
+    import huggingface_hub
+
+    files = {"config.json": b"{}", "model.safetensors": b"w", "flax_model.msgpack": b"skip"}
+
+    def fake_download(repo, name, revision=None, **kwargs):
+        path = tmp_path / "hf_cache" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(files[name])
+        return str(path)
+
+    monkeypatch.setattr(huggingface_hub, "list_repo_files", lambda repo, revision=None: list(files))
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", fake_download)
+    spec = WeightSpec(
+        name="clip",
+        kind="hf_snapshot",
+        repo="org/clip",
+        revision="0" * 40,
+        allow_patterns=["config.json", "*.safetensors"],
+    )
+    path = fetch_weight("m", spec, tmp_path / "weights", record=True)
+    assert sorted(p.name for p in path.iterdir()) == ["config.json", "model.safetensors"]
+    assert set(fetch.read_lock()["m"]) == {"clip/config.json", "clip/model.safetensors"}
+    assert fetch.is_pinned("m", spec)

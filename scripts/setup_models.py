@@ -7,9 +7,11 @@ Examples:
 
 For each model this clones the upstream repo at its pinned commit into ``third_party/``,
 archives it to ``DTB_ROOT/upstream/``, downloads every weight file into
-``DTB_ROOT/weights/<id>/`` and checks it against ``configs/weights.lock.yaml``. Use
-``--record`` the first time a weight is fetched to pin its hash. Downloads belong on a
-machine with internet access (on Curnagl, the login node).
+``DTB_ROOT/weights/<id>/`` and checks it against ``configs/weights.lock.yaml``. Video models
+also get the shared face detector named in ``configs/eval/default.yaml`` (a tool in
+``configs/tools/``), fetched and pinned the same way under its own id. Use ``--record`` the
+first time a weight is fetched to pin its hash. Downloads belong on a machine with internet
+access (on Curnagl, the login node).
 """
 
 from __future__ import annotations
@@ -22,11 +24,11 @@ from deeptrace_bench.fetch import (
     ChecksumMismatchError,
     ManualStepRequiredError,
     fetch_weight,
-    read_lock,
+    is_pinned,
 )
 from deeptrace_bench.models._stub import PendingDetector
 from deeptrace_bench.paths import weights_dir
-from deeptrace_bench.registry import ModelConfig, Registry, resolve
+from deeptrace_bench.registry import Modality, ModelConfig, Registry, ToolConfig, resolve
 from deeptrace_bench.upstream import ensure_upstream
 
 log = logging.getLogger("setup_models")
@@ -42,8 +44,7 @@ def adapter_state(model: ModelConfig) -> str:
 
 
 def print_table(registry: Registry) -> None:
-    """Print every model with status, wave and where its weights come from."""
-    lock = read_lock()
+    """Print every model with status, wave and where its weights come from, then the tools."""
     rows = []
 
     def order(m: ModelConfig) -> tuple:
@@ -51,7 +52,7 @@ def print_table(registry: Registry) -> None:
 
     for m in sorted(registry.models.values(), key=order):
         hosts = ",".join(sorted({w.kind for w in m.weights})) or "-"
-        pinned = sum(1 for w in m.weights if w.name in lock.get(m.id, {}))
+        pinned = sum(1 for w in m.weights if is_pinned(m.id, w))
         rows.append(
             (
                 m.id,
@@ -67,21 +68,18 @@ def print_table(registry: Registry) -> None:
     widths = [max(len(r[i]) for r in [header, *rows]) for i in range(len(header))]
     for row in [header, tuple("-" * w for w in widths), *rows]:
         print("  ".join(cell.ljust(w) for cell, w in zip(row, widths, strict=True)))
+    print()
+    for t in registry.tools.values():
+        pinned = sum(1 for w in t.weights if is_pinned(t.id, w))
+        print(f"tool {t.id} ({t.kind}): hashes {pinned}/{len(t.weights)}")
 
 
-def setup_model(model: ModelConfig, record: bool, skip_upstream: bool) -> bool:
-    """Set up one model. Returns False if a manual step or a failure stopped it."""
-    log.info("== %s (%s)", model.id, model.status)
-    if model.status in ("dropped", "test"):
-        log.info("%s is %s; skipping", model.id, model.status)
-        return True
+def fetch_weights(owner: ModelConfig | ToolConfig, record: bool) -> bool:
+    """Fetch and check every weight of a model or tool. Returns False on any failure."""
     ok = True
-    if model.upstream and not skip_upstream:
-        path = ensure_upstream(model.upstream)
-        log.info("upstream at %s", path)
-    for spec in model.weights:
+    for spec in owner.weights:
         try:
-            path = fetch_weight(model.id, spec, weights_dir(model.id), record=record)
+            path = fetch_weight(owner.id, spec, weights_dir(owner.id), record=record)
             log.info("weight ready: %s", path)
         except ManualStepRequiredError as exc:
             log.warning("manual step needed: %s", exc)
@@ -89,6 +87,23 @@ def setup_model(model: ModelConfig, record: bool, skip_upstream: bool) -> bool:
         except ChecksumMismatchError as exc:
             log.error("%s", exc)
             ok = False
+    return ok
+
+
+def setup_model(model: ModelConfig, registry: Registry, record: bool, skip_upstream: bool) -> bool:
+    """Set up one model (and, for video models, the face detector). False if anything failed."""
+    log.info("== %s (%s)", model.id, model.status)
+    if model.status in ("dropped", "test"):
+        log.info("%s is %s; skipping", model.id, model.status)
+        return True
+    if model.upstream and not skip_upstream:
+        path = ensure_upstream(model.upstream)
+        log.info("upstream at %s", path)
+    ok = fetch_weights(model, record)
+    if model.modality in (Modality.VIDEO, Modality.AUDIO_VIDEO):
+        tool = registry.face_detector()
+        log.info("== %s (face detector for video models)", tool.id)
+        ok = fetch_weights(tool, record) and ok
     return ok
 
 
@@ -114,7 +129,8 @@ def main() -> int:
         parser.error("give model ids, --wave N or --list")
 
     results = {
-        mid: setup_model(registry.model(mid), args.record, args.skip_upstream) for mid in ids
+        mid: setup_model(registry.model(mid), registry, args.record, args.skip_upstream)
+        for mid in ids
     }
     failed = [mid for mid, ok in results.items() if not ok]
     if failed:

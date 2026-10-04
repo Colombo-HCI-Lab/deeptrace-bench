@@ -9,10 +9,13 @@ Every download lands in a staging folder first and is checked there (not an HTML
 matches the lock) before it is moved to its final path, so a bad file never sits where an
 adapter would load it. Dataset archives are checked against ``access.sha256`` the same way
 before they are extracted, and archive members may not escape the dataset folder.
+
+The lock is keyed by owner: a model id, or a tool id (the face detector), never both.
 """
 
 from __future__ import annotations
 
+import fnmatch
 import hashlib
 import logging
 import os
@@ -98,10 +101,21 @@ def download_url(url: str, dest: Path) -> Path:
 
 
 def read_lock() -> dict[str, dict[str, str]]:
-    """Return ``{model_id: {file_name: sha256}}`` from the lock file."""
+    """Return ``{owner_id: {file_name: sha256}}`` from the lock file (owners: models, tools)."""
     if not LOCK_PATH.exists():
         return {}
     return yaml.safe_load(LOCK_PATH.read_text()) or {}
+
+
+def locked_hashes(owner_id: str) -> dict[str, str]:
+    """One owner's recorded hashes (empty if none yet)."""
+    return read_lock().get(owner_id, {})
+
+
+def is_pinned(owner_id: str, spec: WeightSpec) -> bool:
+    """True if the lock has the weight's hash (for a folder, at least one of its files)."""
+    keys = locked_hashes(owner_id)
+    return spec.name in keys or any(k.startswith(f"{spec.name}/") for k in keys)
 
 
 def record_hash(model_id: str, name: str, digest: str) -> None:
@@ -121,13 +135,13 @@ def fetch_weight(model_id: str, spec: WeightSpec, dest_dir: Path, record: bool =
     re-downloaded.
 
     Args:
-        model_id: owning model, the key in the lock file.
+        model_id: owning model (or tool), the key in the lock file.
         spec: the weight to fetch.
         dest_dir: the model's weights directory.
         record: write hashes into the lock file where none is recorded yet.
 
     Returns:
-        Path of the file (or folder, for ``gdrive_folder``).
+        Path of the file (or folder, for ``gdrive_folder`` and ``hf_snapshot``).
 
     Raises:
         ManualStepRequiredError: for weights a person must fetch by hand, and for downloads
@@ -193,13 +207,18 @@ def _download_weight(spec: WeightSpec, dest: Path) -> None:
     match spec.kind:
         case "github_release" | "github_raw" | "url":
             assert spec.url is not None
-            download_url(spec.url, dest)
+            if spec.member:
+                _download_member(spec.url, spec.member, dest)
+            else:
+                download_url(spec.url, dest)
         case "hf":
             from huggingface_hub import hf_hub_download
 
             assert spec.repo is not None and spec.filename is not None
             path = hf_hub_download(spec.repo, spec.filename, revision=spec.revision)
             shutil.copyfile(path, dest)
+        case "hf_snapshot":
+            _download_hf_snapshot(spec, dest)
         case "gdrive":
             import gdown
 
@@ -221,6 +240,51 @@ def _download_weight(spec: WeightSpec, dest: Path) -> None:
             raise ManualStepRequiredError(
                 f"{spec.name}: {spec.instructions} Place it in the model's weights folder."
             )
+
+
+def _download_member(url: str, member: str, dest: Path) -> None:
+    """One file out of a remote zip: by range requests if the host allows, else in full."""
+    from .remote_zip import RangeNotSupportedError, extract_member, open_remote_zip
+
+    try:
+        with open_remote_zip(url) as zf:
+            log.info("reading %s out of %s by range requests", member, url)
+            extract_member(zf, member, dest)
+        return
+    except RangeNotSupportedError:
+        log.info("%s ignores range requests; downloading the whole archive", url)
+    archive = dest.with_name(dest.name + ".archive")
+    try:
+        download_url(url, archive)
+        with zipfile.ZipFile(archive) as zf:
+            extract_member(zf, member, dest)
+    finally:
+        archive.unlink(missing_ok=True)
+
+
+def _download_hf_snapshot(spec: WeightSpec, dest: Path) -> None:
+    """The files of one Hugging Face repo at a pinned revision, copied into a folder.
+
+    Copies rather than links out of the HF cache, so the folder is self-contained and is
+    hashed file by file like any other folder weight.
+    """
+    from huggingface_hub import hf_hub_download, list_repo_files
+
+    assert spec.repo is not None and spec.revision is not None
+    files = list_repo_files(spec.repo, revision=spec.revision)
+    wanted = [
+        f
+        for f in files
+        if not spec.allow_patterns or any(fnmatch.fnmatch(f, p) for p in spec.allow_patterns)
+    ]
+    if not wanted:
+        raise ManualStepRequiredError(f"{spec.repo}@{spec.revision}: no files match the patterns")
+    dest.mkdir(parents=True, exist_ok=True)
+    for name in wanted:
+        target = ensure_inside(dest, dest / name)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        log.info("%s: %s", spec.repo, name)
+        shutil.copyfile(hf_hub_download(spec.repo, name, revision=spec.revision), target)
 
 
 # --- datasets -----------------------------------------------------------------------------
@@ -263,10 +327,12 @@ def fetch_dataset(config: DatasetConfig, dest: Path, languages: list[str] | None
             )
 
 
-def _fetch_hf_dataset(config: DatasetConfig, dest: Path, languages: list[str] | None) -> Path:
-    from huggingface_hub import snapshot_download
-    from huggingface_hub.errors import GatedRepoError
+def hf_patterns(config: DatasetConfig, languages: list[str] | None = None) -> list[str]:
+    """The ``allow_patterns`` for a Hugging Face dataset, plus the chosen languages' patterns.
 
+    Raises:
+        ValueError: for a language the config has no patterns for.
+    """
     access = config.access
     patterns = list(access.allow_patterns or [])
     if access.language_patterns:
@@ -276,19 +342,34 @@ def _fetch_hf_dataset(config: DatasetConfig, dest: Path, languages: list[str] | 
             raise ValueError(f"{config.id}: no patterns for languages {sorted(unknown)}")
         for lang in chosen:
             patterns.extend(access.language_patterns[lang])
+    return patterns
+
+
+def gated_error(config: DatasetConfig) -> ManualStepRequiredError:
+    """The error for a gated Hugging Face dataset whose terms haven't been accepted."""
+    return ManualStepRequiredError(
+        f"{config.id} is gated: accept its terms at {config.access.page} with your Hugging Face "
+        "account, then set HF_TOKEN in .env and re-run."
+    )
+
+
+def _fetch_hf_dataset(config: DatasetConfig, dest: Path, languages: list[str] | None) -> Path:
+    from huggingface_hub import snapshot_download
+    from huggingface_hub.errors import GatedRepoError
+
+    access = config.access
+    patterns = hf_patterns(config, languages)
     log.info("%s: snapshot of %s (%s)", config.id, access.repo, patterns or "everything")
     try:
         snapshot_download(
             repo_id=access.repo,
             repo_type="dataset",
+            revision=access.revision,
             allow_patterns=patterns or None,
             local_dir=dest,
         )
     except GatedRepoError as exc:
-        raise ManualStepRequiredError(
-            f"{config.id} is gated: accept its terms at {access.page} with your Hugging Face "
-            "account, then set HF_TOKEN in .env and re-run."
-        ) from exc
+        raise gated_error(config) from exc
     return dest
 
 
