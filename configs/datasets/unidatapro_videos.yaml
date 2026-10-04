@@ -1,0 +1,25 @@
+id: unidatapro_videos
+name: UniDataPro deepfake videos (free Hugging Face preview)
+modality: video
+role: pipeline_test
+status: open
+access:
+  kind: hf
+  page: https://huggingface.co/datasets/UniDataPro/deepfake-videos-dataset
+  repo: UniDataPro/deepfake-videos-dataset
+  revision: bdbf7fc95c93b5426fac7aae418d4f94cd890e23
+  allow_patterns: [video/*, deepfake/*]
+licence: CC BY-NC-ND 4.0
+licence_terms:
+  - Non-commercial use only.
+  - No derivatives may be shared; scores and face crops stay in DTB_ROOT.
+contains: [real, fake]
+languages: []
+size_gb: 0.07
+derived_from: []
+builder: deeptrace_bench.datasets.unidatapro_videos:build_manifest
+notes: >-
+  Pipeline test only, never reported. Five real phone videos and five face-swap fakes made
+  from them (one face swapped in per pair, by aisaver.io, faceswapvideo.ai or magichour.ai),
+  480p to 1080p, about 68 MB. The only open paired real/fake video set small enough to fetch
+  on the fly. Checked 2026-10-04.

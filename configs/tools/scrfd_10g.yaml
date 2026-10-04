@@ -1,0 +1,16 @@
+id: scrfd_10g
+name: SCRFD-10GF face detector (insightface det_10g, buffalo_l pack)
+kind: face_detector
+licence: insightface pretrained models are for non-commercial research only; the detection code we port is MIT
+page: https://github.com/deepinsight/insightface/tree/master/model_zoo
+weights:
+  # The official buffalo_l pack is 288 MB; only det_10g.onnx is read out of it, by HTTP range.
+  - name: det_10g.onnx
+    kind: github_release
+    url: https://github.com/deepinsight/insightface/releases/download/v0.7/buffalo_l.zip
+    member: det_10g.onnx
+    size_bytes: 16923827
+notes: >-
+  The detector GenD's own detector.py runs (it calls it RetinaFace). Upstream GenD fetches the
+  same file from a third-party mirror; we take it from insightface's v0.7 release instead and
+  pin its hash. Checked 2026-10-04.

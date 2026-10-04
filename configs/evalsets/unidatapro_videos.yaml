@@ -1,0 +1,9 @@
+id: unidatapro_videos
+modality: video
+role: pipeline_test
+pairing: same_corpus
+components:
+  - dataset: unidatapro_videos
+group_by: []
+status: ready
+notes: Pipeline test of the video path (decode, sample frames, detect, average). Never reported.

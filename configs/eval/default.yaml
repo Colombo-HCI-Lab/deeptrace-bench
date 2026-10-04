@@ -6,11 +6,18 @@
 status: proposed
 
 video:
-  face_detector: retinaface_onnx   # one shared detector, run once per dataset and cached
+  face_detector: scrfd_10g         # configs/tools/; run once per dataset, detections cached
+  detector_input_size: 640         # letterboxed square input, as GenD's detector.py uses
+  det_threshold: 0.4               # detector.py's default; GenD's README preprocesses at 0.1
+  nms_threshold: 0.4
+  face_choice: largest             # one face per frame: the largest box
   frames_per_clip: 32
   frame_sampling: uniform
   crop: per_model                  # each model's config carries its CropSpec
-  min_face_frames: 8               # fewer frames with a face than this: status no_face
+  min_face_frames: 8               # video: fewer frames with a face than this: status no_face
+  image_min_face_frames: 1         # an image is a one-frame clip
+  image_pad_retry: 0.5             # no face in an image: detect again with a black border of
+                                   # this fraction per side (tight face crops defeat SCRFD)
   aggregation: mean                # item score = mean of frame scores
 
 audio:

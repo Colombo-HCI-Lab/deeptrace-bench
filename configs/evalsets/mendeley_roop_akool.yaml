@@ -1,0 +1,9 @@
+id: mendeley_roop_akool
+modality: image
+role: pipeline_test
+pairing: same_corpus
+components:
+  - dataset: mendeley_roop_akool
+group_by: [method]
+status: ready
+notes: Pipeline test of the image path (one face per frame). Never reported.

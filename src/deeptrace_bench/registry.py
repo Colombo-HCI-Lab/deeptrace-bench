@@ -1,6 +1,6 @@
 """Typed loading and cross-checking of everything under ``configs/``.
 
-Four kinds of config, one YAML file each, named after its ``id``:
+Five kinds of config, one YAML file each, named after its ``id``:
 
 - ``configs/models/<id>.yaml``: a detector, where its code and weights come from, and every
   dataset its released weights saw (``training_data``), which drives the contamination guard.
@@ -8,6 +8,8 @@ Four kinds of config, one YAML file each, named after its ``id``:
   was derived from.
 - ``configs/evalsets/<id>.yaml``: what actually gets scored. One or more dataset components,
   each filtered and labelled, plus whether real and fake come from the same corpus.
+- ``configs/tools/<id>.yaml``: a shared preprocessing model (the face detector), with its
+  weights pinned like a detector's. Its settings live in the eval config, not here.
 - ``configs/eval/default.yaml``: the one evaluation setup every run uses.
 
 ``configs/corpora.yaml`` lists corpora that models were trained on but that we never
@@ -34,6 +36,7 @@ class Modality(StrEnum):
     VIDEO = "video"
     AUDIO = "audio"
     AUDIO_VIDEO = "audio_video"
+    IMAGE = "image"
 
 
 class _Strict(BaseModel):
@@ -52,8 +55,9 @@ def _safe_relpath(value: str) -> str:
 
 ModelStatus = Literal["ready", "workable", "later", "blocked", "dropped", "test"]
 WeightKind = Literal[
-    "github_release", "github_raw", "url", "hf", "gdrive", "gdrive_folder", "manual"
+    "github_release", "github_raw", "url", "hf", "hf_snapshot", "gdrive", "gdrive_folder", "manual"
 ]
+_URL_KINDS = ("github_release", "github_raw", "url")
 TrainingLevel = Literal["pretrain", "train", "finetune"]
 
 
@@ -70,14 +74,22 @@ class Upstream(_Strict):
 
 
 class WeightSpec(_Strict):
-    """One weight file and where to fetch it."""
+    """One weight file (or folder) and where to fetch it.
+
+    ``member`` takes one file out of a zip at ``url`` (read with HTTP range requests where the
+    host allows it, so a 300 MB pack isn't downloaded for a 17 MB file). ``hf_snapshot`` copies
+    several files of one Hugging Face repo, pinned to ``revision``, into a folder named
+    ``name``; ``allow_patterns`` picks which.
+    """
 
     name: str
     kind: WeightKind
     url: str | None = None
+    member: str | None = None
     repo: str | None = None
     filename: str | None = None
     revision: str | None = None
+    allow_patterns: list[str] | None = None
     drive_id: str | None = None
     instructions: str | None = None
     size_bytes: int | None = None
@@ -90,6 +102,7 @@ class WeightSpec(_Strict):
             "github_raw": ["url"],
             "url": ["url"],
             "hf": ["repo", "filename"],
+            "hf_snapshot": ["repo", "revision"],
             "gdrive": ["drive_id"],
             "gdrive_folder": ["drive_id"],
             "manual": ["instructions"],
@@ -97,6 +110,14 @@ class WeightSpec(_Strict):
         missing = [f for f in required if getattr(self, f) is None]
         if missing:
             raise ValueError(f"weight {self.name!r} of kind {self.kind} needs {missing}")
+        if self.member is not None:
+            if self.kind not in _URL_KINDS:
+                raise ValueError(f"weight {self.name!r}: member only applies to url kinds")
+            _safe_relpath(self.member)
+        if self.allow_patterns is not None and self.kind != "hf_snapshot":
+            raise ValueError(f"weight {self.name!r}: allow_patterns only applies to hf_snapshot")
+        if self.kind == "hf_snapshot" and not re.fullmatch(r"[0-9a-f]{40}", self.revision or ""):
+            raise ValueError(f"weight {self.name!r}: hf_snapshot needs a full 40-hex revision")
         return self
 
 
@@ -136,7 +157,9 @@ class ModelConfig(_Strict):
 
 AccessKind = Literal["hf", "hf_gated", "url", "manual", "modelscope", "none"]
 DatasetStatus = Literal["open", "click_through", "request", "deferred", "dead"]
-DatasetRole = Literal["reproduction", "south_asian", "real_reference", "in_the_wild"]
+DatasetRole = Literal[
+    "reproduction", "south_asian", "real_reference", "in_the_wild", "pipeline_test"
+]
 
 
 class Access(_Strict):
@@ -145,6 +168,11 @@ class Access(_Strict):
     kind: AccessKind
     page: str | None = None
     repo: str | None = None
+    revision: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{40}$",
+        description="Hugging Face commit to download from, so a re-upload can't change the data.",
+    )
     allow_patterns: list[str] | None = None
     language_patterns: dict[str, list[str]] | None = None
     default_languages: list[str] | None = None
@@ -198,7 +226,7 @@ class EvalsetConfig(_Strict):
 
     id: str
     modality: Modality
-    role: Literal["reproduction", "south_asian"]
+    role: Literal["reproduction", "south_asian", "pipeline_test"]
     pairing: Literal["same_corpus", "cross_corpus"]
     components: list[Component] = Field(min_length=1)
     match_on: list[str] = []
@@ -227,6 +255,39 @@ class Corpus(_Strict):
     note: str | None = None
 
 
+class ToolConfig(_Strict):
+    """A model the harness runs for preprocessing (today, the shared face detector).
+
+    Its weights are fetched and hash-pinned like a detector's, under the tool's id in the lock
+    file. Its settings (thresholds, input size) live in ``configs/eval/default.yaml``, the one
+    place settings live.
+    """
+
+    id: str
+    name: str
+    kind: Literal["face_detector"]
+    licence: str
+    page: str | None = None
+    weights: list[WeightSpec] = Field(min_length=1)
+    notes: str | None = None
+
+
+# A model of one modality can score evalsets of these modalities. A video model sees an image
+# as a one-frame clip and an audio-video item through its frames; an audio model hears the
+# audio track.
+_ACCEPTS: dict[Modality, set[Modality]] = {
+    Modality.VIDEO: {Modality.VIDEO, Modality.IMAGE, Modality.AUDIO_VIDEO},
+    Modality.IMAGE: {Modality.IMAGE},
+    Modality.AUDIO: {Modality.AUDIO, Modality.AUDIO_VIDEO},
+    Modality.AUDIO_VIDEO: {Modality.AUDIO_VIDEO},
+}
+
+
+def accepts(model: ModelConfig, evalset: EvalsetConfig) -> bool:
+    """True if ``model`` can score ``evalset`` (a video model can't score audio, and so on)."""
+    return evalset.modality in _ACCEPTS[model.modality]
+
+
 # --- registry -----------------------------------------------------------------------------
 
 
@@ -251,12 +312,14 @@ class Registry:
         evalsets: dict[str, EvalsetConfig],
         corpora: dict[str, Corpus],
         eval_config: EvalConfig,
+        tools: dict[str, ToolConfig] | None = None,
     ) -> None:
         self.models = models
         self.datasets = datasets
         self.evalsets = evalsets
         self.corpora = corpora
         self.eval = eval_config
+        self.tools = tools or {}
 
     @classmethod
     def load(cls, config_dir: Path = CONFIG_DIR) -> Registry:
@@ -276,6 +339,7 @@ class Registry:
             eval_config=EvalConfig.model_validate(
                 yaml.safe_load((config_dir / "eval" / "default.yaml").read_text())
             ),
+            tools=_load_dir(config_dir / "tools", ToolConfig),
         )
 
     def model(self, model_id: str) -> ModelConfig:
@@ -303,6 +367,23 @@ class Registry:
                 f"unknown evalset {evalset_id!r}; known: {sorted(self.evalsets)}"
             ) from None
 
+    def tool(self, tool_id: str) -> ToolConfig:
+        """Return a tool config, with a helpful error for unknown ids."""
+        try:
+            return self.tools[tool_id]
+        except KeyError:
+            raise KeyError(f"unknown tool {tool_id!r}; known: {sorted(self.tools)}") from None
+
+    def face_detector(self) -> ToolConfig:
+        """The shared face detector named in the eval config."""
+        return self.tool(self.eval.video["face_detector"])
+
+    def weight_owner(self, owner_id: str) -> ModelConfig | ToolConfig:
+        """The model or tool whose weights are locked under ``owner_id``."""
+        if owner_id in self.models:
+            return self.models[owner_id]
+        return self.tool(owner_id)
+
     def known_sources(self) -> set[str]:
         """Ids that training data and ``derived_from`` may refer to."""
         return set(self.datasets) | set(self.corpora)
@@ -318,6 +399,12 @@ class Registry:
         overlap = set(self.datasets) & set(self.corpora)
         if overlap:
             found.append(f"ids are both datasets and corpora: {sorted(overlap)}")
+        clash = set(self.models) & set(self.tools)
+        if clash:
+            found.append(f"ids are both models and tools (they share the lock): {sorted(clash)}")
+        detector = self.eval.video.get("face_detector")
+        if detector not in self.tools:
+            found.append(f"eval config: face_detector {detector!r} is not in configs/tools/")
 
         for m in self.models.values():
             for td in m.training_data:
@@ -361,6 +448,15 @@ class Registry:
             forced = {c.label for c in e.components}
             if "from_manifest" not in forced and len(forced) < 2 and e.status == "ready":
                 found.append(f"evalset {e.id}: ready but only {forced} items")
+            # Pipeline-test data proves the plumbing works and is never reported, so it may
+            # not leak into a real evalset, and a pipeline test may not use real datasets.
+            for comp in e.components:
+                ds = self.datasets.get(comp.dataset)
+                if ds is not None and (ds.role == "pipeline_test") != (e.role == "pipeline_test"):
+                    found.append(
+                        f"evalset {e.id} ({e.role}) uses {ds.id} ({ds.role}); pipeline_test "
+                        "datasets and evalsets only go together"
+                    )
         return found
 
 

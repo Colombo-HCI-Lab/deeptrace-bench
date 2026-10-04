@@ -1,0 +1,30 @@
+id: mendeley_roop_akool
+name: "Comprehensive Deepfake Detection Dataset: Real and Synthetic Frames from Roop and Akool (Mendeley v3)"
+modality: image
+role: pipeline_test
+status: open
+access:
+  kind: url
+  page: https://data.mendeley.com/datasets/pdcp9mjy3z/3
+  urls:
+    deepfake_dataset.zip: https://data.mendeley.com/public-files/datasets/pdcp9mjy3z/files/450e6387-a3d4-4ba5-8c43-315a081debb9/file_downloaded
+  sha256:
+    deepfake_dataset.zip: 707e4cbf1c3494d6b054b314aa12f55be5b30fe27ebe390b05a21d9af01268fb
+  expect: [deepfake_dataset/real, deepfake_dataset/deepfake]
+licence: CC BY 4.0
+licence_terms:
+  - Attribution required (cite the Mendeley Data record).
+  - The page notes that third-party content in the source videos may need further permission.
+contains: [real, fake]
+languages: []
+size_gb: 4.1
+derived_from: []
+builder: deeptrace_bench.datasets.mendeley_roop_akool:build_manifest
+notes: >-
+  Pipeline test only, never reported. Face-crop frames (500 x 500 JPEG), not videos: 3,746
+  real frames from 30 videos and 106,948 fake frames from 450, made with Roop and Akool;
+  Bangladeshi and Indian subjects; collected with ethical approval from Daffodil
+  International University. One 4.1 GB ZIP64; the host (S3 behind a redirect) supports HTTP
+  range requests, so --sample reads only the members it needs. Some source clips came from
+  YouTube; not listed in derived_from because "youtube" names no particular videos. Checked
+  2026-10-04.

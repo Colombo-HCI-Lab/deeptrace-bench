@@ -22,9 +22,11 @@ manifests/
 splits/
 scores/
 results/raw/
-# ...but these two are code, not data: dataset configs and manifest builders
+# ...but these are code or counts, not data: dataset configs, manifest builders, and the
+# committable manifest summaries (counts only) that setup_datasets.py writes
 !configs/datasets/
 !src/deeptrace_bench/datasets/
+!results/manifests/
 *.parquet
 *.feather
 *.h5
