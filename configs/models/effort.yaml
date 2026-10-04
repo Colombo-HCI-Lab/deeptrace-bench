@@ -15,6 +15,6 @@ training_data:
   - {dataset: clip_wit, level: pretrain}
   - {dataset: ffpp, level: train, split: train, note: "c23"}
 input:
-  crop: {size: 224, margin: 1.3, align: five_point, normalize: clip}
+  crop: {size: 224, margin: 1.3, align: five_point}
   frames_per_clip: 32
 notes: Second wave. Hard-coded local CLIP path (issue 15), a reported reproduction gap (CDF-v2 AUC 0.885 vs 0.956, issue 19) and parameters reported missing from the FF++ checkpoint (issue 18).

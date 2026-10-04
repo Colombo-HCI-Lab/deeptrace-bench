@@ -13,6 +13,5 @@ licence_terms:
   - Redistribution terms not yet read; assume the same as DF-Platter.
 contains: [real, fake]
 size_gb: 30
-derived_from: [youtube]
 builder: deeptrace_bench.datasets.deephy:build_manifest
-notes: 100 real and 5,040 fake videos (FaceShifter, FaceSwap, FSGAN), with gender, age group and Fitzpatrick skin tone among 10 attributes.
+notes: 100 real and 5,040 fake videos (FaceShifter, FaceSwap, FSGAN), with gender, age group and Fitzpatrick skin tone among 10 attributes. Real videos come from YouTube, which isn't listed in derived_from because it names no particular videos.

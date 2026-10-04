@@ -13,6 +13,5 @@ licence_terms:
   - Non-commercial research only.
 contains: [real, fake]
 size_gb: 40
-derived_from: [youtube]
 builder: deeptrace_bench.datasets.ffpp:build_manifest
-notes: Needed to reproduce the video models' published numbers. Official splits are the train/val/test JSON files in the FaceForensics repo.
+notes: Needed to reproduce the video models' published numbers. Official splits are the train/val/test JSON files in the FaceForensics repo. Real videos are 1,000 YouTube clips; YouTube isn't listed in derived_from because it names no particular videos.

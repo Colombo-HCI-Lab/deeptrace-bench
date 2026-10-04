@@ -36,6 +36,3 @@
 - id: genimage
   name: GenImage
   note: Effort's AI-image checkpoint, not the face checkpoint we use.
-- id: youtube
-  name: YouTube videos (unspecified)
-  note: Where FF++, DF-Platter and similar sets took their real videos from.

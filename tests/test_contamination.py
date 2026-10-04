@@ -106,3 +106,10 @@ def test_pretraining_on_the_evalset_dataset_is_a_warning(registry):
     assert (
         check(model, registry.evalset("indicsynth_hi"), registry).verdict == Verdict.SOURCE_OVERLAP
     )
+
+
+def test_sets_that_both_draw_on_youtube_do_not_overlap(registry):
+    # "From YouTube" names no particular videos, so FF++ training data says nothing about
+    # DeePhy's real videos; only a shared, identifiable corpus counts as overlap.
+    verdict = check(registry.model("xception"), registry.evalset("deephy"), registry)
+    assert verdict.verdict == Verdict.CLEAN, verdict.reasons

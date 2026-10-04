@@ -15,6 +15,5 @@ licence_terms:
   - Cite Narayan et al., CVPR 2023.
 contains: [real, fake]
 size_gb: 500
-derived_from: [youtube]
 builder: deeptrace_bench.datasets.dfplatter:build_manifest
-notes: 133,260 videos of Indian subjects with gender, age, Fitzpatrick skin tone and occlusion labels. Evaluate a stratified sample, not all of it.
+notes: 133,260 videos of Indian subjects with gender, age, Fitzpatrick skin tone and occlusion labels. Evaluate a stratified sample, not all of it. Real videos come from YouTube, which isn't listed in derived_from because it names no particular videos.

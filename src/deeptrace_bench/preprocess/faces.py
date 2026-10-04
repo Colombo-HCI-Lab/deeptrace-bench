@@ -38,7 +38,7 @@ from typing import Any, Literal
 import cv2
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from ..paths import dataset_dir, faces_dir, weights_dir
 from . import PreprocessError
@@ -65,12 +65,13 @@ class FaceDetection:
 
 
 class CropSpec(BaseModel):
-    """How a model wants its faces cut."""
+    """How a model wants its faces cut. Normalisation is the adapter's business, not this."""
+
+    model_config = ConfigDict(extra="forbid")
 
     size: int | None = None  # None: native size, from the landmark spread times the margin
     margin: float = 1.3
     align: Literal["none", "five_point"] = "none"
-    normalize: Literal["imagenet", "clip", "none"] = "imagenet"
 
 
 def sample_frame_indices(n_frames: int, k: int) -> list[int]:

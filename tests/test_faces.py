@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import pytest
+from pydantic import ValidationError
 
 from deeptrace_bench.preprocess import PreprocessError
 from deeptrace_bench.preprocess.faces import (
@@ -179,3 +180,9 @@ def test_crops_are_saved_for_people_to_look_at(store, tmp_path):
     loader = _loader(StubDetector(), save_crops_to=tmp_path / "crops", save_crops=2)
     loader(_row("clip.mp4", "video"))
     assert len(list((tmp_path / "crops" / "toy" / "clip.mp4").glob("frame_*.png"))) == 2
+
+
+def test_crop_spec_refuses_unknown_keys():
+    # Normalisation belongs to each adapter; a crop spec only says how faces are cut.
+    with pytest.raises(ValidationError):
+        CropSpec(size=256, normalize="imagenet")

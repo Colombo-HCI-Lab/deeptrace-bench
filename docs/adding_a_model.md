@@ -9,7 +9,7 @@ Add `configs/models/<id>.yaml` (the id is the file name):
 - `upstream`: the GitHub repo and the full commit to pin.
 - `weights`: every file, with where it comes from. Kinds: `hf` (one file at a pinned `revision`), `hf_snapshot` (several files of a repo at a full 40-hex revision, into a folder, picked by `allow_patterns`), `github_release`, `github_raw`, `url` (optionally `member:` to take one file out of a zip by range requests), `gdrive`, `gdrive_folder`, `manual`. Pin whatever the model loads at runtime: GenD's own code calls `CLIPModel.from_pretrained("openai/clip-vit-large-patch14")` unpinned, so its config adds that backbone as an `hf_snapshot` and the adapter points GenD at the local copy.
 - `training_data`: every dataset or corpus the released weights saw, including pretraining, with `split` where only one split was used. Be thorough; the contamination guard is only as good as this list.
-- `input`: what the adapter needs. Face models give a `crop` (`size`, `margin`, `align`, `normalize`; `size: null` keeps the native size).
+- `input`: what the adapter needs. Face models give a `crop` (`size`, `margin`, `align`; `size: null` keeps the native size). Normalisation (mean and std) belongs in the adapter, which knows what upstream does.
 - `modality`: `video` models also score `image` and `audio_video` evalsets; `audio` models score `audio` and `audio_video`.
 
 ## 2. Fetch and pin

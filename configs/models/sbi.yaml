@@ -20,6 +20,6 @@ training_data:
   - {dataset: ffpp, level: train, split: train, note: "real videos only, self-blended into fakes"}
 adapter: deeptrace_bench.models.sbi:SBIDetector
 input:
-  crop: {size: 380, margin: 1.3, align: none, normalize: imagenet}
+  crop: {size: 380, margin: 1.3, align: none}
   frames_per_clip: 32
 notes: The only video repo with a script that scores any video, which makes the parity check easy.
