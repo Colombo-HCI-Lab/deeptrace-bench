@@ -7,7 +7,8 @@ Examples:
 
 For each model this clones the upstream repo at its pinned commit into ``third_party/``,
 archives it to ``DTB_ROOT/upstream/``, downloads every weight file into
-``DTB_ROOT/weights/<id>/`` and checks it against ``configs/weights.lock.yaml``. Video models
+``DTB_ROOT/weights/<id>/`` and checks it against ``configs/weights.lock.yaml``. Adapters that
+need it then convert the download once to ``model.safetensors``. Video models
 also get the shared face detector named in ``configs/eval/default.yaml`` (a tool in
 ``configs/tools/``), fetched and pinned the same way under its own id. Use ``--record`` the
 first time a weight is fetched to pin its hash. Downloads belong on a machine with internet
@@ -27,6 +28,7 @@ from deeptrace_bench.fetch import (
     is_pinned,
 )
 from deeptrace_bench.models._stub import PendingDetector
+from deeptrace_bench.models.base import load_detector
 from deeptrace_bench.paths import weights_dir
 from deeptrace_bench.registry import Modality, ModelConfig, Registry, ToolConfig, resolve
 from deeptrace_bench.upstream import ensure_upstream
@@ -100,6 +102,11 @@ def setup_model(model: ModelConfig, registry: Registry, record: bool, skip_upstr
         path = ensure_upstream(model.upstream)
         log.info("upstream at %s", path)
     ok = fetch_weights(model, record)
+    if ok and adapter_state(model) == "yes":
+        # Done once per download: the converted file records which download it came from.
+        converted = load_detector(model).convert_checkpoint()
+        if converted:
+            log.info("converted weights: %s", converted)
     if model.modality in (Modality.VIDEO, Modality.AUDIO_VIDEO):
         tool = registry.face_detector()
         log.info("== %s (face detector for video models)", tool.id)

@@ -62,10 +62,23 @@ TrainingLevel = Literal["pretrain", "train", "finetune"]
 
 
 class Upstream(_Strict):
-    """A GitHub repo pinned to one commit."""
+    """A code repo pinned to one commit, on GitHub or on the Hugging Face Hub.
 
+    Some detectors ship their code inside a Hugging Face model repo (custom modelling files
+    next to the weights). Hub repos are git repos too, so both hosts are cloned the same way;
+    ``commit`` is then the Hub revision.
+    """
+
+    host: Literal["github", "hf"] = "github"
     repo: str = Field(pattern=r"^[\w.-]+/[\w.-]+$")
     commit: str = Field(pattern=r"^[0-9a-f]{40}$")
+
+    @property
+    def url(self) -> str:
+        """Where to clone from."""
+        if self.host == "hf":
+            return f"https://huggingface.co/{self.repo}"
+        return f"https://github.com/{self.repo}.git"
 
     @property
     def slug(self) -> str:

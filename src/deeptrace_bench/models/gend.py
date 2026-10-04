@@ -23,14 +23,13 @@ so they don't contaminate our runs. Parity with upstream is not checked yet.
 
 from __future__ import annotations
 
-import importlib.util
 import logging
-import sys
 from collections.abc import Sequence
 from types import ModuleType
 
 import numpy as np
 
+from ._upstream import load_module
 from .base import Detector, resolve_device
 
 log = logging.getLogger(__name__)
@@ -47,18 +46,13 @@ class GenDDetector(Detector):
     """GenD CLIP-L/14."""
 
     def _module(self) -> ModuleType:
-        if _MODULE_NAME in sys.modules:
-            return sys.modules[_MODULE_NAME]
         assert self.upstream_dir is not None
         path = self.upstream_dir / "src" / "hf" / "modeling_gend.py"
-        if not path.exists():
-            raise FileNotFoundError(f"{path} is missing; run scripts/setup_models.py gend")
-        spec = importlib.util.spec_from_file_location(_MODULE_NAME, path)
-        assert spec is not None and spec.loader is not None
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[_MODULE_NAME] = module
-        spec.loader.exec_module(module)
-        return module
+        try:
+            return load_module(path, _MODULE_NAME)
+        except FileNotFoundError:
+            msg = f"{path} is missing; run scripts/setup_models.py gend"
+            raise FileNotFoundError(msg) from None
 
     def load(self, device: str) -> None:
         """Build GenD on the pinned CLIP backbone and load its weights."""

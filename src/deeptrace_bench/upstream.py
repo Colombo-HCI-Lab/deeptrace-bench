@@ -13,6 +13,7 @@ live in ``patches/<repo>/*.patch`` and are applied in name order after checkout.
 from __future__ import annotations
 
 import logging
+import os
 import subprocess
 import tarfile
 from pathlib import Path
@@ -44,10 +45,13 @@ def ensure_upstream(upstream: Upstream, archive: bool = True) -> Path:
     target = checkout_dir(upstream)
     if not (target / ".git").exists():
         target.parent.mkdir(parents=True, exist_ok=True)
-        url = f"https://github.com/{upstream.repo}.git"
-        log.info("cloning %s at %s", upstream.repo, upstream.commit[:12])
-        _git("clone", "--filter=blob:none", "--no-checkout", url, str(target))
-        _git("-C", str(target), "checkout", "--detach", upstream.commit)
+        log.info("cloning %s at %s", upstream.url, upstream.commit[:12])
+        # Hugging Face repos keep their weights in LFS next to the code; the checkout only
+        # needs the code (weights are fetched and hash-checked separately), so LFS objects
+        # stay as pointer files.
+        env = {**os.environ, "GIT_LFS_SKIP_SMUDGE": "1"}
+        _git("clone", "--filter=blob:none", "--no-checkout", upstream.url, str(target), env=env)
+        _git("-C", str(target), "checkout", "--detach", upstream.commit, env=env)
         _apply_patches(upstream, target)
     else:
         head = _git("-C", str(target), "rev-parse", "HEAD").strip()
@@ -80,5 +84,7 @@ def _archive(upstream: Upstream, target: Path) -> None:
     part.rename(out)
 
 
-def _git(*args: str) -> str:
-    return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
+def _git(*args: str, env: dict[str, str] | None = None) -> str:
+    return subprocess.run(
+        ["git", *args], check=True, capture_output=True, text=True, env=env
+    ).stdout
