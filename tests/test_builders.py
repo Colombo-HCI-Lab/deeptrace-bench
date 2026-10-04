@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from deeptrace_bench.datasets import (
+    banglafake,
     in_the_wild,
     mendeley_roop_akool,
     unidatapro_videos,
@@ -115,7 +116,14 @@ def test_urdu_manifest(tmp_path):
     assert by_path.loc["Bonafide/Speaker_01/Part 2/7.wav", "subject_id"] == "Speaker_01"
 
 
-_ITW_META = "file,speaker,label\n1.wav,Speaker A,bona-fide\n2.wav,Speaker A,spoof\n3.wav,Speaker B,spoof\n"
+_ITW_META = "\n".join(
+    [
+        "file,speaker,label",
+        "1.wav,Speaker A,bona-fide",
+        "2.wav,Speaker A,spoof",
+        "3.wav,Speaker B,spoof",
+    ]
+)
 
 
 def test_in_the_wild_labels_come_from_its_metadata():
@@ -134,3 +142,36 @@ def test_in_the_wild_manifest_covers_only_files_present(tmp_path):
     validate_manifest(df, "in_the_wild")
     assert sorted(df["label"]) == ["fake", "real"]
     assert set(df["subject_id"]) == {"Speaker A", "Speaker B"}
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("final_data/deepfake_data_sust/real_wav/01001.wav", "real"),
+        ("final_data/deepfake_data_mozilla/deepfake_wav/common_voice_s2_7.wav", "fake"),
+        ("final_data/deepfake_data_news/real_wav/3.wav", "real"),
+        ("final_data/deepfake_data_news/metadata.csv", None),
+    ],
+)
+def test_banglafake_labels(path, label):
+    assert banglafake.label_from_path(path) == label
+
+
+def test_banglafake_manifest(tmp_path):
+    _tree(
+        tmp_path,
+        [
+            "final_data/deepfake_data_sust/real_wav/01001.wav",
+            "final_data/deepfake_data_sust/deepfake_wav/10001.wav",
+            "final_data/deepfake_data_mozilla/real_wav/common_voice_s2_7.wav",
+            "final_data/deepfake_data_mozilla/deepfake_wav/common_voice_s2_7.wav",
+            "final_data/deepfake_data_news/real_wav/3.wav",
+        ],
+    )
+    df = banglafake.build_manifest(tmp_path)
+    validate_manifest(df, "banglafake")
+    assert len(df) == 5 and df["item_id"].is_unique
+    assert set(df["g_subcorpus"]) == {"sust", "mozilla", "news"}
+    mozilla = df[df["g_subcorpus"] == "mozilla"]
+    assert set(mozilla["subject_id"]) == {"mozilla_s2"}
+    assert df.loc[df["label"] == "fake", "method"].eq("vits").all()

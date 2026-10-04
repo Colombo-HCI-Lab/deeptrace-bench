@@ -50,7 +50,13 @@ def test_wave_one_is_clean_on_the_open_south_asian_sets(registry):
             verdict = check(
                 registry.model(model_id), registry.evalset(evalset_id), registry
             ).verdict
-            assert verdict == Verdict.CLEAN, (model_id, evalset_id)
+            # BanglaFake's mozilla sub-corpus is Common Voice, which XLS-R was pretrained on.
+            expected = (
+                Verdict.SOURCE_OVERLAP
+                if (model_id, evalset_id) == ("xlsr_aasist", "banglafake")
+                else Verdict.CLEAN
+            )
+            assert verdict == expected, (model_id, evalset_id)
 
 
 def test_training_on_the_whole_dataset_without_a_list_is_contaminated(registry):

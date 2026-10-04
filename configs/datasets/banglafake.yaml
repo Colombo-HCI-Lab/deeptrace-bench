@@ -4,14 +4,18 @@ modality: audio
 role: south_asian
 status: open
 access:
-  kind: hf
+  kind: url
   page: https://huggingface.co/datasets/sifat1221/banglaFake
-  repo: sifat1221/banglaFake
+  urls:
+    final_data.zip: https://huggingface.co/datasets/sifat1221/banglaFake/resolve/1a4bfe329a9fe951f6b441a25fa8383b3e57f3f4/final_data.zip
+  sha256:
+    final_data.zip: 3034353ef96a9f8c8a8118e65682b31b36de14c4f9159a2ee0e5cd5a9dfaa8b0
 licence: none declared
 licence_terms:
   - No licence is declared on Hugging Face or GitHub. Ask the authors before publishing results.
 contains: [real, fake]
 languages: [bn]
 size_gb: 5.6
+derived_from: [commonvoice]
 builder: deeptrace_bench.datasets.banglafake:build_manifest
-notes: One 5.6 GB final_data.zip. 12,260 real and 13,260 VITS fakes per the GitHub README; 7 speakers, no official split.
+notes: One 5.6 GB final_data.zip on Hugging Face, read at a pinned revision (by range requests when sampling). Three sub-corpora, checked 2026-10-05; sust (9,999 real, 9,999 fake), mozilla (2,797 pairs, five Common Voice speakers) and news (1,000 real, no fakes). Totals 13,796 real and 12,796 VITS fakes, not the README's numbers. No official split.

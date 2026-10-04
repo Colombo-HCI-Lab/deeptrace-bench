@@ -4,6 +4,7 @@ role: south_asian
 pairing: same_corpus
 components:
   - dataset: banglafake
-group_by: [subject_id]
+    filter: {g_subcorpus: [sust, mozilla]}
+group_by: [g_subcorpus]
 status: ready
-notes: One generator (VITS) and 7 speakers, so per-speaker gaps are as far as grouping goes. Licence undeclared; ask the authors before publishing.
+notes: One generator (VITS). Only the sust and mozilla sub-corpora, where every fake has a real counterpart; news has real clips only. Speakers are known only for mozilla (five). Licence undeclared; ask the authors before publishing.
