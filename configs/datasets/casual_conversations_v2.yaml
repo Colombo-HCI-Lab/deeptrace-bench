@@ -1,0 +1,16 @@
+id: casual_conversations_v2
+name: Casual Conversations v2
+modality: video
+role: real_reference
+status: request
+access:
+  kind: manual
+  page: https://ai.meta.com/datasets/casual-conversations-v2-dataset/
+  request: Request access on the dataset page and accept Meta's licence; some labels are licensed for evaluation only.
+licence: Casual Conversations v2 licence (Meta)
+licence_terms:
+  - Research use under Meta's licence; check which labels may be used for evaluation only.
+contains: [real]
+languages: [hi, ta, te, en]
+builder: deeptrace_bench.datasets.casual_conversations_v2:build_manifest
+notes: Real videos only, 5,567 consenting participants in seven countries with India the largest group, labelled for Fitzpatrick and Monk skin tone, age, gender and language. For false positive rates on real South Asian faces by skin tone, the real half of a fairness comparison. Checked 2026-10-05.

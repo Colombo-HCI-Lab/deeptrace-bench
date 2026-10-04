@@ -1,0 +1,19 @@
+id: mavos_dd_hi
+name: MAVOS-DD, Hindi subset
+modality: audio_video
+role: south_asian
+status: click_through
+access:
+  kind: hf_gated
+  page: https://huggingface.co/datasets/unibuc-cs/MAVOS-DD
+  repo: unibuc-cs/MAVOS-DD
+  revision: 3ea7e6dbf0ed7e4f279bb8e6340bf55f0f2e55a5
+  allow_patterns: [hindi/*, data-00000-of-00001.arrow, dataset_info.json, state.json, README.md]
+licence: CC BY-NC-SA 4.0
+licence_terms:
+  - Non-commercial, share-alike. Accept the terms on Hugging Face first (its form asks for name, affiliation and purpose).
+contains: [real, fake]
+languages: [hi]
+size_gb: 35.7
+builder: deeptrace_bench.datasets.mavos_dd_hi:build_manifest
+notes: The only downloadable South Asian audio-video deepfake set found (2026-10-05). 3,632 real and 3,881 fake Hindi videos from eight generators, most of them talking-head and lip-sync, which is v1's focus. Real videos come from YouTube, which isn't listed in derived_from because it names no particular videos. No speaker, ethnicity or skin-tone labels. Whether the face-swap and talking-head videos keep their original audio is unknown until the metadata can be read.

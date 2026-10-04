@@ -1,0 +1,10 @@
+id: celeb_df_v2_test
+modality: video
+role: reproduction
+pairing: same_corpus
+components:
+  - dataset: celeb_df_v2
+    filter: {split: test}
+group_by: []
+status: pending_access
+notes: The official 518-video test list; reproduce each video model's published Celeb-DF v2 AUC here.

@@ -14,7 +14,10 @@ Labels come from the builder: ``label_from_path`` where the path says it, or, fo
 keep labels in a file (a ``meta.csv``, protocol files), ``METADATA_FILES`` plus
 ``labels_from_metadata``. Those files are read from the source first and copied into the
 sample, so the builder sees them too. A dataset with only fake (or only real) items is
-sampled on the labels its config says it contains.
+sampled on the labels its config says it contains. A builder may also define
+``sample_stratum(rel_path)``; then N items are taken from every stratum of each label (MAVOS-DD
+samples per generator, so the rare voice-conversion fakes, the only ones with a known audio
+label, are always in).
 
 Which items are chosen depends only on the file list and the seed: files are ordered by
 ``sha1("<seed>:<path>")``, never by Python's ``hash``, so the same sample comes back on any
@@ -95,31 +98,36 @@ def choose(
     per_label: int,
     seed: int,
     labels: Iterable[str] = ("real", "fake"),
+    stratum_of: Callable[[str], str] | None = None,
 ) -> list[str]:
     """Pick up to ``per_label`` paths of each wanted label, deterministically.
 
     Args:
         labels: the labels to sample; a fake-only dataset passes ``["fake"]``.
+        stratum_of: splits each label further (a builder's ``sample_stratum``); then
+            ``per_label`` paths are taken from every stratum of every label, so a rare
+            method still turns up in a small sample.
 
     Returns:
-        The chosen paths, real first, each label in rank order.
+        The chosen paths, real first, each label (and stratum) in rank order.
 
     Raises:
         SampleError: if a wanted label has no candidates at all.
     """
     wanted = [label for label in ("real", "fake") if label in set(labels)]
-    by_label: dict[str, list[str]] = {"real": [], "fake": []}
+    groups: dict[tuple[str, str], list[str]] = {}
     for path in paths:
         label = label_of(path)
         if label is not None:
-            by_label[label].append(path)
-    empty = [label for label in wanted if not by_label[label]]
+            stratum = stratum_of(path) if stratum_of else ""
+            groups.setdefault((label, stratum), []).append(path)
+    empty = [label for label in wanted if not any(k[0] == label for k in groups)]
     if empty:
         raise SampleError(f"no {' or '.join(empty)} items among the candidates")
     chosen = []
-    for label in wanted:
-        chosen += sorted(by_label[label], key=lambda p: _rank(seed, p))[:per_label]
-    return chosen
+    for key in sorted(k for k in groups if k[0] in wanted):
+        chosen += sorted(groups[key], key=lambda p: _rank(seed, p))[:per_label]
+    return sorted(chosen, key=lambda p: wanted.index(label_of(p)))
 
 
 # --- sources --------------------------------------------------------------------------------
@@ -362,8 +370,14 @@ def sample_dataset(
     if per_label < 1:
         raise ValueError("per_label must be at least 1")
     metadata = metadata_files(config)
+    stratum_of = getattr(_builder_module(config), "sample_stratum", None)
     source = _source(config, local, languages)
-    spec = {"per_label": per_label, "seed": seed, "source": source.key()}
+    spec = {
+        "per_label": per_label,
+        "seed": seed,
+        "source": source.key(),
+        "stratified": stratum_of is not None,
+    }
 
     previous = read_sample(dest)
     kept = [*(previous or {}).get("chosen", []), *(previous or {}).get("metadata", [])]
@@ -378,7 +392,7 @@ def sample_dataset(
 
     paths = source.candidates()
     label_of = label_function(config, read=source.read)
-    chosen = choose(paths, label_of, per_label, seed, labels=config.contains)
+    chosen = choose(paths, label_of, per_label, seed, labels=config.contains, stratum_of=stratum_of)
     counts = {"real": 0, "fake": 0}
     for path in paths:
         label = label_of(path)

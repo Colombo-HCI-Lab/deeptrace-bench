@@ -1,0 +1,18 @@
+id: celeb_df_v2
+name: Celeb-DF (v2)
+modality: video
+role: reproduction
+status: request
+access:
+  kind: manual
+  page: https://github.com/yuezunli/celeb-deepfakeforensics
+  request: Fill in the request form linked from the repo README; the authors email a download link.
+  expect: [Celeb-real, Celeb-synthesis, YouTube-real, List_of_testing_videos.txt]
+licence: Celeb-DF terms of use (research only)
+licence_terms:
+  - Non-commercial research only.
+contains: [real, fake]
+languages: [en]
+size_gb: 10
+builder: deeptrace_bench.datasets.celeb_df_v2:build_manifest
+notes: The cross-dataset benchmark every video detector here reports (SBI, UCF, Effort, GenD), so it anchors reproduction for models whose only other reference is FF++. 890 real and 5,639 fake videos of 59 celebrities, mostly Caucasian; no South Asian signal. Size approximate, checked 2026-10-05.

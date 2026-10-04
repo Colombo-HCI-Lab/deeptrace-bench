@@ -209,3 +209,13 @@ def test_a_gated_download_says_what_to_do(monkeypatch, tmp_path):
     )
     with pytest.raises(ManualStepRequiredError, match="accept its terms"):
         _HfSource(config, None).materialize(["fake/1.wav"], tmp_path)
+
+
+def test_strata_get_their_own_share():
+    # Like MAVOS-DD: one real folder and fakes from several methods, one of them rare.
+    paths = [f"real/{i}.mp4" for i in range(10)]
+    paths += [f"swap/{i}.mp4" for i in range(20)] + ["vc/0.mp4"]
+    label = lambda p: "real" if p.startswith("real/") else "fake"  # noqa: E731
+    stratum = lambda p: p.split("/")[0]  # noqa: E731
+    chosen = choose(paths, label, 2, seed=0, stratum_of=stratum)
+    assert sorted(p.split("/")[0] for p in chosen) == ["real", "real", "swap", "swap", "vc"]

@@ -135,3 +135,8 @@ def test_df_arena_is_refused_where_it_trained_and_clean_elsewhere(registry, mode
     ]:
         verdict = check(model, registry.evalset(evalset_id), registry).verdict
         assert verdict == expected, (model_id, evalset_id, verdict)
+
+
+def test_youtube_sourced_mavos_is_clean_for_ffpp_models(registry):
+    verdict = check(registry.model("xception"), registry.evalset("mavos_dd_hi_video"), registry)
+    assert verdict.verdict == Verdict.CLEAN, verdict.reasons

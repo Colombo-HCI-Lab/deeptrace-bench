@@ -1,0 +1,11 @@
+id: mavos_dd_hi_audio
+modality: audio
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: mavos_dd_hi
+    filter: {label_audio: [real, fake]}
+    label: from_audio
+group_by: [method]
+status: pending_access
+notes: Audio models hear the soundtrack; labels say whether the audio was changed. Until the metadata settles the audio of the face-swap, talking-head and reenactment videos, only real and knnvc (voice conversion) items have a known audio label, so only those are scored.

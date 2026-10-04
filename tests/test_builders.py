@@ -8,7 +8,9 @@ import pytest
 from deeptrace_bench.datasets import (
     asvspoof2019_la,
     banglafake,
+    celeb_df_v2,
     in_the_wild,
+    mavos_dd_hi,
     mendeley_roop_akool,
     mlaad,
     openslr_sinhala,
@@ -264,3 +266,61 @@ def test_asvspoof_manifest(tmp_path):
     assert rows.loc["train", "label"] == "real" and pd.isna(rows.loc["train", "method"])
     assert rows.loc["eval", "method"] == "A17" and rows.loc["eval", "method_family"] == "vc"
     assert rows.loc["eval", "subject_id"] == "LA_0002"
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("hindi/real/0001-aa.mp4", "real"),
+        ("hindi/knnvc/0002-bb.mp4", "fake"),
+        ("hindi/inswapper/0003-cc.mp4", "fake"),
+        ("english/real/0004-dd.mp4", None),
+        ("hindi/unknown_method/0005-ee.mp4", None),
+    ],
+)
+def test_mavos_labels(path, label):
+    assert mavos_dd_hi.label_from_path(path) == label
+
+
+def test_mavos_manifest_labels_each_track(tmp_path):
+    _tree(
+        tmp_path,
+        [
+            "hindi/real/0001-aa.mp4",
+            "hindi/knnvc/0002-bb.mp4",
+            "hindi/inswapper/0003-cc.mp4",
+            "hindi/liveportrait/0004-dd.mp4",
+        ],
+    )
+    df = mavos_dd_hi.build_manifest(tmp_path)
+    validate_manifest(df, "mavos_dd_hi")
+    tracks = df.set_index("method")[["label_video", "label_audio"]]
+    # Voice conversion leaves the video real; nobody has checked a face swap's audio yet.
+    assert tracks.loc["knnvc"].tolist() == ["real", "fake"]
+    assert tracks.loc["inswapper", "label_video"] == "fake"
+    assert pd.isna(tracks.loc["inswapper", "label_audio"])
+    assert set(df["language"]) == {"hi"} and set(df["modality"]) == {"audio_video"}
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("Celeb-real/id0_0001.mp4", "real"),
+        ("YouTube-real/00001.mp4", "real"),
+        ("Celeb-synthesis/id0_id1_0001.mp4", "fake"),
+        ("List_of_testing_videos.txt", None),
+    ],
+)
+def test_celeb_df_labels(path, label):
+    assert celeb_df_v2.label_from_path(path) == label
+
+
+def test_celeb_df_marks_the_official_test_list(tmp_path):
+    _tree(tmp_path, ["Celeb-real/id0_0001.mp4", "Celeb-synthesis/id0_id1_0001.mp4"])
+    (tmp_path / "List_of_testing_videos.txt").write_text("1 Celeb-real/id0_0001.mp4\n")
+    df = celeb_df_v2.build_manifest(tmp_path)
+    validate_manifest(df, "celeb_df_v2")
+    assert df.set_index("rel_path")["split"].to_dict() == {
+        "Celeb-real/id0_0001.mp4": "test",
+        "Celeb-synthesis/id0_id1_0001.mp4": "train",
+    }

@@ -1,0 +1,10 @@
+id: mavos_dd_hi_video
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: mavos_dd_hi
+    label: from_video
+group_by: [method]
+status: pending_access
+notes: Video models score the frames; labels say whether the video track was changed, so knnvc (voice conversion only) counts as real. Ready once the MAVOS-DD terms are accepted and a sample passes the smoke test.
