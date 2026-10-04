@@ -1,0 +1,31 @@
+{
+  "model": "spsl",
+  "checked_utc": "2026-10-04T23:59:25+00:00",
+  "evalset": "mendeley_roop_akool",
+  "namespace": "smoke",
+  "items": 199,
+  "n": 199,
+  "max_abs_diff": 2.0265579223632812e-06,
+  "mean_abs_diff": 2.620432844114064e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "SCLBD/DeepfakeBench",
+    "commit": "f188b1c105465e2e5377eb536a95022ae0e4522d"
+  },
+  "weights_sha256": {
+    "spsl_best.pth": "7305d660c68aa6ac138f8d59c068832a43244f390fa6e54355f211d81bc246bd"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.9.6",
+    "torch": "1.13.1",
+    "torchvision": "0.14.1",
+    "opencv": "4.6.0"
+  },
+  "reference": "upstream detector, original release .pth, DeepfakeBench test transform"
+}
