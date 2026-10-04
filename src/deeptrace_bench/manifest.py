@@ -15,6 +15,9 @@ Columns:
 - ``subject_id``: whose face or voice the item shows. ``source_subject_id``: the identity a
   fake was made from. Both drive identity-safe splits (see ``splits.py``).
 - ``split``: the dataset's official split, if any. ``duration_s``.
+- ``label_video``, ``label_audio``: for audio-video items, which track was manipulated
+  (``real``, ``fake``, or null when nobody knows). ``label`` is fake when either track is.
+  Evalsets that score one track take its label (``from_video`` / ``from_audio``).
 - Group attributes: one ``g_<attr>`` column per attribute (``g_gender``, ``g_skin_tone``,
   ``g_language``...) and a ``g_<attr>_src`` column saying where each value came from
   (``dataset``, ``self_reported``, ``annotated`` or ``inferred``). Unknown is null, never a
@@ -42,7 +45,10 @@ OPTIONAL = [
     "source_subject_id",
     "split",
     "duration_s",
+    "label_video",
+    "label_audio",
 ]
+TRACK_LABELS = ["label_video", "label_audio"]
 LABELS = {"real", "fake"}
 MODALITIES = {"video", "audio", "audio_video", "image"}
 ATTR_SOURCES = {"dataset", "self_reported", "annotated", "inferred"}
@@ -86,6 +92,7 @@ def validate_manifest(df: pd.DataFrame, dataset_id: str) -> None:
     bad_labels = set(df["label"].dropna().unique()) - LABELS
     if bad_labels or df["label"].isna().any():
         problems.append(f"label must be real or fake, found {sorted(map(str, bad_labels))}")
+    problems += _track_problems(df)
     bad_modalities = set(df["modality"].dropna().unique()) - MODALITIES
     if bad_modalities:
         problems.append(f"unknown modalities {sorted(bad_modalities)}")
@@ -109,6 +116,25 @@ def validate_manifest(df: pd.DataFrame, dataset_id: str) -> None:
 
     if problems:
         raise ManifestError(f"{dataset_id}: " + "; ".join(problems))
+
+
+def _track_problems(df: pd.DataFrame) -> list[str]:
+    """Per-track labels must be real, fake or null, and agree with the item's label."""
+    tracks = [c for c in TRACK_LABELS if c in df.columns]
+    if not tracks:
+        return []
+    problems = []
+    for col in tracks:
+        bad = set(df[col].dropna().unique()) - LABELS
+        if bad:
+            problems.append(f"track label {col} must be real, fake or null, found {sorted(bad)}")
+    any_fake = (df[tracks] == "fake").any(axis=1)
+    all_real = (df[tracks] == "real").all(axis=1) & (len(tracks) == len(TRACK_LABELS))
+    if (any_fake & (df["label"] != "fake")).any():
+        problems.append("an item with a fake track must have label fake")
+    if (all_real & (df["label"] != "real")).any():
+        problems.append("an item whose tracks are all real must have label real")
+    return problems
 
 
 def write_manifest(df: pd.DataFrame, dataset_id: str) -> Path:

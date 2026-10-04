@@ -227,11 +227,17 @@ class DatasetConfig(_Strict):
 
 
 class Component(_Strict):
-    """One dataset's contribution to an evalset."""
+    """One dataset's contribution to an evalset.
+
+    ``label`` keeps each item's own label (``from_manifest``), forces one (``real``, ``fake``),
+    or, for an audio-video dataset, takes the label of the track being scored
+    (``from_video``, ``from_audio``): a voice-converted clip is fake to an audio model but
+    real to a video model.
+    """
 
     dataset: str
     filter: dict[str, Any] = {}
-    label: Literal["from_manifest", "real", "fake"] = "from_manifest"
+    label: Literal["from_manifest", "from_video", "from_audio", "real", "fake"] = "from_manifest"
 
 
 class EvalsetConfig(_Strict):
@@ -454,12 +460,18 @@ class Registry:
                 ds = self.datasets[comp.dataset]
                 if not _modality_fits(e.modality, ds.modality):
                     found.append(f"evalset {e.id}: {e.modality} evalset uses {ds.modality} {ds.id}")
-                if comp.label != "from_manifest" and comp.label not in ds.contains:
+                if comp.label in _TRACK_LABELS and ds.modality != Modality.AUDIO_VIDEO:
+                    found.append(
+                        f"evalset {e.id}: {comp.label} needs an audio_video dataset, not "
+                        f"{ds.modality} {ds.id}"
+                    )
+                if comp.label in ("real", "fake") and comp.label not in ds.contains:
                     found.append(
                         f"evalset {e.id}: {ds.id} has no {comp.label} items ({ds.contains})"
                     )
             forced = {c.label for c in e.components}
-            if "from_manifest" not in forced and len(forced) < 2 and e.status == "ready":
+            per_item = forced & {"from_manifest", *_TRACK_LABELS}
+            if not per_item and len(forced) < 2 and e.status == "ready":
                 found.append(f"evalset {e.id}: ready but only {forced} items")
             # Pipeline-test data proves the plumbing works and is never reported, so it may
             # not leak into a real evalset, and a pipeline test may not use real datasets.
@@ -471,6 +483,9 @@ class Registry:
                         "datasets and evalsets only go together"
                     )
         return found
+
+
+_TRACK_LABELS = ("from_video", "from_audio")
 
 
 def _modality_fits(evalset: Modality, dataset: Modality) -> bool:

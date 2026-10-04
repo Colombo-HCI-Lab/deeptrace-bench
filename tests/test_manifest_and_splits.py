@@ -90,3 +90,25 @@ def test_splits_are_deterministic_and_roughly_sized():
     shares = a.value_counts(normalize=True)
     assert abs(shares["train"] - 0.7) < 0.05
     assert abs(shares["test"] - 0.2) < 0.05
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        {"local": "a", "label": "real", "label_video": "fake", "label_audio": "real"},
+        {"local": "b", "label": "fake", "label_video": "real", "label_audio": "real"},
+        {"local": "c", "label": "fake", "label_video": "maybe", "label_audio": None},
+    ],
+)
+def test_track_labels_must_agree_with_the_item_label(row):
+    with pytest.raises(ManifestError, match="track"):
+        validate_manifest(make_manifest("av", [row]), "av")
+
+
+def test_track_labels_may_be_unknown():
+    rows = [
+        {"local": "a", "label": "fake", "label_video": "fake", "label_audio": None},
+        {"local": "b", "label": "fake", "label_video": "real", "label_audio": "fake"},
+        {"local": "c", "label": "real", "label_video": "real", "label_audio": "real"},
+    ]
+    validate_manifest(make_manifest("av", rows), "av")

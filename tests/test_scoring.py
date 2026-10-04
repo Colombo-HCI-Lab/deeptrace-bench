@@ -127,3 +127,43 @@ def test_same_inputs_resume_the_same_run(tmp_path, monkeypatch):
     assert len(second.sessions) == 2
     other, _ = start_run(**{**kwargs, "preprocessing": "native"}, directory=tmp_path / "n")
     assert other.run_id != first.run_id
+
+
+def _audio_video_manifest() -> pd.DataFrame:
+    # A real clip, a voice-converted one (video untouched) and a face swap whose audio
+    # nobody has checked.
+    return make_manifest(
+        "av",
+        [
+            {"local": "real", "label": "real", "label_video": "real", "label_audio": "real"},
+            {"local": "vc", "label": "fake", "label_video": "real", "label_audio": "fake"},
+            {"local": "swap", "label": "fake", "label_video": "fake", "label_audio": None},
+        ],
+    )
+
+
+def _track_evalset(label: str, filter: dict | None = None) -> EvalsetConfig:
+    return EvalsetConfig(
+        id="av_track",
+        modality="audio" if label == "from_audio" else "video",
+        role="south_asian",
+        pairing="same_corpus",
+        components=[Component(dataset="av", filter=filter or {}, label=label)],
+        status="ready",
+    )
+
+
+def test_a_track_label_scores_the_track_that_was_manipulated():
+    audio = _track_evalset("from_audio", {"label_audio": ["real", "fake"]})
+    items = load_items(audio, manifests={"av": _audio_video_manifest()})
+    assert dict(zip(items["item_id"], items["label"], strict=True)) == {
+        "av/real": "real",
+        "av/vc": "fake",
+    }
+    video = load_items(_track_evalset("from_video"), manifests={"av": _audio_video_manifest()})
+    assert dict(zip(video["item_id"], video["label"], strict=True))["av/vc"] == "real"
+
+
+def test_a_track_label_must_be_known_for_every_item():
+    with pytest.raises(EvalsetError, match="label_audio"):
+        load_items(_track_evalset("from_audio"), manifests={"av": _audio_video_manifest()})

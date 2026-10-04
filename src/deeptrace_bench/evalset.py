@@ -23,6 +23,22 @@ def apply_filter(df: pd.DataFrame, spec: dict) -> pd.DataFrame:
     return df[mask]
 
 
+_TRACK_COLUMNS = {"from_video": "label_video", "from_audio": "label_audio"}
+
+
+def _track_label(df: pd.DataFrame, column: str, evalset_id: str) -> pd.Series:
+    """The label of one track, which every selected item must have."""
+    if column not in df.columns:
+        raise EvalsetError(f"{evalset_id}: the manifest has no {column} column")
+    unknown = df[column].isna()
+    if unknown.any():
+        raise EvalsetError(
+            f"{evalset_id}: {int(unknown.sum())} items have no {column}; filter them out in "
+            f"the component (e.g. {column}: [real, fake])"
+        )
+    return df[column]
+
+
 def load_items(
     evalset: EvalsetConfig, manifests: dict[str, pd.DataFrame] | None = None
 ) -> pd.DataFrame:
@@ -34,7 +50,8 @@ def load_items(
             read from the store.
 
     Returns:
-        The concatenated rows, with ``label`` overridden where a component forces it, plus
+        The concatenated rows, with ``label`` overridden where a component forces it or
+        takes a track's label, plus
         ``component`` (its index in the config) and ``pairing``.
 
     Raises:
@@ -45,7 +62,9 @@ def load_items(
     for index, comp in enumerate(evalset.components):
         df = manifests[comp.dataset] if manifests else read_manifest(comp.dataset)
         df = apply_filter(df, comp.filter).copy()
-        if comp.label != "from_manifest":
+        if comp.label in _TRACK_COLUMNS:
+            df["label"] = _track_label(df, _TRACK_COLUMNS[comp.label], evalset.id)
+        elif comp.label != "from_manifest":
             df["label"] = comp.label
         df["component"] = index
         parts.append(df)

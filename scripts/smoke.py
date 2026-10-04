@@ -61,17 +61,23 @@ from deeptrace_bench.score import read_scores
 
 log = logging.getLogger("smoke")
 
-KNOWN_STATUSES = {"ok", "no_face", "unreadable", "too_short", "empty_audio"}
+KNOWN_STATUSES = {"ok", "no_face", "unreadable", "too_short", "empty_audio", "no_audio"}
+# No open audio set is a pipeline test, so audio models smoke-test on a small open South Asian
+# set instead. It lives in the smoke namespace, which can never be published.
+AUDIO_FALLBACK = ["urdu_csalt"]
 SCRIPTS = REPO_ROOT / "scripts"
 
 
 def default_evalsets(registry: Registry, model: ModelConfig) -> list[EvalsetConfig]:
-    """Every ready pipeline-test evalset the model can score."""
-    return [
+    """Every ready pipeline-test evalset the model can score (audio: ``AUDIO_FALLBACK``)."""
+    chosen = [
         e
         for e in registry.evalsets.values()
         if e.role == "pipeline_test" and e.status == "ready" and accepts(model, e)
     ]
+    if not chosen and model.modality == Modality.AUDIO:
+        chosen = [registry.evalset(e) for e in AUDIO_FALLBACK]
+    return chosen
 
 
 def unpinned(registry: Registry, model: ModelConfig) -> list[str]:
@@ -113,6 +119,8 @@ def latest_run(model_id: str, evalset_id: str) -> str | None:
 
 def face_counts(registry: Registry, model: ModelConfig, datasets: list[str]) -> pd.DataFrame:
     """Frames sampled and frames with a face, per item, from the detection cache."""
+    if model.modality == Modality.AUDIO:
+        return pd.DataFrame(columns=["item_id", "frames", "faces"])
     key = FaceLoader.from_registry(registry, model).key
     parts = [p for d in datasets for p in sorted(faces_dir(d, key).glob("part-*.parquet"))]
     if not parts:

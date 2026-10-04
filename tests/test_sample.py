@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import json
 import random
+import sys
+import types
 
 import pytest
 
+from deeptrace_bench.registry import DatasetConfig
 from deeptrace_bench.sample import SampleError, choose, sample_dataset
 
 
@@ -82,3 +85,73 @@ def test_the_same_request_is_a_no_op_and_a_new_one_rebuilds(registry, local_copy
     bigger = sample_dataset(config, dest, per_label=2, seed=0, local=local_copy)
     assert len(bigger["chosen"]) == 4
     assert sum(1 for p in dest.rglob("*.jpg")) == 4
+
+
+def test_a_single_label_dataset_samples_only_that_label():
+    fakes = [f"fake/{i}.jpg" for i in range(5)]
+    assert len(choose(fakes, _label, 2, seed=0, labels=["fake"])) == 2
+    with pytest.raises(SampleError, match="no fake"):
+        choose(PATHS[:20], _label, 2, seed=0, labels=["fake"])
+
+
+# --- builders registered for these tests only (invented layouts and names) -----------------
+
+
+def _builder(monkeypatch, name: str, **attrs) -> str:
+    module = types.ModuleType(name)
+    module.build_manifest = lambda root: None
+    for key, value in attrs.items():
+        setattr(module, key, value)
+    monkeypatch.setitem(sys.modules, name, module)
+    return f"{name}:build_manifest"
+
+
+def _config(builder: str, contains: list[str]) -> DatasetConfig:
+    return DatasetConfig(
+        id="toy",
+        name="toy",
+        modality="audio",
+        role="south_asian",
+        status="open",
+        access={"kind": "none"},
+        licence="-",
+        contains=contains,
+        builder=builder,
+    )
+
+
+def test_a_fake_only_dataset_can_be_sampled(monkeypatch, tmp_path):
+    root = tmp_path / "copy"
+    for rel in ["fake/xx/gen_a/1.wav", "fake/xx/gen_a/2.wav", "fake/xx/gen_b/3.wav"]:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).write_bytes(b"wav")
+    builder = _builder(monkeypatch, "dtb_toy_fake_only", label_from_path=lambda p: "fake")
+    record = sample_dataset(_config(builder, ["fake"]), tmp_path / "out", per_label=2, local=root)
+    assert len(record["chosen"]) == 2
+    assert record["candidates"] == {"real": 0, "fake": 3}
+
+
+def test_labels_can_come_from_a_metadata_file(monkeypatch, tmp_path):
+    root = tmp_path / "copy"
+    (root / "clips").mkdir(parents=True)
+    for n in (1, 2, 3):
+        (root / "clips" / f"{n}.wav").write_bytes(b"wav")
+    (root / "meta.csv").write_text("file,label\n1.wav,bona-fide\n2.wav,spoof\n3.wav,spoof\n")
+
+    def labels_from_metadata(files: dict[str, bytes]) -> dict[str, str]:
+        rows = files["meta.csv"].decode().splitlines()[1:]
+        names = dict(row.split(",") for row in rows)
+        return {f"clips/{k}": "real" if v == "bona-fide" else "fake" for k, v in names.items()}
+
+    builder = _builder(
+        monkeypatch,
+        "dtb_toy_meta",
+        METADATA_FILES=["meta.csv"],
+        labels_from_metadata=labels_from_metadata,
+    )
+    dest = tmp_path / "out"
+    record = sample_dataset(_config(builder, ["real", "fake"]), dest, per_label=1, local=root)
+    assert record["candidates"] == {"real": 1, "fake": 2}
+    assert sorted(record["chosen"])[0] == "clips/1.wav"
+    # The builder reads the same file when it builds the manifest of the sample.
+    assert (dest / "meta.csv").exists() and record["metadata"] == ["meta.csv"]

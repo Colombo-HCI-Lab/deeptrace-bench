@@ -8,8 +8,9 @@ Examples:
 Refuses a model that can't read the evalset's modality (exit 2), then checks contamination
 (a contaminated pair is refused unless ``--force``), creates or resumes the run
 (``scores/<run_id>/run.json`` in the store), and scores every item not yet scored. Video and
-image items go through the shared face pipeline (``preprocess/faces.py``); audio items are
-cut into windows. ``--shard i/n`` scores one stable slice, for SLURM array jobs.
+image items go through the shared face pipeline (``preprocess/faces.py``); audio models get
+each item's audio (an audio-video item's audio track) cut into windows. ``--shard i/n``
+scores one stable slice, for SLURM array jobs.
 ``--save-crops K`` keeps up to K face crops per item under the run's ``crops/`` folder, for
 people to look at. ``--smoke`` works in the smoke namespace (``DTB_ROOT/smoke/``).
 """
@@ -31,7 +32,7 @@ from deeptrace_bench.models.base import load_detector, resolve_device
 from deeptrace_bench.paths import dataset_dir, namespace, prepare_store, use_namespace
 from deeptrace_bench.preprocess.audio import load_audio, segment
 from deeptrace_bench.preprocess.faces import FaceLoader
-from deeptrace_bench.registry import Registry, accepts
+from deeptrace_bench.registry import Modality, Registry, accepts
 from deeptrace_bench.runs import config_hash, start_run
 from deeptrace_bench.score import part_prefix, score_items, shard_items
 
@@ -70,7 +71,9 @@ def main() -> int:
             "%s (%s) can't score %s (%s)", model.id, model.modality, evalset.id, evalset.modality
         )
         return 2
-    is_audio = evalset.modality.value == "audio"
+    # An audio model on an audio-video evalset hears the audio track; a video model sees the
+    # frames. So the model, not the evalset, decides which loader runs.
+    is_audio = model.modality == Modality.AUDIO
     if args.preprocessing == "native" and not is_audio:
         log.error("native preprocessing for video and image models isn't built yet")
         return 2

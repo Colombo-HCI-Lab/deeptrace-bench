@@ -84,3 +84,19 @@ def test_zip_members_only_come_from_urls():
 def test_eval_config_is_still_proposed(registry):
     # Flip this test when the team settles decision 5.
     assert registry.eval.status == "proposed"
+
+
+def test_track_labels_need_an_audio_video_dataset(registry):
+    wrong = EvalsetConfig(
+        id="wrong_track",
+        modality="audio",
+        role="south_asian",
+        pairing="same_corpus",
+        components=[Component(dataset="urdu_csalt", label="from_audio")],
+        status="ready",
+    )
+    registry.evalsets["wrong_track"] = wrong
+    try:
+        assert any("from_audio" in p for p in registry.problems())
+    finally:
+        del registry.evalsets["wrong_track"]
