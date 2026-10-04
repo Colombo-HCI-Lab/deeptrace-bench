@@ -3,9 +3,16 @@ aasist:
   AASIST.pth: 51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0
 aasist_l:
   AASIST-L.pth: 814331d088032bb4c3fa61cc014789eadeed464209dd094ab3a2dd6ffbdce27a
+df_arena_1b:
+  pytorch_model.bin: 780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988
+  xls-r-1b-config/config.json: 36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997
 df_arena_500m:
   pytorch_model.bin: ebd7662047f3b33a6a0fcb9d205bbdcea07220bf42853ae57c6cf4d8e40f66a2
   xls-r-300m-config/config.json: 0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac
+efficientnet_b4:
+  effnb4_best.pth: 74cbd82d7be1bf5e6adec717824274a95b4509b02e1e78401608d32b3cbeaf0f
+f3net:
+  f3net_best.pth: deee7d25bfc1b8b5ba83054a664880078de51213b1067f1e472c2bed7cc667f9
 gend:
   clip-vit-large-patch14/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
   clip-vit-large-patch14/merges.txt: 9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a
@@ -19,3 +26,9 @@ gend:
   model.safetensors: d76f0bdfd74a29fe1b1c1b84a80ac92486993e426878e8c7a3944281fbb96833
 scrfd_10g:
   det_10g.onnx: 5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91
+spsl:
+  spsl_best.pth: 7305d660c68aa6ac138f8d59c068832a43244f390fa6e54355f211d81bc246bd
+ucf:
+  ucf_best.pth: 4afa2517feeb473024e1b73049bfa61ce446eb4da14d17c864f2e2a76b3223e5
+xception:
+  xception_best.pth: dd61186f9ac8e99aae85982cae338b555dfaeef042f6b699e5a55cae3998ba47

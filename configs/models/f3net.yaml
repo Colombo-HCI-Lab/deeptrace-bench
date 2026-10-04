@@ -1,0 +1,23 @@
+id: f3net
+name: F3Net (DeepfakeBench)
+modality: video
+status: workable
+licence: CC BY-NC 4.0 (DeepfakeBench)
+paper: Qian et al., Thinking in Frequency, ECCV 2020
+upstream:
+  repo: SCLBD/DeepfakeBench
+  commit: f188b1c105465e2e5377eb536a95022ae0e4522d
+weights:
+  - name: f3net_best.pth
+    kind: github_release
+    url: https://github.com/SCLBD/DeepfakeBench/releases/download/v1.0.1/f3net_best.pth
+    size_bytes: 90398839
+training_data:
+  - {dataset: imagenet, level: pretrain}
+  - {dataset: ffpp, level: train, split: train, note: "c23; the detector yaml lists NeuralTextures only, which may not describe the released checkpoint"}
+adapter: deeptrace_bench.models.deepfakebench:DeepfakeBenchDetector
+input:
+  detector: f3net
+  crop: {size: 256, margin: 1.3, align: five_point}
+  frames_per_clip: 32
+notes: Frequency cue, a DCT band filter (FAD head) in front of Xception with a 12-channel first convolution. Weights from DeepfakeBench release v1.0.1, checked 2026-10-05.

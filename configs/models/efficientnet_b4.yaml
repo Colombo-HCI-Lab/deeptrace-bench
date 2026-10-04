@@ -16,8 +16,9 @@ weights:
 training_data:
   - {dataset: imagenet, level: pretrain}
   - {dataset: ffpp, level: train, split: train, note: "c23 per the DeepfakeBench README"}
-adapter: deeptrace_bench.models.deepfakebench:EfficientNetB4Detector
+adapter: deeptrace_bench.models.deepfakebench:DeepfakeBenchDetector
 input:
+  detector: efficientnetb4      # training/config/detector/<name>.yaml in the checkout
   crop: {size: 256, margin: 1.3, align: five_point}
   frames_per_clip: 32
 notes: Shares the Xception wrapper, so it costs almost nothing extra. DeepfakeBench issue 79 reports an architecture mismatch; check at parity.

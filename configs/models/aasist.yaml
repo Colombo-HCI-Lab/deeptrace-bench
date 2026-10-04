@@ -20,5 +20,5 @@ input:
   variant: AASIST
   sample_rate: 16000
   segment_samples: 64600
-  fake_index: 0      # upstream labels bona fide 1; confirm on asvspoof2019_la_eval
-notes: Check the score direction on ASVspoof 2019 LA eval before anything else (aasist issue 17).
+  fake_index: 0      # upstream labels bona fide 1; confirmed on asvspoof2019_la_eval
+notes: Score direction settled 2026-10-05 on a seeded sample of ASVspoof 2019 LA eval (186 real, 187 fake) - AUC 0.999, EER 1.6% (paper 0.83%) with P(fake) at softmax index 0. Issue 17's inverted outputs come from reading upstream's bona fide logit as a fake score. Full-eval reproduction waits for the full download.

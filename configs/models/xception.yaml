@@ -16,8 +16,9 @@ weights:
 training_data:
   - {dataset: imagenet, level: pretrain}
   - {dataset: ffpp, level: train, split: train, note: "c23 per the DeepfakeBench README (issue 151 unanswered)"}
-adapter: deeptrace_bench.models.deepfakebench:XceptionDetector
+adapter: deeptrace_bench.models.deepfakebench:DeepfakeBenchDetector
 input:
+  detector: xception      # training/config/detector/<name>.yaml in the checkout
   crop: {size: 256, margin: 1.3, align: five_point}
   frames_per_clip: 32
 notes: Upstream pins torch 1.12 and dlib; we port to the shared env and check parity.
