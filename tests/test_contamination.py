@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from deeptrace_bench.eval.contamination import Verdict, check
 from deeptrace_bench.registry import Component, EvalsetConfig, ModelConfig, TrainingData
 
@@ -119,3 +121,17 @@ def test_sets_that_both_draw_on_youtube_do_not_overlap(registry):
     # DeePhy's real videos; only a shared, identifiable corpus counts as overlap.
     verdict = check(registry.model("xception"), registry.evalset("deephy"), registry)
     assert verdict.verdict == Verdict.CLEAN, verdict.reasons
+
+
+@pytest.mark.parametrize("model_id", ["df_arena_500m", "df_arena_1b"])
+def test_df_arena_is_refused_where_it_trained_and_clean_elsewhere(registry, model_id):
+    model = registry.model(model_id)
+    for evalset_id, expected in [
+        ("asvspoof2019_la_eval", Verdict.CONTAMINATED),
+        ("mlaad_si", Verdict.CONTAMINATED),
+        ("in_the_wild", Verdict.CLEAN),
+        ("urdu_csalt", Verdict.CLEAN),
+        ("banglafake", Verdict.SOURCE_OVERLAP),
+    ]:
+        verdict = check(model, registry.evalset(evalset_id), registry).verdict
+        assert verdict == expected, (model_id, evalset_id, verdict)

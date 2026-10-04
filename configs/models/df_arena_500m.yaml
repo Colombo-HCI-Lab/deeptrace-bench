@@ -1,0 +1,43 @@
+id: df_arena_500m
+name: DF Arena 500M (Speech DF Arena universal anti-spoofing model)
+modality: audio
+status: workable
+licence: non-commercial (custom LICENSE.txt in the model repo)
+paper: Speech DF Arena (RAPTOR), Interspeech 2026; model card on Hugging Face
+upstream:
+  host: hf
+  repo: Speech-Arena-2025/DF_Arena_500M_V_1
+  commit: 8258fa8e74ff9b8ad20d4c939c1a7f694a6e4080
+weights:
+  - name: pytorch_model.bin
+    kind: hf
+    repo: Speech-Arena-2025/DF_Arena_500M_V_1
+    filename: pytorch_model.bin
+    revision: 8258fa8e74ff9b8ad20d4c939c1a7f694a6e4080
+  # backbone.py builds its XLS-R from the Hub at whatever revision is served; the adapter
+  # points it at this pinned config instead (the weights come from pytorch_model.bin).
+  - name: xls-r-300m-config
+    kind: hf_snapshot
+    repo: facebook/wav2vec2-xls-r-300m
+    revision: 1a640f32ac3e39899438a2931f9924c02f080a54
+    allow_patterns: [config.json]
+training_data:
+  - {dataset: commonvoice, level: pretrain, note: "XLS-R pretraining"}
+  - {dataset: babel, level: pretrain, note: "XLS-R pretraining"}
+  - {dataset: mls, level: pretrain, note: "XLS-R pretraining"}
+  - {dataset: voxpopuli, level: pretrain, note: "XLS-R pretraining"}
+  - {dataset: voxlingua107, level: pretrain, note: "XLS-R pretraining"}
+  - {dataset: asvspoof2019_la, level: train, note: "the card says ASVspoof 2019 without naming partitions, so every partition counts as seen"}
+  - {dataset: asvspoof5, level: train, note: "the card's ASVspoof 2024"}
+  - {dataset: mlaad, level: train}
+  - {dataset: codecfake, level: train}
+  - {dataset: librisevoc, level: train}
+  - {dataset: dfadd, level: train}
+  - {dataset: ctrsvdd, level: train}
+  - {dataset: spoofceleb, level: train}
+  - {dataset: envsdd, level: train}
+adapter: deeptrace_bench.models.df_arena:DFArenaDetector
+input:
+  sample_rate: 16000
+  segment_samples: 64600
+notes: XLS-R 300M plus attention pooling over all layers and a conformer head; code and weights checked 2026-10-05. Top open model on the Speech DF Arena leaderboard. The card reports In-the-Wild EER 1.76%, the reproduction target (the guard refuses ASVspoof 2019 LA eval and MLAAD). Transformers-native, so parity runs in our own environment.

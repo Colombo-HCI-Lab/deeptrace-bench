@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import pandas as pd
 import pytest
 
 from deeptrace_bench.datasets import (
+    asvspoof2019_la,
     banglafake,
     in_the_wild,
     mendeley_roop_akool,
@@ -224,3 +226,41 @@ def test_openslr_sinhala_manifest(tmp_path):
     validate_manifest(df, "openslr_sinhala")
     assert set(df["label"]) == {"real"} and set(df["language"]) == {"si"}
     assert set(df["subject_id"]) == {"spk1", "spk2"}
+
+
+_PROTOCOLS = "LA/ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.{}.txt"
+
+
+def _asvspoof_protocols() -> dict[str, bytes]:
+    return {
+        _PROTOCOLS.format(
+            "train.trn"
+        ): b"LA_0001 LA_T_1 - - bonafide\nLA_0001 LA_T_2 - A01 spoof\n",
+        _PROTOCOLS.format("dev.trl"): b"",
+        _PROTOCOLS.format("eval.trl"): b"LA_0002 LA_E_3 - A17 spoof\n",
+    }
+
+
+def test_asvspoof_labels_come_from_its_protocols():
+    labels = asvspoof2019_la.labels_from_metadata(_asvspoof_protocols())
+    assert labels == {
+        "LA/ASVspoof2019_LA_train/flac/LA_T_1.flac": "real",
+        "LA/ASVspoof2019_LA_train/flac/LA_T_2.flac": "fake",
+        "LA/ASVspoof2019_LA_eval/flac/LA_E_3.flac": "fake",
+    }
+
+
+def test_asvspoof_manifest(tmp_path):
+    for name, text in _asvspoof_protocols().items():
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / name).write_bytes(text)
+    _tree(
+        tmp_path,
+        ["LA/ASVspoof2019_LA_train/flac/LA_T_1.flac", "LA/ASVspoof2019_LA_eval/flac/LA_E_3.flac"],
+    )
+    df = asvspoof2019_la.build_manifest(tmp_path)
+    validate_manifest(df, "asvspoof2019_la")
+    rows = df.set_index("split")
+    assert rows.loc["train", "label"] == "real" and pd.isna(rows.loc["train", "method"])
+    assert rows.loc["eval", "method"] == "A17" and rows.loc["eval", "method_family"] == "vc"
+    assert rows.loc["eval", "subject_id"] == "LA_0002"

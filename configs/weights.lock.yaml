@@ -3,6 +3,9 @@ aasist:
   AASIST.pth: 51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0
 aasist_l:
   AASIST-L.pth: 814331d088032bb4c3fa61cc014789eadeed464209dd094ab3a2dd6ffbdce27a
+df_arena_500m:
+  pytorch_model.bin: ebd7662047f3b33a6a0fcb9d205bbdcea07220bf42853ae57c6cf4d8e40f66a2
+  xls-r-300m-config/config.json: 0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac
 gend:
   clip-vit-large-patch14/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
   clip-vit-large-patch14/merges.txt: 9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a

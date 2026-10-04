@@ -33,6 +33,25 @@
   note: MLAAD's intended real counterpart; no South Asian languages.
 - id: asvspoof5
   name: ASVspoof 5
+  note: The 2024 challenge data (DF Arena's "ASVspoof 2024").
+- id: codecfake
+  name: Codecfake
+  note: Speech resynthesised by neural audio codecs. DF Arena training data.
+- id: librisevoc
+  name: LibriSeVoc
+  note: LibriTTS speech re-vocoded by six neural vocoders. DF Arena training data.
+- id: dfadd
+  name: DFADD
+  note: Diffusion and flow-matching TTS fakes of VCTK speakers. DF Arena training data.
+- id: ctrsvdd
+  name: CtrSVDD
+  note: Singing voice deepfakes. DF Arena training data.
+- id: spoofceleb
+  name: SpoofCeleb
+  note: TTS fakes of VoxCeleb1 speakers in the wild. DF Arena training data.
+- id: envsdd
+  name: EnvSDD
+  note: Environmental sound deepfakes. DF Arena training data.
 - id: genimage
   name: GenImage
   note: Effort's AI-image checkpoint, not the face checkpoint we use.
