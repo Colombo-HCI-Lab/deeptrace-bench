@@ -20,4 +20,5 @@ input:
   variant: AASIST
   sample_rate: 16000
   segment_samples: 64600
+  fake_index: 0      # upstream labels bona fide 1; confirm on asvspoof2019_la_eval
 notes: Check the score direction on ASVspoof 2019 LA eval before anything else (aasist issue 17).

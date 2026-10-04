@@ -1,10 +1,10 @@
-"""The smoke datasets' builders read their layouts (invented names; no real files)."""
+"""Dataset builders read their layouts (invented names; no real files)."""
 
 from __future__ import annotations
 
 import pytest
 
-from deeptrace_bench.datasets import mendeley_roop_akool, unidatapro_videos
+from deeptrace_bench.datasets import mendeley_roop_akool, unidatapro_videos, urdu_csalt
 from deeptrace_bench.manifest import validate_manifest
 
 
@@ -71,3 +71,40 @@ def test_unidatapro_manifest(tmp_path):
         "unidatapro_videos/video/1",
         "unidatapro_videos/video/5",
     ]
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("Bonafide/Speaker_01/Part 1/7.wav", "real"),
+        ("Spoofed_TTS/Speaker_01/7.wav", "fake"),
+        ("Spoofed_Tacotron/Speaker_02/9.wav", "fake"),
+        ("README.md", None),
+        ("Other/Speaker_01/7.wav", None),
+    ],
+)
+def test_urdu_labels(path, label):
+    assert urdu_csalt.label_from_path(path) == label
+
+
+def test_urdu_manifest(tmp_path):
+    _tree(
+        tmp_path,
+        [
+            "Bonafide/Speaker_01/Part 1/7.wav",
+            "Bonafide/Speaker_01/Part 2/7.wav",
+            "Spoofed_TTS/Speaker_01/7.wav",
+            "Spoofed_Tacotron/Speaker_02/9.wav",
+            "README.md",
+            ".sample.json",
+        ],
+    )
+    df = urdu_csalt.build_manifest(tmp_path)
+    validate_manifest(df, "urdu_csalt")
+    assert len(df) == 4 and set(df["language"]) == {"ur"}
+    # The same file name recurs across parts, so the part stays in the id.
+    assert df["item_id"].is_unique
+    by_path = df.set_index("rel_path")
+    assert by_path.loc["Spoofed_TTS/Speaker_01/7.wav", "method"] == "vits"
+    assert by_path.loc["Spoofed_Tacotron/Speaker_02/9.wav", "method"] == "tacotron"
+    assert by_path.loc["Bonafide/Speaker_01/Part 2/7.wav", "subject_id"] == "Speaker_01"

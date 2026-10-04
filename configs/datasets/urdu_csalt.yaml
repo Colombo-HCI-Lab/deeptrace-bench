@@ -7,6 +7,7 @@ access:
   kind: hf
   page: https://huggingface.co/datasets/CSALT/deepfake_detection_dataset_urdu
   repo: CSALT/deepfake_detection_dataset_urdu
+  revision: eb8f16623108324867e4424a646937409c64b82b
 licence: CC BY-NC 4.0
 licence_terms:
   - Non-commercial use only.
@@ -14,4 +15,4 @@ contains: [real, fake]
 languages: [ur]
 size_gb: 2.0
 builder: deeptrace_bench.datasets.urdu_csalt:build_manifest
-notes: Folders Bonafide, Spoofed_TTS (VITS) and Spoofed_Tacotron, 17 speakers each, 6,794 WAV files. The Doc says 35k clips; check the count after download.
+notes: Folders Bonafide, Spoofed_TTS (VITS) and Spoofed_Tacotron, 17 speakers each, 6,794 WAV files (3,398 real, 3,396 fake) at the pinned revision, checked 2026-10-05. The team Doc's 35k clips is wrong for this release.
