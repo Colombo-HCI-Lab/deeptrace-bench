@@ -1,0 +1,20 @@
+id: dfplatter
+name: DF-Platter
+modality: video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://iab-rubric.org/df-platter-database
+  request: Email the licence agreement (https://iab-rubric.org/images/pdf/license/LICENSE_AGREE_DB_df-platter.pdf), signed by someone with legal authority for the institution (for UCSC, the Director or Registrar), to databases@iab-rubric.org with the subject "License agreement for DF Platter". They reply with a password for a Google Drive archive.
+licence: IAB Rubric database licence
+licence_terms:
+  - Non-commercial research only.
+  - Only research colleagues at the signing institution may use it. Check before sharing access across institutions.
+  - No copying or distribution beyond backup.
+  - Cite Narayan et al., CVPR 2023.
+contains: [real, fake]
+size_gb: 500
+derived_from: [youtube]
+builder: deeptrace_bench.datasets.dfplatter:build_manifest
+notes: 133,260 videos of Indian subjects with gender, age, Fitzpatrick skin tone and occlusion labels. Evaluate a stratified sample, not all of it.

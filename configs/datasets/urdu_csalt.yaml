@@ -1,0 +1,17 @@
+id: urdu_csalt
+name: Urdu Deepfake Audio (CSALT-LUMS)
+modality: audio
+role: south_asian
+status: open
+access:
+  kind: hf
+  page: https://huggingface.co/datasets/CSALT/deepfake_detection_dataset_urdu
+  repo: CSALT/deepfake_detection_dataset_urdu
+licence: CC BY-NC 4.0
+licence_terms:
+  - Non-commercial use only.
+contains: [real, fake]
+languages: [ur]
+size_gb: 2.0
+builder: deeptrace_bench.datasets.urdu_csalt:build_manifest
+notes: Folders Bonafide, Spoofed_TTS (VITS) and Spoofed_Tacotron, 17 speakers each, 6,794 WAV files. The Doc says 35k clips; check the count after download.

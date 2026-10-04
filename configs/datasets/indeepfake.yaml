@@ -1,0 +1,18 @@
+id: indeepfake
+name: InDeepFake
+modality: audio_video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://github.com/arnabdasphd/InDeepFake
+  request: Fill in the access request form (PDF linked from the repo README), naming the PI, and email it to the address on the form. Academic institutions only.
+licence: InDeepFake access agreement
+licence_terms:
+  - Non-commercial research and academic use only.
+  - No copying, publishing or distributing any part of the dataset or derived data.
+  - Cite the Pattern Recognition Letters paper.
+contains: [real, fake]
+size_gb: 31
+builder: deeptrace_bench.datasets.indeepfake:build_manifest
+notes: 389 real and 4,680 fake videos, seven Indian languages, face swaps and TTS plus Wav2Lip lip-sync. The lightest request of the video sets.

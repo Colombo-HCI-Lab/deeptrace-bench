@@ -1,0 +1,18 @@
+id: indicsuperb
+name: IndicSUPERB (Kathbath)
+modality: audio
+role: real_reference
+status: open
+access:
+  kind: url
+  page: https://github.com/AI4Bharat/IndicSUPERB
+  urls:
+    testkn_audio.tar: https://objectstore.e2enetworks.net/indic-superb/kathbath/clean/testkn_audio.tar
+    testunk_audio.tar: https://objectstore.e2enetworks.net/indic-superb/kathbath/clean/testunk_audio.tar
+    transcripts_n2w.tar: https://objectstore.e2enetworks.net/indic-superb/kathbath/clean/transcripts_n2w.tar
+licence: see the IndicSUPERB repo (licence not yet checked)
+contains: [real]
+languages: [hi, bn, ur, ta, mr, kn, ml, gu, pa, te, or, sa]
+size_gb: 4
+builder: deeptrace_bench.datasets.indicsuperb:build_manifest
+notes: Real counterpart for IndicSynth, which was generated from these speakers. Only the clean test splits are fetched (about 4 GB); the 85 GB train split is left out until needed. Audio is m4a, converted to 16 kHz WAV when the manifest is built. Check the licence before publishing.

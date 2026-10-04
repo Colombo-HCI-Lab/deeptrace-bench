@@ -1,0 +1,18 @@
+id: fakeavceleb
+name: FakeAVCeleb
+modality: audio_video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://sites.google.com/view/fakeavcelebdash-lab/
+  request: Submit the FakeAVCeleb request form linked from the site; expect to show ethics (IRB) approval. The authors email a download script. Replies have taken from days to months. Do not use the unofficial Hugging Face mirrors.
+licence: non-commercial research and education (site says CC BY 4.0; the GitHub README defers to the request form)
+licence_terms:
+  - Non-commercial research and education only.
+contains: [real, fake]
+languages: [en]
+size_gb: null
+derived_from: [voxceleb2]
+builder: deeptrace_bench.datasets.fakeavceleb:build_manifest
+notes: 500 real and 19,500 fake videos across five ethnic groups, including 100 real South Asian videos. English-speaking celebrities.

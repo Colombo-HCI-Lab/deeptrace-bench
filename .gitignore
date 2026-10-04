@@ -22,6 +22,9 @@ manifests/
 splits/
 scores/
 results/raw/
+# ...but these two are code, not data: dataset configs and manifest builders
+!configs/datasets/
+!src/deeptrace_bench/datasets/
 *.parquet
 *.feather
 *.h5

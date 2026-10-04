@@ -1,0 +1,17 @@
+id: deepfake_eval_2024
+name: Deepfake-Eval-2024
+modality: audio_video
+role: in_the_wild
+status: request
+access:
+  kind: hf_gated
+  page: https://huggingface.co/datasets/nuriachandra/Deepfake-Eval-2024
+  repo: nuriachandra/Deepfake-Eval-2024
+  request: Request access on Hugging Face (name, institution, intended use, a link to prior deepfake-detection work). The maintainers approve by hand and reject often.
+licence: CC BY-SA 4.0
+licence_terms:
+  - Evaluation only; no training on it.
+contains: [real, fake]
+size_gb: 20.3
+builder: deeptrace_bench.datasets.deepfake_eval_2024:build_manifest
+notes: In-the-wild, 52 languages, about 5% South Asian subjects by the paper's estimate. No country field; any South Asian subset needs filtering after access.

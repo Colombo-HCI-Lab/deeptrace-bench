@@ -1,0 +1,17 @@
+id: asvspoof2019_la
+name: ASVspoof 2019 Logical Access
+modality: audio
+role: reproduction
+status: open
+access:
+  kind: url
+  page: https://datashare.ed.ac.uk/handle/10283/3336
+  urls:
+    LA.zip: https://datashare.ed.ac.uk/bitstreams/a9f87c35-f055-4015-80e2-2fdff0d46269/download
+licence: see LICENSE_text.txt on the DataShare page
+contains: [real, fake]
+languages: [en]
+size_gb: 7.6
+derived_from: [vctk]
+builder: deeptrace_bench.datasets.asvspoof2019_la:build_manifest
+notes: Needed to reproduce the audio models' published numbers and to settle score direction. Train, dev and eval partitions have disjoint speakers.

@@ -1,0 +1,18 @@
+id: deephy
+name: DeePhy
+modality: video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://iab-rubric.org/deephy-database
+  request: Same process as DF-Platter, subject "License agreement for DeePhy"; one signing round can cover both.
+licence: IAB Rubric database licence
+licence_terms:
+  - Research and educational use only; cite Narayan et al., IJCB 2022.
+  - Redistribution terms not yet read; assume the same as DF-Platter.
+contains: [real, fake]
+size_gb: 30
+derived_from: [youtube]
+builder: deeptrace_bench.datasets.deephy:build_manifest
+notes: 100 real and 5,040 fake videos (FaceShifter, FaceSwap, FSGAN), with gender, age group and Fitzpatrick skin tone among 10 attributes.

@@ -1,0 +1,13 @@
+id: speechfake
+name: SpeechFake
+modality: audio
+role: south_asian
+status: deferred
+access:
+  kind: modelscope
+  page: https://www.modelscope.cn/datasets/inclusionAI/SPEECHFAKE
+licence: CC BY 4.0 (README; ModelScope metadata says Apache-2.0)
+contains: [fake]
+languages: [hi]
+size_gb: 116
+notes: Deferred. Getting its Hindi means downloading the whole 116 GB multilingual part, and IndicSynth and MLAAD already cover Hindi.

@@ -1,0 +1,11 @@
+id: indic_codecfake
+name: Indic-CodecFake
+modality: audio
+role: south_asian
+status: dead
+access:
+  kind: none
+  page: https://helixometry.github.io/IndicFake/
+licence: CC BY 4.0 (arXiv)
+contains: [fake]
+notes: No download link anywhere as of 2026-10-03.

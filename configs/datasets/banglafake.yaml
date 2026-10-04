@@ -1,0 +1,17 @@
+id: banglafake
+name: BanglaFake
+modality: audio
+role: south_asian
+status: open
+access:
+  kind: hf
+  page: https://huggingface.co/datasets/sifat1221/banglaFake
+  repo: sifat1221/banglaFake
+licence: none declared
+licence_terms:
+  - No licence is declared on Hugging Face or GitHub. Ask the authors before publishing results.
+contains: [real, fake]
+languages: [bn]
+size_gb: 5.6
+builder: deeptrace_bench.datasets.banglafake:build_manifest
+notes: One 5.6 GB final_data.zip. 12,260 real and 13,260 VITS fakes per the GitHub README; 7 speakers, no official split.

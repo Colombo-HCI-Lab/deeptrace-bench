@@ -1,0 +1,29 @@
+id: mlaad
+name: MLAAD
+modality: audio
+role: south_asian
+status: click_through
+access:
+  kind: hf_gated
+  page: https://huggingface.co/datasets/mueller91/MLAAD
+  repo: mueller91/MLAAD
+  allow_patterns: [README.md]
+  language_patterns:
+    hi: [fake/hi/*]
+    bn: [fake/bn/*]
+    ta: [fake/ta/*]
+    ur: [fake/ur/*]
+    si: [fake/si/*]
+    kn: [fake/kn/*]
+    mr: [fake/mr/*]
+    ml: [fake/ml/*]
+  default_languages: [hi, bn, ta, ur, si, kn, mr, ml]
+licence: CC BY-NC 4.0
+licence_terms:
+  - Non-commercial use only. Accept the terms on Hugging Face first (instant).
+contains: [fake]
+languages: [hi, bn, ta, ur, si, kn, mr, ml]
+size_gb: 9.5
+derived_from: [m_ailabs]
+builder: deeptrace_bench.datasets.mlaad:build_manifest
+notes: Fake only, 1,000 clips per language and generator. Hindi has 9 generators; Sinhala has 1,000 Edge-TTS clips, the only Sinhala deepfake audio found. M-AILABS has no South Asian languages, so real speech must come from another corpus (cross-corpus).

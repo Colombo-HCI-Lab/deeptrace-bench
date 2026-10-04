@@ -1,0 +1,18 @@
+id: ffpp
+name: FaceForensics++
+modality: video
+role: reproduction
+status: request
+access:
+  kind: manual
+  page: https://github.com/ondyari/FaceForensics
+  request: Fill in the FaceForensics++ Google Form linked from the repo README; the authors email a download script. Download c23 videos for original_sequences/youtube and the four manipulations plus FaceShifter.
+  expect: [original_sequences, manipulated_sequences]
+licence: FaceForensics++ terms of use (research only)
+licence_terms:
+  - Non-commercial research only.
+contains: [real, fake]
+size_gb: 40
+derived_from: [youtube]
+builder: deeptrace_bench.datasets.ffpp:build_manifest
+notes: Needed to reproduce the video models' published numbers. Official splits are the train/val/test JSON files in the FaceForensics repo.

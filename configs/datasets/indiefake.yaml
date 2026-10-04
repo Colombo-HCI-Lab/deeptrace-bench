@@ -1,0 +1,15 @@
+id: indiefake
+name: IndieFake
+modality: audio
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://indie-fake-dataset.netlify.app/
+  request: Use the "Request Dataset Access" form on the site (name, email, organisation, reason).
+licence: CC BY 4.0 (site footer)
+contains: [real, fake]
+languages: [en]
+size_gb: null
+builder: deeptrace_bench.datasets.indiefake:build_manifest
+notes: Indian-accented English, 50 speakers, 27 h. Low priority; no South Asian languages.
