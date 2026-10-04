@@ -3,10 +3,12 @@
 Examples:
     uv run scripts/evaluate.py --model aasist --evalset urdu_csalt
     uv run scripts/evaluate.py --run aasist__urdu_csalt__1a2b3c4d --publish
+    uv run scripts/evaluate.py --smoke --model gend --evalset unidatapro_videos
 
-Writes full results (including per-item rows) to ``DTB_ROOT/results/<run_id>/``. With
+Writes full results (including per-item rows) to ``results/<run_id>/`` in the store. With
 ``--publish`` it also copies the aggregate tables, which name no items, into the repo's
-``results/<run_id>/`` so they can be committed.
+``results/<run_id>/`` so they can be committed; pipeline tests and smoke runs are refused
+(exit 2). ``--smoke`` works in the smoke namespace (``DTB_ROOT/smoke/``).
 """
 
 from __future__ import annotations
@@ -20,7 +22,15 @@ import sys
 from deeptrace_bench import evalset as evalsets
 from deeptrace_bench.eval.contamination import check
 from deeptrace_bench.eval.metrics import per_group, score_direction_ok, summarize_scores
-from deeptrace_bench.paths import PUBLISHED_RESULTS_DIR, dtb_root, results_dir, run_dir
+from deeptrace_bench.eval.publish import publish_refusal
+from deeptrace_bench.paths import (
+    PUBLISHED_RESULTS_DIR,
+    namespace,
+    results_dir,
+    run_dir,
+    scores_root,
+    use_namespace,
+)
 from deeptrace_bench.registry import Registry
 from deeptrace_bench.score import read_scores
 
@@ -29,7 +39,7 @@ log = logging.getLogger("evaluate")
 
 def find_run(model_id: str, evalset_id: str) -> str:
     """Return the only run for a (model, evalset) pair, or fail if there are none or several."""
-    runs = sorted(p.name for p in (dtb_root() / "scores").glob(f"{model_id}__{evalset_id}__*"))
+    runs = sorted(p.name for p in scores_root().glob(f"{model_id}__{evalset_id}__*"))
     if len(runs) != 1:
         raise SystemExit(
             f"expected one run for {model_id} on {evalset_id}, found {runs}; use --run"
@@ -44,8 +54,11 @@ def main() -> int:
     parser.add_argument("--model")
     parser.add_argument("--evalset")
     parser.add_argument("--publish", action="store_true", help="copy aggregates into results/")
+    parser.add_argument("--smoke", action="store_true", help="use the smoke namespace")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    if args.smoke:
+        use_namespace("smoke")
 
     run_id = args.run or find_run(args.model, args.evalset)
     record = json.loads((run_dir(run_id) / "run.json").read_text())
@@ -70,6 +83,8 @@ def main() -> int:
         "run_id": run_id,
         "model": model.id,
         "evalset": evalset.id,
+        "role": evalset.role,
+        "namespace": namespace(),
         "pairing": evalset.pairing,
         "verdict": verdict.verdict.label,
         "verdict_reasons": verdict.reasons,
@@ -99,6 +114,10 @@ def main() -> int:
     log.info("results in %s (verdict %s)", out, verdict.verdict.label)
 
     if args.publish:
+        refusal = publish_refusal(evalset, namespace())
+        if refusal:
+            log.error("not publishing: %s", refusal)
+            return 2
         public = PUBLISHED_RESULTS_DIR / run_id
         public.mkdir(parents=True, exist_ok=True)
         for path in out.glob("*"):

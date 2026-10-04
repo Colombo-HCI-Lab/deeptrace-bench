@@ -7,7 +7,9 @@ An adapter wraps one upstream model so the harness can treat them all the same:
   that, adapters load safetensors only and never unpickle files from Google Drive.
 - ``load`` builds the network and loads the converted weights.
 - ``score`` maps a batch of preprocessed inputs (audio windows or face crops of one item) to
-  P(fake) per window or frame. The harness aggregates those into one score per item, so the
+  P(fake) per window or frame. Audio windows come as one ``[n, samples]`` array; face crops
+  come as a list of ``[h, w, 3]`` uint8 RGB arrays, since a model with native-size crops gets
+  crops of different sizes. The harness aggregates the scores into one per item, so the
   aggregation rule lives in one place (``configs/eval/default.yaml``).
 
 Adapters must match upstream: before an adapter is used for results, its scores on about 200
@@ -18,6 +20,7 @@ docs/models.md, "Parity check").
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -57,8 +60,21 @@ class Detector(ABC):
         """Build the network on ``device`` and load weights."""
 
     @abstractmethod
-    def score(self, inputs: np.ndarray) -> np.ndarray:
-        """Return P(fake) for each window or frame in ``inputs`` (shape ``[n, ...]``)."""
+    def score(self, inputs: np.ndarray | Sequence[np.ndarray]) -> np.ndarray:
+        """Return P(fake) for each window or frame in ``inputs`` (``n`` of them)."""
+
+
+def resolve_device(device: str) -> str:
+    """``auto`` becomes the best available device (cuda, then mps, then cpu); others pass."""
+    if device != "auto":
+        return device
+    import torch
+
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
 
 
 def load_detector(config: ModelConfig) -> Detector:

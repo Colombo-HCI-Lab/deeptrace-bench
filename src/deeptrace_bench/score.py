@@ -1,16 +1,18 @@
 """Resumable scoring: items in, one score per item out, safe to kill at any point.
 
-Scores are appended as parquet parts (``part-00000.parquet``...) in the run directory, keyed
-by ``item_id``. On restart the items already in a part are skipped, so a job that hits
-Curnagl's 3-day limit or gets pre-empted picks up where it stopped. Items that can't be
-preprocessed get a status instead of a score, so failures can be counted per group.
+Scores are appended as parquet parts in the run directory, keyed by ``item_id``. Each
+process names its parts with its own prefix (``part-003of008-00000.parquet`` for shard 3 of
+8), so array jobs that start together never write the same file. On restart the items
+already in any part are skipped, so a job that hits Curnagl's 3-day limit or gets pre-empted
+picks up where it stopped. Items that can't be preprocessed get a status instead of a score,
+so failures can be counted per group.
 """
 
 from __future__ import annotations
 
 import hashlib
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 import numpy as np
@@ -40,6 +42,11 @@ def shard_items(items: pd.DataFrame, index: int, count: int) -> pd.DataFrame:
     return items[keys % count == index]
 
 
+def part_prefix(index: int, count: int) -> str:
+    """The part-file prefix for shard ``index`` of ``count``."""
+    return f"part-{index:03d}of{count:03d}"
+
+
 def read_scores(directory: Path) -> pd.DataFrame:
     """All score parts in a run directory, as one table."""
     parts = sorted(directory.glob("part-*.parquet"))
@@ -51,23 +58,25 @@ def read_scores(directory: Path) -> pd.DataFrame:
 def score_items(
     detector: Detector,
     items: pd.DataFrame,
-    load_inputs: Callable[[pd.Series], np.ndarray],
+    load_inputs: Callable[[pd.Series], np.ndarray | Sequence[np.ndarray]],
     directory: Path,
     aggregate: str = "mean",
     flush_every: int = 256,
     max_items: int | None = None,
+    prefix: str = "part",
 ) -> int:
     """Score every item not yet scored in ``directory``.
 
     Args:
         detector: a loaded detector.
         items: rows with at least ``item_id``; passed whole to ``load_inputs``.
-        load_inputs: turns a row into the detector's input array, or raises
-            ``PreprocessError``.
+        load_inputs: turns a row into the detector's inputs (an array of windows, or a list
+            of face crops), or raises ``PreprocessError``.
         directory: the run directory.
         aggregate: how window scores become one item score (``mean``, ``max``, ``median``).
         flush_every: rows per parquet part.
         max_items: stop after this many new items (tests use it to simulate a kill).
+        prefix: this process's part-file prefix (see ``part_prefix``).
 
     Returns:
         Number of items scored or marked failed in this call.
@@ -80,7 +89,7 @@ def score_items(
     log.info("%d items already scored, %d to go", len(done), len(todo))
 
     combine = AGGREGATIONS[aggregate]
-    next_part = len(list(directory.glob("part-*.parquet")))
+    next_part = len(list(directory.glob(f"{prefix}-*.parquet")))
     buffer: list[dict] = []
     for _, row in todo.iterrows():
         try:
@@ -99,16 +108,16 @@ def score_items(
                 {"item_id": row["item_id"], "score": np.nan, "n_windows": 0, "status": exc.reason}
             )
         if len(buffer) >= flush_every:
-            _flush(buffer, directory, next_part)
+            _flush(buffer, directory, prefix, next_part)
             next_part += 1
             buffer = []
     if buffer:
-        _flush(buffer, directory, next_part)
+        _flush(buffer, directory, prefix, next_part)
     return len(todo)
 
 
-def _flush(rows: list[dict], directory: Path, part: int) -> None:
-    path = directory / f"part-{part:05d}.parquet"
+def _flush(rows: list[dict], directory: Path, prefix: str, part: int) -> None:
+    path = directory / f"{prefix}-{part:05d}.parquet"
     tmp = path.with_name(path.name + ".tmp")
     pd.DataFrame(rows).to_parquet(tmp, index=False)
     tmp.rename(path)

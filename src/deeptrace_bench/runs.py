@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import platform
 import socket
 import subprocess
@@ -66,10 +67,12 @@ class RunRecord:
     sessions: list[dict[str, Any]] = field(default_factory=list)
 
     def save(self, directory: Path) -> Path:
-        """Write ``run.json`` into ``directory``."""
+        """Write ``run.json`` into ``directory`` (atomically, so shards can't corrupt it)."""
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / "run.json"
-        path.write_text(json.dumps(asdict(self), indent=2, sort_keys=True))
+        tmp = path.with_name(f"run.json.{os.getpid()}.tmp")
+        tmp.write_text(json.dumps(asdict(self), indent=2, sort_keys=True))
+        tmp.replace(path)
         return path
 
 
@@ -87,13 +90,15 @@ def start_run(
     config_hashes: dict[str, str],
     preprocessing: str = "shared",
     directory: Path | None = None,
+    session: dict[str, Any] | None = None,
 ) -> tuple[RunRecord, Path]:
     """Create or resume a run and append a session to its record.
 
     Args:
         preprocessing: ``shared`` (the harness pipeline) or ``native`` (the model's own,
             for reproducing published numbers). Part of the run id, so the two never mix.
-        directory: override the run directory (tests); defaults to ``DTB_ROOT/scores/<id>``.
+        directory: override the run directory (tests); defaults to ``scores/<id>`` in the store.
+        session: extra facts for this session's entry (device, namespace, shard).
 
     Returns:
         The record and its directory.
@@ -127,6 +132,7 @@ def start_run(
             "repo_dirty": dirty,
             "host": socket.gethostname(),
             "python": platform.python_version(),
+            **(session or {}),
         }
     )
     record.save(directory)

@@ -3,10 +3,15 @@
 Examples:
     uv run scripts/score.py --model aasist --evalset asvspoof2019_la_eval
     uv run scripts/score.py --model aasist --evalset urdu_csalt --shard 3/8 --device cuda
+    uv run scripts/score.py --smoke --model gend --evalset unidatapro_videos --save-crops 4
 
-Checks contamination first (a contaminated pair is refused unless ``--force``), creates or
-resumes the run (``DTB_ROOT/scores/<run_id>/run.json``), then scores every item not yet
-scored. ``--shard i/n`` scores one stable slice, for SLURM array jobs.
+Refuses a model that can't read the evalset's modality (exit 2), then checks contamination
+(a contaminated pair is refused unless ``--force``), creates or resumes the run
+(``scores/<run_id>/run.json`` in the store), and scores every item not yet scored. Video and
+image items go through the shared face pipeline (``preprocess/faces.py``); audio items are
+cut into windows. ``--shard i/n`` scores one stable slice, for SLURM array jobs.
+``--save-crops K`` keeps up to K face crops per item under the run's ``crops/`` folder, for
+people to look at. ``--smoke`` works in the smoke namespace (``DTB_ROOT/smoke/``).
 """
 
 from __future__ import annotations
@@ -21,13 +26,14 @@ import pandas as pd
 
 from deeptrace_bench import evalset as evalsets
 from deeptrace_bench.eval.contamination import Verdict, check
-from deeptrace_bench.fetch import read_lock
-from deeptrace_bench.models.base import load_detector
-from deeptrace_bench.paths import dataset_dir
+from deeptrace_bench.fetch import locked_hashes
+from deeptrace_bench.models.base import load_detector, resolve_device
+from deeptrace_bench.paths import dataset_dir, namespace, prepare_store, use_namespace
 from deeptrace_bench.preprocess.audio import load_audio, segment
-from deeptrace_bench.registry import Registry
+from deeptrace_bench.preprocess.faces import FaceLoader
+from deeptrace_bench.registry import Registry, accepts
 from deeptrace_bench.runs import config_hash, start_run
-from deeptrace_bench.score import score_items, shard_items
+from deeptrace_bench.score import part_prefix, score_items, shard_items
 
 log = logging.getLogger("score")
 
@@ -44,15 +50,30 @@ def main() -> int:
     parser.add_argument("--model", required=True)
     parser.add_argument("--evalset", required=True)
     parser.add_argument("--shard", default="0/1", help="i/n: score shard i of n")
-    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--device", default="auto", help="auto (cuda, mps, cpu), or a device")
     parser.add_argument("--preprocessing", choices=["shared", "native"], default="shared")
     parser.add_argument("--force", action="store_true", help="score even if contaminated")
+    parser.add_argument("--save-crops", type=int, default=0, metavar="K", help="keep K crops")
+    parser.add_argument("--smoke", action="store_true", help="use the smoke namespace")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    if args.smoke:
+        use_namespace("smoke")
 
     registry = Registry.load()
     model = registry.model(args.model)
     evalset = registry.evalset(args.evalset)
+
+    # Everything that can refuse the pair runs before a run folder is created.
+    if not accepts(model, evalset):
+        log.error(
+            "%s (%s) can't score %s (%s)", model.id, model.modality, evalset.id, evalset.modality
+        )
+        return 2
+    is_audio = evalset.modality.value == "audio"
+    if args.preprocessing == "native" and not is_audio:
+        log.error("native preprocessing for video and image models isn't built yet")
+        return 2
 
     verdict = check(model, evalset, registry)
     for reason in verdict.reasons:
@@ -68,22 +89,32 @@ def main() -> int:
         raise NotImplementedError("item exclusion lists aren't wired up yet")
     index, count = (int(x) for x in args.shard.split("/"))
     items = shard_items(items, index, count)
+    prefix = part_prefix(index, count)
 
+    # The face detector's weights are part of what defines a video or image run.
+    weights = dict(locked_hashes(model.id))
+    if not is_audio:
+        tool = registry.face_detector()
+        weights.update({f"{tool.id}/{k}": v for k, v in locked_hashes(tool.id).items()})
+
+    prepare_store()
+    device = resolve_device(args.device)
     record, directory = start_run(
         model_id=model.id,
         evalset_id=evalset.id,
         upstream_commit=model.upstream.commit if model.upstream else None,
-        weights_sha256=read_lock().get(model.id, {}),
+        weights_sha256=weights,
         config_hashes={
             "model": config_hash(model),
             "evalset": config_hash(evalset),
             "eval": config_hash(registry.eval),
         },
         preprocessing=args.preprocessing,
+        session={"device": device, "namespace": namespace(), "shard": args.shard},
     )
     log.info("run %s, shard %d/%d, %d items", record.run_id, index, count, len(items))
 
-    if evalset.modality.value == "audio":
+    if is_audio:
         audio = registry.eval.audio
         loader = partial(
             load_audio_inputs,
@@ -92,11 +123,22 @@ def main() -> int:
         )
         aggregate = audio["aggregation"]
     else:
-        raise NotImplementedError("video scoring waits on preprocess.faces; see docs/evaluation.md")
+        loader = FaceLoader.from_registry(
+            registry,
+            model,
+            save_crops_to=directory / "crops" if args.save_crops else None,
+            save_crops=args.save_crops,
+            part_prefix=prefix,
+        )
+        aggregate = registry.eval.video["aggregation"]
 
     detector = load_detector(model)
-    detector.load(args.device)
-    n = score_items(detector, items, loader, directory, aggregate=aggregate)
+    detector.load(device)
+    try:
+        n = score_items(detector, items, loader, directory, aggregate=aggregate, prefix=prefix)
+    finally:
+        if hasattr(loader, "close"):
+            loader.close()
     log.info("scored %d items into %s", n, directory)
     return 0
 

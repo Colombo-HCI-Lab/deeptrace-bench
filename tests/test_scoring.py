@@ -12,7 +12,7 @@ from deeptrace_bench.preprocess import PreprocessError
 from deeptrace_bench.preprocess.audio import segment
 from deeptrace_bench.registry import Component, EvalsetConfig
 from deeptrace_bench.runs import start_run
-from deeptrace_bench.score import read_scores, score_items, shard_items
+from deeptrace_bench.score import part_prefix, read_scores, score_items, shard_items
 
 from .conftest import make_manifest
 
@@ -85,6 +85,25 @@ def test_scoring_resumes_and_records_failures(registry, tmp_path):
     assert len(scores) == 10 and scores["item_id"].is_unique
     failed = scores.set_index("item_id").loc["toy/7"]
     assert failed["status"] == "too_short" and np.isnan(failed["score"])
+
+
+def test_shards_write_their_own_parts(registry, tmp_path):
+    detector = load_detector(registry.model("dummy"))
+    detector.load("cpu")
+    items = pd.DataFrame({"item_id": [f"toy/{i}" for i in range(10)]})
+
+    def loader(row: pd.Series) -> np.ndarray:
+        return np.zeros((1, 4), dtype=np.float32)
+
+    # Two shards starting together on an empty run folder must not overwrite each other.
+    for index in range(2):
+        shard = shard_items(items, index, 2)
+        score_items(detector, shard, loader, tmp_path, prefix=part_prefix(index, 2))
+    assert sorted(p.name for p in tmp_path.glob("part-*.parquet")) == [
+        "part-000of002-00000.parquet",
+        "part-001of002-00000.parquet",
+    ]
+    assert len(read_scores(tmp_path)) == 10
 
 
 def test_shards_partition_the_items():
