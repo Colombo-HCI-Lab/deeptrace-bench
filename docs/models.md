@@ -1,6 +1,6 @@
 # Models
 
-Availability checked against the live repos on 2026-10-03. The source of truth is `configs/models/<id>.yaml`; `uv run scripts/setup_models.py --list` prints the current table.
+Availability checked against the live repos on 2026-10-03, and for every video model again on 2026-10-04 (pinned commits still current, every weight file still public). The source of truth is `configs/models/<id>.yaml`; `uv run scripts/setup_models.py --list` prints the current table, including which adapters are written. Only GenD's is, as of 2026-10-04.
 
 | Model           | Modality    | Status   | Wave | Weights                      | Trained on (released weights) | Licence         |
 | --------------- | ----------- | -------- | ---- | ---------------------------- | ----------------------------- | --------------- |
@@ -38,7 +38,7 @@ Expect these breakages on Python 3.12 and torch 2.x: `torch.load` now defaults t
 
 **SBI.** `FFc23.tar` and `FFraw.tar` from Google Drive, about 135 MB each. A plain EfficientNet-B4 on RetinaFace crops at 380 px. Upstream's `src/inference/inference_video.py` scores any video (max over faces, mean over frames), which makes the parity check easy. Install the right `retinaface_pytorch` package for parity (#55, #29).
 
-**GenD.** `yermandy/GenD_CLIP_L_14` on Hugging Face, pinned to revision `891ce01`. Already modern. Needs face crops from upstream `detector.py` (RetinaFace ONNX, alignment at scale 1.3). Trained on FF++ only: the paper's 14 benchmarks, FakeAVCeleb among them, are test sets.
+**GenD.** `yermandy/GenD_CLIP_L_14` on Hugging Face, pinned to revision `891ce01`. Already modern. Trained on FF++ only: the paper's 14 benchmarks, FakeAVCeleb among them, are test sets. **Adapter written 2026-10-04** (`models/gend.py`): it loads upstream's `src/hf/modeling_gend.py` from the pinned checkout and points it at a pinned local copy of its CLIP backbone (`openai/clip-vit-large-patch14` at `32bd642`), which upstream would otherwise fetch unpinned; all ten weight files are hash-pinned. Index 1 of the logits is fake; a video scores the mean of its frames' P(fake). Its face crops come from the shared pipeline, which ports `detector.py`'s SCRFD detector and five-point alignment (see [evaluation.md](evaluation.md)). The detector model, `det_10g.onnx`, is taken from insightface's official v0.7 `buffalo_l` pack (licensed for non-commercial research only) and hashes identical to the third-party mirror upstream downloads. Runs end to end in the smoke test on a laptop (MPS and CPU agree to 2e-6). **Parity with upstream is not checked yet.**
 
 **AASIST, AASIST-L.** Weights committed in the upstream repo. Drop the unused `torchcontrib` import. A user reports inverted outputs with the shipped weights (#17, 2026-08-30), so settle the score direction on ASVspoof 2019 LA eval first.
 
@@ -58,7 +58,4 @@ Expect these breakages on Python 3.12 and torch 2.x: `torch.load` now defaults t
 
 ## Adding a model
 
-1. Add `configs/models/<id>.yaml`: pinned upstream commit, every weight with its source, and every dataset the released weights saw in `training_data` (be thorough; the guard is only as good as this list).
-2. `uv run scripts/setup_models.py <id> --record` to fetch and pin hashes.
-3. Write the adapter (subclass `models.base.Detector`), run the parity check and the score-direction check, then set `adapter:` and a `wave:`.
-4. `uv run pytest` (the registry test checks the config cross-references).
+See [adding_a_model.md](adding_a_model.md): config, pinned weights, adapter, smoke test, then parity and score direction before any result counts.

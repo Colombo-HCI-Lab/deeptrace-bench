@@ -13,17 +13,23 @@ Almost every dataset here is licensed for non-commercial research only, several 
 
 The pre-commit hook (`git config core.hooksPath scripts/hooks`) refuses data, media, archive and weight files, anything over 5 MB, and any CSV or JSON with an `item_id` or `rel_path` column. `evaluate.py --publish` copies only aggregate tables and leaves per-subject tables behind.
 
+Pipeline tests are item-level too: sampled datasets, face crops, smoke reports (which name items and embed crops) all stay in `DTB_ROOT/smoke/`, and `--publish` refuses pipeline-test evalsets and anything in the smoke namespace. Test fixtures use invented file names, since some datasets' file names carry real people's names.
+
 ## Licence clauses that bind us
 
-| Dataset            | Clause                                                                                               |
-| ------------------ | ---------------------------------------------------------------------------------------------------- |
-| DF-Platter         | only research colleagues at the signing institution may use it; no copying beyond backup             |
-| DeePhy             | research and educational use; assume DF-Platter's terms until the licence text is read               |
-| InDeepFake         | no copying, publishing or distributing any part of the dataset or derived data; access revocable     |
-| Deepfake-Eval-2024 | evaluation only: never train or fine-tune on it                                                      |
-| FakeAVCeleb        | non-commercial research and education; the site and the GitHub README describe the terms differently |
-| BanglaFake         | no licence declared: ask the authors before publishing results                                       |
-| most others        | CC BY-NC 4.0: non-commercial, with attribution                                                       |
+| Dataset             | Clause                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------- |
+| DF-Platter          | only research colleagues at the signing institution may use it; no copying beyond backup                |
+| DeePhy              | research and educational use; assume DF-Platter's terms until the licence text is read                  |
+| InDeepFake          | no copying, publishing or distributing any part of the dataset or derived data; access revocable        |
+| Deepfake-Eval-2024  | evaluation only: never train or fine-tune on it                                                         |
+| FakeAVCeleb         | non-commercial research and education; the site and the GitHub README describe the terms differently    |
+| BanglaFake          | no licence declared: ask the authors before publishing results                                          |
+| UniDataPro preview  | CC BY-NC-ND 4.0: non-commercial, and no derivatives may be shared (crops and scores stay in DTB_ROOT)   |
+| Mendeley Roop/Akool | CC BY 4.0 with attribution; the page warns third-party content in the source videos may need permission |
+| most others         | CC BY-NC 4.0: non-commercial, with attribution                                                          |
+
+Models carry licences too. insightface's pretrained models, including the shared face detector (`det_10g.onnx`), are for non-commercial research only; the detection code we port is MIT. SBI is research only, DeepfakeBench CC BY-NC; their code is never copied into the repo.
 
 Publishing aggregate results is allowed for every dataset we've read the terms of, with the required citation.
 

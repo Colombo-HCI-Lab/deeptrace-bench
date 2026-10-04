@@ -34,9 +34,11 @@ uv run scripts/setup_datasets.py indicsynth --languages hi bn ur
 
 MLAAD: accept its terms at <https://huggingface.co/datasets/mueller91/MLAAD> with your Hugging Face account, put `HF_TOKEN` in `.env`, then `uv run scripts/setup_datasets.py mlaad`.
 
+To try a dataset before downloading all of it, `--sample N` fetches N real and N fake items into the smoke namespace (see [adding_a_dataset.md](adding_a_dataset.md)); it needs the dataset's builder to be written.
+
 ## Requests to send
 
-These need a person. Send them early: replies take days to months.
+These need a person. Send them early: replies take days to months. Rechecked 2026-10-04: the FF++, InDeepFake and FakeAVCeleb request forms and both IAB Rubric pages are live. A FakeAVCeleb maintainer wrote (GitHub issue 13, 2024-12-18) that requests missing IRB approval are rejected and complete ones get access within days; other applicants report waiting months. An FF++ issue from 2025-10-05 says its download server was down; it answered again on 2026-10-04, but a download wasn't tested.
 
 | Dataset            | What to do                                                                                                          | Who                                                        |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
@@ -67,10 +69,18 @@ uv run scripts/setup_datasets.py fakeavceleb --from /path/to/FakeAVCeleb_v1.2
 - **DeePhy.** 100 real and 5,040 fake videos (FaceShifter, FaceSwap, FSGAN), 10 attributes per video including gender, age group and skin tone.
 - **InDeepFake.** 389 real and 4,680 fake videos in seven Indian languages; face swaps and TTS plus Wav2Lip. Also on IEEE DataPort (subscription).
 - **Deepfake-Eval-2024.** In the wild, 52 languages, no country field. Evaluation only.
-- **Optional open video set.** A Bangladeshi set on Mendeley Data (480 videos, CC BY 4.0, <https://data.mendeley.com/datasets/pdcp9mjy3z/3>) is useful for testing the video pipeline on non-FF++ faces. Its subjects' ethnicity isn't documented, so don't report results on it.
+## Pipeline-test datasets
+
+Open data that proves the code works, used by the smoke test ([smoke_test.md](smoke_test.md)). Their role is `pipeline_test`: the registry keeps them out of real evalsets, and their numbers are never published or reported. Checked 2026-10-04.
+
+| Dataset               | Modality | Access                                | Licence         | What's in it                                                                   |
+| --------------------- | -------- | ------------------------------------- | --------------- | ------------------------------------------------------------------------------ |
+| `mendeley_roop_akool` | image    | one 4.1 GB zip, sampled by HTTP range | CC BY 4.0       | face-crop frames; 30 real and 450 fake videos; Bangladeshi and Indian subjects |
+| `unidatapro_videos`   | video    | Hugging Face, pinned revision         | CC BY-NC-ND 4.0 | 5 real phone videos and 5 face-swap fakes made from them                       |
+
+- **Mendeley Roop/Akool** (<https://data.mendeley.com/datasets/pdcp9mjy3z/3>, Daffodil International University, collected with ethical approval). Not videos, as earlier notes said: 500 x 500 JPEG face crops. Its zip holds 3,744 real frames and 104,200 fake frames (49,997 `Tech-1`, 54,203 `Tech-2`; the page says 106,948). The page names Roop and Akool but not which is which, so `method` stays `tech_1` / `tech_2`. The crops are so tight that the face detector misses them until the image is padded (see [evaluation.md](evaluation.md)). File names of fakes carry the name of the person swapped in.
+- **UniDataPro deepfake videos** (<https://huggingface.co/datasets/UniDataPro/deepfake-videos-dataset>). The free preview of a commercial set: pairs of a real phone video and a fake made from it with an AI-generated face, by one of three online services. 480p to 1080p, about 68 MB. The only open, licensed source of paired real and fake videos small enough to fetch on the fly.
 
 ## Adding a dataset
 
-1. Add `configs/datasets/<id>.yaml` with access, licence terms, `contains`, and `derived_from` (any corpus its items came from, so the contamination guard can follow it).
-2. Write `src/deeptrace_bench/datasets/<id>.py` against the real files: `build_manifest(root)` returning the schema in `manifest.py`, with group attributes as `g_<attr>` plus `g_<attr>_src`.
-3. `uv run scripts/setup_datasets.py <id> --manifest`, then add an evalset in `configs/evalsets/`.
+See [adding_a_dataset.md](adding_a_dataset.md): config, builder (with `label_from_path`, so it can be sampled), evalset, smoke test.

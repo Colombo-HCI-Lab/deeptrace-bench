@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repo.
 
 The benchmark harness for the Colombo HCI Lab's South Asia deepfake detection project: open video and audio detectors run on South Asian deepfake datasets under one evaluation setup, with results reported per group. It starts with existing datasets and models (reproduce published numbers, zero-shot runs, fine-tuned baselines) and later evaluates the data collected through the sibling repo `deeptrace`. `README.md` has the workflow; `docs/` has models, datasets, evaluation, cluster and data policy.
 
-Scaffolded 2026-10-03: configs, setup scripts, contamination guard, metrics, resumable scoring and tests work; model adapters (`models/*.py` other than `dummy.py`), dataset builders (`datasets/*.py`) and face preprocessing are documented stubs.
+Scaffolded 2026-10-03; runs end to end since 2026-10-04: `scripts/smoke.py` fetches GenD and a few items of two open pipeline-test datasets, detects and aligns faces, scores, evaluates and writes a report under `DTB_ROOT/smoke/reports/`. Written: the GenD adapter, the shared face pipeline (`preprocess/faces.py`, `preprocess/scrfd.py`), dataset sampling (`sample.py`, `remote_zip.py`) and the builders for `mendeley_roop_akool` and `unidatapro_videos`. Still documented stubs: the other adapters and builders, native preprocessing, the shortcut probe. GenD's parity with upstream is not checked yet.
 
 ## Commands
 
@@ -16,11 +16,13 @@ uv run pytest                              # synthetic fixtures only
 uv run ruff check . && uv run ruff format .
 uv run scripts/setup_models.py --list | <ids> [--record] | --wave N
 uv run scripts/setup_datasets.py --list | <ids> [--languages ..] | <id> --from PATH | --manifest
-uv run scripts/score.py --model <id> --evalset <id> [--shard i/n]
-uv run scripts/evaluate.py --model <id> --evalset <id> [--publish]
+uv run scripts/setup_datasets.py <ids> --sample N [--seed S] --manifest   # smoke namespace
+uv run scripts/score.py --model <id> --evalset <id> [--shard i/n] [--smoke] [--save-crops K]
+uv run scripts/evaluate.py --model <id> --evalset <id> [--publish] [--smoke]
+uv run scripts/smoke.py [--model gend] [--sample 2] [--device auto|cpu|mps|cuda] [--keep]
 ```
 
-Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`).
+Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/store_layout.md` maps the tree. `DTB_NAMESPACE=smoke` (set by `--smoke`, `--sample` and `smoke.py`, never in `.env`) moves everything item-level under `DTB_ROOT/smoke/`.
 
 ## Rules
 
@@ -32,6 +34,8 @@ Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`).
 - **One evaluation setup.** `configs/eval/default.yaml` is the only place settings live; it is `proposed` until the team settles decision 5.
 - **Weight hashes** are pinned in `configs/weights.lock.yaml` via `--record` on first fetch, never edited by hand.
 - **Failures are data.** Preprocessing failures get a status and are counted per group, never dropped.
+- **Pipeline tests are never results.** Datasets and evalsets with `role: pipeline_test` only prove the code works; the registry keeps them out of real evalsets and `--publish` refuses them and anything in the smoke namespace. Run `scripts/smoke.py` after any change to the pipeline.
+- **Builders are samplable.** A dataset builder defines `label_from_path` as well as `build_manifest`, and works on a partial tree; test fixtures use invented file names.
 
 ## Conventions
 

@@ -1,6 +1,6 @@
 # Running on Curnagl (or any Linux GPU machine)
 
-The harness targets UNIL's Curnagl cluster but runs on any Linux machine with an NVIDIA GPU and CUDA 12 drivers. Laptops (Apple Silicon) run the tests and small CPU checks only.
+The harness targets UNIL's Curnagl cluster but runs on any Linux machine with an NVIDIA GPU and CUDA 12 drivers. Laptops (Apple Silicon) run the tests and the smoke test ([smoke_test.md](smoke_test.md)), which scores a few items per dataset on the laptop's GPU or CPU.
 
 ## Getting on Curnagl
 
@@ -20,6 +20,8 @@ Jobs run at most 3 days. Ask for one GPU and a realistic `--time`; small, short 
 
 ## Storage layout
 
+The full tree, naming rules and what's safe to delete are in [store_layout.md](store_layout.md). On Curnagl:
+
 ```
 /work/<project>/deeptrace-bench/      DTB_ROOT (no backup; quota set by the project)
 ├── datasets/<id>/                    downloads, or symlinks to copies obtained by hand
@@ -27,8 +29,10 @@ Jobs run at most 3 days. Ask for one GPU and a realistic `--time`; small, short 
 ├── upstream/<repo>-<commit>.tar.gz   archive of every pinned upstream checkout
 ├── manifests/<id>.parquet
 ├── splits/
+├── faces/<dataset>/<detector>__<hash>/  cached face detections
 ├── scores/<run_id>/                  run.json + score parts
 ├── results/<run_id>/                 full evaluation output
+├── smoke/                            pipeline tests (same layout); safe to delete
 └── hf/                               HF_HOME
 $TMPDIR/dtb-cache/                    DTB_CACHE inside jobs: node-local NVMe, wiped after
 ```

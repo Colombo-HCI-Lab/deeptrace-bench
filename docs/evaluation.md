@@ -14,8 +14,16 @@ Every result row carries its pairing.
 ## Preprocessing
 
 - **Audio:** 16 kHz mono, cut into 64,600-sample windows (about 4 s). Clips under 1 s get status `too_short` rather than being tiled; shorter-than-a-window clips are tiled up to one window, as AASIST does. A clip's score is the mean of its window scores.
-- **Video (planned):** one face detector (RetinaFace via ONNX) runs once per dataset over 32 uniformly sampled frames per video and caches boxes and landmarks in the store. Each model then cuts its own crop from the cache (size, margin, alignment and normalisation from its config), because models trained on different crops degrade on the wrong one. A video with too few face frames gets status `no_face`. A clip's score is the mean of its frame scores.
-- **Native mode:** reproducing a paper's numbers uses that model's own preprocessing (`score.py --preprocessing native`). Native and shared runs get different run ids.
+- **Video and images:** one face detector, insightface's SCRFD-10GF (`det_10g.onnx`, the `scrfd_10g` tool; the detector GenD's own `detector.py` runs, which calls it RetinaFace), runs on CPU over 32 uniformly sampled frames per video, keeps the largest face per frame, and caches its box and five landmarks in the store (`faces/<dataset>/<detector>__<hash>/`). An image is a one-frame clip. Each model then cuts its own crop from the cache (size, margin, alignment from its config), because models trained on different crops degrade on the wrong one. GenD aligns the five landmarks to its template at scale 1.3 and keeps the native size. A video with fewer than 8 face frames, or an image with none, gets status `no_face`. A clip's score is the mean of its frame scores. Written 2026-10-04 in `preprocess/faces.py` and `preprocess/scrfd.py`.
+- **Tight face crops:** datasets that ship ready-made face crops (a face filling the image, like the Mendeley frames) defeat the detector, which needs context around a face. An image with no face is tried once more with a black border of half its size on each side (`image_pad_retry`); the cache records which items needed it. Videos are never padded.
+- **Native mode:** reproducing a paper's numbers uses that model's own preprocessing (`score.py --preprocessing native`). Native and shared runs get different run ids. Not built yet for video and image models; `score.py` refuses it.
+
+Open choices for decision 5, all in `configs/eval/default.yaml`:
+
+- The detection threshold: 0.4 is `detector.py`'s default; GenD's README preprocesses FF++ at 0.1.
+- Frame sampling: uniform 32 frames (ours) against `detector.py`'s "at least 32 frames with a face, spreading out from the middle".
+- Native crop size against a fixed size per model, and the padding retry for tight crops.
+- Video decoding: OpenCV applies the rotation stored in phone videos; PyAV, which GenD's preprocessing uses, doesn't. Settle this at parity time; decoding is one function (`read_video_frames`).
 
 ## Metrics
 
