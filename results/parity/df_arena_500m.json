@@ -1,0 +1,31 @@
+{
+  "model": "df_arena_500m",
+  "checked_utc": "2026-10-04T23:36:06+00:00",
+  "evalset": "urdu_csalt",
+  "namespace": "smoke",
+  "items": 200,
+  "n": 521,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "hf",
+    "repo": "Speech-Arena-2025/DF_Arena_500M_V_1",
+    "commit": "8258fa8e74ff9b8ad20d4c939c1a7f694a6e4080"
+  },
+  "weights_sha256": {
+    "pytorch_model.bin": "ebd7662047f3b33a6a0fcb9d205bbdcea07220bf42853ae57c6cf4d8e40f66a2",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0",
+    "transformers": "4.56.2"
+  },
+  "reference": "the model card's pipeline with trust_remote_code at the pinned revision"
+}

@@ -1,0 +1,29 @@
+{
+  "model": "aasist_l",
+  "checked_utc": "2026-10-04T23:20:33+00:00",
+  "evalset": "urdu_csalt",
+  "namespace": "smoke",
+  "items": 200,
+  "n": 521,
+  "max_abs_diff": 3.2782554626464844e-06,
+  "mean_abs_diff": 1.397392767948061e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "clovaai/aasist",
+    "commit": "a04c9863f63d44471dde8a6abcb3b082b07cd1d1"
+  },
+  "weights_sha256": {
+    "AASIST-L.pth": "814331d088032bb4c3fa61cc014789eadeed464209dd094ab3a2dd6ffbdce27a"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference": "upstream models/AASIST.py and the original .pth, built as main.py does"
+}
