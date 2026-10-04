@@ -1,0 +1,9 @@
+id: in_the_wild
+modality: audio
+role: reproduction
+pairing: same_corpus
+components:
+  - dataset: in_the_wild
+group_by: []
+status: ready
+notes: Reproduce published In-the-Wild EERs (DF Arena reports its own) and settle score direction for models the guard refuses on asvspoof2019_la_eval. Speakers are public figures, so no per-speaker tables.

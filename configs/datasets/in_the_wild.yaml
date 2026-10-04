@@ -1,0 +1,20 @@
+id: in_the_wild
+name: In-the-Wild (Müller et al. 2022)
+modality: audio
+role: reproduction
+status: open
+access:
+  kind: url
+  page: https://huggingface.co/datasets/mueller91/In-The-Wild
+  urls:
+    release_in_the_wild.zip: https://huggingface.co/datasets/mueller91/In-The-Wild/resolve/eee168f92c367f8c82ff2cf42b6f61e362fd6211/release_in_the_wild.zip
+  sha256:
+    release_in_the_wild.zip: 46665f30a6758b45642c659c7e0e80da2ba3d121b064716824a56a010ddf9e1a
+licence: CC BY-SA 4.0
+licence_terms:
+  - Attribution and share-alike; the clips show public figures, so item-level data stays in the store.
+contains: [real, fake]
+languages: [en]
+size_gb: 8.2
+builder: deeptrace_bench.datasets.in_the_wild:build_manifest
+notes: 31,779 clips (19,963 bona fide, 11,816 spoof) of 54 public figures, labels in meta.csv; checked 2026-10-05. The zip is read from the Hugging Face repo at a pinned revision, by range requests when sampling. Not South Asian; it is where audio models trained on ASVspoof 2019 report generalisation, so it anchors reproduction for models that saw ASVspoof 2019 eval.

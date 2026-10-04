@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from deeptrace_bench.datasets import mendeley_roop_akool, unidatapro_videos, urdu_csalt
+from deeptrace_bench.datasets import (
+    in_the_wild,
+    mendeley_roop_akool,
+    unidatapro_videos,
+    urdu_csalt,
+)
 from deeptrace_bench.manifest import validate_manifest
 
 
@@ -108,3 +113,24 @@ def test_urdu_manifest(tmp_path):
     assert by_path.loc["Spoofed_TTS/Speaker_01/7.wav", "method"] == "vits"
     assert by_path.loc["Spoofed_Tacotron/Speaker_02/9.wav", "method"] == "tacotron"
     assert by_path.loc["Bonafide/Speaker_01/Part 2/7.wav", "subject_id"] == "Speaker_01"
+
+
+_ITW_META = "file,speaker,label\n1.wav,Speaker A,bona-fide\n2.wav,Speaker A,spoof\n3.wav,Speaker B,spoof\n"
+
+
+def test_in_the_wild_labels_come_from_its_metadata():
+    labels = in_the_wild.labels_from_metadata({in_the_wild.META: _ITW_META.encode()})
+    assert labels == {
+        "release_in_the_wild/1.wav": "real",
+        "release_in_the_wild/2.wav": "fake",
+        "release_in_the_wild/3.wav": "fake",
+    }
+
+
+def test_in_the_wild_manifest_covers_only_files_present(tmp_path):
+    _tree(tmp_path, ["release_in_the_wild/1.wav", "release_in_the_wild/3.wav", ".sample.json"])
+    (tmp_path / in_the_wild.META).write_text(_ITW_META)
+    df = in_the_wild.build_manifest(tmp_path)
+    validate_manifest(df, "in_the_wild")
+    assert sorted(df["label"]) == ["fake", "real"]
+    assert set(df["subject_id"]) == {"Speaker A", "Speaker B"}
