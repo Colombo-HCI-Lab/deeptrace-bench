@@ -7,6 +7,7 @@ access:
   kind: hf_gated
   page: https://huggingface.co/datasets/mueller91/MLAAD
   repo: mueller91/MLAAD
+  revision: 30c3dec763fa4803f11c2df1557d3b0828395366
   allow_patterns: [README.md]
   language_patterns:
     hi: [fake/hi/*]
@@ -26,4 +27,4 @@ languages: [hi, bn, ta, ur, si, kn, mr, ml]
 size_gb: 9.5
 derived_from: [m_ailabs]
 builder: deeptrace_bench.datasets.mlaad:build_manifest
-notes: Fake only, 1,000 clips per language and generator. Hindi has 9 generators; Sinhala has 1,000 Edge-TTS clips, the only Sinhala deepfake audio found. M-AILABS has no South Asian languages, so real speech must come from another corpus (cross-corpus).
+notes: Fake only, 1,000 clips per language and generator. Hindi has 9 generators; Sinhala has 1,000 Edge-TTS clips, the only Sinhala deepfake audio found. M-AILABS has no South Asian languages, so real speech must come from another corpus (cross-corpus), openslr_sinhala for Sinhala. Layout checked 2026-10-05.

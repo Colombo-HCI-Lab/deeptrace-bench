@@ -1,0 +1,20 @@
+id: openslr_sinhala
+name: Large Sinhala ASR training data (OpenSLR SLR52)
+modality: audio
+role: real_reference
+status: open
+access:
+  kind: url
+  page: https://openslr.org/52/
+  urls:
+    asr_sinhala_0.zip: https://www.openslr.org/resources/52/asr_sinhala_0.zip
+  sha256:
+    asr_sinhala_0.zip: 41bcd4cf6edde39e49bf8ca6b54c32e1403609759ff9edea2a2696ef7aa8fff5
+licence: CC BY-SA 4.0
+licence_terms:
+  - Attribution and share-alike.
+contains: [real]
+languages: [si]
+size_gb: 0.9
+builder: deeptrace_bench.datasets.openslr_sinhala:build_manifest
+notes: Crowd-sourced Sinhala read speech from Google, manually checked. Only the first of 16 zips (11,550 FLAC clips); the whole set is 185k utterances in 14.6 GB, far more than MLAAD's 1,000 Sinhala fakes need. Speaker ids are anonymised; no gender. Checked 2026-10-05.

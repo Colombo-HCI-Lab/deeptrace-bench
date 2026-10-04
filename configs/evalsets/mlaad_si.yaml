@@ -6,7 +6,9 @@ components:
   - dataset: mlaad
     filter: {language: si}
     label: fake
+  - dataset: openslr_sinhala
+    label: real
 match_on: [language]
 group_by: [method]
-status: needs_real_source
-notes: MLAAD is fake only and its intended real counterpart (M-AILABS) has no South Asian languages. Add a real si source as a second component, run the shortcut probe, and keep the results out of headline numbers.
+status: ready
+notes: MLAAD is fake only and its intended real counterpart (M-AILABS) has no South Asian languages, so real Sinhala speech comes from OpenSLR SLR52 (crowd-sourced read speech against Edge-TTS). Cross-corpus by construction, so a detector can score well by telling the recording setups apart. Run the shortcut probe and keep the results out of headline numbers.

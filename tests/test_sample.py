@@ -155,3 +155,57 @@ def test_labels_can_come_from_a_metadata_file(monkeypatch, tmp_path):
     assert sorted(record["chosen"])[0] == "clips/1.wav"
     # The builder reads the same file when it builds the manifest of the sample.
     assert (dest / "meta.csv").exists() and record["metadata"] == ["meta.csv"]
+
+
+def test_hugging_face_listing_covers_only_the_patterns(monkeypatch):
+    import huggingface_hub
+    from huggingface_hub.hf_api import RepoFile, RepoFolder
+
+    from deeptrace_bench.sample import _HfSource
+
+    listed = []
+
+    def fake_tree(repo_id, path_in_repo=None, *, recursive=False, revision=None, **kw):
+        listed.append(path_in_repo)
+        return [
+            RepoFolder(path=f"{path_in_repo}/gen", oid="1"),
+            RepoFile(path=f"{path_in_repo}/gen/1.wav", size=1, oid="2"),
+        ]
+
+    monkeypatch.setattr(huggingface_hub, "list_repo_tree", fake_tree)
+    config = _config("dtb_unused:build_manifest", ["fake"]).model_copy(
+        update={
+            "access": DatasetConfig.model_fields["access"].annotation(
+                kind="hf",
+                repo="org/big",
+                allow_patterns=["README.md"],
+                language_patterns={"si": ["fake/si/*"], "hi": ["fake/hi/*"]},
+            )
+        }
+    )
+    files = _HfSource(config, ["si"]).candidates()
+    # One listing of the Sinhala folder, not of the whole repo; plain names need no listing.
+    assert listed == ["fake/si"]
+    assert files == ["README.md", "fake/si/gen/1.wav"]
+
+
+def test_a_gated_download_says_what_to_do(monkeypatch, tmp_path):
+    import huggingface_hub
+    from huggingface_hub.errors import GatedRepoError
+
+    from deeptrace_bench.fetch import ManualStepRequiredError
+    from deeptrace_bench.sample import _HfSource
+
+    def refuse(*args, **kwargs):
+        raise GatedRepoError("Cannot access gated repo")
+
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", refuse)
+    config = _config("dtb_unused:build_manifest", ["fake"]).model_copy(
+        update={
+            "access": DatasetConfig.model_fields["access"].annotation(
+                kind="hf_gated", repo="org/gated", page="https://example.org/gated"
+            )
+        }
+    )
+    with pytest.raises(ManualStepRequiredError, match="accept its terms"):
+        _HfSource(config, None).materialize(["fake/1.wav"], tmp_path)

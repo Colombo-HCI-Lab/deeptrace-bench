@@ -159,34 +159,82 @@ class _HfSource(_Source):
     def candidates(self) -> list[str]:
         import fnmatch
 
-        from huggingface_hub import list_repo_files
         from huggingface_hub.errors import GatedRepoError
 
-        access = self.config.access
         try:
-            files = list_repo_files(access.repo, repo_type="dataset", revision=access.revision)
+            files = self._list()
         except GatedRepoError as exc:
             raise gated_error(self.config) from exc
         if not self.patterns:
             return files
         return [f for f in files if any(fnmatch.fnmatch(f, p) for p in self.patterns)]
 
-    def read(self, name: str) -> bytes:
-        from huggingface_hub import hf_hub_download
+    def _list(self) -> list[str]:
+        """The repo's files, listing only the folders the patterns can match.
+
+        MLAAD has well over 100k files; listing all of them to sample one language takes
+        many minutes, while listing ``fake/si`` takes seconds. A pattern without wildcards
+        names one file and needs no listing.
+        """
+        import huggingface_hub
+        from huggingface_hub.hf_api import RepoFile
 
         access = self.config.access
-        path = hf_hub_download(access.repo, name, repo_type="dataset", revision=access.revision)
-        return Path(path).read_bytes()
+        prefixes = [_literal_prefix(p) for p in self.patterns]
+        if not self.patterns or "" in prefixes:
+            return huggingface_hub.list_repo_files(
+                access.repo, repo_type="dataset", revision=access.revision
+            )
+        files = [p for p in self.patterns if not _has_wildcard(p)]
+        globs = zip(self.patterns, prefixes, strict=True)
+        for folder in sorted({prefix for pattern, prefix in globs if _has_wildcard(pattern)}):
+            tree = huggingface_hub.list_repo_tree(
+                access.repo,
+                path_in_repo=folder,
+                recursive=True,
+                revision=access.revision,
+                repo_type="dataset",
+            )
+            files += [entry.path for entry in tree if isinstance(entry, RepoFile)]
+        return files
+
+    def _download(self, name: str) -> Path:
+        import huggingface_hub
+        from huggingface_hub.errors import GatedRepoError
+
+        access = self.config.access
+        try:
+            path = huggingface_hub.hf_hub_download(
+                access.repo, name, repo_type="dataset", revision=access.revision
+            )
+        except GatedRepoError as exc:
+            raise gated_error(self.config) from exc
+        return Path(path)
+
+    def read(self, name: str) -> bytes:
+        return self._download(name).read_bytes()
 
     def materialize(self, chosen: list[str], dest: Path) -> None:
-        from huggingface_hub import hf_hub_download
-
-        access = self.config.access
         for name in chosen:
             target = ensure_inside(dest, dest / name)
             target.parent.mkdir(parents=True, exist_ok=True)
-            path = hf_hub_download(access.repo, name, repo_type="dataset", revision=access.revision)
-            shutil.copyfile(path, target)
+            shutil.copyfile(self._download(name), target)
+
+
+def _has_wildcard(pattern: str) -> bool:
+    return any(c in pattern for c in "*?[")
+
+
+def _literal_prefix(pattern: str) -> str:
+    """The folder a glob pattern stays inside (``fake/si/*`` -> ``fake/si``)."""
+    if not _has_wildcard(pattern):
+        return pattern.rpartition("/")[0] if "/" in pattern else pattern
+    parts = []
+    for part in pattern.split("/"):
+        if _has_wildcard(part):
+            break
+        parts.append(part)
+    return "/".join(parts)
 
 
 class _ZipSource(_Source):

@@ -8,6 +8,8 @@ from deeptrace_bench.datasets import (
     banglafake,
     in_the_wild,
     mendeley_roop_akool,
+    mlaad,
+    openslr_sinhala,
     unidatapro_videos,
     urdu_csalt,
 )
@@ -175,3 +177,50 @@ def test_banglafake_manifest(tmp_path):
     mozilla = df[df["g_subcorpus"] == "mozilla"]
     assert set(mozilla["subject_id"]) == {"mozilla_s2"}
     assert df.loc[df["label"] == "fake", "method"].eq("vits").all()
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("fake/si/Edge-TTS/story_01_f000001.wav", "fake"),
+        ("fake/hi/tts_models_hi_x/story_02_f000002.wav", "fake"),
+        ("fake/si/Edge-TTS/meta.csv", None),
+        ("README.md", None),
+    ],
+)
+def test_mlaad_labels(path, label):
+    assert mlaad.label_from_path(path) == label
+
+
+def test_mlaad_manifest(tmp_path):
+    _tree(
+        tmp_path,
+        [
+            "fake/si/Edge-TTS/story_01_f000001.wav",
+            "fake/hi/tts_models_hi_x/story_02_f000002.wav",
+            "fake/si/Edge-TTS/meta.csv",
+        ],
+    )
+    df = mlaad.build_manifest(tmp_path)
+    validate_manifest(df, "mlaad")
+    assert set(df["label"]) == {"fake"}
+    assert dict(zip(df["language"], df["method"], strict=True)) == {
+        "si": "edge-tts",
+        "hi": "tts_models_hi_x",
+    }
+
+
+def test_openslr_sinhala_manifest(tmp_path):
+    _tree(
+        tmp_path,
+        ["asr_sinhala/data/00/00aa.flac", "asr_sinhala/data/0b/0bcd.flac", "asr_sinhala/LICENSE"],
+    )
+    (tmp_path / "asr_sinhala/utt_spk_text.tsv").write_text(
+        '00aa\tspk1\t"opens a quote\n0bcd\tspk2\ttext\n'
+    )
+    assert openslr_sinhala.label_from_path("asr_sinhala/data/00/00aa.flac") == "real"
+    assert openslr_sinhala.label_from_path("asr_sinhala/LICENSE") is None
+    df = openslr_sinhala.build_manifest(tmp_path)
+    validate_manifest(df, "openslr_sinhala")
+    assert set(df["label"]) == {"real"} and set(df["language"]) == {"si"}
+    assert set(df["subject_id"]) == {"spk1", "spk2"}
