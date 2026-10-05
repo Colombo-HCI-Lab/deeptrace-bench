@@ -25,10 +25,10 @@ This clones the upstream repo at its commit into `third_party/` (git-ignored), a
 
 Subclass `deeptrace_bench.models.base.Detector` in `src/deeptrace_bench/models/<module>.py` and set `adapter:` in the config:
 
-- `convert_checkpoint()`: turn a pickled download into `model.safetensors` once, with `self.save_converted(state, source)` (it unwraps `{"state_dict": ...}`, strips `module.` and records the source file's hash). Return early when `self.converted_is_current(source)`. Models whose weights are already safetensors (GenD) skip this.
+- `convert_checkpoint()`: turn a pickled download into `model.safetensors` once, with `self.save_converted(state, source)` (it unwraps `{"state_dict": ...}`, strips `module.` and records the source file's hash). Return early when `self.converted_is_current(source)`. Models whose weights are already safetensors (GenD) skip this. A Hub file called `model.safetensors` needs another local `name` in the config, or the conversion would overwrite it (`save_converted` refuses).
 - `load(device)`: build the network and load the weights; `self.load_converted(network)` loads with every key matching and refuses a conversion made from another download. Use `resolve_device` so `auto` works.
-- Upstream code comes from the checkout (`self.upstream_dir`), through `models/_upstream.py`: `load_module` for one file (registered in `sys.modules` under a fixed name, as transformers needs for GenD), `load_package` for a folder of files that import each other relatively (DF Arena), and `scoped_modules` for stand-ins while importing a file whose imports drag in a whole framework (DeepfakeBench: its training losses, metrics and tensorboard). Never copy code from repos without an MIT-style licence; compatibility fixes go in `patches/<repo>/`.
-- `score(inputs)`: P(fake) per window or frame, higher is more fake. Face models get a list of RGB uint8 crops (sizes may differ); audio models get an array of windows. Batch inside the adapter; the harness averages the scores into one per item.
+- Upstream code comes from the checkout (`self.upstream_dir`), through `models/_upstream.py`: `load_module` for one file (registered in `sys.modules` under a fixed name, as transformers needs for GenD), `load_package` for a folder of files that import each other relatively (DF Arena), and `scoped_modules` for stand-ins while importing a file whose imports drag in a whole framework (DeepfakeBench: its training losses, metrics and tensorboard). For fairseq wav2vec 2.0 and XLS-R front ends, `models/_fairseq.py` gives stand-in `fairseq` modules backed by transformers and renames checkpoint keys (`fairseq_to_hf`); for mamba-ssm, `models/_mamba.py` gives pure-PyTorch modules with the same names. Never copy code from repos without an MIT-style licence; compatibility fixes go in `patches/<repo>/`.
+- `score(inputs)`: P(fake) per window or frame, higher is more fake. Face models get a list of RGB uint8 crops (sizes may differ); audio models get an array of windows; audio-visual models (`modality: audio_video`) a dict of face crops, audio and frame counts; lip models (`input.inputs: mouths`) an array of grayscale mouth crops. A model can raise `PreprocessError` (say `too_short`) when its inputs can't make one window. Batch inside the adapter; the harness averages the scores into one per item.
 - Keep heavy imports inside `load` and `score`, so the registry test can import every adapter cheaply.
 
 ## 4. Prove it runs
@@ -56,7 +56,8 @@ Audio models have no pipeline-test set, so their smoke test runs on a sample of 
   ```bash
   uv venv --python 3.9 $DTB_ROOT/parity/envs/dfb
   uv pip install --python $DTB_ROOT/parity/envs/dfb/bin/python torch==1.13.1 torchvision==0.14.1 \
-    "numpy<1.24" opencv-python-headless==4.6.0.66 efficientnet-pytorch==0.7.1 pyyaml "scikit-learn<1.3"
+    "numpy<1.24" opencv-python-headless==4.6.0.66 efficientnet-pytorch==0.7.1 pyyaml "scikit-learn<1.3" \
+    timm==0.6.13   # RECCE's encoder; install it in the same command, or uv upgrades torch
   ```
 
 - **Score direction**: on the reproduction evalset (FF++ test, ASVspoof 2019 LA eval, or In-the-Wild for models the guard refuses on ASVspoof 2019), AUC must come out above 0.5. An inverted logit flips every result silently. A seeded sample is enough for the direction (`setup_datasets.py <id> --sample 300 --manifest`, then `score.py --smoke` and `evaluate.py --smoke`); the full set reproduces the published number.

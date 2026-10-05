@@ -28,8 +28,9 @@ Earlier smoke faces, scores and results are deleted first, so a fixed bug can't 
 | --------------------- | -------- | -------------------------------------- | ------------------------------------------------------------------ |
 | `mendeley_roop_akool` | image    | face-crop frames, Bangladeshi/Indian   | the image path, the padded detection retry, remote-zip sampling    |
 | `unidatapro_videos`   | video    | 5 real phone videos, 5 face-swap fakes | video decoding, frame sampling, frame-score averaging, HF sampling |
+| `unidatapro_av`       | audio-video | the same ten videos, with sound     | the audio-visual path (frames at a fixed rate plus the audio track) |
 
-Both are `role: pipeline_test`: the registry won't let them into a real evalset, and `evaluate.py --publish` refuses them. See [datasets.md](datasets.md) for their sources and licences.
+All three are `role: pipeline_test`; a video model runs only `unidatapro_videos` of the two UniDataPro evalsets, and a model that reads frame runs (LipForensics) skips the image set: the registry won't let them into a real evalset, and `evaluate.py --publish` refuses them. See [datasets.md](datasets.md) for their sources and licences.
 
 No open audio set is a pipeline test, so an audio model smoke-tests on two real and two fake clips of `urdu_csalt` by default (`AUDIO_FALLBACK` in `smoke.py`): `uv run scripts/smoke.py --model aasist`. Any other evalset works with `--evalsets`, e.g. `--evalsets in_the_wild banglafake`. It is still the smoke namespace: nothing there can be published.
 

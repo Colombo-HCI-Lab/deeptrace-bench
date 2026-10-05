@@ -4,7 +4,7 @@ Benchmark harness for deepfake detection in South Asia. It runs open video and a
 
 It starts with existing datasets and models: reproduce each model's published numbers, test it zero-shot on South Asian data, then fine-tune baselines. Later it evaluates the data collected through [deeptrace](https://github.com/Colombo-HCI-Lab/deeptrace), and becomes the benchmark released with that dataset.
 
-**Status (2026-10-05):** ten adapters are written: GenD; AASIST and AASIST-L; DF Arena 500M and 1B; and Xception, EfficientNet-B4, UCF, F3Net and SPSL through one DeepfakeBench adapter. Every one but GenD passes its parity check against upstream (`results/parity/`), and the audio models' score direction is settled. Builders are written for the open audio sets (Urdu CSALT, BanglaFake, MLAAD, ASVspoof 2019 LA, In-the-Wild, OpenSLR Sinhala) and for MAVOS-DD's Hindi videos, the only South Asian video available without an institutional request. One command (`scripts/smoke.py`) proves any model end to end on a few items. The evaluation setup is proposed, not yet settled.
+**Status (2026-10-05):** 25 adapters are written, and every one with weights (24; Effort's wait on Google Drive's quota) passes the pipeline check: 195 model and evalset pairs, two real and two fake items each, on CUDA. Video: GenD (CLIP and Perception Encoder backbones), SBI, LipForensics, and Xception, EfficientNet-B4, UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD and Effort through one DeepfakeBench adapter (Effort's weights wait on Google Drive's download quota). Audio: AASIST, AASIST-L, AASIST3, XLS-R + AASIST, XLS-R + SLS, XLSR-Mamba (the last three without fairseq or mamba-ssm), AntiDeepfake MMS-300M and wav2vec 2.0 small, and DF Arena 500M and 1B. Audio-visual: HAVIC. Thirteen pass their parity check against upstream (`results/parity/`): AASIST, AASIST-L, both DF Arena models and the nine DeepfakeBench detectors; the rest are not parity-checked yet. Builders cover the open South Asian sets (Urdu CSALT, BanglaFake, BD-GRF6, the Mendeley Bangla voices, the IndicTTS challenge set in 16 Indian languages with Nepali, IndicSynth with its real side IndicSUPERB, SpeechFake's Hindi, Bengali, Tamil, Marathi and Malayalam, MLAAD, OpenSLR Sinhala, MAVOS-DD Hindi), HiDF videos with per-face race labels, and the reproduction sets ASVspoof 2019 LA and In-the-Wild. One command (`scripts/smoke.py`) proves any model end to end on a few items. The evaluation setup is proposed, not yet settled.
 
 ## Quickstart
 
@@ -42,17 +42,17 @@ On the cluster the same steps run as SLURM jobs from `slurm/`. See [docs/cluster
 
 ## What's in scope
 
-| Wave       | Video                                | Audio                            |
-| ---------- | ------------------------------------ | -------------------------------- |
-| 1          | Xception, EfficientNet-B4, SBI, GenD | AASIST, AASIST-L, XLS-R + AASIST |
-| 2          | Effort, HAVIC, LipForensics          |                                  |
-| added, no wave yet | UCF, F3Net, SPSL             | DF Arena 500M, DF Arena 1B       |
+| Wave               | Video                                                                 | Audio                                                                  | Audio-visual |
+| ------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------ |
+| 1                  | Xception, EfficientNet-B4, SBI, GenD                                  | AASIST, AASIST-L, XLS-R + AASIST                                       |              |
+| 2                  | Effort, LipForensics                                                  |                                                                        | HAVIC        |
+| added, no wave yet | UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD, GenD (PE-L)                  | DF Arena 500M and 1B, XLS-R + SLS, XLSR-Mamba, AntiDeepfake (2), AASIST3 |              |
 
-| Data available now                                                                                                                                  | Data on request                                                                                                    |
-| --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Urdu (CSALT), BanglaFake, IndicSynth + IndicSUPERB, MLAAD (accept terms), MAVOS-DD Hindi (accept terms), OpenSLR Sinhala, ASVspoof 2019 LA, In-the-Wild | FF++, Celeb-DF v2, FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, Deepfake-Eval-2024, Casual Conversations v2 |
+| Data available now                                                                                                                                                                                                  | Accept terms first                                    | Data on request                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Urdu (CSALT), BanglaFake, BD-GRF6, Bangla voices (Mendeley), IndicTTS challenge, IndicSynth + IndicSUPERB, SpeechFake, OpenSLR Sinhala, HiDF, ASVspoof 2019 LA, In-the-Wild                                        | MLAAD, MAVOS-DD Hindi, Svarah                          | FF++, Celeb-DF v2, FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, Deepfake-Eval-2024, Casual Conversations v2, IndieFake, SEA-Spoof |
 
-MAVOS-DD's Hindi subset is the only South Asian video available without an institutional request (accept its terms on Hugging Face). Two open sets, Mendeley Roop/Akool frames and the UniDataPro video preview, serve as pipeline tests only: they prove the code works and are never reported. Details, access routes and licence terms: [docs/models.md](docs/models.md), [docs/datasets.md](docs/datasets.md).
+MAVOS-DD's Hindi subset is the only South Asian video available without an institutional request (accept its terms on Hugging Face). Two open sets, Mendeley Roop/Akool frames and the UniDataPro video preview (with its audio, for the audio-visual path), serve as pipeline tests only: they prove the code works and are never reported. Details, access routes and licence terms: [docs/models.md](docs/models.md), [docs/datasets.md](docs/datasets.md).
 
 ## Layout
 
@@ -76,8 +76,10 @@ src/deeptrace_bench/
   datasets/      one manifest builder per dataset
   splits.py      identity-safe fine-tuning splits
   evalset.py     evalset to item table
-  preprocess/    audio windows; face detection (SCRFD), alignment and crops
-  models/        detector adapters behind one interface; _upstream.py imports upstream code
+  preprocess/    audio windows; face detection (SCRFD), alignment and crops; audio-visual
+                 inputs; mouth crops from FAN landmarks
+  models/        detector adapters behind one interface; _upstream.py imports upstream code,
+                 _fairseq.py and _mamba.py stand in for fairseq and mamba-ssm
   parity.py      adapter-versus-upstream checks
   score.py       resumable, sharded scoring
   runs.py        run records (provenance)
