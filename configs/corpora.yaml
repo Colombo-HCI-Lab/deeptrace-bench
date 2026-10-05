@@ -55,3 +55,53 @@
 - id: genimage
   name: GenImage
   note: Effort's AI-image checkpoint, not the face checkpoint we use.
+# AntiDeepfake's post-training data (checked on its model cards, 2026-10-05). The cards
+# list every corpus the 74k hours drew on; most are English or Chinese.
+- id: aishell3
+  name: AISHELL-3
+- id: asvspoof2021
+  name: ASVspoof 2021 (LA and DF)
+- id: cfad
+  name: CFAD (Chinese fake audio detection)
+- id: cnceleb2
+  name: CN-Celeb2
+- id: codecfake_wu
+  name: CodecFake (Wu et al., codec-resynthesised English)
+  note: Not the same corpus as `codecfake` (Codecfake, English and Chinese).
+- id: cvoicefake
+  name: CVoiceFake
+- id: decro
+  name: DECRO
+- id: diffuse_or_confuse
+  name: Diffuse or Confuse
+- id: diffssd
+  name: DiffSSD
+- id: dsd
+  name: DSD
+- id: fleurs
+  name: FLEURS (102 languages)
+  note: Read Wikipedia sentences; covers Hindi, Bengali, Urdu, Tamil, Telugu, Nepali and more, but not Sinhala.
+- id: fleurs_r
+  name: FLEURS-R (FLEURS resynthesised)
+- id: habla
+  name: HABLA
+- id: libritts
+  name: LibriTTS
+- id: libritts_r
+  name: LibriTTS-R
+- id: libritts_vocoded
+  name: LibriTTS re-vocoded
+- id: ljspeech
+  name: LJSpeech
+- id: voicemos
+  name: VoiceMOS challenge data
+- id: voxceleb2_vocoded
+  name: VoxCeleb2 re-vocoded
+- id: wavefake
+  name: WaveFake
+- id: mms_lab
+  name: MMS-lab (read New Testament recordings, 1,107 languages)
+  note: Part of MMS pretraining, with MLS, Common Voice, VoxLingua107, BABEL and VoxPopuli.
+- id: librispeech
+  name: LibriSpeech 960 h
+  note: wav2vec 2.0 base pretraining.

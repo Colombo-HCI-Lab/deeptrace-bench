@@ -1,0 +1,59 @@
+id: antideepfake_mms_300m
+name: AntiDeepfake MMS-300M
+modality: audio
+status: workable
+licence: CC BY-NC-SA 4.0 (checkpoint); code BSD-3
+paper: Ge et al., Post-training for Deepfake Speech Detection, 2025 (arXiv 2506.21090)
+upstream:
+  repo: nii-yamagishilab/AntiDeepfake
+  commit: 0dea622bde8f064c8ee5a557f2598643123fc6b6
+weights:
+  - name: mms-300m-anti-deepfake.safetensors
+    kind: hf
+    repo: nii-yamagishilab/mms-300m-anti-deepfake
+    filename: model.safetensors
+    revision: 7928e119e09f616b2ce698892e00ca22dbaa40bf
+    size_bytes: 1269622944
+training_data:
+  # MMS pretraining
+  - {dataset: mms_lab, level: pretrain}
+  - {dataset: mls, level: pretrain}
+  - {dataset: commonvoice, level: pretrain}
+  - {dataset: voxlingua107, level: pretrain}
+  - {dataset: babel, level: pretrain}
+  - {dataset: voxpopuli, level: pretrain}
+  # AntiDeepfake post-training (the card's training set table)
+  - {dataset: aishell3, level: train}
+  - {dataset: asvspoof2019_la, level: train, note: "the card's 11.85 h of bona fide is about all three partitions, so every partition counts as seen"}
+  - {dataset: asvspoof2021, level: train}
+  - {dataset: asvspoof5, level: train}
+  - {dataset: cfad, level: train}
+  - {dataset: cnceleb2, level: train}
+  - {dataset: codecfake, level: train}
+  - {dataset: codecfake_wu, level: train}
+  - {dataset: cvoicefake, level: train}
+  - {dataset: decro, level: train}
+  - {dataset: dfadd, level: train}
+  - {dataset: diffuse_or_confuse, level: train}
+  - {dataset: diffssd, level: train}
+  - {dataset: dsd, level: train}
+  - {dataset: fleurs, level: train}
+  - {dataset: fleurs_r, level: train}
+  - {dataset: habla, level: train}
+  - {dataset: libritts, level: train}
+  - {dataset: libritts_r, level: train}
+  - {dataset: libritts_vocoded, level: train}
+  - {dataset: ljspeech, level: train}
+  - {dataset: mlaad, level: train}
+  - {dataset: spoofceleb, level: train}
+  - {dataset: voicemos, level: train}
+  - {dataset: voxceleb2, level: train}
+  - {dataset: voxceleb2_vocoded, level: train}
+  - {dataset: wavefake, level: train}
+adapter: deeptrace_bench.models.antideepfake:AntiDeepfakeDetector
+input:
+  variant: mms_300m               # W2V_configs.global_configs key in the checkout
+  sample_rate: 16000
+  segment_samples: 64600
+  fake_index: 0                   # upstream labels real 1, fake 0
+notes: Post-trained on 74k hours in over 100 languages, including FLEURS (Hindi, Bengali, Urdu, Tamil, Nepali and more; not Sinhala) and MLAAD, so it is refused on mlaad_* and on anything built from FLEURS. MMS pretraining covers about 1,400 languages. The card reports In-the-Wild EER 2.90%, its reproduction set. Checked 2026-10-05; adapter written that day, parity needs fairseq 0.12.2 in an old environment and isn't run yet.

@@ -3,6 +3,10 @@ aasist:
   AASIST.pth: 51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0
 aasist_l:
   AASIST-L.pth: 814331d088032bb4c3fa61cc014789eadeed464209dd094ab3a2dd6ffbdce27a
+antideepfake_mms_300m:
+  mms-300m-anti-deepfake.safetensors: 9bd5d9785bf72f91dfca8508651354946c4b307921cb358505e1b94035102224
+antideepfake_w2v_small:
+  wav2vec-small-anti-deepfake.safetensors: 828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0
 df_arena_1b:
   pytorch_model.bin: 780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988
   xls-r-1b-config/config.json: 36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997

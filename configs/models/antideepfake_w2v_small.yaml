@@ -1,0 +1,54 @@
+id: antideepfake_w2v_small
+name: AntiDeepfake wav2vec 2.0 small
+modality: audio
+status: workable
+licence: CC BY-NC-SA 4.0 (checkpoint); code BSD-3
+paper: Ge et al., Post-training for Deepfake Speech Detection, 2025 (arXiv 2506.21090)
+upstream:
+  repo: nii-yamagishilab/AntiDeepfake
+  commit: 0dea622bde8f064c8ee5a557f2598643123fc6b6
+weights:
+  - name: wav2vec-small-anti-deepfake.safetensors
+    kind: hf
+    repo: nii-yamagishilab/wav2vec-small-anti-deepfake
+    filename: model.safetensors
+    revision: 9a13264b5dcc827a8d5a4f8e01fccefa392f886b
+    size_bytes: 380210632
+training_data:
+  # wav2vec 2.0 base pretraining
+  - {dataset: librispeech, level: pretrain}
+  # AntiDeepfake post-training (the card's training set table)
+  - {dataset: aishell3, level: train}
+  - {dataset: asvspoof2019_la, level: train, note: "the card's 11.85 h of bona fide is about all three partitions, so every partition counts as seen"}
+  - {dataset: asvspoof2021, level: train}
+  - {dataset: asvspoof5, level: train}
+  - {dataset: cfad, level: train}
+  - {dataset: cnceleb2, level: train}
+  - {dataset: codecfake, level: train}
+  - {dataset: codecfake_wu, level: train}
+  - {dataset: cvoicefake, level: train}
+  - {dataset: decro, level: train}
+  - {dataset: dfadd, level: train}
+  - {dataset: diffuse_or_confuse, level: train}
+  - {dataset: diffssd, level: train}
+  - {dataset: dsd, level: train}
+  - {dataset: fleurs, level: train}
+  - {dataset: fleurs_r, level: train}
+  - {dataset: habla, level: train}
+  - {dataset: libritts, level: train}
+  - {dataset: libritts_r, level: train}
+  - {dataset: libritts_vocoded, level: train}
+  - {dataset: ljspeech, level: train}
+  - {dataset: mlaad, level: train}
+  - {dataset: spoofceleb, level: train}
+  - {dataset: voicemos, level: train}
+  - {dataset: voxceleb2, level: train}
+  - {dataset: voxceleb2_vocoded, level: train}
+  - {dataset: wavefake, level: train}
+adapter: deeptrace_bench.models.antideepfake:AntiDeepfakeDetector
+input:
+  variant: w2v_small              # W2V_configs.global_configs key in the checkout
+  sample_rate: 16000
+  segment_samples: 64600
+  fake_index: 0                   # upstream labels real 1, fake 0
+notes: The smallest AntiDeepfake model (wav2vec 2.0 base, 95M parameters, English-only pretraining), a cheap counterpart to the MMS-300M one with the same post-training data, so the two separate the effect of multilingual pretraining. The card reports In-the-Wild EER 4.24% (MMS-300M 2.90%); adapter written 2026-10-05, parity not run yet.
