@@ -1,0 +1,9 @@
+id: unidatapro_av
+modality: audio_video
+role: pipeline_test
+pairing: same_corpus
+components:
+  - dataset: unidatapro_videos
+group_by: []
+status: ready
+notes: Pipeline test of the audio-visual path (frames at a fixed rate, face boxes, the audio track under them) on the same five pairs as unidatapro_videos. Never reported.

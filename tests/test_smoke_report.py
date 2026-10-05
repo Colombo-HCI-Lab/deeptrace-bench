@@ -50,3 +50,12 @@ def test_a_share_that_refuses_the_pointer_does_not_fail_the_run(tmp_path, monkey
 @pytest.fixture(autouse=True)
 def _no_store(monkeypatch, tmp_path):
     monkeypatch.setenv("DTB_ROOT", str(tmp_path / "store"))
+
+
+def test_a_video_model_is_smoked_once_per_sample(registry):
+    smoke = _smoke()
+    chosen = {e.id for e in smoke.default_evalsets(registry, registry.model("xception"))}
+    assert "unidatapro_videos" in chosen and "unidatapro_av" not in chosen
+    assert {e.id for e in smoke.default_evalsets(registry, registry.model("havic"))} == {
+        "unidatapro_av"
+    }

@@ -31,6 +31,7 @@ from deeptrace_bench.fetch import locked_hashes
 from deeptrace_bench.models.base import load_detector, resolve_device, set_tf32
 from deeptrace_bench.paths import dataset_dir, namespace, prepare_store, use_namespace
 from deeptrace_bench.preprocess.audio import load_audio, segment
+from deeptrace_bench.preprocess.av import AudioVideoLoader
 from deeptrace_bench.preprocess.faces import FaceLoader
 from deeptrace_bench.registry import Modality, Registry, accepts
 from deeptrace_bench.runs import config_hash, start_run
@@ -134,6 +135,9 @@ def main() -> int:
             save_crops=args.save_crops,
             part_prefix=prefix,
         )
+        if model.modality == Modality.AUDIO_VIDEO:
+            # an audio-visual model gets its faces and the audio track together
+            loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
         aggregate = registry.eval.video["aggregation"]
 
     detector = load_detector(model)

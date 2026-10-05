@@ -1,7 +1,7 @@
 id: havic
 name: HAVIC (audio-visual)
 modality: audio_video
-status: later
+status: workable
 licence: MIT
 paper: CVPR 2026 Findings (arXiv 2603.23960)
 upstream:
@@ -13,11 +13,16 @@ weights:
     repo: JielunPeng/HAVIC
     filename: best_ft_model.pth
     revision: dbac156e0e172985cc2f732d8e36f5928675f615
+    size_bytes: 858837738
 training_data:
   - {dataset: lrs2, level: pretrain}
   - {dataset: fakeavceleb, level: finetune, note: "random 70% of FakeAVCeleb; the item list isn't published, so FakeAVCeleb is refused"}
+adapter: deeptrace_bench.models.havic:HAVICDetector
 input:
+  frame_rate: 5                   # frames per second from the start, as upstream samples
+  max_frames: 50                  # 10 s
+  min_face_frames: 16             # one window
   window_frames: 16
   frame_stride: 2
-  fps: 5
-notes: The only open audio-visual detector. Useful once DeePhy, DF-Platter or InDeepFake arrive; never on FakeAVCeleb.
+  crop: {size: null, margin: 1.0, align: box}   # the raw face box; the adapter resizes to 224
+notes: The only open audio-visual detector; adapter written 2026-10-05 with two compatibility patches (patches/HAVIC). Scores MAVOS-DD Hindi once its terms are accepted, and DeePhy, DF-Platter or InDeepFake when they arrive; never FakeAVCeleb. Needs videos of at least 3.2 s with a face in 16 sampled frames (HiDF's 3 s clips are too short). Parity not run yet.

@@ -12,6 +12,11 @@ Layout (Hugging Face ``UniDataPro/deepfake-videos-dataset`` at ``bdbf7fc9``, 202
 - ``image/<i>.jpg`` and ``DeepFake Videos Dataset.csv``: the source faces and the pairing
   table. Not items. The CSV says ``video/5.mov`` but the file is ``video/5.MOV``, so the
   builder scans files instead of trusting it, matching extensions case-insensitively.
+
+Every video has an audio track (checked 2026-10-05), so the items are ``audio_video``: video
+models score their frames and audio-visual models (HAVIC) both tracks. ``label_video`` is the
+item's label; ``label_audio`` is real for the real recordings and unknown for the fakes, since
+the card doesn't say whether the services kept the original audio.
 """
 
 from __future__ import annotations
@@ -48,8 +53,10 @@ def build_manifest(root: Path) -> pd.DataFrame:
                 "item_id": f"{DATASET}/{path.parent}/{path.stem}",
                 "dataset": DATASET,
                 "rel_path": rel,
-                "modality": "video",
+                "modality": "audio_video",
                 "label": label,
+                "label_video": label,
+                "label_audio": "real" if label == "real" else None,
                 "method_family": "face_swap" if label == "fake" else None,
             }
         )

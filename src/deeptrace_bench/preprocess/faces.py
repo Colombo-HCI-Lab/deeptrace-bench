@@ -86,6 +86,26 @@ def sample_frame_indices(n_frames: int, k: int) -> list[int]:
     return [int(i) for i in np.linspace(0, n_frames - 1, k).round()]
 
 
+def rate_frame_indices(n_frames: int, fps: float, rate: float, max_frames: int) -> list[int]:
+    """Frames at ``rate`` per second from the start, at most ``max_frames`` of them.
+
+    HAVIC's sampling: times ``0, 1/rate, 2/rate, ...`` over the video's duration, each taken
+    to the frame ``int(t * fps)`` (duplicates dropped), then the first ``max_frames``.
+    """
+    if n_frames <= 0 or fps <= 0:
+        return []
+    times = np.arange(0, n_frames / fps, 1.0 / rate)
+    indices = np.unique(np.clip((times * fps).astype(int), 0, n_frames - 1))
+    return [int(i) for i in indices[:max_frames]]
+
+
+def rate_frame_count(n_frames: int, fps: float, rate: float) -> int:
+    """How many frames ``rate`` per second gives over the whole video (before any cap)."""
+    if n_frames <= 0 or fps <= 0:
+        return 0
+    return len(np.arange(0, n_frames / fps, 1.0 / rate))
+
+
 # --- reading ---------------------------------------------------------------------------------
 
 
@@ -101,8 +121,11 @@ def read_image(path: Path) -> np.ndarray:
     return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
 
 
-def read_video_frames(path: Path, k: int) -> tuple[list[tuple[int, np.ndarray]], int]:
-    """Read ``k`` evenly spread frames of a video as RGB uint8.
+def read_video_frames(
+    path: Path, k: int, rate: float | None = None
+) -> tuple[list[tuple[int, np.ndarray]], int]:
+    """Read ``k`` evenly spread frames of a video as RGB uint8, or with ``rate`` set, the
+    first ``k`` frames at ``rate`` per second (``rate_frame_indices``).
 
     Frames are decoded in order with ``grab`` and only the wanted ones converted, which is
     robust to formats that seek badly. OpenCV applies the rotation stored in phone videos.
@@ -123,7 +146,10 @@ def read_video_frames(path: Path, k: int) -> tuple[list[tuple[int, np.ndarray]],
             n_frames = _count_frames(cap)
             cap.release()
             cap = cv2.VideoCapture(str(path))
-        wanted = sample_frame_indices(n_frames, k)
+        if rate is None:
+            wanted = sample_frame_indices(n_frames, k)
+        else:
+            wanted = rate_frame_indices(n_frames, cap.get(cv2.CAP_PROP_FPS), rate, k)
         want = set(wanted)
         frames: list[tuple[int, np.ndarray]] = []
         index = 0
@@ -298,7 +324,9 @@ class FaceLoader:
         make_detector: builds the detector on first use (so a fully cached run never loads it).
         detector_id: the detector tool's id, for the cache key.
         settings: everything that changes detections (weights hash, thresholds, sampling).
-        frames_per_clip: frames sampled per video.
+        frames_per_clip: frames sampled per video (with ``frame_rate``, the most taken).
+        frame_rate: if set, frames at this many per second from the start instead of spread
+            evenly; for models whose network takes consecutive frames (HAVIC).
         min_face_frames: a video needs at least this many frames with a face.
         image_min_face_frames: the same for an image (a one-frame clip).
         image_pad_retry: border to add when an image shows no face, as a fraction of each
@@ -315,6 +343,7 @@ class FaceLoader:
         detector_id: str,
         settings: dict[str, Any],
         frames_per_clip: int = 32,
+        frame_rate: float | None = None,
         min_face_frames: int = 8,
         image_min_face_frames: int = 1,
         image_pad_retry: float = 0.0,
@@ -328,6 +357,7 @@ class FaceLoader:
         self.settings = settings
         self.key = cache_key(detector_id, settings)
         self.frames_per_clip = frames_per_clip
+        self.frame_rate = frame_rate
         self.min_face_frames = min_face_frames
         self.image_min_face_frames = image_min_face_frames
         self.image_pad_retry = image_pad_retry
@@ -359,6 +389,17 @@ class FaceLoader:
         }
         if settings["face_choice"] != "largest" or settings["frame_sampling"] != "uniform":
             raise NotImplementedError("only largest-face choice and uniform sampling exist")
+        # A model whose network takes consecutive frames at a fixed rate overrides the shared
+        # sampling with its own (input.frame_rate, input.max_frames, input.min_face_frames);
+        # the cache key changes with it, so its detections are kept apart.
+        rate = model.input.get("frame_rate")
+        frames_per_clip, min_faces = video["frames_per_clip"], video["min_face_frames"]
+        if rate is not None:
+            frames_per_clip = int(model.input["max_frames"])
+            min_faces = int(model.input.get("min_face_frames", min_faces))
+            settings.update(
+                frame_sampling="rate", frame_rate=float(rate), frames_per_clip=frames_per_clip
+            )
 
         def make() -> Detect:
             if not model_path.exists():
@@ -377,8 +418,9 @@ class FaceLoader:
             make_detector=make,
             detector_id=tool.id,
             settings=settings,
-            frames_per_clip=video["frames_per_clip"],
-            min_face_frames=video["min_face_frames"],
+            frames_per_clip=frames_per_clip,
+            frame_rate=float(rate) if rate is not None else None,
+            min_face_frames=min_faces,
             image_min_face_frames=video["image_min_face_frames"],
             image_pad_retry=video["image_pad_retry"],
             **kwargs,
@@ -439,7 +481,7 @@ class FaceLoader:
         if is_image:
             frames, n_frames = [(0, read_image(path))], 1
         else:
-            frames, n_frames = read_video_frames(path, self.frames_per_clip)
+            frames, n_frames = read_video_frames(path, self.frames_per_clip, self.frame_rate)
 
         cache = self._cache(row["dataset"])
         records = cache.get(row["item_id"])

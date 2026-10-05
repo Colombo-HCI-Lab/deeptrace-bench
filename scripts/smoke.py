@@ -69,11 +69,22 @@ SCRIPTS = REPO_ROOT / "scripts"
 
 
 def default_evalsets(registry: Registry, model: ModelConfig) -> list[EvalsetConfig]:
-    """Every ready pipeline-test evalset the model can score (audio: ``AUDIO_FALLBACK``)."""
-    chosen = [
+    """Every ready pipeline-test evalset the model can score (audio: ``AUDIO_FALLBACK``).
+
+    Where two evalsets cover the same data (``unidatapro_videos`` and ``unidatapro_av``), the
+    one of the model's own modality is kept, so a video model isn't run twice on one sample.
+    """
+    accepted = [
         e
         for e in registry.evalsets.values()
         if e.role == "pipeline_test" and e.status == "ready" and accepts(model, e)
+    ]
+    by_data: dict[frozenset[str], list[EvalsetConfig]] = {}
+    for e in accepted:
+        by_data.setdefault(frozenset(c.dataset for c in e.components), []).append(e)
+    chosen = [
+        next((e for e in group if e.modality == model.modality), group[0])
+        for group in by_data.values()
     ]
     if not chosen and model.modality == Modality.AUDIO:
         chosen = [registry.evalset(e) for e in AUDIO_FALLBACK]

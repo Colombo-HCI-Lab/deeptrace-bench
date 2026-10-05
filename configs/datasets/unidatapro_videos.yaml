@@ -1,6 +1,6 @@
 id: unidatapro_videos
 name: UniDataPro deepfake videos (free Hugging Face preview)
-modality: video
+modality: audio_video
 role: pipeline_test
 status: open
 access:
