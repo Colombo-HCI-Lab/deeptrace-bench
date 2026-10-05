@@ -1,0 +1,19 @@
+id: hidf
+name: HiDF (human-indistinguishable deepfakes), videos
+modality: video
+role: south_asian
+status: open
+access:
+  kind: url
+  page: https://zenodo.org/records/16140829
+  urls:
+    Real-vid.zip: "https://zenodo.org/records/16140829/files/Real-vid.zip?download=1"
+    Fake-vid.zip: "https://zenodo.org/records/16140829/files/Fake-vid.zip?download=1"
+    metadata.csv: "https://zenodo.org/records/16140829/files/metadata.csv?download=1"
+licence: CC BY-NC 4.0
+licence_terms:
+  - Non-commercial use only.
+contains: [real, fake]
+size_gb: 1.6
+builder: deeptrace_bench.datasets.hidf:build_manifest
+notes: Face swaps made with commercial tools and curated to fool people (KDD 2025; checked 2026-10-05). 4,361 real and 4,361 fake short videos with race, gender and age per face; "Indian" is the South Asian group (90 base videos), next to White, Asian, Latino and Black. The 62k images (40 GB) aren't fetched.

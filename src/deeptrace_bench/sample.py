@@ -347,13 +347,25 @@ class _HfParquetSource(_HfSource):
 
 
 class _ZipSource(_Source):
-    def __init__(self, config: DatasetConfig) -> None:
+    """Zip archives at URLs, read by range requests; other URLs are small metadata files.
+
+    A builder whose archives hold further zips (BD-GRF6) defines
+    ``nested_zip_label(member) -> "real" | "fake" | None``. Inner zips are compressed inside
+    their archive, so they can't be read in place: for each label the smallest inner zip is
+    fetched whole (its compressed bytes only, by range) into the cache, and its members join
+    the candidates as ``<inner zip path without .zip>/<member>``, the path a full copy's
+    builder extracts them to.
+    """
+
+    def __init__(self, config: DatasetConfig, builder: Any = None) -> None:
         urls = config.access.urls or {}
         self.urls = {name: url for name, url in urls.items() if name.lower().endswith(".zip")}
-        if not self.urls or len(self.urls) != len(urls):
-            raise SampleError(f"{config.id}: sampling over URLs needs every archive to be a zip")
+        self.plain = {name: url for name, url in urls.items() if name not in self.urls}
+        if not self.urls:
+            raise SampleError(f"{config.id}: sampling over URLs needs at least one zip")
+        self.nested_label = getattr(builder, "nested_zip_label", None)
         self.archives: dict[str, tuple[str, int, Any]] = {}
-        self.where: dict[str, str] = {}
+        self.where: dict[str, Any] = {}
 
     def _open(self) -> None:
         from .remote_zip import open_remote, open_zip
@@ -364,7 +376,7 @@ class _ZipSource(_Source):
                 self.archives[name] = (url, raw.size, open_zip(raw))
 
     def key(self) -> dict[str, Any]:
-        return {"kind": "zip", "urls": dict(self.urls)}
+        return {"kind": "zip", "urls": {**self.urls, **self.plain}}
 
     def describe(self) -> dict[str, Any]:
         self._open()
@@ -379,26 +391,73 @@ class _ZipSource(_Source):
     def candidates(self) -> list[str]:
         self._open()
         paths = []
-        for name, (_, _, zf) in self.archives.items():
+        inner: dict[str, list[tuple[int, str, str, Any]]] = {}
+        for url, _, zf in self.archives.values():
             for info in zf.infolist():
-                if not info.is_dir():
-                    self.where[info.filename] = name
-                    paths.append(info.filename)
+                if info.is_dir():
+                    continue
+                label = self.nested_label(info.filename) if self.nested_label else None
+                if label is not None:
+                    inner.setdefault(label, []).append((info.compress_size, info.filename, url, zf))
+                    continue
+                self.where[info.filename] = zf
+                paths.append(info.filename)
+        for label in sorted(inner):
+            _, member, url, zf = min(inner[label], key=lambda t: (t[0], t[1]))
+            paths += self._open_inner(member, url, zf)
         return paths
 
+    def _open_inner(self, member: str, url: str, outer: Any) -> list[str]:
+        """Fetch one inner zip into the cache and list its members as candidates."""
+        import zipfile
+
+        from .paths import dtb_cache
+        from .remote_zip import extract_member
+
+        digest = hashlib.sha1(f"{url}:{member}".encode()).hexdigest()[:16]
+        local = dtb_cache() / "sample_zips" / f"{digest}.zip"
+        if not local.exists():
+            log.info("fetching inner archive %s of %s", member, url)
+            extract_member(outer, member, local)
+        zf = zipfile.ZipFile(local)
+        prefix = member.removesuffix(".zip").removesuffix(".ZIP") + "/"
+        paths = []
+        for info in zf.infolist():
+            if not info.is_dir():
+                path = prefix + info.filename
+                self.where[path] = (zf, info.filename)
+                paths.append(path)
+        return paths
+
+    def _member(self, path: str) -> tuple[Any, str]:
+        found = self.where[path]
+        return found if isinstance(found, tuple) else (found, path)
+
     def read(self, name: str) -> bytes:
+        if name in self.plain:
+            import requests
+
+            response = requests.get(self.plain[name], timeout=60)
+            response.raise_for_status()
+            return response.content
         if not self.where:
             self.candidates()
         if name not in self.where:
             raise SampleError(f"{name} is in none of {sorted(self.urls)}")
-        return self.archives[self.where[name]][2].read(name)
+        zf, member = self._member(name)
+        return zf.read(member)
 
     def materialize(self, chosen: list[str], dest: Path) -> None:
         from .remote_zip import extract_member
 
-        for member in chosen:
-            zf = self.archives[self.where[member]][2]
-            extract_member(zf, member, ensure_inside(dest, dest / member))
+        for path in chosen:
+            target = ensure_inside(dest, dest / path)
+            if path in self.plain:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(self.read(path))
+                continue
+            zf, member = self._member(path)
+            extract_member(zf, member, target)
 
 
 class _LocalSource(_Source):
@@ -440,7 +499,7 @@ def _source(
                 return _HfParquetSource(config, languages, builder, seed)
             return _HfSource(config, languages)
         case "url":
-            return _ZipSource(config)
+            return _ZipSource(config, builder)
         case _:
             raise ManualStepRequiredError(
                 f"{config.id} can't be fetched by a script ({config.access.kind}); sample a "

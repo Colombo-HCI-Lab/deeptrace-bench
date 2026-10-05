@@ -274,3 +274,56 @@ def test_parquet_rows_are_sampled_from_one_row_group_and_keep_their_numbers(monk
         assert row["audio"]["bytes"] == b"RIFF" + bytes([number])
         assert row["flag"] == number % 2
     assert SOURCE_ROW in pq.read_schema(tmp_path / "sample" / "data" / "train-0.parquet").names
+
+
+def test_a_nested_zip_is_fetched_once_per_label_and_its_members_sampled(monkeypatch, tmp_path):
+    import io
+    import zipfile
+
+    from deeptrace_bench import remote_zip
+    from deeptrace_bench.sample import _ZipSource, choose
+
+    def zipped(members: dict[str, bytes]) -> bytes:
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            for name, data in members.items():
+                zf.writestr(name, data)
+        return buf.getvalue()
+
+    outer = zipped(
+        {
+            "all/Big Fake.zip": zipped({f"Big Fake/{i}.wav": bytes(200) * i for i in range(1, 9)}),
+            "all/Small Fake.zip": zipped({"Small Fake/1.wav": b"a", "Small Fake/2.wav": b"b"}),
+            "all/Small Real.zip": zipped({"Small Real/1.wav": b"c", "Small Real/2.wav": b"d"}),
+        }
+    )
+    served = []
+
+    def open_remote(url, session=None):
+        served.append(url)
+        return remote_zip.HttpRangeFile(lambda start, end: outer[start : end + 1], len(outer))
+
+    monkeypatch.setattr(remote_zip, "open_remote", open_remote)
+    monkeypatch.setenv("DTB_CACHE", str(tmp_path / "cache"))
+    label = lambda p: ("fake" if "Fake" in p else "real") if p.endswith(".wav") else None  # noqa: E731
+    builder = types.SimpleNamespace(
+        nested_zip_label=lambda m: (
+            ("fake" if "Fake" in m else "real") if m.endswith(".zip") else None
+        )
+    )
+    config = _config("dtb_unused:build_manifest", ["real", "fake"])
+    config.access = config.access.model_copy(
+        update={"kind": "url", "urls": {"all.zip": "https://x/all.zip"}}
+    )
+    source = _ZipSource(config, builder)
+    paths = source.candidates()
+    assert sorted(paths) == [  # the smaller fake zip, never the big one
+        "all/Small Fake/Small Fake/1.wav",
+        "all/Small Fake/Small Fake/2.wav",
+        "all/Small Real/Small Real/1.wav",
+        "all/Small Real/Small Real/2.wav",
+    ]
+    chosen = choose(paths, label, per_label=1, seed=0)
+    source.materialize(chosen, tmp_path / "sample")
+    for path in chosen:
+        assert (tmp_path / "sample" / path).read_bytes() in {b"a", b"b", b"c", b"d"}

@@ -1,0 +1,16 @@
+id: bd_grf6
+name: BD-GRF6 (Bangladeshi real and fake speech, three genders)
+modality: audio
+role: south_asian
+status: open
+access:
+  kind: url
+  page: https://zenodo.org/records/18656689
+  urls:
+    Real and Fake.zip: "https://zenodo.org/records/18656689/files/Real%20and%20Fake.zip?download=1"
+licence: CC BY 4.0
+contains: [real, fake]
+languages: [bn]
+size_gb: 3.0
+builder: deeptrace_bench.datasets.bd_grf6:build_manifest
+notes: Bangla speech of Bangladeshi speakers, real and fake for male, female and third gender, 13,566 clips (18.7 h), published 2026-02-16 and checked 2026-10-05. The only set with a third-gender group. Zips inside a zip; a sample fetches the smallest real and the smallest fake class zip (about 350 MB). The record names no generator and no speakers.

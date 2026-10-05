@@ -402,3 +402,63 @@ def test_a_sampled_shard_keeps_full_shard_row_numbers(tmp_path):
     )
     df = indictts_challenge.build_manifest(tmp_path)
     assert df.item_id.tolist() == ["indictts_challenge/train-00000-of-00001/417"]
+
+
+def test_bd_grf6_extracts_class_zips_and_labels_by_gender(tmp_path):
+    import io
+    import zipfile
+
+    from deeptrace_bench.datasets import bd_grf6
+
+    def inner(name: str, files: list[str]) -> bytes:
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            for f in files:
+                zf.writestr(f"{name}/{f}", b"RIFF")
+        return buf.getvalue()
+
+    outer = tmp_path / "Real and Fake"
+    outer.mkdir()
+    (outer / "Femail Fake.zip").write_bytes(inner("Femail Fake", ["F1.wav", "F2.wav"]))
+    (outer / "Third Gender Real.zip").write_bytes(inner("Third Gender Real", ["T1.wav"]))
+    df = bd_grf6.build_manifest(tmp_path)
+    validate_manifest(df, "bd_grf6")
+    assert sorted(zip(df.label, df.g_gender, strict=True)) == [
+        ("fake", "female"),
+        ("fake", "female"),
+        ("real", "third_gender"),
+    ]
+    assert (outer / ".extracted-Femail Fake.zip").exists()
+    assert len(bd_grf6.build_manifest(tmp_path)) == 3  # a rebuild doesn't extract again
+
+
+@pytest.mark.parametrize(
+    ("member", "label"),
+    [
+        ("Real and Fake/Male Real.zip", "real"),
+        ("Real and Fake/Third Gender Fake.zip", "fake"),
+        ("Real and Fake/readme.zip", None),
+        ("Real and Fake/Male Real/M3.wav", None),
+    ],
+)
+def test_bd_grf6_nested_zip_labels(member, label):
+    from deeptrace_bench.datasets import bd_grf6
+
+    assert bd_grf6.nested_zip_label(member) == label
+
+
+def test_hidf_labels_fakes_by_the_face_on_screen(tmp_path):
+    from deeptrace_bench.datasets import hidf
+
+    _tree(tmp_path, ["Real-vid/c0001.mp4", "Fake-vid/c0001_f0009.mp4", "Fake-img/x.jpg"])
+    (tmp_path / "metadata.csv").write_text(
+        "ID,Img/Vid,Base/Swap,Race,Gender,Age\n"
+        "c0001,Vid,Base,White,Male,Adult\n"
+        'c0001,Img,"Base, Swap",Latino,Female,Adult\n'  # another person: images are separate
+        "f0009,Img,Swap,Indian ,Female ,Elderly\n"
+    )
+    df = hidf.build_manifest(tmp_path).set_index("label")
+    validate_manifest(df.reset_index(), "hidf")
+    assert (df.loc["real", "g_race"], df.loc["real", "g_gender"]) == ("white", "male")
+    assert (df.loc["fake", "g_race"], df.loc["fake", "g_age"]) == ("indian", "elderly")
+    assert (df.loc["fake", "subject_id"], df.loc["fake", "source_subject_id"]) == ("c0001", "f0009")

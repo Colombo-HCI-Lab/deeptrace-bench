@@ -1,0 +1,9 @@
+id: hidf_video
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: hidf
+group_by: [g_race, g_gender, g_age]
+status: ready
+notes: Each fake is a real video of the set with another face swapped in, so same-corpus. Not a South Asian dataset; it is here for its per-face race labels, whose "indian" group (90 base videos) is compared against the others.
