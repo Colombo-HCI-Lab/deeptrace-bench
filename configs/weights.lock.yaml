@@ -1,6 +1,10 @@
 # sha256 of every weight file, recorded on first fetch. Edit only via --record.
 aasist:
   AASIST.pth: 51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0
+aasist3:
+  aasist3.safetensors: a06d43d8d4a7e11b62fb4fa833f13a598fee23be7c368c416df4bec2e44e664f
+  aasist3_config.json: 0bd97c713c1d4b1f2a9be60cc0eb7183f49789f8af95fa8319b3113e6392ba81
+  xlsr-53-config/config.json: 48576e4a1b0f02c7770f57e236747169459db9a8b9a529bbd7a58bbbf52c45b5
 aasist_l:
   AASIST-L.pth: 814331d088032bb4c3fa61cc014789eadeed464209dd094ab3a2dd6ffbdce27a
 antideepfake_mms_300m:
