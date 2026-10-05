@@ -35,6 +35,7 @@ uv run scripts/smoke.py --model aasist         # an audio model, on a few Urdu c
 4. **Evaluate** (`scripts/evaluate.py`): AUC and EER overall and per group, with bootstrap intervals, failure counts and the contamination verdict. `--publish` copies the aggregates into `results/`.
 5. **Smoke test** (`scripts/smoke.py`): steps 1 to 4 on a few items per dataset, in `DTB_ROOT/smoke/`, with a report per run. Run it after any change, and to prove a new model or dataset is wired up.
 6. **Parity** (`scripts/parity.py`): before a model's numbers count, its adapter and the upstream code score the same ~200 items within 1e-3; the summary goes to `results/parity/<model>.json`.
+7. **Status page** (`scripts/build_site.py`): rewrites the data in `docs/index.html`, one page with the pipeline, which model was scored on which evalset, and every countable run. It reads run summaries from the store, so rebuild it where `DTB_ROOT` is set, and commit the page.
 
 Adding a model or a dataset: [docs/adding_a_model.md](docs/adding_a_model.md), [docs/adding_a_dataset.md](docs/adding_a_dataset.md).
 
@@ -89,8 +90,8 @@ scripts/         setup_models, setup_datasets, score, evaluate, smoke, parity; h
 slurm/           job templates for Curnagl
 patches/         compatibility patches for upstream code
 results/         published aggregate results and parity summaries (no item-level data)
-docs/            smoke test, store layout, adding a model or dataset, models, datasets,
-                 evaluation, cluster, data policy
+docs/            the status page (index.html); smoke test, store layout, adding a model or
+                 dataset, models, datasets, evaluation, cluster, data policy
 tests/           synthetic fixtures only
 ```
 

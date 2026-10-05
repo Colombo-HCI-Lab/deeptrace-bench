@@ -1,0 +1,1492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>deeptrace-bench Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: one report sheet. Masthead, then pipeline, coverage grids, scored runs. Ink does the
+   work; the one accent marks a number that needs a caveat before anyone quotes it. */
+:root {
+  --paper: #f4f5f2;
+  --ink: #1b1d1a;
+  --muted: #5e625b;
+  --rule: #d3d6ce;
+  --tint: #e7e9e3;
+  --flag: #b93c12;
+  --serif: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121412; --ink: #e4e6e0; --muted: #989c93; --rule: #2c302a; --tint: #1c1f1b; --flag: #f2804f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121412; --ink: #e4e6e0; --muted: #989c93; --rule: #2c302a; --tint: #1c1f1b; --flag: #f2804f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.55 var(--serif); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 72px; display: grid; gap: 56px; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--muted); }
+a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+code, .mono { font-family: var(--mono); font-size: 0.8em; }
+h1, h2 { font-weight: 600; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.05; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; line-height: 1.2; }
+p { margin: 0; max-width: 65ch; }
+.label { font: 500 11px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 20px; min-width: 0; }
+section > header { display: grid; gap: 6px; border-top: 1px solid var(--ink); padding-top: 14px; }
+
+/* Masthead */
+.mast { display: grid; gap: 16px; }
+.lede { font-size: 1.15rem; color: var(--muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 400 13px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
+.facts b { font-weight: 500; }
+
+/* Pipeline */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border: 1px solid var(--rule); }
+.stage { padding: 16px 16px 18px; display: grid; gap: 8px; align-content: start; border-left: 1px solid var(--rule); position: relative; min-width: 0; }
+.stage:first-child { border-left: 0; }
+.stage:not(:last-child)::after { content: "→"; position: absolute; right: -0.6em; top: 14px; font: 500 15px/1 var(--mono); background: var(--paper); color: var(--muted); padding: 2px 0; z-index: 1; }
+.stage h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.stage p { font-size: 0.9rem; line-height: 1.45; }
+.stage .label { color: var(--ink); }
+.gates { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
+.gate { font-size: 0.85rem; line-height: 1.4; padding: 10px 16px 0; border-left: 1px dashed var(--muted); display: grid; gap: 4px; min-width: 0; }
+.gate.g-parity { grid-column: 2; }
+.gate.g-guard { grid-column: 3; }
+.gate.g-pub { grid-column: 5; }
+.homes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 8px; }
+.home { background: var(--tint); padding: 14px 16px; display: grid; gap: 4px; font-size: 0.9rem; line-height: 1.45; }
+.smoke { font-size: 0.9rem; color: var(--muted); }
+
+/* Coverage grids */
+.scroll { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.grid th, .grid td { padding: 0; }
+.grid thead th { font: 500 11px/1.2 var(--mono); color: var(--muted); vertical-align: bottom; text-align: left; }
+.grid th.grp { text-align: left; padding: 0 8px 6px 6px; border-left: 1px solid var(--rule); white-space: nowrap; letter-spacing: 0.06em; text-transform: uppercase; }
+.grid th.v { padding: 6px 0 8px; width: 46px; min-width: 46px; }
+.grid th.v span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; display: inline-block; margin: 0 auto; }
+.grid th.v { text-align: center; }
+.grid th.v.first, .grid td.first { border-left: 1px solid var(--rule); }
+.grid th.v.pending { color: var(--muted); font-style: italic; }
+.grid th.mh { padding: 0 12px 8px 0; min-width: 190px; }
+.grid tbody th { text-align: left; font: 400 15px/1.2 var(--serif); padding: 0 12px 0 0; white-space: nowrap; height: 34px; border-top: 1px solid var(--rule); }
+.grid tbody th small { font: 400 10px/1 var(--mono); color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-left: 6px; }
+.grid td { border-top: 1px solid var(--rule); text-align: center; font: 400 12px/1 var(--mono); height: 34px; width: 46px; }
+.grid td.lad, .grid th.lad { width: 30px; min-width: 30px; color: var(--muted); }
+.grid td.lad.on { color: var(--ink); }
+.grid td.pending { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule) 5px 6px); }
+.grid td.run { font-weight: 500; }
+.grid td.run.flag { color: var(--flag); font-weight: 500; }
+.grid td.guard, .grid td.empty { color: var(--muted); }
+.grid td.guard { font-size: 15px; }
+.grid tbody th, .grid th.mh { position: sticky; left: 0; background: var(--paper); z-index: 1; }
+.grid td.empty { color: var(--rule); }
+.grid td.na { background: var(--tint); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 0.85rem; color: var(--muted); }
+.legend span { display: inline-flex; gap: 8px; align-items: center; }
+.legend i { font: normal 500 12px/1 var(--mono); color: var(--ink); min-width: 2.6em; height: 22px; display: inline-grid; place-items: center; }
+.legend i.flag { color: var(--flag); }
+.legend i.hatch { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule) 5px 6px); }
+.legend i.na { background: var(--tint); }
+.empty-note { font-size: 0.95rem; color: var(--muted); }
+
+/* Scored runs */
+.runs { width: 100%; min-width: 760px; font-size: 0.9rem; }
+.runs th { font: 500 11px/1.3 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0 12px 8px 0; border-bottom: 1px solid var(--ink); }
+.runs td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.runs td.num, .runs th.num { text-align: right; font-family: var(--mono); font-size: 0.82rem; white-space: nowrap; }
+.runs td.id { font-family: var(--mono); font-size: 0.8rem; }
+.runs td.model { white-space: nowrap; }
+.runs td.ci { color: var(--muted); }
+.runs .flags { color: var(--flag); font-size: 0.85rem; }
+
+.rules { display: grid; gap: 8px; padding-left: 1.1em; margin: 0; max-width: 72ch; font-size: 0.95rem; }
+footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.85rem; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .flow, .gates { grid-template-columns: minmax(0, 1fr); }
+  .stage { border-left: 0; border-top: 1px solid var(--rule); }
+  .stage:first-child { border-top: 0; }
+  .stage:not(:last-child)::after { content: "↓"; right: auto; left: 16px; top: auto; bottom: -0.7em; padding: 0 4px; }
+  .gate.g-parity, .gate.g-guard, .gate.g-pub { grid-column: 1; }
+  .gate { padding: 10px 0 0 14px; }
+  .homes { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <div class="label">Colombo HCI Lab · South Asia deepfake detection · phase 2</div>
+  <h1>deeptrace-bench</h1>
+  <p class="lede">Open deepfake detectors, run on South Asian audio and video under one evaluation setup. What has been scored so far, and how a score is produced.</p>
+  <div class="facts" id="facts"></div>
+</header>
+
+<section id="pipeline">
+  <header><div class="label">How a score is made</div><h2>Pipeline</h2></header>
+  <div>
+    <div class="flow">
+      <div class="stage"><div class="label">1 · configs/</div><h3>Configure</h3><p>One YAML per model (upstream commit, weights, training data), per dataset (access, licence) and per evalset (what gets scored). One shared evaluation setup.</p></div>
+      <div class="stage"><div class="label">2 · setup_*.py</div><h3>Set up</h3><p>Pin upstream code and weight hashes. Download each dataset and build its manifest: one row per item, with label, generator and group attributes.</p></div>
+      <div class="stage"><div class="label">3 · score.py</div><h3>Score</h3><p>Evalset to items, shared preprocessing (4&nbsp;s audio windows; SCRFD faces, per-model crops), adapter, P(fake) per item. Sharded and resumable.</p></div>
+      <div class="stage"><div class="label">4 · evaluate.py</div><h3>Evaluate</h3><p>AUC and EER with 95% bootstrap intervals, overall and per group. Failures (no face, too short) are counted per group, never dropped.</p></div>
+      <div class="stage"><div class="label">5 · --publish</div><h3>Publish</h3><p>Aggregate tables only go to <code>results/</code> in git. Every row carries its pairing and contamination verdict.</p></div>
+    </div>
+    <div class="gates">
+      <div class="gate g-parity"><span class="label">Parity gate</span>An adapter counts only after it matches upstream code within 1e-3 on about 200 items.</div>
+      <div class="gate g-guard"><span class="label">Contamination guard</span>Training data is checked against the evalset's sources. A model that trained on the data is refused.</div>
+      <div class="gate g-pub"><span class="label">Publish guard</span>Pipeline tests, smoke runs and item-level files never reach git.</div>
+    </div>
+  </div>
+  <div class="homes">
+    <div class="home"><span class="label">In git</span>Code, configs, docs, weight hashes, aggregate results, parity summaries.</div>
+    <div class="home"><span class="label">In the store (DTB_ROOT)</span>Datasets, weights, manifests, face caches, per-item scores. Licences forbid sharing these.</div>
+  </div>
+  <p class="smoke">A smoke namespace runs the same steps on two real and two fake items per evalset, to prove a model or dataset is wired up. Those numbers are never reported.</p>
+</section>
+
+<section id="coverage">
+  <header><div class="label">Which model ran on which evalset</div><h2>Coverage</h2></header>
+  <p>Columns are evalsets, the unit that gets scored; one dataset can feed several. A number is the AUC on the full evalset.</p>
+  <div class="legend" id="legend">
+    <span><i>0.863</i>AUC, full evalset (darker is higher)</span>
+    <span><i class="flag">0.365</i>read the flag before quoting</span>
+    <span><i>⊘</i>guard refuses: model trained on this data</span>
+    <span><i>·</i>not run yet</span>
+    <span><i class="hatch"></i>data access pending</span>
+    <span><i class="na"></i>model can't read this modality</span>
+    <span><i>●</i>adapter written · parity passed</span>
+  </div>
+  <h3 class="label" style="margin:12px 0 0">Audio</h3>
+  <div class="scroll"><table class="grid" id="grid-audio"></table></div>
+  <h3 class="label" style="margin:12px 0 0">Video and audio-visual</h3>
+  <div class="scroll"><table class="grid" id="grid-video"></table></div>
+  <p class="empty-note" id="video-note"></p>
+</section>
+
+<section id="runs">
+  <header><div class="label">Every countable run</div><h2>Scored runs</h2></header>
+  <div class="scroll"><table class="runs" id="runs-table"></table></div>
+  <ul class="rules">
+    <li>The evaluation setup is <b id="eval-status">proposed</b> until the team settles decision 5, so these numbers can still move.</li>
+    <li><b>Below chance</b> on a reproduction set means a flipped score; on a South Asian set it is a finding about the model.</li>
+    <li><b>Source overlap</b>: the model's pretraining shares a corpus with the evalset. Reported with a warning, kept out of headlines.</li>
+    <li><b>Cross-corpus</b> evalsets take real and fake from different corpora and never enter headline numbers.</li>
+  </ul>
+</section>
+
+<footer>
+  <span>Rebuild with <code>uv run scripts/build_site.py</code> (needs DTB_ROOT).</span>
+  <span>Docs: <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/models.md">models</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/datasets.md">datasets</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/evaluation.md">evaluation</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/data_policy.md">data policy</a></span>
+</footer>
+
+</div>
+<script id="status-data" type="application/json">
+{
+ "built": "2026-10-05",
+ "eval_status": "proposed",
+ "models": [
+  {
+   "id": "aasist",
+   "name": "AASIST",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "urdu_csalt",
+    "items": 200,
+    "max_abs_diff": 2.6226043701171875e-06
+   }
+  },
+  {
+   "id": "aasist3",
+   "name": "AASIST3",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "aasist_l",
+   "name": "AASIST-L",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "urdu_csalt",
+    "items": 200,
+    "max_abs_diff": 3.2782554626464844e-06
+   }
+  },
+  {
+   "id": "altfreezing",
+   "name": "AltFreezing",
+   "modality": "video",
+   "adapter": false,
+   "blocked": true,
+   "parity": null
+  },
+  {
+   "id": "antideepfake_mms_300m",
+   "name": "AntiDeepfake MMS-300M",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "antideepfake_w2v_small",
+   "name": "AntiDeepfake wav2vec 2.0 small",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "core",
+   "name": "CORE",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 3.3974647521972656e-06
+   }
+  },
+  {
+   "id": "df_arena_1b",
+   "name": "DF Arena 1B",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "urdu_csalt",
+    "items": 200,
+    "max_abs_diff": 0.0
+   }
+  },
+  {
+   "id": "df_arena_500m",
+   "name": "DF Arena 500M",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "urdu_csalt",
+    "items": 200,
+    "max_abs_diff": 0.0
+   }
+  },
+  {
+   "id": "efficientnet_b4",
+   "name": "EfficientNet-B4",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 3.4570693969726562e-06
+   }
+  },
+  {
+   "id": "effort",
+   "name": "Effort",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "f3net",
+   "name": "F3Net",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 3.3974647521972656e-06
+   }
+  },
+  {
+   "id": "ffd",
+   "name": "FFD",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 4.172325134277344e-06
+   }
+  },
+  {
+   "id": "gend",
+   "name": "GenD (CLIP ViT-L/14)",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "gend_pe_l",
+   "name": "GenD (Perception Encoder L/14)",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "havic",
+   "name": "HAVIC",
+   "modality": "audio_video",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "lipforensics",
+   "name": "LipForensics",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "recce",
+   "name": "RECCE",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 5.900859832763672e-06
+   }
+  },
+  {
+   "id": "sbi",
+   "name": "SBI",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "spsl",
+   "name": "SPSL",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 2.0265579223632812e-06
+   }
+  },
+  {
+   "id": "srm",
+   "name": "SRM",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 1.6689300537109375e-06
+   }
+  },
+  {
+   "id": "ucf",
+   "name": "UCF",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 4.947185516357422e-06
+   }
+  },
+  {
+   "id": "xception",
+   "name": "Xception",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "parity": {
+    "evalset": "mendeley_roop_akool",
+    "items": 199,
+    "max_abs_diff": 2.115964889526367e-06
+   }
+  },
+  {
+   "id": "xlsr_aasist",
+   "name": "XLS-R 300M + AASIST",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "xlsr_mamba",
+   "name": "XLSR-Mamba",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  },
+  {
+   "id": "xlsr_sls",
+   "name": "XLS-R 300M + SLS",
+   "modality": "audio",
+   "adapter": true,
+   "blocked": false,
+   "parity": null
+  }
+ ],
+ "evalsets": [
+  {
+   "id": "asvspoof2019_la_eval",
+   "modality": "audio",
+   "role": "reproduction",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "bangla_voices",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "banglafake",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "bd_grf6",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "celeb_df_v2_test",
+   "modality": "video",
+   "role": "reproduction",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "deephy",
+   "modality": "video",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "dfplatter_sample",
+   "modality": "video",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "fakeavceleb",
+   "modality": "video",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "ffpp_test",
+   "modality": "video",
+   "role": "reproduction",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "hidf_video",
+   "modality": "video",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "in_the_wild",
+   "modality": "audio",
+   "role": "reproduction",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "indeepfake",
+   "modality": "video",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "indicsynth_bn",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "indicsynth_hi",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "indicsynth_ur",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "indictts_challenge",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "mavos_dd_hi_audio",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "mavos_dd_hi_video",
+   "modality": "video",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "mlaad_bn",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "mlaad_hi",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "mlaad_si",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "sea_spoof_hi",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "sea_spoof_ta",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "pending_access"
+  },
+  {
+   "id": "speechfake_bn",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "speechfake_hi",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "speechfake_ml",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "speechfake_mr",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "speechfake_ta",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready"
+  },
+  {
+   "id": "urdu_csalt",
+   "modality": "audio",
+   "role": "south_asian",
+   "pairing": "same_corpus",
+   "status": "ready"
+  }
+ ],
+ "cells": {
+  "aasist|celeb_df_v2_test": "na",
+  "aasist|deephy": "na",
+  "aasist|dfplatter_sample": "na",
+  "aasist|fakeavceleb": "na",
+  "aasist|ffpp_test": "na",
+  "aasist|hidf_video": "na",
+  "aasist|indeepfake": "na",
+  "aasist|mavos_dd_hi_video": "na",
+  "aasist3|celeb_df_v2_test": "na",
+  "aasist3|deephy": "na",
+  "aasist3|dfplatter_sample": "na",
+  "aasist3|fakeavceleb": "na",
+  "aasist3|ffpp_test": "na",
+  "aasist3|hidf_video": "na",
+  "aasist3|indeepfake": "na",
+  "aasist3|mavos_dd_hi_video": "na",
+  "aasist3|mlaad_bn": "guard",
+  "aasist3|mlaad_hi": "guard",
+  "aasist3|mlaad_si": "guard",
+  "aasist_l|celeb_df_v2_test": "na",
+  "aasist_l|deephy": "na",
+  "aasist_l|dfplatter_sample": "na",
+  "aasist_l|fakeavceleb": "na",
+  "aasist_l|ffpp_test": "na",
+  "aasist_l|hidf_video": "na",
+  "aasist_l|indeepfake": "na",
+  "aasist_l|mavos_dd_hi_video": "na",
+  "altfreezing|asvspoof2019_la_eval": "na",
+  "altfreezing|bangla_voices": "na",
+  "altfreezing|banglafake": "na",
+  "altfreezing|bd_grf6": "na",
+  "altfreezing|in_the_wild": "na",
+  "altfreezing|indicsynth_bn": "na",
+  "altfreezing|indicsynth_hi": "na",
+  "altfreezing|indicsynth_ur": "na",
+  "altfreezing|indictts_challenge": "na",
+  "altfreezing|mavos_dd_hi_audio": "na",
+  "altfreezing|mlaad_bn": "na",
+  "altfreezing|mlaad_hi": "na",
+  "altfreezing|mlaad_si": "na",
+  "altfreezing|sea_spoof_hi": "na",
+  "altfreezing|sea_spoof_ta": "na",
+  "altfreezing|speechfake_bn": "na",
+  "altfreezing|speechfake_hi": "na",
+  "altfreezing|speechfake_ml": "na",
+  "altfreezing|speechfake_mr": "na",
+  "altfreezing|speechfake_ta": "na",
+  "altfreezing|urdu_csalt": "na",
+  "antideepfake_mms_300m|asvspoof2019_la_eval": "guard",
+  "antideepfake_mms_300m|celeb_df_v2_test": "na",
+  "antideepfake_mms_300m|deephy": "na",
+  "antideepfake_mms_300m|dfplatter_sample": "na",
+  "antideepfake_mms_300m|fakeavceleb": "na",
+  "antideepfake_mms_300m|ffpp_test": "na",
+  "antideepfake_mms_300m|hidf_video": "na",
+  "antideepfake_mms_300m|indeepfake": "na",
+  "antideepfake_mms_300m|mavos_dd_hi_video": "na",
+  "antideepfake_mms_300m|mlaad_bn": "guard",
+  "antideepfake_mms_300m|mlaad_hi": "guard",
+  "antideepfake_mms_300m|mlaad_si": "guard",
+  "antideepfake_w2v_small|asvspoof2019_la_eval": "guard",
+  "antideepfake_w2v_small|celeb_df_v2_test": "na",
+  "antideepfake_w2v_small|deephy": "na",
+  "antideepfake_w2v_small|dfplatter_sample": "na",
+  "antideepfake_w2v_small|fakeavceleb": "na",
+  "antideepfake_w2v_small|ffpp_test": "na",
+  "antideepfake_w2v_small|hidf_video": "na",
+  "antideepfake_w2v_small|indeepfake": "na",
+  "antideepfake_w2v_small|mavos_dd_hi_video": "na",
+  "antideepfake_w2v_small|mlaad_bn": "guard",
+  "antideepfake_w2v_small|mlaad_hi": "guard",
+  "antideepfake_w2v_small|mlaad_si": "guard",
+  "core|asvspoof2019_la_eval": "na",
+  "core|bangla_voices": "na",
+  "core|banglafake": "na",
+  "core|bd_grf6": "na",
+  "core|in_the_wild": "na",
+  "core|indicsynth_bn": "na",
+  "core|indicsynth_hi": "na",
+  "core|indicsynth_ur": "na",
+  "core|indictts_challenge": "na",
+  "core|mavos_dd_hi_audio": "na",
+  "core|mlaad_bn": "na",
+  "core|mlaad_hi": "na",
+  "core|mlaad_si": "na",
+  "core|sea_spoof_hi": "na",
+  "core|sea_spoof_ta": "na",
+  "core|speechfake_bn": "na",
+  "core|speechfake_hi": "na",
+  "core|speechfake_ml": "na",
+  "core|speechfake_mr": "na",
+  "core|speechfake_ta": "na",
+  "core|urdu_csalt": "na",
+  "df_arena_1b|asvspoof2019_la_eval": "guard",
+  "df_arena_1b|celeb_df_v2_test": "na",
+  "df_arena_1b|deephy": "na",
+  "df_arena_1b|dfplatter_sample": "na",
+  "df_arena_1b|fakeavceleb": "na",
+  "df_arena_1b|ffpp_test": "na",
+  "df_arena_1b|hidf_video": "na",
+  "df_arena_1b|indeepfake": "na",
+  "df_arena_1b|mavos_dd_hi_video": "na",
+  "df_arena_1b|mlaad_bn": "guard",
+  "df_arena_1b|mlaad_hi": "guard",
+  "df_arena_1b|mlaad_si": "guard",
+  "df_arena_500m|asvspoof2019_la_eval": "guard",
+  "df_arena_500m|celeb_df_v2_test": "na",
+  "df_arena_500m|deephy": "na",
+  "df_arena_500m|dfplatter_sample": "na",
+  "df_arena_500m|fakeavceleb": "na",
+  "df_arena_500m|ffpp_test": "na",
+  "df_arena_500m|hidf_video": "na",
+  "df_arena_500m|indeepfake": "na",
+  "df_arena_500m|mavos_dd_hi_video": "na",
+  "df_arena_500m|mlaad_bn": "guard",
+  "df_arena_500m|mlaad_hi": "guard",
+  "df_arena_500m|mlaad_si": "guard",
+  "efficientnet_b4|asvspoof2019_la_eval": "na",
+  "efficientnet_b4|bangla_voices": "na",
+  "efficientnet_b4|banglafake": "na",
+  "efficientnet_b4|bd_grf6": "na",
+  "efficientnet_b4|in_the_wild": "na",
+  "efficientnet_b4|indicsynth_bn": "na",
+  "efficientnet_b4|indicsynth_hi": "na",
+  "efficientnet_b4|indicsynth_ur": "na",
+  "efficientnet_b4|indictts_challenge": "na",
+  "efficientnet_b4|mavos_dd_hi_audio": "na",
+  "efficientnet_b4|mlaad_bn": "na",
+  "efficientnet_b4|mlaad_hi": "na",
+  "efficientnet_b4|mlaad_si": "na",
+  "efficientnet_b4|sea_spoof_hi": "na",
+  "efficientnet_b4|sea_spoof_ta": "na",
+  "efficientnet_b4|speechfake_bn": "na",
+  "efficientnet_b4|speechfake_hi": "na",
+  "efficientnet_b4|speechfake_ml": "na",
+  "efficientnet_b4|speechfake_mr": "na",
+  "efficientnet_b4|speechfake_ta": "na",
+  "efficientnet_b4|urdu_csalt": "na",
+  "effort|asvspoof2019_la_eval": "na",
+  "effort|bangla_voices": "na",
+  "effort|banglafake": "na",
+  "effort|bd_grf6": "na",
+  "effort|in_the_wild": "na",
+  "effort|indicsynth_bn": "na",
+  "effort|indicsynth_hi": "na",
+  "effort|indicsynth_ur": "na",
+  "effort|indictts_challenge": "na",
+  "effort|mavos_dd_hi_audio": "na",
+  "effort|mlaad_bn": "na",
+  "effort|mlaad_hi": "na",
+  "effort|mlaad_si": "na",
+  "effort|sea_spoof_hi": "na",
+  "effort|sea_spoof_ta": "na",
+  "effort|speechfake_bn": "na",
+  "effort|speechfake_hi": "na",
+  "effort|speechfake_ml": "na",
+  "effort|speechfake_mr": "na",
+  "effort|speechfake_ta": "na",
+  "effort|urdu_csalt": "na",
+  "f3net|asvspoof2019_la_eval": "na",
+  "f3net|bangla_voices": "na",
+  "f3net|banglafake": "na",
+  "f3net|bd_grf6": "na",
+  "f3net|in_the_wild": "na",
+  "f3net|indicsynth_bn": "na",
+  "f3net|indicsynth_hi": "na",
+  "f3net|indicsynth_ur": "na",
+  "f3net|indictts_challenge": "na",
+  "f3net|mavos_dd_hi_audio": "na",
+  "f3net|mlaad_bn": "na",
+  "f3net|mlaad_hi": "na",
+  "f3net|mlaad_si": "na",
+  "f3net|sea_spoof_hi": "na",
+  "f3net|sea_spoof_ta": "na",
+  "f3net|speechfake_bn": "na",
+  "f3net|speechfake_hi": "na",
+  "f3net|speechfake_ml": "na",
+  "f3net|speechfake_mr": "na",
+  "f3net|speechfake_ta": "na",
+  "f3net|urdu_csalt": "na",
+  "ffd|asvspoof2019_la_eval": "na",
+  "ffd|bangla_voices": "na",
+  "ffd|banglafake": "na",
+  "ffd|bd_grf6": "na",
+  "ffd|in_the_wild": "na",
+  "ffd|indicsynth_bn": "na",
+  "ffd|indicsynth_hi": "na",
+  "ffd|indicsynth_ur": "na",
+  "ffd|indictts_challenge": "na",
+  "ffd|mavos_dd_hi_audio": "na",
+  "ffd|mlaad_bn": "na",
+  "ffd|mlaad_hi": "na",
+  "ffd|mlaad_si": "na",
+  "ffd|sea_spoof_hi": "na",
+  "ffd|sea_spoof_ta": "na",
+  "ffd|speechfake_bn": "na",
+  "ffd|speechfake_hi": "na",
+  "ffd|speechfake_ml": "na",
+  "ffd|speechfake_mr": "na",
+  "ffd|speechfake_ta": "na",
+  "ffd|urdu_csalt": "na",
+  "gend|asvspoof2019_la_eval": "na",
+  "gend|bangla_voices": "na",
+  "gend|banglafake": "na",
+  "gend|bd_grf6": "na",
+  "gend|in_the_wild": "na",
+  "gend|indicsynth_bn": "na",
+  "gend|indicsynth_hi": "na",
+  "gend|indicsynth_ur": "na",
+  "gend|indictts_challenge": "na",
+  "gend|mavos_dd_hi_audio": "na",
+  "gend|mlaad_bn": "na",
+  "gend|mlaad_hi": "na",
+  "gend|mlaad_si": "na",
+  "gend|sea_spoof_hi": "na",
+  "gend|sea_spoof_ta": "na",
+  "gend|speechfake_bn": "na",
+  "gend|speechfake_hi": "na",
+  "gend|speechfake_ml": "na",
+  "gend|speechfake_mr": "na",
+  "gend|speechfake_ta": "na",
+  "gend|urdu_csalt": "na",
+  "gend_pe_l|asvspoof2019_la_eval": "na",
+  "gend_pe_l|bangla_voices": "na",
+  "gend_pe_l|banglafake": "na",
+  "gend_pe_l|bd_grf6": "na",
+  "gend_pe_l|in_the_wild": "na",
+  "gend_pe_l|indicsynth_bn": "na",
+  "gend_pe_l|indicsynth_hi": "na",
+  "gend_pe_l|indicsynth_ur": "na",
+  "gend_pe_l|indictts_challenge": "na",
+  "gend_pe_l|mavos_dd_hi_audio": "na",
+  "gend_pe_l|mlaad_bn": "na",
+  "gend_pe_l|mlaad_hi": "na",
+  "gend_pe_l|mlaad_si": "na",
+  "gend_pe_l|sea_spoof_hi": "na",
+  "gend_pe_l|sea_spoof_ta": "na",
+  "gend_pe_l|speechfake_bn": "na",
+  "gend_pe_l|speechfake_hi": "na",
+  "gend_pe_l|speechfake_ml": "na",
+  "gend_pe_l|speechfake_mr": "na",
+  "gend_pe_l|speechfake_ta": "na",
+  "gend_pe_l|urdu_csalt": "na",
+  "havic|asvspoof2019_la_eval": "na",
+  "havic|bangla_voices": "na",
+  "havic|banglafake": "na",
+  "havic|bd_grf6": "na",
+  "havic|celeb_df_v2_test": "na",
+  "havic|deephy": "na",
+  "havic|dfplatter_sample": "na",
+  "havic|fakeavceleb": "na",
+  "havic|ffpp_test": "na",
+  "havic|hidf_video": "na",
+  "havic|in_the_wild": "na",
+  "havic|indeepfake": "na",
+  "havic|indicsynth_bn": "na",
+  "havic|indicsynth_hi": "na",
+  "havic|indicsynth_ur": "na",
+  "havic|indictts_challenge": "na",
+  "havic|mavos_dd_hi_audio": "na",
+  "havic|mavos_dd_hi_video": "na",
+  "havic|mlaad_bn": "na",
+  "havic|mlaad_hi": "na",
+  "havic|mlaad_si": "na",
+  "havic|sea_spoof_hi": "na",
+  "havic|sea_spoof_ta": "na",
+  "havic|speechfake_bn": "na",
+  "havic|speechfake_hi": "na",
+  "havic|speechfake_ml": "na",
+  "havic|speechfake_mr": "na",
+  "havic|speechfake_ta": "na",
+  "havic|urdu_csalt": "na",
+  "lipforensics|asvspoof2019_la_eval": "na",
+  "lipforensics|bangla_voices": "na",
+  "lipforensics|banglafake": "na",
+  "lipforensics|bd_grf6": "na",
+  "lipforensics|in_the_wild": "na",
+  "lipforensics|indicsynth_bn": "na",
+  "lipforensics|indicsynth_hi": "na",
+  "lipforensics|indicsynth_ur": "na",
+  "lipforensics|indictts_challenge": "na",
+  "lipforensics|mavos_dd_hi_audio": "na",
+  "lipforensics|mlaad_bn": "na",
+  "lipforensics|mlaad_hi": "na",
+  "lipforensics|mlaad_si": "na",
+  "lipforensics|sea_spoof_hi": "na",
+  "lipforensics|sea_spoof_ta": "na",
+  "lipforensics|speechfake_bn": "na",
+  "lipforensics|speechfake_hi": "na",
+  "lipforensics|speechfake_ml": "na",
+  "lipforensics|speechfake_mr": "na",
+  "lipforensics|speechfake_ta": "na",
+  "lipforensics|urdu_csalt": "na",
+  "recce|asvspoof2019_la_eval": "na",
+  "recce|bangla_voices": "na",
+  "recce|banglafake": "na",
+  "recce|bd_grf6": "na",
+  "recce|in_the_wild": "na",
+  "recce|indicsynth_bn": "na",
+  "recce|indicsynth_hi": "na",
+  "recce|indicsynth_ur": "na",
+  "recce|indictts_challenge": "na",
+  "recce|mavos_dd_hi_audio": "na",
+  "recce|mlaad_bn": "na",
+  "recce|mlaad_hi": "na",
+  "recce|mlaad_si": "na",
+  "recce|sea_spoof_hi": "na",
+  "recce|sea_spoof_ta": "na",
+  "recce|speechfake_bn": "na",
+  "recce|speechfake_hi": "na",
+  "recce|speechfake_ml": "na",
+  "recce|speechfake_mr": "na",
+  "recce|speechfake_ta": "na",
+  "recce|urdu_csalt": "na",
+  "sbi|asvspoof2019_la_eval": "na",
+  "sbi|bangla_voices": "na",
+  "sbi|banglafake": "na",
+  "sbi|bd_grf6": "na",
+  "sbi|in_the_wild": "na",
+  "sbi|indicsynth_bn": "na",
+  "sbi|indicsynth_hi": "na",
+  "sbi|indicsynth_ur": "na",
+  "sbi|indictts_challenge": "na",
+  "sbi|mavos_dd_hi_audio": "na",
+  "sbi|mlaad_bn": "na",
+  "sbi|mlaad_hi": "na",
+  "sbi|mlaad_si": "na",
+  "sbi|sea_spoof_hi": "na",
+  "sbi|sea_spoof_ta": "na",
+  "sbi|speechfake_bn": "na",
+  "sbi|speechfake_hi": "na",
+  "sbi|speechfake_ml": "na",
+  "sbi|speechfake_mr": "na",
+  "sbi|speechfake_ta": "na",
+  "sbi|urdu_csalt": "na",
+  "spsl|asvspoof2019_la_eval": "na",
+  "spsl|bangla_voices": "na",
+  "spsl|banglafake": "na",
+  "spsl|bd_grf6": "na",
+  "spsl|in_the_wild": "na",
+  "spsl|indicsynth_bn": "na",
+  "spsl|indicsynth_hi": "na",
+  "spsl|indicsynth_ur": "na",
+  "spsl|indictts_challenge": "na",
+  "spsl|mavos_dd_hi_audio": "na",
+  "spsl|mlaad_bn": "na",
+  "spsl|mlaad_hi": "na",
+  "spsl|mlaad_si": "na",
+  "spsl|sea_spoof_hi": "na",
+  "spsl|sea_spoof_ta": "na",
+  "spsl|speechfake_bn": "na",
+  "spsl|speechfake_hi": "na",
+  "spsl|speechfake_ml": "na",
+  "spsl|speechfake_mr": "na",
+  "spsl|speechfake_ta": "na",
+  "spsl|urdu_csalt": "na",
+  "srm|asvspoof2019_la_eval": "na",
+  "srm|bangla_voices": "na",
+  "srm|banglafake": "na",
+  "srm|bd_grf6": "na",
+  "srm|in_the_wild": "na",
+  "srm|indicsynth_bn": "na",
+  "srm|indicsynth_hi": "na",
+  "srm|indicsynth_ur": "na",
+  "srm|indictts_challenge": "na",
+  "srm|mavos_dd_hi_audio": "na",
+  "srm|mlaad_bn": "na",
+  "srm|mlaad_hi": "na",
+  "srm|mlaad_si": "na",
+  "srm|sea_spoof_hi": "na",
+  "srm|sea_spoof_ta": "na",
+  "srm|speechfake_bn": "na",
+  "srm|speechfake_hi": "na",
+  "srm|speechfake_ml": "na",
+  "srm|speechfake_mr": "na",
+  "srm|speechfake_ta": "na",
+  "srm|urdu_csalt": "na",
+  "ucf|asvspoof2019_la_eval": "na",
+  "ucf|bangla_voices": "na",
+  "ucf|banglafake": "na",
+  "ucf|bd_grf6": "na",
+  "ucf|in_the_wild": "na",
+  "ucf|indicsynth_bn": "na",
+  "ucf|indicsynth_hi": "na",
+  "ucf|indicsynth_ur": "na",
+  "ucf|indictts_challenge": "na",
+  "ucf|mavos_dd_hi_audio": "na",
+  "ucf|mlaad_bn": "na",
+  "ucf|mlaad_hi": "na",
+  "ucf|mlaad_si": "na",
+  "ucf|sea_spoof_hi": "na",
+  "ucf|sea_spoof_ta": "na",
+  "ucf|speechfake_bn": "na",
+  "ucf|speechfake_hi": "na",
+  "ucf|speechfake_ml": "na",
+  "ucf|speechfake_mr": "na",
+  "ucf|speechfake_ta": "na",
+  "ucf|urdu_csalt": "na",
+  "xception|asvspoof2019_la_eval": "na",
+  "xception|bangla_voices": "na",
+  "xception|banglafake": "na",
+  "xception|bd_grf6": "na",
+  "xception|in_the_wild": "na",
+  "xception|indicsynth_bn": "na",
+  "xception|indicsynth_hi": "na",
+  "xception|indicsynth_ur": "na",
+  "xception|indictts_challenge": "na",
+  "xception|mavos_dd_hi_audio": "na",
+  "xception|mlaad_bn": "na",
+  "xception|mlaad_hi": "na",
+  "xception|mlaad_si": "na",
+  "xception|sea_spoof_hi": "na",
+  "xception|sea_spoof_ta": "na",
+  "xception|speechfake_bn": "na",
+  "xception|speechfake_hi": "na",
+  "xception|speechfake_ml": "na",
+  "xception|speechfake_mr": "na",
+  "xception|speechfake_ta": "na",
+  "xception|urdu_csalt": "na",
+  "xlsr_aasist|celeb_df_v2_test": "na",
+  "xlsr_aasist|deephy": "na",
+  "xlsr_aasist|dfplatter_sample": "na",
+  "xlsr_aasist|fakeavceleb": "na",
+  "xlsr_aasist|ffpp_test": "na",
+  "xlsr_aasist|hidf_video": "na",
+  "xlsr_aasist|indeepfake": "na",
+  "xlsr_aasist|mavos_dd_hi_video": "na",
+  "xlsr_mamba|celeb_df_v2_test": "na",
+  "xlsr_mamba|deephy": "na",
+  "xlsr_mamba|dfplatter_sample": "na",
+  "xlsr_mamba|fakeavceleb": "na",
+  "xlsr_mamba|ffpp_test": "na",
+  "xlsr_mamba|hidf_video": "na",
+  "xlsr_mamba|indeepfake": "na",
+  "xlsr_mamba|mavos_dd_hi_video": "na",
+  "xlsr_sls|celeb_df_v2_test": "na",
+  "xlsr_sls|deephy": "na",
+  "xlsr_sls|dfplatter_sample": "na",
+  "xlsr_sls|fakeavceleb": "na",
+  "xlsr_sls|ffpp_test": "na",
+  "xlsr_sls|hidf_video": "na",
+  "xlsr_sls|indeepfake": "na",
+  "xlsr_sls|mavos_dd_hi_video": "na"
+ },
+ "runs": [
+  {
+   "model": "aasist",
+   "evalset": "asvspoof2019_la_eval",
+   "run_id": "aasist__asvspoof2019_la_eval__992a100f",
+   "pairing": "same_corpus",
+   "n": 71237,
+   "n_real": 7355,
+   "n_fake": 63882,
+   "n_failed": 1059,
+   "auc": 0.9988645005168919,
+   "auc_lo": 0.9986118691191672,
+   "auc_hi": 0.999081469359333,
+   "eer": 0.015758308926524855,
+   "eer_lo": 0.014141963557247757,
+   "eer_hi": 0.017541474027740006,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "aasist",
+   "evalset": "banglafake",
+   "run_id": "aasist__banglafake__92b6357f",
+   "pairing": "same_corpus",
+   "n": 25592,
+   "n_real": 12796,
+   "n_fake": 12796,
+   "n_failed": 19,
+   "auc": 0.36528139079410066,
+   "auc_lo": 0.35880608361100325,
+   "auc_hi": 0.37159737435526125,
+   "eer": 0.5946854239937476,
+   "eer_lo": 0.5888245226093525,
+   "eer_hi": 0.6007033997655333,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "below chance"
+   ]
+  },
+  {
+   "model": "aasist",
+   "evalset": "in_the_wild",
+   "run_id": "aasist__in_the_wild__aa3d82d3",
+   "pairing": "same_corpus",
+   "n": 31779,
+   "n_real": 19963,
+   "n_fake": 11816,
+   "n_failed": 865,
+   "auc": 0.5777580536458184,
+   "auc_lo": 0.5708601911390804,
+   "auc_hi": 0.583754213694696,
+   "eer": 0.4404301075268817,
+   "eer_lo": 0.4354282233397273,
+   "eer_hi": 0.44611129057343396,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "aasist",
+   "evalset": "urdu_csalt",
+   "run_id": "aasist__urdu_csalt__97cf7cb7",
+   "pairing": "same_corpus",
+   "n": 6794,
+   "n_real": 3398,
+   "n_fake": 3396,
+   "n_failed": 19,
+   "auc": 0.8632242084258313,
+   "auc_lo": 0.8551788245554746,
+   "auc_hi": 0.8716269634126085,
+   "eer": 0.22218952324896998,
+   "eer_lo": 0.21142702608773853,
+   "eer_hi": 0.23131888534477335,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "aasist_l",
+   "evalset": "asvspoof2019_la_eval",
+   "run_id": "aasist_l__asvspoof2019_la_eval__64617abd",
+   "pairing": "same_corpus",
+   "n": 71237,
+   "n_real": 7355,
+   "n_fake": 63882,
+   "n_failed": 1059,
+   "auc": 0.9988768790985681,
+   "auc_lo": 0.9986434685116156,
+   "auc_hi": 0.9990777075984034,
+   "eer": 0.014914682287024084,
+   "eer_lo": 0.013190100625509927,
+   "eer_hi": 0.016589611096002176,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "aasist_l",
+   "evalset": "banglafake",
+   "run_id": "aasist_l__banglafake__7d2bedff",
+   "pairing": "same_corpus",
+   "n": 25592,
+   "n_real": 12796,
+   "n_fake": 12796,
+   "n_failed": 19,
+   "auc": 0.3794115258059736,
+   "auc_lo": 0.3728630972073618,
+   "auc_hi": 0.38614208444980813,
+   "eer": 0.5824072624823916,
+   "eer_lo": 0.5766125370203562,
+   "eer_hi": 0.5883548261039468,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "below chance"
+   ]
+  },
+  {
+   "model": "aasist_l",
+   "evalset": "in_the_wild",
+   "run_id": "aasist_l__in_the_wild__be308f8f",
+   "pairing": "same_corpus",
+   "n": 31779,
+   "n_real": 19963,
+   "n_fake": 11816,
+   "n_failed": 865,
+   "auc": 0.5824822660639497,
+   "auc_lo": 0.5757900745703302,
+   "auc_hi": 0.5886413768614014,
+   "eer": 0.4484939602882472,
+   "eer_lo": 0.44336020529835657,
+   "eer_hi": 0.4541936269878035,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "aasist_l",
+   "evalset": "urdu_csalt",
+   "run_id": "aasist_l__urdu_csalt__18f0b5bc",
+   "pairing": "same_corpus",
+   "n": 6794,
+   "n_real": 3398,
+   "n_fake": 3396,
+   "n_failed": 19,
+   "auc": 0.8608831720587438,
+   "auc_lo": 0.8524853745684331,
+   "auc_hi": 0.8693615127991645,
+   "eer": 0.23101824602707474,
+   "eer_lo": 0.22061000888362448,
+   "eer_hi": 0.2413189236888462,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "df_arena_1b",
+   "evalset": "banglafake",
+   "run_id": "df_arena_1b__banglafake__6814a911",
+   "pairing": "same_corpus",
+   "n": 25592,
+   "n_real": 12796,
+   "n_fake": 12796,
+   "n_failed": 19,
+   "auc": 0.9994419629136171,
+   "auc_lo": 0.9992222280124269,
+   "auc_hi": 0.9996354175745716,
+   "eer": 0.00657379871654406,
+   "eer_lo": 0.005712944122710909,
+   "eer_hi": 0.007737397420867542,
+   "verdict": "source_overlap",
+   "reasons": [
+    "df_arena_1b pretrain data commonvoice shares ['commonvoice'] with banglafake"
+   ],
+   "flags": [
+    "source overlap"
+   ]
+  },
+  {
+   "model": "df_arena_1b",
+   "evalset": "in_the_wild",
+   "run_id": "df_arena_1b__in_the_wild__fc243ad2",
+   "pairing": "same_corpus",
+   "n": 31779,
+   "n_real": 19963,
+   "n_fake": 11816,
+   "n_failed": 865,
+   "auc": 0.9990204233623597,
+   "auc_lo": 0.9986406706814346,
+   "auc_hi": 0.9993531265521549,
+   "eer": 0.006687749494530561,
+   "eer_lo": 0.005763440860215074,
+   "eer_hi": 0.007725043021344271,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "df_arena_1b",
+   "evalset": "urdu_csalt",
+   "run_id": "df_arena_1b__urdu_csalt__f1d5ce50",
+   "pairing": "same_corpus",
+   "n": 6794,
+   "n_real": 3398,
+   "n_fake": 3396,
+   "n_failed": 19,
+   "auc": 0.9948221558327521,
+   "auc_lo": 0.9937547527042594,
+   "auc_hi": 0.9957440083464588,
+   "eer": 0.04002354326074161,
+   "eer_lo": 0.034726309593878756,
+   "eer_hi": 0.04532077692760447,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "df_arena_500m",
+   "evalset": "banglafake",
+   "run_id": "df_arena_500m__banglafake__ccdac5c8",
+   "pairing": "same_corpus",
+   "n": 25592,
+   "n_real": 12796,
+   "n_fake": 12796,
+   "n_failed": 19,
+   "auc": 0.9973273383919743,
+   "auc_lo": 0.9968667723919292,
+   "auc_hi": 0.9977595683488086,
+   "eer": 0.021649081672528325,
+   "eer_lo": 0.019695193434935532,
+   "eer_hi": 0.023399593050555643,
+   "verdict": "source_overlap",
+   "reasons": [
+    "df_arena_500m pretrain data commonvoice shares ['commonvoice'] with banglafake"
+   ],
+   "flags": [
+    "source overlap"
+   ]
+  },
+  {
+   "model": "df_arena_500m",
+   "evalset": "in_the_wild",
+   "run_id": "df_arena_500m__in_the_wild__b2c198ee",
+   "pairing": "same_corpus",
+   "n": 31779,
+   "n_real": 19963,
+   "n_fake": 11816,
+   "n_failed": 865,
+   "auc": 0.9986259615347093,
+   "auc_lo": 0.9982868804271418,
+   "auc_hi": 0.9989057103692172,
+   "eer": 0.01505376344086018,
+   "eer_lo": 0.013503425485693811,
+   "eer_hi": 0.016602150537634364,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  },
+  {
+   "model": "df_arena_500m",
+   "evalset": "urdu_csalt",
+   "run_id": "df_arena_500m__urdu_csalt__3ef80d7b",
+   "pairing": "same_corpus",
+   "n": 6794,
+   "n_real": 3398,
+   "n_fake": 3396,
+   "n_failed": 19,
+   "auc": 0.9813130160872557,
+   "auc_lo": 0.978893729489189,
+   "auc_hi": 0.9835183656344385,
+   "eer": 0.07769276044732196,
+   "eer_lo": 0.07106899615042939,
+   "eer_hi": 0.08469055374592838,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": []
+  }
+ ]
+}
+</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("status-data").textContent);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const fmt = (x, d = 3) => x.toFixed(d);
+  const pct = (x) => (100 * x).toFixed(1) + "%";
+  const int = (x) => x.toLocaleString("en-US");
+  const runs = new Map(D.runs.map((r) => [r.model + "|" + r.evalset, r]));
+  const models = new Map(D.models.map((m) => [m.id, m]));
+  const GROUPS = [
+    ["reproduction", "same_corpus", "Reproduction"],
+    ["south_asian", "same_corpus", "South Asian · same corpus"],
+    ["south_asian", "cross_corpus", "South Asian · cross corpus"],
+  ];
+  const nRuns = (m) => D.runs.filter((r) => r.model === m.id).length;
+
+  document.getElementById("facts").innerHTML = [
+    `<span><b>${D.models.length}</b> models</span>`,
+    `<span><b>${D.evalsets.length}</b> evalsets</span>`,
+    `<span><b>${D.runs.length}</b> scored pairs</span>`,
+    `<span><b>${D.models.filter((m) => m.parity).length}</b> parity-checked</span>`,
+    `<span>eval setup <b>${esc(D.eval_status)}</b></span>`,
+    `<span>built ${esc(D.built)}</span>`,
+  ].join("");
+  document.getElementById("eval-status").textContent = D.eval_status;
+
+  function grid(id, modelMods, evMods) {
+    const evs = D.evalsets.filter((e) => evMods.includes(e.modality));
+    const groups = GROUPS.map(([role, pairing, label]) => ({
+      label,
+      evs: evs.filter((e) => e.role === role && e.pairing === pairing).sort((a, b) => a.id.localeCompare(b.id)),
+    })).filter((g) => g.evs.length);
+    const cols = groups.flatMap((g) => g.evs.map((e, i) => ({ ...e, first: i === 0 })));
+    const ms = D.models
+      .filter((m) => modelMods.includes(m.modality))
+      .sort((a, b) => nRuns(b) - nRuns(a) || !!b.parity - !!a.parity || a.name.localeCompare(b.name));
+
+    let h = "<thead><tr><th class='mh' rowspan='2'>Model</th>";
+    h += "<th class='v lad' rowspan='2'><span>adapter</span></th><th class='v lad' rowspan='2'><span>parity</span></th>";
+    h += groups.map((g) => `<th class='grp' colspan='${g.evs.length}'>${esc(g.label)}</th>`).join("") + "</tr><tr>";
+    h += cols.map((e) => `<th class='v${e.first ? " first" : ""}${e.status !== "ready" ? " pending" : ""}' title='${esc(e.id)}: ${esc(e.status.replace("_", " "))}'><span>${esc(e.id)}</span></th>`).join("");
+    h += "</tr></thead><tbody>";
+    for (const m of ms) {
+      const tag = m.blocked ? "<small>blocked</small>" : "";
+      const par = m.parity ? `parity on ${m.parity.items} items of ${m.parity.evalset}, max diff ${m.parity.max_abs_diff.toExponential(1)}` : "no parity check yet";
+      h += `<tr><th scope='row' title='${esc(m.id)}'>${esc(m.name)}${tag}</th>`;
+      h += `<td class='lad${m.adapter ? " on" : ""}' title='${m.adapter ? "adapter written" : "no adapter"}'>${m.adapter ? "●" : "○"}</td>`;
+      h += `<td class='lad${m.parity ? " on" : ""}' title='${esc(par)}'>${m.parity ? "●" : "○"}</td>`;
+      for (const e of cols) {
+        const key = m.id + "|" + e.id;
+        const r = runs.get(key);
+        const cls = [e.first ? "first" : "", e.status !== "ready" ? "pending" : ""];
+        let body = "", title = "";
+        if (r) {
+          const shade = Math.max(0, Math.min(1, (r.auc - 0.5) / 0.5)) * 24;
+          cls.push("run", r.flags.length && r.flags.some((f) => f !== "cross-corpus") ? "flag" : "");
+          body = fmt(r.auc);
+          title = `AUC ${fmt(r.auc)} [${fmt(r.auc_lo)}, ${fmt(r.auc_hi)}], EER ${pct(r.eer)}, n ${int(r.n)}${r.flags.length ? ", " + r.flags.join(", ") : ""}`;
+          h += `<td class='${cls.join(" ")}' style='background-color: color-mix(in oklab, var(--ink) ${shade.toFixed(1)}%, transparent)' title='${esc(title)}'>${body}</td>`;
+          continue;
+        }
+        const state = D.cells[key];
+        if (state === "na") { cls.push("na"); title = "different modality"; }
+        else if (state === "guard") { cls.push("guard"); body = "⊘"; title = "contamination guard: trained on this data"; }
+        else { cls.push("empty"); body = "·"; title = e.status === "ready" ? "not run yet" : "data access pending"; }
+        h += `<td class='${cls.join(" ")}' title='${esc(title)}'>${body}</td>`;
+      }
+      h += "</tr>";
+    }
+    document.getElementById(id).innerHTML = h + "</tbody>";
+    return ms;
+  }
+
+  grid("grid-audio", ["audio"], ["audio"]);
+  const vms = grid("grid-video", ["video", "audio_video"], ["video", "image", "audio_video"]);
+  if (!D.runs.some((r) => vms.some((m) => m.id === r.model))) {
+    const open = D.evalsets.filter((e) => e.modality !== "audio" && e.status === "ready").map((e) => e.id);
+    document.getElementById("video-note").textContent =
+      `No video model has a full-evalset run yet. Open video evalsets: ${open.join(", ") || "none"}; the rest wait on access requests.`;
+  }
+
+  const order = (r) => {
+    const e = D.evalsets.find((x) => x.id === r.evalset);
+    return GROUPS.findIndex(([role, pairing]) => e.role === role && e.pairing === pairing);
+  };
+  const rows = D.runs.slice().sort((a, b) => order(a) - order(b) || a.evalset.localeCompare(b.evalset) || a.model.localeCompare(b.model));
+  let t = "<thead><tr><th>Evalset</th><th>Model</th><th class='num'>Real / fake</th><th class='num'>Failed</th><th class='num'>AUC</th><th class='num'>95% CI</th><th class='num'>EER</th><th>Flags</th></tr></thead><tbody>";
+  for (const r of rows) {
+    const title = [r.run_id, ...r.reasons].join("\n");
+    t += `<tr title='${esc(title)}'><td class='id'>${esc(r.evalset)}</td><td class='model'>${esc(models.get(r.model).name)}</td>`;
+    t += `<td class='num'>${int(r.n_real)} / ${int(r.n_fake)}</td><td class='num'>${int(r.n_failed)}</td>`;
+    t += `<td class='num'>${fmt(r.auc)}</td><td class='num ci'>${fmt(r.auc_lo)}–${fmt(r.auc_hi)}</td><td class='num'>${pct(r.eer)}</td>`;
+    t += `<td class='flags'>${esc(r.flags.join(", "))}</td></tr>`;
+  }
+  document.getElementById("runs-table").innerHTML = t + "</tbody>";
+})();
+</script>
+</body>
+</html>
