@@ -1,0 +1,18 @@
+id: bangla_voices
+name: Bangla Audio Dataset, original and deepfake voices (Mendeley)
+modality: audio
+role: south_asian
+status: open
+access:
+  kind: url
+  page: https://data.mendeley.com/datasets/4ftmwt86vr/1
+  urls:
+    # Mendeley's whole-dataset zip; the endpoint redirects to a short-lived signed S3 link,
+    # which serves range requests
+    bangla_voices.zip: https://data.mendeley.com/public-api/zip/4ftmwt86vr/download/1
+licence: CC BY 4.0
+contains: [real, fake]
+languages: [bn]
+size_gb: 0.52
+builder: deeptrace_bench.datasets.bangla_voices:build_manifest
+notes: Bangla speech of 75 Bangladeshi speakers (University of Asia Pacific, 2024; checked 2026-10-05), 30 sentences each read once and faked once, 4,500 clips of 2 to 5 s, near gender balance. Every fake has a real twin by the same speaker and sentence. The generator isn't named.

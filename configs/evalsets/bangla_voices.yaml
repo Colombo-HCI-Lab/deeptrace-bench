@@ -1,0 +1,10 @@
+id: bangla_voices
+modality: audio
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: bangla_voices
+match_on: [subject_id]
+group_by: [g_gender]
+status: ready
+notes: Each speaker's 30 sentences, real and faked, so real and fake share speakers and text. The second Bengali set after BanglaFake, with 75 speakers against BanglaFake's seven.

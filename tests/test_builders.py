@@ -462,3 +462,38 @@ def test_hidf_labels_fakes_by_the_face_on_screen(tmp_path):
     assert (df.loc["real", "g_race"], df.loc["real", "g_gender"]) == ("white", "male")
     assert (df.loc["fake", "g_race"], df.loc["fake", "g_age"]) == ("indian", "elderly")
     assert (df.loc["fake", "subject_id"], df.loc["fake", "source_subject_id"]) == ("c0001", "f0009")
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("Title/Dataset/S10F03/Real/1.wav", "real"),
+        ("Title/Dataset/S12M05/Fake/30.wav", "fake"),
+        ("Title/Dataset/notes/Fake/1.wav", None),
+        ("Title/Dataset/S10F03/Real/1.txt", None),
+    ],
+)
+def test_bangla_voices_labels(path, label):
+    from deeptrace_bench.datasets import bangla_voices
+
+    assert bangla_voices.label_from_path(path) == label
+
+
+def test_bangla_voices_manifest(tmp_path):
+    from deeptrace_bench.datasets import bangla_voices
+
+    _tree(
+        tmp_path,
+        ["T/Dataset/S1F02/Real/1.wav", "T/Dataset/S1F02/Fake/1.wav", "T/Dataset/S2M01/Fake/4.wav"],
+    )
+    df = bangla_voices.build_manifest(tmp_path)
+    validate_manifest(df, "bangla_voices")
+    assert sorted(df.item_id) == [
+        "bangla_voices/S1F02/fake/1",
+        "bangla_voices/S1F02/real/1",
+        "bangla_voices/S2M01/fake/4",
+    ]
+    assert set(zip(df.subject_id, df.g_gender, strict=True)) == {
+        ("S1F02", "female"),
+        ("S2M01", "male"),
+    }
