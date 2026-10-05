@@ -257,9 +257,9 @@ def _literal_prefix(pattern: str) -> str:
 class _HfParquetSource(_HfSource):
     """Rows of a dataset's parquet shards on the Hub, sampled without fetching every shard.
 
-    Candidates come from at most ``max_files`` shards and one row group of each (both picked
-    by the seed), so a sample costs a few small label reads and one row group of audio per
-    shard. A candidate is ``<shard path>#<row number in the shard>``.
+    Candidates come from at most ``max_files`` shards per folder and one row group of each
+    (both picked by the seed), so a sample costs a few small label reads and one row group of
+    audio per shard. A candidate is ``<shard path>#<row number in the shard>``.
     """
 
     def __init__(
@@ -293,10 +293,20 @@ class _HfParquetSource(_HfSource):
         import pyarrow.parquet as pq
 
         shards = [f for f in super().candidates() if f.endswith(".parquet")]
-        shards = sorted(shards, key=lambda p: _rank(self.seed, p))[: self.max_files]
+        # up to max_files shards per folder (IndicSynth keeps one per language), each folder
+        # its own stratum, so every language asked for turns up
+        folders: dict[str, list[str]] = {}
+        for name in shards:
+            folders.setdefault(name.rpartition("/")[0], []).append(name)
+        shards = [
+            name
+            for group in folders.values()
+            for name in sorted(group, key=lambda p: _rank(self.seed, p))[: self.max_files]
+        ]
         stratum_of = getattr(self.builder, "row_stratum", None)
         paths = []
         for name in shards:
+            folder = name.rpartition("/")[0]
             with self.open_file(name) as handle:
                 shard = pq.ParquetFile(handle)
                 sizes = [shard.metadata.row_group(g).num_rows for g in range(shard.num_row_groups)]
@@ -308,8 +318,8 @@ class _HfParquetSource(_HfSource):
                     continue
                 path = f"{name}#{sum(sizes[:group]) + offset}"
                 self.labels[path] = label
-                if stratum_of is not None:
-                    self.strata[path] = stratum_of(row)
+                inner = stratum_of(row) if stratum_of is not None else ""
+                self.strata[path] = f"{folder}/{inner}" if len(folders) > 1 else inner
                 paths.append(path)
         return paths
 
@@ -611,7 +621,7 @@ def sample_dataset(
     paths = source.candidates()
     if isinstance(source, _HfParquetSource):
         label_of: LabelOf = source.labels.get
-        stratum_of = source.strata.get if source.strata else None
+        stratum_of = source.strata.get if any(source.strata.values()) else None
     else:
         label_of = label_function(config, read=source.read)
     chosen = choose(paths, label_of, per_label, seed, labels=config.contains, stratum_of=stratum_of)

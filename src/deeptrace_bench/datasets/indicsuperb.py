@@ -56,6 +56,12 @@ def label_from_path(rel_path: str) -> str | None:
     return "real" if _parts(rel_path) else None
 
 
+def sample_stratum(rel_path: str) -> str:
+    """Sample per language, so every language's evalset gets real items."""
+    found = _parts(rel_path)
+    return found[0] if found else ""
+
+
 def build_manifest(root: Path) -> pd.DataFrame:
     """One row per m4a clip found under ``root`` (the extracted tars, or a sample)."""
     rows = []
