@@ -18,6 +18,8 @@ video:
   image_min_face_frames: 1         # an image is a one-frame clip
   image_pad_retry: 0.5             # no face in an image: detect again with a black border of
                                    # this fraction per side (tight face crops defeat SCRFD)
+  video_pad_retry: 0.5             # the same for a video frame: HiDF's videos are 512 px face
+                                   # crops, and without it SCRFD found faces in 6 of 32 frames
   aggregation: mean                # item score = mean of frame scores
 
 audio:

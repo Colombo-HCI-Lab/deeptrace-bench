@@ -7,8 +7,10 @@ The shared pipeline, one item at a time:
    is a one-frame clip. Frames are RGB from here on.
    Datasets of ready-made face crops (a face filling the whole image) defeat the detector,
    which needs some context around a face, so an image with no face is tried once more with
-   a black border (``image_pad_retry`` of each side). Coordinates are always stored in the
-   original image, so cropping is the same either way; the cache records the padding used.
+   a black border (``image_pad_retry`` of each side), and so is a video frame
+   (``video_pad_retry``): some sets ship videos of face crops too (HiDF). Coordinates are
+   always stored in the original image, so cropping is the same either way; the cache
+   records the padding used.
 2. **Detect once per dataset.** One detector (the ``scrfd_10g`` tool, the model GenD's own
    ``detector.py`` runs) finds faces in each frame, and the largest face's box and five
    landmarks are cached as parquet parts under ``faces/<dataset>/<detector>__<hash>/``. The
@@ -334,6 +336,8 @@ class FaceLoader:
             models whose network takes runs of consecutive frames (LipForensics).
         min_face_frames: a video needs at least this many frames with a face.
         image_min_face_frames: the same for an image (a one-frame clip).
+        video_pad_retry: the same for a video frame with no face (videos of tight face crops,
+            like HiDF's); 0 disables it.
         image_pad_retry: border to add when an image shows no face, as a fraction of each
             side; 0 disables the retry.
         save_crops_to: if set, write up to ``save_crops`` crops per item there as PNG, under
@@ -353,6 +357,7 @@ class FaceLoader:
         min_face_frames: int = 8,
         image_min_face_frames: int = 1,
         image_pad_retry: float = 0.0,
+        video_pad_retry: float = 0.0,
         save_crops_to: Path | None = None,
         save_crops: int = 0,
         part_prefix: str = "part",
@@ -368,6 +373,7 @@ class FaceLoader:
         self.min_face_frames = min_face_frames
         self.image_min_face_frames = image_min_face_frames
         self.image_pad_retry = image_pad_retry
+        self.video_pad_retry = video_pad_retry
         self.save_crops_to = save_crops_to
         self.save_crops = save_crops
         self.part_prefix = part_prefix
@@ -393,6 +399,7 @@ class FaceLoader:
             "frames_per_clip": video["frames_per_clip"],
             "frame_sampling": video["frame_sampling"],
             "image_pad_retry": video["image_pad_retry"],
+            "video_pad_retry": video["video_pad_retry"],
         }
         if settings["face_choice"] != "largest" or settings["frame_sampling"] != "uniform":
             raise NotImplementedError("only largest-face choice and uniform sampling exist")
@@ -436,6 +443,7 @@ class FaceLoader:
             min_face_frames=min_faces,
             image_min_face_frames=video["image_min_face_frames"],
             image_pad_retry=video["image_pad_retry"],
+            video_pad_retry=video["video_pad_retry"],
             **kwargs,
         )
 
@@ -449,10 +457,11 @@ class FaceLoader:
         """Detections in ``rgb``'s coordinates, and the padding that found them."""
         assert self._detector is not None
         dets, kps = self._detector(rgb)
-        if len(dets) or not is_image or self.image_pad_retry <= 0:
+        pad = self.image_pad_retry if is_image else self.video_pad_retry
+        if len(dets) or pad <= 0:
             return dets, kps, 0.0
         h, w = rgb.shape[:2]
-        py, px = int(round(h * self.image_pad_retry)), int(round(w * self.image_pad_retry))
+        py, px = int(round(h * pad)), int(round(w * pad))
         padded = cv2.copyMakeBorder(rgb, py, py, px, px, cv2.BORDER_CONSTANT, value=(0, 0, 0))
         dets, kps = self._detector(padded)
         if len(dets):
@@ -460,7 +469,7 @@ class FaceLoader:
             dets[:, [0, 2]] -= px
             dets[:, [1, 3]] -= py
             kps = kps - np.array([px, py], dtype=kps.dtype)
-        return dets, kps, self.image_pad_retry
+        return dets, kps, pad
 
     def _detect(
         self, frames: list[tuple[int, np.ndarray]], n_frames: int, is_image: bool

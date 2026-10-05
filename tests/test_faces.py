@@ -177,6 +177,16 @@ def test_a_tight_face_crop_is_found_on_the_padded_retry(store):
         _loader(StubDetector(min_side=100))(_row("face.png", "image"))
 
 
+def test_tight_face_crop_videos_get_the_padded_retry_too(store):
+    # HiDF's videos are 512 px face crops, chin cut off: the detector needs the border
+    loader = _loader(StubDetector(min_side=100), video_pad_retry=0.5)
+    assert len(loader(_row("clip.mp4", "video"))) == 8
+    records = loader._cache("toy").get("toy/clip.mp4")
+    assert {r["pad"] for r in records} == {0.5}
+    with pytest.raises(PreprocessError):
+        _loader(StubDetector(min_side=100))(_row("clip.mp4", "video"))
+
+
 def test_crops_are_saved_for_people_to_look_at(store, tmp_path):
     loader = _loader(StubDetector(), save_crops_to=tmp_path / "crops", save_crops=2)
     loader(_row("clip.mp4", "video"))
