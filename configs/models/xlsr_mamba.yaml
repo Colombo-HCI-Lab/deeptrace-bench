@@ -1,17 +1,24 @@
 id: xlsr_mamba
 name: XLSR-Mamba
 modality: audio
-status: dropped
+status: workable
 licence: MIT
-paper: Xiao and Das, 2024
+paper: Xiao and Das, XLSR-Mamba, 2024
 upstream:
   repo: swagshaw/XLSR-Mamba
   commit: 10ec73810d24091028a2aa5454c8dfd1a239e441
 weights:
-  - name: model.safetensors
+  - name: xlsr_mamba_la.safetensors   # the Hub's model.safetensors, under its own name
     kind: hf
     repo: AustinXiao/XLSR-Mamba-LA
     filename: model.safetensors
+    revision: 61e3446b4816e493e8361adcda55449abe5e4eed
+    size_bytes: 1277378920
+  - name: xls-r-300m-config
+    kind: hf_snapshot
+    repo: facebook/wav2vec2-xls-r-300m
+    revision: 1a640f32ac3e39899438a2931f9924c02f080a54
+    allow_patterns: [config.json]
 training_data:
   - {dataset: commonvoice, level: pretrain}
   - {dataset: babel, level: pretrain}
@@ -19,4 +26,13 @@ training_data:
   - {dataset: voxpopuli, level: pretrain}
   - {dataset: voxlingua107, level: pretrain}
   - {dataset: asvspoof2019_la, level: train, split: train}
-notes: Dropped for now. Needs fairseq plus compiled mamba-ssm and causal-conv1d kernels. Revisit if XLS-R + AASIST porting goes smoothly.
+adapter: deeptrace_bench.models.xlsr_mamba:XLSRMambaDetector
+input:
+  sample_rate: 16000
+  segment_samples: 64600
+  checkpoint: xlsr_mamba_la.safetensors
+  backbone_config: xls-r-300m-config
+  emb_size: 144                   # upstream's --emb_size for the released LA model
+  num_encoders: 12                # six Mamba blocks per direction
+  fake_index: 0                   # upstream scores batch_out[:, 1], bona fide
+notes: XLS-R with a bidirectional Mamba back end. Runs without fairseq or mamba-ssm's CUDA kernels (pure-PyTorch stand-ins in models/_mamba.py, checked against transformers' Mamba mixer); adapter written 2026-10-05. Parity against the CUDA kernels needs upstream's environment on a GPU and isn't run yet. The step-by-step scan is slower than the kernel.

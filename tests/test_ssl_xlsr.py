@@ -1,4 +1,4 @@
-"""The XLS-R family (AASIST, SLS back ends) loads converted fairseq checkpoints offline."""
+"""The XLS-R family (AASIST, SLS, Mamba back ends) loads converted fairseq checkpoints offline."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from deeptrace_bench.models.base import load_detector
 from .test_df_arena import _ready
 
 
-@pytest.mark.parametrize("model_id", ["xlsr_aasist", "xlsr_sls"])
+@pytest.mark.parametrize("model_id", ["xlsr_aasist", "xlsr_sls", "xlsr_mamba"])
 def test_xlsr_family_scores_windows_offline(registry, model_id, monkeypatch):
     if not _ready(registry, model_id):
         pytest.skip(f"run scripts/setup_models.py {model_id} first")
