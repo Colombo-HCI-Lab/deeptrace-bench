@@ -286,10 +286,23 @@ def write_report(
         "",
     ]
     report.write_text("\n".join(head + body) + "\n")
-    latest = report.parent / "latest.md"
-    latest.unlink(missing_ok=True)
-    latest.symlink_to(report.name)
+    point_latest(report)
     return passed, rows
+
+
+def point_latest(report: Path) -> None:
+    """Make ``latest.md`` a copy of the newest report.
+
+    A plain copy, not a symlink: the store may be shared over SMB, where a link made on one
+    machine can't always be replaced from another (the Mac's server answers EAGAIN to a Linux
+    client). The pointer is a convenience, so failing to update it only logs.
+    """
+    latest = report.parent / "latest.md"
+    try:
+        latest.unlink(missing_ok=True)
+        shutil.copyfile(report, latest)
+    except OSError as error:
+        log.warning("couldn't update %s (%s); the report is %s", latest, error, report)
 
 
 def main() -> int:

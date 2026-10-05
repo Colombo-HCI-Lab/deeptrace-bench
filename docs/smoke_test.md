@@ -35,7 +35,7 @@ No open audio set is a pipeline test, so an audio model smoke-tests on two real 
 
 ## Reading the report
 
-`$DTB_ROOT/smoke/reports/latest.md` points at the newest report. It holds:
+`$DTB_ROOT/smoke/reports/latest.md` is a copy of the newest report (a copy, not a link, so a store shared between machines can always replace it). It holds:
 
 - **PASS or FAIL** and, on failure, the reasons.
 - **Provenance**: repo commit (and whether the tree had uncommitted changes), sample size and seed, the model's upstream commit and weight hashes, the face detector's hash, library versions, and a link to the full log.
