@@ -29,7 +29,7 @@ training_data:
   - {dataset: voxpopuli, level: pretrain}
   - {dataset: voxlingua107, level: pretrain}
   - {dataset: asvspoof2019_la, level: train, split: train}
-adapter: deeptrace_bench.models.xlsr_aasist:XLSRAASISTDetector
+adapter: deeptrace_bench.models.ssl_xlsr:SSLXLSRDetector
 input:
   sample_rate: 16000
   segment_samples: 64600

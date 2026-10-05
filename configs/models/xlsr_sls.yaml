@@ -1,0 +1,35 @@
+id: xlsr_sls
+name: XLS-R 300M + SLS
+modality: audio
+status: workable
+licence: none declared (code and weights); a Hugging Face mirror re-hosts the weights as MIT
+paper: Zhang et al., Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier, ACM MM 2024
+upstream:
+  repo: QiShanZhang/SLSforASVspoof-2021-DF
+  commit: 89a09ac4404c5687d96d6c123fcf6db20e4e4b38
+weights:
+  # The authors' Drive folder 13vw_AX1jHdYndRu1edlgpdNJpCX8OnrH; the same file is mirrored at
+  # SpeechAntiSpoofingBenchmarks/XLSR-SLS on Hugging Face.
+  - name: MMpaper_model.pth
+    kind: gdrive
+    drive_id: 1gfyrxFihJevsqVIOO-YS0WY55CuWS_xJ
+  - name: xls-r-300m-config
+    kind: hf_snapshot
+    repo: facebook/wav2vec2-xls-r-300m
+    revision: 1a640f32ac3e39899438a2931f9924c02f080a54
+    allow_patterns: [config.json]
+training_data:
+  - {dataset: commonvoice, level: pretrain}
+  - {dataset: babel, level: pretrain}
+  - {dataset: mls, level: pretrain}
+  - {dataset: voxpopuli, level: pretrain}
+  - {dataset: voxlingua107, level: pretrain}
+  - {dataset: asvspoof2019_la, level: train, split: train}
+adapter: deeptrace_bench.models.ssl_xlsr:SSLXLSRDetector
+input:
+  sample_rate: 16000
+  segment_samples: 64600          # fc1 is sized for exactly this window
+  checkpoint: MMpaper_model.pth
+  backbone_config: xls-r-300m-config
+  fake_index: 0                   # upstream labels bona fide 1 and scores batch_out[:, 1]
+notes: The strongest open model trained on ASVspoof 2019 LA alone, so a clean zero-shot probe on every South Asian set (no MLAAD, no FLEURS). Pools all 24 XLS-R layers with learnt attention. The repo declares no licence, so its code is imported from third_party only. Adapter written 2026-10-05 (shares the XLS-R + AASIST adapter); parity needs fairseq in an old environment and isn't run yet.

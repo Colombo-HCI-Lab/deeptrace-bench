@@ -1,4 +1,4 @@
-"""XLS-R + AASIST loads its converted fairseq checkpoint offline and scores windows."""
+"""The XLS-R family (AASIST, SLS back ends) loads converted fairseq checkpoints offline."""
 
 from __future__ import annotations
 
@@ -10,11 +10,12 @@ from deeptrace_bench.models.base import load_detector
 from .test_df_arena import _ready
 
 
-def test_xlsr_aasist_scores_windows_offline(registry, monkeypatch):
-    if not _ready(registry, "xlsr_aasist"):
-        pytest.skip("run scripts/setup_models.py xlsr_aasist first")
+@pytest.mark.parametrize("model_id", ["xlsr_aasist", "xlsr_sls"])
+def test_xlsr_family_scores_windows_offline(registry, model_id, monkeypatch):
+    if not _ready(registry, model_id):
+        pytest.skip(f"run scripts/setup_models.py {model_id} first")
     monkeypatch.setenv("HF_HUB_OFFLINE", "1")
-    detector = load_detector(registry.model("xlsr_aasist"))
+    detector = load_detector(registry.model(model_id))
     detector.convert_checkpoint()
     detector.load("cpu")  # a strict load: every converted key has a home and none is left out
     rng = np.random.default_rng(0)

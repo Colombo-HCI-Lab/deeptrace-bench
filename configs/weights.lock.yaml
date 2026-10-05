@@ -46,3 +46,6 @@ xception:
 xlsr_aasist:
   LA_model.pth: bd6f36097259fe54e7004eb983651e5304d807be81156dbd04faccb70d91e10c
   xls-r-300m-config/config.json: 0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac
+xlsr_sls:
+  MMpaper_model.pth: 0d315184aa8e6f017ea72c4d2458c11bae8f07fd743fe860a3aa932e36135fa6
+  xls-r-300m-config/config.json: 0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac
