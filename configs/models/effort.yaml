@@ -5,16 +5,28 @@ status: workable
 licence: none published (README badge says CC BY-NC 4.0; issue 3 asks for a licence file)
 paper: Yan et al., ICML 2025
 upstream:
-  repo: YZY-stack/Effort-AIGI-Detection
-  commit: 96f5dea2b534d400cfd7003f053c7e93c8e16461
+  # DeepfakeBench carries Effort's detector (training/detectors/effort_detector.py), so the
+  # shared adapter runs it; Effort's own repo is YZY-stack/Effort-AIGI-Detection at 96f5dea.
+  repo: SCLBD/DeepfakeBench
+  commit: f188b1c105465e2e5377eb536a95022ae0e4522d
 weights:
+  # Effort's checkpoints folder 19kQwGDjF18uk78EnnypxxOLaG4Aa4v1h; Google Drive refused every
+  # file with "Quota exceeded" on 2026-10-05, so setup_models.py fails until the quota resets
   - name: effort_clip_L14_trainOn_FaceForensic.pth
     kind: gdrive
     drive_id: 1m4fyJecABU-Yk3bJ4b1WhUwQa0xCkMLI
+  - name: clip-vit-large-patch14-config
+    kind: hf_snapshot
+    repo: openai/clip-vit-large-patch14
+    revision: 32bd64288804d66eefd0ccbe215aa642df71cc41
+    allow_patterns: [config.json]
 training_data:
   - {dataset: clip_wit, level: pretrain}
   - {dataset: ffpp, level: train, split: train, note: "c23"}
+adapter: deeptrace_bench.models.deepfakebench:DeepfakeBenchDetector
 input:
+  detector: effort
+  backbone_config: clip-vit-large-patch14-config
   crop: {size: 224, margin: 1.3, align: five_point}
   frames_per_clip: 32
-notes: Second wave. Hard-coded local CLIP path (issue 15), a reported reproduction gap (CDF-v2 AUC 0.885 vs 0.956, issue 19) and parameters reported missing from the FF++ checkpoint (issue 18).
+notes: Adapter written 2026-10-05 (DeepfakeBench's Effort detector, CLIP built from a pinned config); its network builds offline, but the weights can't be fetched while Google Drive reports the file over quota. Reported issues upstream - a reproduction gap (CDF-v2 AUC 0.885 against 0.956, issue 19) and keys reported missing from the FF++ checkpoint (issue 18) - get checked by the strict load once the file arrives.

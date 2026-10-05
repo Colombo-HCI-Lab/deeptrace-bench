@@ -21,6 +21,8 @@ df_arena_500m:
   xls-r-300m-config/config.json: 0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac
 efficientnet_b4:
   effnb4_best.pth: 74cbd82d7be1bf5e6adec717824274a95b4509b02e1e78401608d32b3cbeaf0f
+effort:
+  clip-vit-large-patch14-config/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
 f3net:
   f3net_best.pth: deee7d25bfc1b8b5ba83054a664880078de51213b1067f1e472c2bed7cc667f9
 ffd:

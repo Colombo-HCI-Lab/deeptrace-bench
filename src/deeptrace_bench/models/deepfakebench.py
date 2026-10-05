@@ -3,7 +3,8 @@
 One adapter serves every frame-level DeepfakeBench detector whose checkpoint the release
 ships; ``input.detector`` names it (``xception``, ``efficientnetb4``, ``ucf``, ``f3net``,
 ``spsl``, ``recce``, ``srm``, ``core``, ``ffd``), which is also the name of its
-``training/config/detector/<name>.yaml``.
+``training/config/detector/<name>.yaml``. Effort (``effort``) runs through the same adapter
+from DeepfakeBench's own ``effort_detector.py``, with the weights from Effort's repo.
 
 Upstream code is never copied (the licence is non-commercial). The adapter imports the one
 detector file it needs from the pinned checkout. DeepfakeBench's packages import every
@@ -60,6 +61,7 @@ _BACKBONES = {
     "srm": "xception",
     "core": "xception",
     "ffd": "xception",
+    "effort": None,  # CLIP ViT-L/14 from transformers, no DeepfakeBench backbone
 }
 _GENERIC = ["metrics", "networks", "detectors", "loss"]
 _BATCH = 32
@@ -103,6 +105,8 @@ class DeepfakeBenchDetector(Detector):
         stubs = {
             "loss": _module("loss", LOSSFUNC=_AnyLoss()),
             "torch.utils.tensorboard": _module("torch.utils.tensorboard", SummaryWriter=object),
+            # Effort imports loralib for training-time LoRA it never builds
+            "loralib": _module("loralib"),
             # FFD's constructor reads ten template images with imageio (a relative path, and
             # imageio isn't installed); only its "tmp" and "pca" map types use them, and the
             # released FFD is "reg", so blank templates of the right shape build it unchanged
@@ -116,8 +120,11 @@ class DeepfakeBenchDetector(Detector):
             )
             load_package(training / "networks", "networks").BACKBONE = registry.BACKBONE
             load_package(training / "detectors", "detectors").DETECTOR = registry.DETECTOR
-            importlib.import_module(f"networks.{_BACKBONES[self.name]}")
+            if _BACKBONES[self.name]:
+                importlib.import_module(f"networks.{_BACKBONES[self.name]}")
             detector = importlib.import_module(f"detectors.{self.name}_detector")
+            if self.name == "effort":
+                detector.CLIPModel = self._pinned_clip()
             if self.name == "recce":
                 # RECCE builds its encoder with timm's xception(pretrained=True), a download
                 # the checkpoint then replaces; build the same network without it
@@ -127,6 +134,24 @@ class DeepfakeBenchDetector(Detector):
                 params["init_op"] = functools.partial(detector.xception, pretrained=False)
             with _imagenet_stand_in(torch):
                 return registry.DETECTOR[self.name](config)
+
+    def _pinned_clip(self) -> type:
+        """Effort's ``CLIPModel``: the network from the pinned CLIP config, no weights.
+
+        Upstream calls ``CLIPModel.from_pretrained`` on a hard-coded local path (Effort
+        issue 15). The checkpoint replaces every weight of the vision tower, including the
+        SVD split of its attention projections, so only the architecture is needed.
+        """
+        from transformers import CLIPConfig, CLIPModel
+
+        pinned = self.weights_dir / self.config.input["backbone_config"]
+
+        class PinnedCLIP:
+            @staticmethod
+            def from_pretrained(path: str, **kwargs: Any) -> Any:
+                return CLIPModel(CLIPConfig.from_pretrained(str(pinned)))
+
+        return PinnedCLIP
 
     def convert_checkpoint(self) -> Path | None:
         """Re-save the release checkpoint (a state dict) as safetensors."""

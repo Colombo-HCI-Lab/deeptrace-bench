@@ -49,3 +49,20 @@ def test_a_detector_loads_strictly_and_scores_crops(registry, model_id):
     scores = detector.score(crops)
     assert scores.shape == (3,)
     assert np.all((scores >= 0) & (scores <= 1))
+
+
+def test_effort_builds_offline_from_its_pinned_clip_config(registry, monkeypatch):
+    """Effort's network builds without its hard-coded CLIP path or the Hub (weights aside)."""
+    try:
+        config_dir = weights_dir("effort") / "clip-vit-large-patch14-config"
+    except RootNotConfiguredError:
+        pytest.skip("no store")
+    if not config_dir.exists():
+        pytest.skip("run scripts/setup_models.py effort first")
+    monkeypatch.setenv("HF_HUB_OFFLINE", "1")
+    detector = load_detector(registry.model("effort"))
+    model = detector._build()
+    names = dict(model.named_parameters())
+    # the SVD split of every attention projection: 24 layers x q, k, v, out
+    assert sum(name.endswith("S_residual") for name in names) == 96
+    assert names["head.weight"].shape == (2, 1024)
