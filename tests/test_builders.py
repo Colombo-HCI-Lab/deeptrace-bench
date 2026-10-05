@@ -528,3 +528,38 @@ def test_indicsuperb_manifest_reads_speaker_and_gender(tmp_path):
         "female",
         "test_known",
     )
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("MD/EdgeTTS/hi/hi-IN-SwaraNeural/hi-IN-SwaraNeural_1.wav", "fake"),
+        ("MD/SeedVC/hi/103_1_common_voice_hi_2.wav", "fake"),
+        ("MD/EdgeTTS/fr/fr-FR-X/fr_1.wav", None),
+        ("CommonVoice/hi/train/a.wav", "real"),
+        ("Real/CommonVoice/hi/test/a.wav", "real"),
+        ("CommonVoice/en/test/a.wav", None),
+    ],
+)
+def test_speechfake_labels(path, label):
+    from deeptrace_bench.datasets import speechfake
+
+    assert speechfake.label_from_path(path) == label
+
+
+def test_speechfake_manifest(tmp_path):
+    from deeptrace_bench.datasets import speechfake
+
+    _tree(
+        tmp_path,
+        [
+            "MD/EdgeTTS/bn/bn-IN-X/bn_1.wav",
+            "MD/SeedVC/hi/103_1_common_voice_hi_2.wav",
+            "CommonVoice/hi/train/a.wav",
+        ],
+    )
+    df = speechfake.build_manifest(tmp_path).set_index("method", drop=False)
+    validate_manifest(df.reset_index(drop=True), "speechfake")
+    assert df.loc["EdgeTTS", "subject_id"] == "bn-IN-X"
+    assert df.loc["SeedVC", "method_family"] == "vc"
+    assert sorted(df.label) == ["fake", "fake", "real"]

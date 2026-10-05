@@ -110,3 +110,36 @@ def test_a_host_without_ranges_is_reported():
 def test_the_size_comes_from_content_range():
     reply = _Reply(206, {"content-range": "bytes 0-0/4114687567"})
     assert remote_zip.open_remote("https://x/y", session=_Session(reply)).size == 4114687567
+
+
+@pytest.mark.parametrize("level", ["-0", "-6"], ids=["stored", "deflated"])
+def test_split_archives_are_read_member_by_member(tmp_path, level):
+    import shutil
+    import subprocess
+
+    import numpy as np
+
+    from deeptrace_bench.remote_zip import SplitZip
+
+    if shutil.which("zip") is None:
+        pytest.skip("Info-ZIP's zip makes the split archive")
+    rng = np.random.default_rng(0)
+    folder = tmp_path / "MD" / "hi"
+    folder.mkdir(parents=True)
+    members = {}
+    for i in range(6):  # incompressible, so members straddle the 64 KB parts
+        data = rng.integers(0, 256, 30_000 + 7_000 * i, dtype=np.uint8).tobytes()
+        (folder / f"{i}.wav").write_bytes(data)
+        members[f"MD/hi/{i}.wav"] = data
+    (folder / "note.txt").write_text("text " * 2_000)
+    subprocess.run(
+        ["zip", "-q", level, "-s", "64k", "-r", str(tmp_path / "MD.zip"), "MD"],
+        cwd=tmp_path,
+        check=True,
+    )
+    parts = sorted(tmp_path.glob("MD.z0*")) + [tmp_path / "MD.zip"]
+    assert len(parts) > 2
+    split = SplitZip([p.open("rb") for p in parts], keep=lambda name: name.endswith(".wav"))
+    assert sorted(split.namelist()) == sorted(members)
+    for name, data in members.items():
+        assert split.read(name) == data

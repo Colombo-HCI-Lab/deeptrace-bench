@@ -36,6 +36,7 @@ import hashlib
 import importlib
 import json
 import logging
+import re
 import shutil
 from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
@@ -360,30 +361,49 @@ class _ZipSource(_Source):
     def __init__(self, config: DatasetConfig, builder: Any = None) -> None:
         urls = config.access.urls or {}
         self.urls = {name: url for name, url in urls.items() if name.lower().endswith(".zip")}
-        self.plain = {name: url for name, url in urls.items() if name not in self.urls}
+        # a split archive: <stem>.z01, <stem>.z02, ... next to <stem>.zip, read as one
+        self.split_parts = {
+            name: sorted(
+                (n for n in urls if re.fullmatch(re.escape(name[:-4]) + r"\.z\d\d", n, re.I)),
+                key=str.lower,
+            )
+            for name in self.urls
+        }
+        parts = {n for group in self.split_parts.values() for n in group}
+        self.plain = {n: u for n, u in urls.items() if n not in self.urls and n not in parts}
+        self.all_urls = dict(urls)
         if not self.urls:
             raise SampleError(f"{config.id}: sampling over URLs needs at least one zip")
         self.nested_label = getattr(builder, "nested_zip_label", None)
+        self.label_of = getattr(builder, "label_from_path", None)
         self.archives: dict[str, tuple[str, int, Any]] = {}
         self.where: dict[str, Any] = {}
 
     def _open(self) -> None:
-        from .remote_zip import open_remote, open_zip
+        from .remote_zip import SplitZip, open_remote, open_zip
 
         for name, url in self.urls.items():
-            if name not in self.archives:
-                raw = open_remote(url)
+            if name in self.archives:
+                continue
+            raw = open_remote(url)
+            if self.split_parts[name]:
+                parts = [open_remote(self.all_urls[p]) for p in self.split_parts[name]]
+                # list only what the builder can label: a split set can hold millions of names
+                keep = (lambda n: self.label_of(n) is not None) if self.label_of else None
+                log.info("reading the central directory of split archive %s", name)
+                self.archives[name] = (url, raw.size, SplitZip([*parts, raw], keep=keep))
+            else:
                 self.archives[name] = (url, raw.size, open_zip(raw))
 
     def key(self) -> dict[str, Any]:
-        return {"kind": "zip", "urls": {**self.urls, **self.plain}}
+        return {"kind": "zip", "urls": dict(self.all_urls)}
 
     def describe(self) -> dict[str, Any]:
         self._open()
         return {
             **self.key(),
             "archives": {
-                name: {"bytes": size, "entries": len(zf.infolist())}
+                name: {"bytes": size, "entries": len(_names(zf))}
                 for name, (_, size, zf) in self.archives.items()
             },
         }
@@ -393,6 +413,11 @@ class _ZipSource(_Source):
         paths = []
         inner: dict[str, list[tuple[int, str, str, Any]]] = {}
         for url, _, zf in self.archives.values():
+            if not hasattr(zf, "infolist"):  # a split archive: read by name only
+                for name in zf.namelist():
+                    self.where[name] = (zf, name)
+                    paths.append(name)
+                continue
             for info in zf.infolist():
                 if info.is_dir():
                     continue
@@ -457,7 +482,17 @@ class _ZipSource(_Source):
                 target.write_bytes(self.read(path))
                 continue
             zf, member = self._member(path)
-            extract_member(zf, member, target)
+            if hasattr(zf, "infolist"):
+                extract_member(zf, member, target)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                part = target.with_name(target.name + ".part")
+                part.write_bytes(zf.read(member))
+                part.replace(target)
+
+
+def _names(zf: Any) -> list[str]:
+    return [i.filename for i in zf.infolist()] if hasattr(zf, "infolist") else zf.namelist()
 
 
 class _LocalSource(_Source):

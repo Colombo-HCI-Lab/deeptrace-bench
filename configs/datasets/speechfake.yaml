@@ -1,13 +1,22 @@
 id: speechfake
-name: SpeechFake
+name: SpeechFake (South Asian languages)
 modality: audio
 role: south_asian
-status: deferred
+status: open
 access:
-  kind: modelscope
+  kind: url
   page: https://www.modelscope.cn/datasets/inclusionAI/SPEECHFAKE
+  urls:
+    # the multilingual part, one split zip; read as one archive by range requests
+    MD.z01: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=MD/MD.z01"
+    MD.z02: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=MD/MD.z02"
+    MD.zip: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=MD/MD.zip"
+    # the real speech, of which Common Voice has Hindi
+    CommonVoice.zip: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=Real/CommonVoice.zip"
 licence: CC BY 4.0 (README; ModelScope metadata says Apache-2.0)
-contains: [fake]
-languages: [hi]
-size_gb: 116
-notes: Deferred. Getting its Hindi means downloading the whole 116 GB multilingual part, and IndicSynth and MLAAD already cover Hindi. Rechecked on 2026-10-05, ModelScope holds the multilingual part only as one split zip (MD.z01, MD.z02 and MD.zip, 122.7 GB), and its metadata zip shows Hindi as Edge-TTS and SeedVC, and Bengali, Tamil, Marathi and Malayalam as Edge-TTS only; no Urdu, Nepali or Sinhala. The Hugging Face copy (DeepFense/SpeechFake) holds protocols, no audio.
+contains: [real, fake]
+languages: [hi, bn, ta, mr, ml]
+size_gb: 143
+derived_from: [commonvoice, libritts]
+builder: deeptrace_bench.datasets.speechfake:build_manifest
+notes: SpeechFake (ACL 2025, ModelScope; checked 2026-10-05) in its South Asian languages - Hindi as Edge-TTS (15,382 clips) and SeedVC voice conversion (14,633, LibriTTS speech converted to Common Voice Hindi voices), Bengali, Tamil and Marathi as Edge-TTS (20,000 each), Malayalam (3,726), and 4,630 real Common Voice Hindi clips from its own real part; no Urdu, Nepali or Sinhala. The multilingual part is one 123 GB split zip, sampled by range reads of its 179 MB central directory and single members, so only samples are practical; a full copy means the whole 143 GB.

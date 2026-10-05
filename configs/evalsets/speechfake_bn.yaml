@@ -1,0 +1,15 @@
+id: speechfake_bn
+modality: audio
+role: south_asian
+pairing: cross_corpus
+components:
+  - dataset: speechfake
+    filter: {language: bn}
+    label: fake
+  - dataset: indicsuperb
+    filter: {language: bn}
+    label: real
+match_on: [language]
+group_by: [method]
+status: ready
+notes: SpeechFake's Bengali Edge-TTS fakes against real Bengali read speech from IndicSUPERB (Kathbath), since SpeechFake has no real Bengali. Cross-corpus by construction; diagnostic only, after the shortcut probe.

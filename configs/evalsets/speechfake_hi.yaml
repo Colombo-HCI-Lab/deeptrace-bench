@@ -1,0 +1,10 @@
+id: speechfake_hi
+modality: audio
+role: south_asian
+pairing: cross_corpus
+components:
+  - dataset: speechfake
+    filter: {language: hi}
+group_by: [method]
+status: ready
+notes: SpeechFake's Hindi Edge-TTS and SeedVC fakes against its own real Common Voice Hindi. The voice conversions target Common Voice voices, but the Edge-TTS studio voices share no recordings with the reals, so the set is cross-corpus; run the shortcut probe before reading its numbers.

@@ -6,7 +6,10 @@ components:
   - dataset: mlaad
     filter: {language: hi}
     label: fake
+  - dataset: indicsuperb
+    filter: {language: hi}
+    label: real
 match_on: [language]
 group_by: [method]
-status: needs_real_source
-notes: MLAAD is fake only and its intended real counterpart (M-AILABS) has no South Asian languages. Add a real hi source as a second component, run the shortcut probe, and keep the results out of headline numbers.
+status: ready
+notes: MLAAD is fake only and its intended real counterpart (M-AILABS) has no South Asian languages, so real speech comes from IndicSUPERB (Kathbath read speech, since 2026-10-05). Cross-corpus by construction; run the shortcut probe and keep the results out of headline numbers.

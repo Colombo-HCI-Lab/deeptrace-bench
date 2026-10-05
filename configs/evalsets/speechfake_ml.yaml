@@ -1,0 +1,15 @@
+id: speechfake_ml
+modality: audio
+role: south_asian
+pairing: cross_corpus
+components:
+  - dataset: speechfake
+    filter: {language: ml}
+    label: fake
+  - dataset: indicsuperb
+    filter: {language: ml}
+    label: real
+match_on: [language]
+group_by: [method]
+status: ready
+notes: SpeechFake's Malayalam Edge-TTS fakes against real Malayalam read speech from IndicSUPERB (Kathbath), since SpeechFake has no real Malayalam. Cross-corpus by construction; diagnostic only, after the shortcut probe.

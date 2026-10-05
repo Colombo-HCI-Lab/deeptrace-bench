@@ -1,0 +1,15 @@
+id: speechfake_mr
+modality: audio
+role: south_asian
+pairing: cross_corpus
+components:
+  - dataset: speechfake
+    filter: {language: mr}
+    label: fake
+  - dataset: indicsuperb
+    filter: {language: mr}
+    label: real
+match_on: [language]
+group_by: [method]
+status: ready
+notes: SpeechFake's Marathi Edge-TTS fakes against real Marathi read speech from IndicSUPERB (Kathbath), since SpeechFake has no real Marathi. Cross-corpus by construction; diagnostic only, after the shortcut probe.
