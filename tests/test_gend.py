@@ -13,19 +13,21 @@ from deeptrace_bench.paths import RootNotConfiguredError, weights_dir
 from deeptrace_bench.upstream import checkout_dir
 
 
-def _ready(registry) -> bool:
-    model = registry.model("gend")
+def _ready(registry, model_id: str = "gend") -> bool:
+    model = registry.model(model_id)
     try:
-        have_weights = (weights_dir("gend") / "model.safetensors").exists()
+        have_weights = (weights_dir(model_id) / "model.safetensors").exists()
     except RootNotConfiguredError:
         return False
     return have_weights and checkout_dir(model.upstream).exists()
 
 
-def test_gend_scores_crops_of_different_sizes(registry):
-    if not _ready(registry):
+@pytest.mark.parametrize("model_id", ["gend", "gend_pe_l"])
+def test_gend_scores_crops_of_different_sizes(registry, model_id, monkeypatch):
+    if not _ready(registry, model_id):
         pytest.skip("GenD weights or checkout not set up")
-    detector = load_detector(registry.model("gend"))
+    monkeypatch.setenv("HF_HUB_OFFLINE", "1")  # backbones come from pinned copies or timm configs
+    detector = load_detector(registry.model(model_id))
     detector.load("cpu")
     rng = np.random.default_rng(0)
     crops = [rng.integers(0, 255, (s, s, 3), dtype=np.uint8) for s in (180, 300)]

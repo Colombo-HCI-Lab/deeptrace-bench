@@ -40,6 +40,7 @@ training_data:
   - {dataset: ffpp, level: train, split: train, note: "the 14 benchmarks in the paper are test sets, not training data"}
 adapter: deeptrace_bench.models.gend:GenDDetector
 input:
+  backbone_snapshot: clip-vit-large-patch14
   # size null: aligned crops keep their native size (landmark spread x 1.3), as GenD's README
   # preprocessing does (--target_size none); CLIP's processor then resizes and crops to 224.
   crop: {size: null, margin: 1.3, align: five_point}

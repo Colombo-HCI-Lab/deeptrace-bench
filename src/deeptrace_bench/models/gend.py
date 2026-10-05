@@ -1,13 +1,19 @@
-"""GenD (WACV 2026): CLIP ViT-L/14 with only the LayerNorms tuned, trained on FF++ only.
+"""GenD (WACV 2026): a foundation-model backbone with only the LayerNorms tuned, trained on
+FF++ only. Two of the released backbones run here: CLIP ViT-L/14 (``gend``) and Perception
+Encoder L/14 (``gend_pe_l``, built by timm); the DINOv3 one needs a gated Meta repo.
 
 The adapter loads upstream's own model file, ``src/hf/modeling_gend.py`` (MIT), from the
 pinned checkout rather than a copy, and builds it the way ``GenD.from_pretrained`` would,
-with two changes that don't alter the network:
+with changes that don't alter the network:
 
 - The CLIP backbone comes from the pinned local copy in the weights folder
-  (``clip-vit-large-patch14``), not from ``openai/clip-vit-large-patch14`` at whatever
+  (``input.backbone_snapshot``), not from ``openai/clip-vit-large-patch14`` at whatever
   revision the Hub serves today. Upstream passes the backbone name straight to
   ``CLIPModel.from_pretrained``, so a local path works unchanged.
+- The PE backbone is created by ``timm.create_model(..., pretrained=True)``, which would
+  download ImageNet-free PE weights the checkpoint then replaces; while GenD is built, that
+  call gets ``pretrained=False``. timm's built-in config for the model still sets the
+  preprocessing (resize to 224, centre crop, normalisation), as upstream's does.
 - The weights are loaded from ``model.safetensors`` with ``load_state_dict``, and every key
   must match.
 
@@ -23,9 +29,11 @@ so they don't contaminate our runs. Parity with upstream is not checked yet.
 
 from __future__ import annotations
 
+import contextlib
 import logging
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from types import ModuleType
+from typing import Any
 
 import numpy as np
 
@@ -43,7 +51,7 @@ _BATCH = 32
 
 
 class GenDDetector(Detector):
-    """GenD CLIP-L/14."""
+    """GenD, CLIP-L/14 or PE-L/14 per the config."""
 
     def _module(self) -> ModuleType:
         assert self.upstream_dir is not None
@@ -51,19 +59,22 @@ class GenDDetector(Detector):
         try:
             return load_module(path, _MODULE_NAME)
         except FileNotFoundError:
-            msg = f"{path} is missing; run scripts/setup_models.py gend"
+            msg = f"{path} is missing; run scripts/setup_models.py {self.config.id}"
             raise FileNotFoundError(msg) from None
 
     def load(self, device: str) -> None:
-        """Build GenD on the pinned CLIP backbone and load its weights."""
+        """Build GenD on its pinned backbone and load its weights."""
         import torch
         from safetensors.torch import load_file
 
         self.device = resolve_device(device)
         module = self._module()
         config = module.GenDConfig.from_json_file(str(self.weights_dir / "config.json"))
-        config.backbone = str(self.weights_dir / "clip-vit-large-patch14")
-        model = module.GenD(config)
+        snapshot = self.config.input.get("backbone_snapshot")
+        if snapshot:
+            config.backbone = str(self.weights_dir / snapshot)
+        with _timm_without_downloads():
+            model = module.GenD(config)
         state = load_file(str(self.weights_dir / "model.safetensors"))
         result = model.load_state_dict(state, strict=False)
         if result.unexpected_keys or result.missing_keys:
@@ -71,10 +82,12 @@ class GenDDetector(Detector):
                 f"GenD weights don't fit the network: missing {result.missing_keys[:5]}, "
                 f"unexpected {result.unexpected_keys[:5]}"
             )
-        self._check_processor(model.feature_extractor._preprocess.image_processor)
+        processor = getattr(model.feature_extractor._preprocess, "image_processor", None)
+        if processor is not None:  # CLIP; PE's transform comes from timm's own config
+            self._check_processor(processor)
         self.model = model.eval().to(self.device)
         self._torch = torch
-        log.info("GenD loaded on %s", self.device)
+        log.info("GenD (%s) loaded on %s", config.backbone, self.device)
 
     @staticmethod
     def _check_processor(processor) -> None:  # noqa: ANN001
@@ -103,3 +116,21 @@ class GenDDetector(Detector):
                 logits = self.model(pixels)
             scores.append(logits.softmax(dim=-1)[:, 1].float().cpu().numpy())
         return np.concatenate(scores) if scores else np.zeros(0)
+
+
+@contextlib.contextmanager
+def _timm_without_downloads() -> Iterator[None]:
+    """Make ``timm.create_model`` build without pretrained weights while GenD is built."""
+    import timm
+
+    original = timm.create_model
+
+    def create_model(*args: Any, **kwargs: Any) -> Any:
+        kwargs["pretrained"] = False
+        return original(*args, **kwargs)
+
+    timm.create_model = create_model
+    try:
+        yield
+    finally:
+        timm.create_model = original

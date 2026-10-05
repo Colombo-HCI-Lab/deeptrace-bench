@@ -1,0 +1,30 @@
+id: gend_pe_l
+name: GenD (Perception Encoder L/14)
+modality: video
+status: workable
+licence: MIT
+paper: Yermakov et al., WACV 2026 (arXiv 2508.06248)
+upstream:
+  repo: yermandy/GenD
+  commit: 387a42266dd385fbe8f7626c5d3aa03eea3bfaab
+weights:
+  - name: model.safetensors
+    kind: hf
+    repo: yermandy/GenD_PE_L
+    filename: model.safetensors
+    revision: 4fd5a38cf071af2640d314110826ed5cd25cab88
+  - name: config.json
+    kind: hf
+    repo: yermandy/GenD_PE_L
+    filename: config.json
+    revision: 4fd5a38cf071af2640d314110826ed5cd25cab88
+training_data:
+  - {dataset: pe_pretraining, level: pretrain}
+  - {dataset: ffpp, level: train, split: train, note: "the paper's 14 benchmarks are test sets, not training data"}
+adapter: deeptrace_bench.models.gend:GenDDetector
+input:
+  # no backbone_snapshot: timm builds vit_pe_core_large_patch14_336 from its own config and
+  # the checkpoint supplies every weight
+  crop: {size: null, margin: 1.3, align: five_point}
+  frames_per_clip: 32
+notes: GenD's second released backbone, Meta's Perception Encoder (timm vit_pe_core_large_patch14_336, inputs resized to 224), same FF++-only training and the same adapter as the CLIP one, so the two separate the effect of the backbone. Added 2026-10-05; parity not run yet. The DINOv3 variant (yermandy/GenD_DINOv3_L) builds its backbone from facebook/dinov3-vitl16-pretrain-lvd1689m, a gated repo, so it waits for someone to accept Meta's terms.

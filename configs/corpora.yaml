@@ -105,3 +105,6 @@
 - id: librispeech
   name: LibriSpeech 960 h
   note: wav2vec 2.0 base pretraining.
+- id: pe_pretraining
+  name: Perception Encoder pretraining data (Meta)
+  note: Not public, so overlap with our data can't be checked. GenD PE-L's backbone.
