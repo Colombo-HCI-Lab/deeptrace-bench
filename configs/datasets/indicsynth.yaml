@@ -7,6 +7,7 @@ access:
   kind: hf
   page: https://huggingface.co/datasets/vdivyasharma/IndicSynth
   repo: vdivyasharma/IndicSynth
+  revision: c0a10386b723717aff682f757bd67f72983f269f
   allow_patterns: [README.md]
   language_patterns:
     hi: [Hindi/*]
@@ -30,4 +31,4 @@ languages: [hi, bn, ur, ta, mr, kn, ml, gu, pa, te, or, sa]
 size_gb: 845
 derived_from: [indicsuperb]
 builder: deeptrace_bench.datasets.indicsynth:build_manifest
-notes: Fake only (XTTS-v2, VITS, FreeVC24), audio embedded in parquet shards. Default download is Hindi (56 GB), Bengali (34 GB) and Urdu (38 GB); Tamil alone is 148 GB. Real speech comes from IndicSUPERB, its source corpus.
+notes: Fake only (XTTS-v2, VITS, FreeVC24), audio embedded in parquet shards (builder written 2026-10-05; a sample reads two shards' labels and one row group of each). Default download is Hindi (56 GB), Bengali (34 GB) and Urdu (38 GB); Tamil alone is 148 GB. Real speech comes from IndicSUPERB, its source corpus.

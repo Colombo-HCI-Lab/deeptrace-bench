@@ -235,3 +235,42 @@ def test_asvspoof_samples_both_labels_in_every_split():
     chosen = choose(paths, labels.get, 2, seed=0, stratum_of=sample_stratum)
     eval_labels = {labels[p] for p in chosen if "_LA_eval/" in p}
     assert eval_labels == {"real", "fake"}
+
+
+def test_parquet_rows_are_sampled_from_one_row_group_and_keep_their_numbers(monkeypatch, tmp_path):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from deeptrace_bench.datasets._parquet import SOURCE_ROW, iter_rows
+    from deeptrace_bench.sample import _HfParquetSource, choose
+
+    remote = tmp_path / "remote"
+    (remote / "data").mkdir(parents=True)
+    n = 40
+    table = pa.table(
+        {
+            "flag": [i % 2 for i in range(n)],  # invented label column: 1 fake, 0 real
+            "audio": [{"bytes": b"RIFF" + bytes([i]), "path": f"{i}.wav"} for i in range(n)],
+        }
+    )
+    pq.write_table(table, remote / "data" / "train-0.parquet", row_group_size=10)
+    builder = types.SimpleNamespace(
+        ROW_COLUMNS=["flag"], label_from_row=lambda row: "fake" if row["flag"] else "real"
+    )
+    config = _config("dtb_unused:build_manifest", ["real", "fake"])
+    source = _HfParquetSource(
+        config, None, builder, seed=3, open_file=lambda name: (remote / name).open("rb")
+    )
+    monkeypatch.setattr(source, "_list", lambda: ["data/train-0.parquet", "README.md"])
+    paths = source.candidates()
+    assert len(paths) == 10  # one row group of the one shard
+    chosen = choose(paths, source.labels.get, per_label=2, seed=3)
+    source.materialize(chosen, tmp_path / "sample")
+    assert source.files(chosen) == ["data/train-0.parquet"]
+
+    rows = list(iter_rows(tmp_path / "sample", "data/*.parquet", ["flag", "audio"]))
+    assert sorted(r for _, r, _ in rows) == sorted(int(p.rpartition("#")[2]) for p in chosen)
+    for _, number, row in rows:  # each sampled row is the full shard's row of that number
+        assert row["audio"]["bytes"] == b"RIFF" + bytes([number])
+        assert row["flag"] == number % 2
+    assert SOURCE_ROW in pq.read_schema(tmp_path / "sample" / "data" / "train-0.parquet").names

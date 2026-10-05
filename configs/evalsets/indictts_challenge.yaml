@@ -1,0 +1,9 @@
+id: indictts_challenge
+modality: audio
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: indictts_challenge
+group_by: [language, g_gender]
+status: ready
+notes: Real and TTS clips of the same studio voices per language, as far as the ids show (the card doesn't say), so taken as same-corpus. 16 Indian languages including Nepali, the only labelled real-and-fake Nepali we have.

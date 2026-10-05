@@ -8,6 +8,10 @@ original relative paths, so the dataset's own builder runs on the sample unchang
   ``hf_hub_download`` per chosen file.
 - **Zip archives at a URL**: the archive's central directory, read with HTTP range requests,
   then only the chosen members (see ``remote_zip``).
+- **Parquet rows on Hugging Face**, for datasets that embed audio in parquet shards (their
+  builders define ``label_from_row``, see ``datasets/_parquet.py``): the label columns of a
+  few shards, read over HTTP without the audio, then only the row groups holding the chosen
+  rows; each shard is written back with just those rows.
 - **A local copy** (``--from``): the files under it, symlinked rather than copied.
 
 Labels come from the builder: ``label_from_path`` where the path says it, or, for datasets that
@@ -154,6 +158,10 @@ class _Source:
     def materialize(self, chosen: list[str], dest: Path) -> None:
         raise NotImplementedError
 
+    def files(self, chosen: list[str]) -> list[str]:
+        """The files that hold the chosen items, relative to the sample folder."""
+        return list(chosen)
+
 
 class _HfSource(_Source):
     def __init__(self, config: DatasetConfig, languages: list[str] | None) -> None:
@@ -245,6 +253,99 @@ def _literal_prefix(pattern: str) -> str:
     return "/".join(parts)
 
 
+class _HfParquetSource(_HfSource):
+    """Rows of a dataset's parquet shards on the Hub, sampled without fetching every shard.
+
+    Candidates come from at most ``max_files`` shards and one row group of each (both picked
+    by the seed), so a sample costs a few small label reads and one row group of audio per
+    shard. A candidate is ``<shard path>#<row number in the shard>``.
+    """
+
+    def __init__(
+        self,
+        config: DatasetConfig,
+        languages: list[str] | None,
+        builder: Any,
+        seed: int,
+        max_files: int = 2,
+        open_file: Callable[[str], Any] | None = None,
+    ) -> None:
+        super().__init__(config, languages)
+        self.builder = builder
+        self.seed = seed
+        self.max_files = max_files
+        self.open_file = open_file or self._open_on_hub
+        self.labels: dict[str, str] = {}
+        self.strata: dict[str, str] = {}
+
+    def key(self) -> dict[str, Any]:
+        return {**super().key(), "kind": "hf_parquet_rows", "max_files": self.max_files}
+
+    def _open_on_hub(self, name: str) -> Any:
+        from huggingface_hub import HfFileSystem
+
+        access = self.config.access
+        revision = f"@{access.revision}" if access.revision else ""
+        return HfFileSystem().open(f"datasets/{access.repo}{revision}/{name}", "rb")
+
+    def candidates(self) -> list[str]:
+        import pyarrow.parquet as pq
+
+        shards = [f for f in super().candidates() if f.endswith(".parquet")]
+        shards = sorted(shards, key=lambda p: _rank(self.seed, p))[: self.max_files]
+        stratum_of = getattr(self.builder, "row_stratum", None)
+        paths = []
+        for name in shards:
+            with self.open_file(name) as handle:
+                shard = pq.ParquetFile(handle)
+                sizes = [shard.metadata.row_group(g).num_rows for g in range(shard.num_row_groups)]
+                group = min(range(len(sizes)), key=lambda g: _rank(self.seed, f"{name}#{g}"))
+                table = shard.read_row_group(group, columns=list(self.builder.ROW_COLUMNS))
+            for offset, row in enumerate(table.to_pylist()):
+                label = self.builder.label_from_row(row)
+                if label is None:
+                    continue
+                path = f"{name}#{sum(sizes[:group]) + offset}"
+                self.labels[path] = label
+                if stratum_of is not None:
+                    self.strata[path] = stratum_of(row)
+                paths.append(path)
+        return paths
+
+    def files(self, chosen: list[str]) -> list[str]:
+        return sorted({path.rpartition("#")[0] for path in chosen})
+
+    def materialize(self, chosen: list[str], dest: Path) -> None:
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+
+        from .datasets._parquet import SOURCE_ROW
+
+        rows: dict[str, list[int]] = {}
+        for path in chosen:
+            name, _, row = path.rpartition("#")
+            rows.setdefault(name, []).append(int(row))
+        for name, wanted in rows.items():
+            with self.open_file(name) as handle:
+                shard = pq.ParquetFile(handle)
+                starts = [0]
+                for g in range(shard.num_row_groups):
+                    starts.append(starts[-1] + shard.metadata.row_group(g).num_rows)
+                groups = sorted(
+                    {next(g for g in range(len(starts) - 1) if starts[g + 1] > r) for r in wanted}
+                )
+                pieces = []
+                for g in groups:
+                    table = shard.read_row_group(g)
+                    take = [r - starts[g] for r in sorted(wanted) if starts[g] <= r < starts[g + 1]]
+                    picked = table.take(take)
+                    source = pa.array([starts[g] + t for t in take], type=pa.int64())
+                    pieces.append(picked.append_column(SOURCE_ROW, source))
+            target = ensure_inside(dest, dest / name)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            pq.write_table(pa.concat_tables(pieces), target)
+
+
 class _ZipSource(_Source):
     def __init__(self, config: DatasetConfig) -> None:
         urls = config.access.urls or {}
@@ -322,11 +423,21 @@ class _LocalSource(_Source):
             target.symlink_to(ensure_inside(self.root, self.root / name))
 
 
-def _source(config: DatasetConfig, local: Path | None, languages: list[str] | None) -> _Source:
+def _source(
+    config: DatasetConfig, local: Path | None, languages: list[str] | None, seed: int = 0
+) -> _Source:
+    builder = _builder_module(config) if config.builder else None
+    rows = builder is not None and hasattr(builder, "label_from_row")
     if local is not None:
+        if rows:
+            raise SampleError(
+                f"{config.id} keeps its items in parquet rows; sample it from the Hub"
+            )
         return _LocalSource(local)
     match config.access.kind:
         case "hf" | "hf_gated":
+            if rows:
+                return _HfParquetSource(config, languages, builder, seed)
             return _HfSource(config, languages)
         case "url":
             return _ZipSource(config)
@@ -371,7 +482,7 @@ def sample_dataset(
         raise ValueError("per_label must be at least 1")
     metadata = metadata_files(config)
     stratum_of = getattr(_builder_module(config), "sample_stratum", None)
-    source = _source(config, local, languages)
+    source = _source(config, local, languages, seed)
     spec = {
         "per_label": per_label,
         "seed": seed,
@@ -380,7 +491,8 @@ def sample_dataset(
     }
 
     previous = read_sample(dest)
-    kept = [*(previous or {}).get("chosen", []), *(previous or {}).get("metadata", [])]
+    held = (previous or {}).get("files", (previous or {}).get("chosen", []))
+    kept = [*held, *(previous or {}).get("metadata", [])]
     in_place = previous and all((dest / p).exists() for p in kept)
     if in_place and previous.get("spec") == spec:
         log.info("%s: sample already in place (%d items)", config.id, len(previous["chosen"]))
@@ -391,7 +503,11 @@ def sample_dataset(
         shutil.rmtree(dest)
 
     paths = source.candidates()
-    label_of = label_function(config, read=source.read)
+    if isinstance(source, _HfParquetSource):
+        label_of: LabelOf = source.labels.get
+        stratum_of = source.strata.get if source.strata else None
+    else:
+        label_of = label_function(config, read=source.read)
     chosen = choose(paths, label_of, per_label, seed, labels=config.contains, stratum_of=stratum_of)
     counts = {"real": 0, "fake": 0}
     for path in paths:
@@ -414,6 +530,7 @@ def sample_dataset(
         "source": source.describe(),
         "candidates": counts,
         "chosen": chosen,
+        "files": source.files(chosen),
         "metadata": metadata,
         "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
     }

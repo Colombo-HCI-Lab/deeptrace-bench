@@ -324,3 +324,81 @@ def test_celeb_df_marks_the_official_test_list(tmp_path):
         "Celeb-real/id0_0001.mp4": "test",
         "Celeb-synthesis/id0_id1_0001.mp4": "train",
     }
+
+
+def _parquet(path, columns: dict, row_group_size: int = 2):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pq.write_table(pa.table(columns), path, row_group_size=row_group_size)
+
+
+def _wav(tag: int) -> dict:
+    return {"bytes": b"RIFF" + bytes([tag]) * 8, "path": None}
+
+
+def test_indicsynth_manifest_writes_audio_and_reads_speakers(tmp_path):
+    from deeptrace_bench.datasets import indicsynth
+
+    _parquet(
+        tmp_path / "Hindi" / "train-00000-of-00002.parquet",
+        {
+            "audio": [_wav(1), _wav(2), _wav(3)],
+            "Generative Model": ["xtts_v2", "freevc24", "vits"],
+            "Target Speaker ID": [11, 12, 13],
+            "Source Speaker_ID": [None, 21.0, None],
+            "Gender": ["Female", "Male", "Female"],
+        },
+    )
+    df = indicsynth.build_manifest(tmp_path)
+    validate_manifest(df, "indicsynth")
+    assert list(df.label) == ["fake"] * 3
+    assert list(df.method_family) == ["tts", "vc", "tts"]
+    vc = df[df.method == "freevc24"].iloc[0]
+    assert (vc.subject_id, vc.source_subject_id, vc.g_gender, vc.language) == (
+        "12",
+        "21",
+        "male",
+        "hi",
+    )
+    assert (tmp_path / vc.rel_path).read_bytes() == _wav(2)["bytes"]
+    assert vc.item_id == "indicsynth/Hindi/train-00000-of-00002/1"
+
+
+def test_indictts_challenge_labels_and_skips_the_unlabelled(tmp_path):
+    from deeptrace_bench.datasets import indictts_challenge
+
+    _parquet(
+        tmp_path / "data" / "train-00000-of-00001.parquet",
+        {
+            "id": ["NEP_F_HAPPY_00001", "NEP_M_SAD_00002", "en_f_lj_LJ000-0001", "XX_F_Y_1"],
+            "language": ["Nepali", "Nepali", "English", "Nepali"],
+            "is_tts": [1, 0, 0, -1],
+            "text": ["a", "b", "c", "d"],
+            "audio": [_wav(1), _wav(2), _wav(3), _wav(4)],
+        },
+    )
+    df = indictts_challenge.build_manifest(tmp_path)
+    validate_manifest(df, "indictts_challenge")
+    assert list(df.label) == ["fake", "real", "real"]  # is_tts -1 is no item
+    assert list(df.language) == ["ne", "ne", "en"]
+    assert list(df.subject_id) == ["NEP_F", "NEP_M", "EN_F"]
+    assert list(df.g_gender) == ["female", "male", "female"]
+
+
+def test_a_sampled_shard_keeps_full_shard_row_numbers(tmp_path):
+    from deeptrace_bench.datasets import indictts_challenge
+
+    _parquet(
+        tmp_path / "data" / "train-00000-of-00001.parquet",
+        {
+            "id": ["TAM_F_X_1"],
+            "language": ["Tamil"],
+            "is_tts": [1],
+            "audio": [_wav(9)],
+            "__source_row": [417],
+        },
+    )
+    df = indictts_challenge.build_manifest(tmp_path)
+    assert df.item_id.tolist() == ["indictts_challenge/train-00000-of-00001/417"]

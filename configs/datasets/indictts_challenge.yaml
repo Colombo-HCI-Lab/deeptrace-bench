@@ -1,0 +1,18 @@
+id: indictts_challenge
+name: IndicTTS Deepfake Challenge data
+modality: audio
+role: south_asian
+status: open
+access:
+  kind: hf
+  page: https://huggingface.co/datasets/SherryT997/IndicTTS-Deepfake-Challenge-Data
+  repo: SherryT997/IndicTTS-Deepfake-Challenge-Data
+  revision: 57347517658ae989597d8cef303cffb647ed2434
+  allow_patterns: [README.md, "data/train-*.parquet"]
+licence: CC BY 4.0
+contains: [real, fake]
+languages: [as, bn, brx, doi, en, gu, hi, kn, ml, mni, mr, ne, or, sa, ta, te]
+size_gb: 17.4
+derived_from: [ljspeech, librispeech]   # English rows include LJSpeech and LibriSpeech utterances
+builder: deeptrace_bench.datasets.indictts_challenge:build_manifest
+notes: Real and TTS speech in 16 Indian languages, Nepali among them, from a Hugging Face community challenge (checked 2026-10-05). Only the labelled train split (31,102 clips) is fetched; the test split's labels are hidden. The card names neither the TTS system nor where the real speech comes from; the ids point to a studio emotional-speech corpus with one female and one male voice per Indian language, and the English rows include LJSpeech and LibriSpeech. Open, no gate, audio embedded in parquet.
