@@ -1,0 +1,16 @@
+id: svarah
+name: Svarah (Indian-accented English)
+modality: audio
+role: real_reference
+status: click_through
+access:
+  kind: hf_gated
+  page: https://huggingface.co/datasets/ai4bharat/Svarah
+  repo: ai4bharat/Svarah
+  revision: ebbf7777fe771490696a3f7b007097606fa8c924
+licence: none declared on the Hugging Face card (AI4Bharat)
+contains: [real]
+languages: [en]
+size_gb: 1.1
+builder: deeptrace_bench.datasets.svarah:build_manifest
+notes: Real Indian-accented English, 9.6 h from 117 speakers (AI4Bharat, arXiv 2305.15760; checked 2026-10-05), test split only in three parquet shards, with gender, age group, native state and district, and first language per speaker. For false positive rates on real Indian-accented English by state and first language; pairs naturally with IndieFake once that arrives. It is gated, so someone has to accept its terms on the page with a Hugging Face account. No licence declared, so nothing derived from it is published until that's settled.

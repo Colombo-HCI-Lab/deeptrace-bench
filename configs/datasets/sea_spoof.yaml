@@ -1,0 +1,20 @@
+id: sea_spoof
+name: SEA-Spoof (Hindi and Tamil parts)
+modality: audio
+role: south_asian
+status: request
+access:
+  kind: hf_gated
+  page: https://huggingface.co/datasets/Jack-ppkdczgx/SEA-Spoof
+  repo: Jack-ppkdczgx/SEA-Spoof
+  revision: 132f5dca9b6efe39cf1d3b54a858f167f5a421fc
+  request: Email the authors (wu_jinyang@a-star.edu.sg, imcc.sg@gmail.com) to ask for access, then submit the access form on the Hugging Face page from an academic account. Approval is by hand; academic, non-commercial use only.
+licence: other (non-commercial academic research only; the paper says CC BY-NC-ND 4.0)
+licence_terms:
+  - Non-commercial academic research only; approved users at academic institutions.
+contains: [real, fake]
+languages: [hi, ta]
+size_gb: 81.5
+derived_from: [commonvoice]
+builder: deeptrace_bench.datasets.sea_spoof:build_manifest
+notes: The largest labelled Hindi and Tamil spoof set (arXiv 2509.19865; checked 2026-10-05) - Hindi 71,171 and Tamil 49,640 utterances among seven languages, with ten named generators (VITS-MMS, FastSpeech2, Indic-TTS, F5-TTS, Tacotron2, FastPitch, and the commercial HeyGen, ElevenLabs, MiniMax and GPT-4o-mini-TTS) and speakers per row. Real speech is Common Voice plus Indic speech corpora. Parquet shards; only Hindi and Tamil are wanted.

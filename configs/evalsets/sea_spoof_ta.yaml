@@ -1,0 +1,10 @@
+id: sea_spoof_ta
+modality: audio
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: sea_spoof
+    filter: {language: ta}
+group_by: [method, g_gender]
+status: pending_access
+notes: SEA-Spoof's Tamil part, per generator; real and spoofed speech come from the same source corpora. Waits on the authors' approval.

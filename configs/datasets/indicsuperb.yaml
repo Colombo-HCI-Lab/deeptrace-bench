@@ -13,6 +13,6 @@ access:
 licence: CC BY 4.0 (the Hugging Face card of ai4bharat/Kathbath; the IndicSUPERB code repo is Apache-2.0)
 contains: [real]
 languages: [hi, bn, ur, ta, mr, kn, ml, gu, pa, te, or, sa]
-size_gb: 4
+size_gb: 5.8
 builder: deeptrace_bench.datasets.indicsuperb:build_manifest
 notes: Real counterpart for IndicSynth, which was generated from these speakers. Only the clean test splits are fetched (5.8 GB); the 85 GB train split is left out until needed. Plain tars, so the dataset is downloaded in full and samples come from that copy (builder written 2026-10-05). Audio is m4a, decoded by the audio loader. The licence is the Hugging Face card's; the object store states none.

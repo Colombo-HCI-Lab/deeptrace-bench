@@ -1,0 +1,16 @@
+id: lrlspoof
+name: LRLspoof (low-resource language spoofs)
+modality: audio
+role: south_asian
+status: deferred
+access:
+  kind: hf
+  page: https://huggingface.co/datasets/lab260/LRLspoof
+  repo: lab260/LRLspoof
+  revision: 793f667a579756602193bb5b783ba16e80bcb7e6
+  allow_patterns: [README.md, data/labels.parquet]
+licence: MIT
+contains: [fake]
+languages: [ne, hi, gu, ml, mr, or, te, as]
+size_gb: 462
+notes: Deferred. Spoofed speech only, 1.3 million utterances in 66 languages (Interspeech 2026, arXiv 2603.02364; checked 2026-10-05), including Nepali - the only Nepali spoofs besides the IndicTTS challenge set - and Assamese, Bodo, Manipuri and Rajasthani. One gzipped tarball in 47 parts of 10 GiB, so no language can be fetched alone; worth it only if Nepali needs more than the IndicTTS challenge set gives.

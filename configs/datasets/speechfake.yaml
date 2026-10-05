@@ -10,4 +10,4 @@ licence: CC BY 4.0 (README; ModelScope metadata says Apache-2.0)
 contains: [fake]
 languages: [hi]
 size_gb: 116
-notes: Deferred. Getting its Hindi means downloading the whole 116 GB multilingual part, and IndicSynth and MLAAD already cover Hindi.
+notes: Deferred. Getting its Hindi means downloading the whole 116 GB multilingual part, and IndicSynth and MLAAD already cover Hindi. Rechecked on 2026-10-05, ModelScope holds the multilingual part only as one split zip (MD.z01, MD.z02 and MD.zip, 122.7 GB), and its metadata zip shows Hindi as Edge-TTS and SeedVC, and Bengali, Tamil, Marathi and Malayalam as Edge-TTS only; no Urdu, Nepali or Sinhala. The Hugging Face copy (DeepFense/SpeechFake) holds protocols, no audio.

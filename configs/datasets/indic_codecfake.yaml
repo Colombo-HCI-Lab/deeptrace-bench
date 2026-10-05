@@ -8,4 +8,4 @@ access:
   page: https://helixometry.github.io/IndicFake/
 licence: CC BY 4.0 (arXiv)
 contains: [fake]
-notes: No download link anywhere as of 2026-10-03.
+notes: No download link anywhere as of 2026-10-03. Rechecked on 2026-10-05, the project page's download buttons still say coming soon; the GitHub repo Helixometry/IndicFake holds a few demo clips per language and no licence.
