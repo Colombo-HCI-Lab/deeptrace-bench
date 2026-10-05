@@ -14,6 +14,7 @@ from deeptrace_bench.preprocess.faces import (
     CropSpec,
     FaceLoader,
     align_face,
+    crop_face,
     read_video_frames,
     sample_frame_indices,
 )
@@ -186,3 +187,14 @@ def test_crop_spec_refuses_unknown_keys():
     # Normalisation belongs to each adapter; a crop spec only says how faces are cut.
     with pytest.raises(ValidationError):
         CropSpec(size=256, normalize="imagenet")
+
+
+def test_box_crops_follow_sbis_test_rounding():
+    image = np.arange(100 * 100 * 3, dtype=np.uint32).reshape(100, 100, 3).astype(np.uint8)
+    box = np.array([10.6, 20.2, 50.9, 80.7], dtype=np.float32)
+    spec = CropSpec(size=None, margin=1.25, align="box")
+    # SBI: margins of w/8 and h/8, int() towards zero, +1 at the far edges
+    crop = crop_face(image, box, np.zeros((5, 2)), spec)
+    np.testing.assert_array_equal(crop, image[12:89, 5:56])
+    resized = crop_face(image, box, np.zeros((5, 2)), CropSpec(size=380, margin=1.25, align="box"))
+    assert resized.shape == (380, 380, 3)

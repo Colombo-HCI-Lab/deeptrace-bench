@@ -71,7 +71,10 @@ class CropSpec(BaseModel):
 
     size: int | None = None  # None: native size, from the landmark spread times the margin
     margin: float = 1.3
-    align: Literal["none", "five_point"] = "none"
+    # none: a square around the box; five_point: GenD's landmark alignment; box: the box
+    # itself, each side widened by (margin - 1) / 2 of its own length, then stretched to
+    # ``size`` (SBI's test crop)
+    align: Literal["none", "five_point", "box"] = "none"
 
 
 def sample_frame_indices(n_frames: int, k: int) -> list[int]:
@@ -192,10 +195,31 @@ def box_crop(image: np.ndarray, box: np.ndarray, size: int | None, margin: float
     return crop if size is None else cv2.resize(crop, (size, size))
 
 
+def stretch_crop(image: np.ndarray, box: np.ndarray, size: int | None, margin: float) -> np.ndarray:
+    """The box widened on each side by ``(margin - 1) / 2`` of its width and height, clipped.
+
+    The rounding follows SBI's ``crop_face`` in its test phase (``int`` towards zero, one
+    extra pixel at the far edges), so the same box gives the same pixels. The crop keeps the
+    box's aspect ratio until it is resized to a square ``size``, stretching the face as SBI's
+    own pipeline does.
+    """
+    x1, y1, x2, y2 = (float(v) for v in box)
+    dx, dy = (x2 - x1) * (margin - 1) / 2, (y2 - y1) * (margin - 1) / 2
+    h, w = image.shape[:2]
+    top, bottom = max(0, int(y1 - dy)), min(h, int(y2 + dy) + 1)
+    left, right = max(0, int(x1 - dx)), min(w, int(x2 + dx) + 1)
+    crop = image[top:bottom, left:right]
+    if crop.size == 0:
+        raise PreprocessError("no_face", "box lies outside the frame")
+    return crop if size is None else cv2.resize(crop, (size, size))
+
+
 def crop_face(image: np.ndarray, box: np.ndarray, kps: np.ndarray, spec: CropSpec) -> np.ndarray:
     """Cut one face from a frame per a model's crop spec."""
     if spec.align == "five_point":
         return align_face(image, kps, spec.size, spec.margin)
+    if spec.align == "box":
+        return stretch_crop(image, box, spec.size, spec.margin)
     return box_crop(image, box, spec.size, spec.margin)
 
 
