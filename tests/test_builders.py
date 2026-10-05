@@ -420,7 +420,7 @@ def test_bd_grf6_extracts_class_zips_and_labels_by_gender(tmp_path):
     outer = tmp_path / "Real and Fake"
     outer.mkdir()
     (outer / "Femail Fake.zip").write_bytes(inner("Femail Fake", ["F1.wav", "F2.wav"]))
-    (outer / "Third Gender Real.zip").write_bytes(inner("Third Gender Real", ["T1.wav"]))
+    (outer / "Third Gender Real.zip").write_bytes(inner("Third Gender Real", ["T1.mp3"]))
     df = bd_grf6.build_manifest(tmp_path)
     validate_manifest(df, "bd_grf6")
     assert sorted(zip(df.label, df.g_gender, strict=True)) == [

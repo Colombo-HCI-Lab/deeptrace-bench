@@ -13,4 +13,4 @@ contains: [real, fake]
 languages: [bn]
 size_gb: 3.0
 builder: deeptrace_bench.datasets.bd_grf6:build_manifest
-notes: Bangla speech of Bangladeshi speakers, real and fake for male, female and third gender, 13,566 clips (18.7 h), published 2026-02-16 and checked 2026-10-05. The only set with a third-gender group. Zips inside a zip; a sample fetches the smallest real and the smallest fake class zip (about 350 MB). The record names no generator and no speakers.
+notes: Bangla speech of Bangladeshi speakers, real and fake for male, female and third gender, 13,566 clips (18.7 h), published 2026-02-16 and checked 2026-10-05. The only set with a third-gender group. Zips inside a zip; a sample fetches the smallest real and the smallest fake class zip (about 350 MB). The record names no generator and no speakers. The third-gender real clips are MP3 while the female fakes are WAV, so file format may give labels away; check every class's format on the full download before trusting a score.

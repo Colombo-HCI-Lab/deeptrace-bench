@@ -6,4 +6,4 @@ components:
   - dataset: bd_grf6
 group_by: [g_gender]
 status: ready
-notes: Bangla real and fake speech by gender, including third gender. Taken as cross-corpus until the dataset says how its fakes were made and from whose voices; run the shortcut probe before reading its numbers as headline.
+notes: Bangla real and fake speech by gender, including third gender. Taken as cross-corpus until the dataset says how its fakes were made and from whose voices; run the shortcut probe before reading its numbers as headline. Real and fake classes may also differ in file format (MP3 against WAV in the classes seen so far).

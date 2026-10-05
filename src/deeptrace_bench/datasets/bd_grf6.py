@@ -4,7 +4,8 @@ speakers in six classes, real and fake for each of male, female and third gender
 Layout (checked by range reads, 2026-10-05): ``Real and Fake.zip`` (3.0 GB) holds one zip per
 class, ``Real and Fake/<Gender> <Real|Fake>.zip`` with ``<Gender>`` ``Femail`` (sic),
 ``Male`` or ``Third Gender``, and each of those holds ``<Gender> <Real|Fake>/<name>.wav``
-(``Femail Fake.zip``: 2,380 files, ``F1.wav`` to ...). 13,566 clips, 18.7 h in all.
+(``Femail Fake.zip``: 2,380 WAV files; ``Third Gender Real.zip``: 2,022 MP3 files). 13,566
+clips, 18.7 h in all.
 
 The inner zips are compressed inside the outer one, so the builder extracts each into a
 folder named after it (once, marked by ``.extracted-<name>``) and the sampler fetches whole
@@ -27,6 +28,7 @@ from . import iter_files
 DATASET = "bd_grf6"
 _CLASS = re.compile(r"^(Femail|Female|Male|Third Gender) (Real|Fake)$")
 _GENDERS = {"Femail": "female", "Female": "female", "Male": "male", "Third Gender": "third_gender"}
+_AUDIO = {".wav", ".mp3", ".flac", ".m4a", ".ogg"}
 
 
 def _class(name: str) -> tuple[str, str] | None:
@@ -46,9 +48,9 @@ def nested_zip_label(member: str) -> str | None:
 
 
 def label_from_path(rel_path: str) -> str | None:
-    """The label of a ``.wav`` inside a class folder."""
+    """The label of an audio file inside a class folder."""
     path = PurePosixPath(rel_path)
-    if path.suffix.lower() != ".wav":
+    if path.suffix.lower() not in _AUDIO:
         return None
     found = next((_class(part) for part in reversed(path.parts[:-1]) if _class(part)), None)
     return found[1] if found else None
