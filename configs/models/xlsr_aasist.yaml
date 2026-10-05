@@ -9,14 +9,19 @@ upstream:
   repo: TakHemlata/SSL_Anti-spoofing
   commit: 4acaa61dcef5f7610f43aa4d0b29c4559b970cd2
 weights:
-  - name: pretrained
-    kind: gdrive_folder
-    drive_id: 1c4ywztEVlYVijfwbGLl9OEa1SNtFKppB
-  - name: xls_r_300m.bin
-    kind: hf
+  # The authors' Drive folder 1c4ywztEVlYVijfwbGLl9OEa1SNtFKppB also holds
+  # Best_LA_model_for_DF.pth (ASVspoof 2021 DF); LA_model.pth is the LA model.
+  - name: LA_model.pth
+    kind: gdrive
+    drive_id: 11vFBNKzYUtWqdK358_JEygawFzmmaZjO
+    size_bytes: 1271633441
+  # The front end's architecture; its weights come from LA_model.pth, which holds the whole
+  # fine-tuned network.
+  - name: xls-r-300m-config
+    kind: hf_snapshot
     repo: facebook/wav2vec2-xls-r-300m
-    filename: pytorch_model.bin
     revision: 1a640f32ac3e39899438a2931f9924c02f080a54
+    allow_patterns: [config.json]
 training_data:
   - {dataset: commonvoice, level: pretrain}
   - {dataset: babel, level: pretrain}
@@ -28,5 +33,7 @@ adapter: deeptrace_bench.models.xlsr_aasist:XLSRAASISTDetector
 input:
   sample_rate: 16000
   segment_samples: 64600
-  checkpoint: pretrained/LA_model.pth
-notes: Port off fairseq onto the transformers XLS-R (key remap, about 1 to 2 days). The Drive folder holds LA_model.pth and Best_LA_model_for_DF.pth.
+  checkpoint: LA_model.pth
+  backbone_config: xls-r-300m-config
+  fake_index: 0                  # upstream labels bona fide 1 and scores batch_out[:, 1]
+notes: fairseq front end rebuilt in transformers (models/_fairseq.py renames the keys; adapter written 2026-10-05). Weights checked 2026-10-05; an MIT mirror with the same file size is at SpeechAntiSpoofingBenchmarks/W2V2-AASIST on Hugging Face. Parity needs upstream's fairseq in an old environment and isn't run yet.

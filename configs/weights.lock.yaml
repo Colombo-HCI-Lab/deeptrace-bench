@@ -35,3 +35,6 @@ ucf:
   ucf_best.pth: 4afa2517feeb473024e1b73049bfa61ce446eb4da14d17c864f2e2a76b3223e5
 xception:
   xception_best.pth: dd61186f9ac8e99aae85982cae338b555dfaeef042f6b699e5a55cae3998ba47
+xlsr_aasist:
+  LA_model.pth: bd6f36097259fe54e7004eb983651e5304d807be81156dbd04faccb70d91e10c
+  xls-r-300m-config/config.json: 0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac
