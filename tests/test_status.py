@@ -3,9 +3,23 @@
 from __future__ import annotations
 
 import json
+import os
+from datetime import UTC, datetime
 
+import pandas as pd
+import pytest
+
+from deeptrace_bench import status
 from deeptrace_bench.runs import config_hash
-from deeptrace_bench.status import collect, run_flags, scored_runs, write_page
+from deeptrace_bench.status import (
+    collect,
+    fetch_citations,
+    load_catalog,
+    run_flags,
+    run_timing,
+    scored_runs,
+    write_page,
+)
 
 
 def _summary(model: str, evalset: str, run_id: str, auc: float, verdict: str = "clean") -> dict:
@@ -72,3 +86,44 @@ def test_write_page_replaces_only_the_data(tmp_path):
     text = page.read_text()
     assert text.startswith("<p>keep</p>") and text.endswith("</script><b>x</b>")
     assert '"<\\/script>"' in text
+
+
+def test_run_timing_spans_first_start_to_last_part(tmp_path, monkeypatch):
+    monkeypatch.setenv("DTB_ROOT", str(tmp_path))
+    monkeypatch.delenv("DTB_NAMESPACE", raising=False)
+    run = tmp_path / "scores" / "r"
+    run.mkdir(parents=True)
+    start = datetime(2026, 10, 5, tzinfo=UTC)
+    (run / "run.json").write_text(json.dumps({"sessions": [{"started_utc": start.isoformat()}]}))
+    for i, windows in enumerate([[1, 2], [3]]):
+        part = run / f"part-000of001-0000{i}.parquet"
+        pd.DataFrame({"n_windows": windows}).to_parquet(part)
+        os.utime(part, (start.timestamp() + 60 * (i + 1),) * 2)
+    assert run_timing("r") == {"wall_s": 120, "windows": 6}
+
+
+def test_catalog_ids_must_exist(registry, tmp_path, monkeypatch):
+    catalog = tmp_path / "catalog.yaml"
+    catalog.write_text("models:\n  not_a_model: {summary: x}\n")
+    monkeypatch.setattr(status, "CATALOG", catalog)
+    with pytest.raises(ValueError, match="not_a_model"):
+        load_catalog(registry)
+
+
+def test_citations_are_keyed_by_catalog_id(tmp_path, monkeypatch):
+    found = {"title": "T", "year": 2022, "citationCount": 7}
+
+    class Response:
+        status_code = 200
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return [found, None]
+
+    monkeypatch.setattr(status.requests, "post", lambda *a, **k: Response())
+    monkeypatch.setattr(status, "CITATIONS", tmp_path / "citations.json")
+    catalog = {"models": {"a": {"s2_id": "ARXIV:1"}}, "datasets": {"b": {"s2_id": "DOI:2"}}}
+    data = fetch_citations(catalog)
+    assert data["papers"] == {"ARXIV:1": {"title": "T", "year": 2022, "citations": 7}}

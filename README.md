@@ -35,7 +35,8 @@ uv run scripts/smoke.py --model aasist         # an audio model, on a few Urdu c
 4. **Evaluate** (`scripts/evaluate.py`): AUC and EER overall and per group, with bootstrap intervals, failure counts and the contamination verdict. `--publish` copies the aggregates into `results/`.
 5. **Smoke test** (`scripts/smoke.py`): steps 1 to 4 on a few items per dataset, in `DTB_ROOT/smoke/`, with a report per run. Run it after any change, and to prove a new model or dataset is wired up.
 6. **Parity** (`scripts/parity.py`): before a model's numbers count, its adapter and the upstream code score the same ~200 items within 1e-3; the summary goes to `results/parity/<model>.json`.
-7. **Status page** (`scripts/build_site.py`): rewrites the data in `docs/index.html`, one page with the pipeline, which model was scored on which evalset, and every countable run. It reads run summaries from the store, so rebuild it where `DTB_ROOT` is set, and commit the page.
+7. **Profile** (`scripts/profile_models.py --device cuda`): parameters, FLOPs per input, GPU time per input and peak memory for every model, on sampled smoke items, into `results/profile/<model>.json`.
+8. **Status page** (`scripts/build_site.py`): rewrites the data in `docs/index.html`, the public page at <https://colombo-hci-lab.github.io/deeptrace-bench/>: a primer for newcomers, the pipeline, which model was scored on which evalset, every model and dataset with its paper and citation count, every countable run, and compute costs with time estimates. It reads run summaries from the store, so rebuild it where `DTB_ROOT` is set, and commit the page. Plain-language summaries and paper ids live in `docs/catalog.yaml`; `--citations` refreshes the counts from Semantic Scholar into `results/citations.json`.
 
 Adding a model or a dataset: [docs/adding_a_model.md](docs/adding_a_model.md), [docs/adding_a_dataset.md](docs/adding_a_dataset.md).
 

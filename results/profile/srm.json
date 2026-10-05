@@ -1,0 +1,19 @@
+{
+  "model": "srm",
+  "checked_utc": "2026-10-05T14:50:27+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 32,
+  "params": 55350352,
+  "gflops_per_unit": 28.03301898,
+  "ms_per_unit": 4.649142499943082,
+  "ms_per_item": 148.77255999817862,
+  "load_ms_per_item": 17.889539503812557,
+  "peak_memory_gb": 1.273916244506836
+}

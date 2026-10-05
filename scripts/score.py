@@ -20,38 +20,17 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from functools import partial
-
-import numpy as np
-import pandas as pd
 
 from deeptrace_bench import evalset as evalsets
 from deeptrace_bench.eval.contamination import Verdict, check
 from deeptrace_bench.fetch import locked_hashes
 from deeptrace_bench.models.base import load_detector, resolve_device, set_tf32
-from deeptrace_bench.paths import (
-    dataset_dir,
-    namespace,
-    prepare_store,
-    use_namespace,
-    weights_dir,
-)
-from deeptrace_bench.preprocess.audio import load_audio, segment
-from deeptrace_bench.preprocess.av import AudioVideoLoader
-from deeptrace_bench.preprocess.faces import FaceLoader
-from deeptrace_bench.preprocess.mouths import MouthLoader
+from deeptrace_bench.paths import namespace, prepare_store, use_namespace
 from deeptrace_bench.registry import Modality, Registry, accepts
 from deeptrace_bench.runs import config_hash, start_run
-from deeptrace_bench.score import part_prefix, score_items, shard_items
-from deeptrace_bench.upstream import checkout_dir
+from deeptrace_bench.score import build_loader, part_prefix, score_items, shard_items
 
 log = logging.getLogger("score")
-
-
-def load_audio_inputs(row: pd.Series, segment_samples: int, min_samples: int) -> np.ndarray:
-    """Read one audio item and cut it into model windows."""
-    path = dataset_dir(row["dataset"]) / row["rel_path"]
-    return segment(load_audio(path), segment_samples=segment_samples, min_samples=min_samples)
 
 
 def main() -> int:
@@ -127,35 +106,14 @@ def main() -> int:
     )
     log.info("run %s, shard %d/%d, %d items", record.run_id, index, count, len(items))
 
-    if is_audio:
-        audio = registry.eval.audio
-        loader = partial(
-            load_audio_inputs,
-            segment_samples=audio["segment_samples"],
-            min_samples=int(audio["min_seconds"] * audio["sample_rate"]),
-        )
-        aggregate = audio["aggregation"]
-    else:
-        loader = FaceLoader.from_registry(
-            registry,
-            model,
-            save_crops_to=directory / "crops" if args.save_crops else None,
-            save_crops=args.save_crops,
-            part_prefix=prefix,
-        )
-        if model.modality == Modality.AUDIO_VIDEO:
-            # an audio-visual model gets its faces and the audio track together
-            loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
-        elif model.input.get("inputs") == "mouths":
-            # a lip-based model gets mouth crops cut from landmarks, not face crops
-            loader = MouthLoader(
-                loader,
-                fan_path=weights_dir(model.id) / model.input["landmarks"],
-                upstream_dir=checkout_dir(model.upstream),
-                device=device,
-                min_frames=int(model.input["clip_frames"]),
-            )
-        aggregate = registry.eval.video["aggregation"]
+    loader, aggregate = build_loader(
+        registry,
+        model,
+        device,
+        crops_dir=directory / "crops" if args.save_crops else None,
+        save_crops=args.save_crops,
+        prefix=prefix,
+    )
 
     detector = load_detector(model)
     detector.load(device)

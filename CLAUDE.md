@@ -21,7 +21,8 @@ uv run scripts/score.py --model <id> --evalset <id> [--shard i/n] [--smoke] [--s
 uv run scripts/evaluate.py --model <id> --evalset <id> [--publish] [--smoke]
 uv run scripts/smoke.py [--model gend] [--sample 2] [--device auto|cpu|mps|cuda] [--keep]
 uv run scripts/parity.py export --model <id> --evalset <id> --smoke   # then the reference and compare it prints
-uv run scripts/build_site.py               # rewrite docs/index.html, the status page, from the store
+uv run scripts/profile_models.py --device cuda   # params, FLOPs, GPU time per model -> results/profile/
+uv run scripts/build_site.py [--citations] # rewrite docs/index.html, the status page, from the store
 ```
 
 Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/store_layout.md` maps the tree. `DTB_NAMESPACE=smoke` (set by `--smoke`, `--sample` and `smoke.py`, never in `.env`) moves everything item-level under `DTB_ROOT/smoke/`.

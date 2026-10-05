@@ -1,0 +1,19 @@
+{
+  "model": "gend_pe_l",
+  "checked_utc": "2026-10-05T14:49:49+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 32,
+  "params": 316104706,
+  "gflops_per_unit": 163.123929088,
+  "ms_per_unit": 12.822997171838324,
+  "ms_per_item": 410.33590949882637,
+  "load_ms_per_item": 32.570251500146696,
+  "peak_memory_gb": 1.572800636291504
+}

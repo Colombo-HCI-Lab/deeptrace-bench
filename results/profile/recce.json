@@ -1,0 +1,19 @@
+{
+  "model": "recce",
+  "checked_utc": "2026-10-05T14:50:18+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 32,
+  "params": 47693720,
+  "gflops_per_unit": 15.974639936,
+  "ms_per_unit": 3.155618374989899,
+  "ms_per_item": 100.97978799967677,
+  "load_ms_per_item": 18.704955004068324,
+  "peak_memory_gb": 1.037496566772461
+}

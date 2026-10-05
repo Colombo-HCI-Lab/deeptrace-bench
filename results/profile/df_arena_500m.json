@@ -1,0 +1,19 @@
+{
+  "model": "df_arena_500m",
+  "checked_utc": "2026-10-05T14:48:59+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "urdu_csalt",
+  "items": 4,
+  "repeats": 3,
+  "unit": "4 s audio window",
+  "units_per_item": 2,
+  "params": 436191877,
+  "gflops_per_unit": 193.788934144,
+  "ms_per_unit": 22.651899000265985,
+  "ms_per_item": 45.30379800053197,
+  "load_ms_per_item": 7.681248000153573,
+  "peak_memory_gb": 1.703409194946289
+}

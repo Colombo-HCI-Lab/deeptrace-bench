@@ -1,0 +1,19 @@
+{
+  "model": "ucf",
+  "checked_utc": "2026-10-05T14:50:31+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 32,
+  "params": 46838430,
+  "gflops_per_unit": 24.13901888,
+  "ms_per_unit": 4.226527031278238,
+  "ms_per_item": 135.2488650009036,
+  "load_ms_per_item": 18.260696502693463,
+  "peak_memory_gb": 1.0383291244506836
+}

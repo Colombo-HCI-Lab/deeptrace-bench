@@ -8,8 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
 <style>
-/* Layout: one report sheet. Masthead, then pipeline, coverage grids, scored runs. Ink does the
-   work; the one accent marks a number that needs a caveat before anyone quotes it. */
+/* Layout: one report sheet read top to bottom. A plain-language primer first, then pipeline,
+   coverage, models, datasets, runs and compute. Ink does the work; the one accent marks a
+   number that needs a caveat before anyone quotes it. */
 :root {
   --paper: #f4f5f2;
   --ink: #1b1d1a;
@@ -22,31 +23,48 @@
   color-scheme: light; /* light only: it is projected and printed, so it never follows a dark OS */
 }
 * { box-sizing: border-box; }
+html { scroll-padding-top: 56px; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.55 var(--serif); }
 .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 72px; display: grid; gap: 56px; }
 a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--muted); }
-a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 code, .mono { font-family: var(--mono); font-size: 0.8em; }
-h1, h2 { font-weight: 600; text-wrap: balance; margin: 0; }
+h1, h2, h3 { font-weight: 600; text-wrap: balance; margin: 0; }
 h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.05; letter-spacing: -0.01em; }
 h2 { font-size: 1.5rem; line-height: 1.2; }
-p { margin: 0; max-width: 65ch; }
+p { margin: 0; max-width: 68ch; }
 .label { font: 500 11px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 section { display: grid; gap: 20px; min-width: 0; }
 section > header { display: grid; gap: 6px; border-top: 1px solid var(--ink); padding-top: 14px; }
+.intro { font-size: 1rem; }
+.note { font-size: 0.9rem; color: var(--muted); }
 
-/* Masthead */
+/* Masthead and section index */
 .mast { display: grid; gap: 16px; }
-.lede { font-size: 1.15rem; color: var(--muted); }
-.facts { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 400 13px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
-.facts b { font-weight: 500; }
+.lede { font-size: 1.2rem; line-height: 1.5; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 400 13px/1.5 var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.facts b { font-weight: 500; color: var(--ink); }
+nav.index { min-width: 0; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-block: 1px solid var(--rule); margin-block: -28px; }
+nav.index ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 22px; overflow-x: auto; white-space: nowrap; }
+nav.index a { display: block; padding: 10px 0; font: 500 11px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; color: var(--muted); }
+nav.index a:hover { color: var(--ink); }
+
+/* Primer */
+.terms { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px 32px; margin: 0; }
+.term { border-top: 1px solid var(--rule); padding-top: 10px; display: grid; gap: 4px; align-content: start; }
+.term dt { font-weight: 600; font-size: 1.02rem; }
+.term dd { margin: 0; font-size: 0.93rem; line-height: 1.5; }
+.scale { margin-top: 8px; display: grid; gap: 4px; }
+.scale .track { height: 6px; background: linear-gradient(to right, var(--tint), var(--ink)); position: relative; }
+.scale .ticks { display: flex; justify-content: space-between; font: 400 11px/1.3 var(--mono); color: var(--muted); }
+.scale .ticks span:nth-child(2) { transform: translateX(-10%); }
 
 /* Pipeline */
 .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border: 1px solid var(--rule); }
 .stage { padding: 16px 16px 18px; display: grid; gap: 8px; align-content: start; border-left: 1px solid var(--rule); position: relative; min-width: 0; }
 .stage:first-child { border-left: 0; }
 .stage:not(:last-child)::after { content: "→"; position: absolute; right: -0.6em; top: 14px; font: 500 15px/1 var(--mono); background: var(--paper); color: var(--muted); padding: 2px 0; z-index: 1; }
-.stage h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.stage h3 { font-size: 1.05rem; }
 .stage p { font-size: 0.9rem; line-height: 1.45; }
 .stage .label { color: var(--ink); }
 .gates { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
@@ -56,7 +74,6 @@ section > header { display: grid; gap: 6px; border-top: 1px solid var(--ink); pa
 .gate.g-pub { grid-column: 5; }
 .homes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 8px; }
 .home { background: var(--tint); padding: 14px 16px; display: grid; gap: 4px; font-size: 0.9rem; line-height: 1.45; }
-.smoke { font-size: 0.9rem; color: var(--muted); }
 
 /* Coverage grids */
 .scroll { overflow-x: auto; min-width: 0; }
@@ -64,42 +81,55 @@ table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .grid th, .grid td { padding: 0; }
 .grid thead th { font: 500 11px/1.2 var(--mono); color: var(--muted); vertical-align: bottom; text-align: left; }
 .grid th.grp { text-align: left; padding: 0 8px 6px 6px; border-left: 1px solid var(--rule); white-space: nowrap; letter-spacing: 0.06em; text-transform: uppercase; }
-.grid th.v { padding: 6px 0 8px; width: 46px; min-width: 46px; }
+.grid th.v { padding: 6px 0 8px; width: 50px; min-width: 50px; text-align: center; }
 .grid th.v span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; display: inline-block; margin: 0 auto; }
-.grid th.v { text-align: center; }
 .grid th.v.first, .grid td.first { border-left: 1px solid var(--rule); }
 .grid th.v.pending { color: var(--muted); font-style: italic; }
 .grid th.mh { padding: 0 12px 8px 0; min-width: 190px; }
 .grid tbody th { text-align: left; font: 400 15px/1.2 var(--serif); padding: 0 12px 0 0; white-space: nowrap; height: 34px; border-top: 1px solid var(--rule); }
 .grid tbody th small { font: 400 10px/1 var(--mono); color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-left: 6px; }
-.grid td { border-top: 1px solid var(--rule); text-align: center; font: 400 12px/1 var(--mono); height: 34px; width: 46px; }
+.grid td { border-top: 1px solid var(--rule); text-align: center; font: 400 12px/1 var(--mono); height: 34px; width: 50px; }
 .grid td.lad, .grid th.lad { width: 30px; min-width: 30px; color: var(--muted); }
 .grid td.lad.on { color: var(--ink); }
 .grid td.pending { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule) 5px 6px); }
 .grid td.run { font-weight: 500; }
-.grid td.run.flag { color: var(--flag); font-weight: 500; }
+.grid td.run.flag { color: var(--flag); }
+.grid td.time { color: var(--ink); }
 .grid td.guard, .grid td.empty { color: var(--muted); }
 .grid td.guard { font-size: 15px; }
-.grid tbody th, .grid th.mh { position: sticky; left: 0; background: var(--paper); z-index: 1; }
 .grid td.empty { color: var(--rule); }
 .grid td.na { background: var(--tint); }
+.grid tbody th, .grid th.mh { position: sticky; left: 0; background: var(--paper); z-index: 1; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 0.85rem; color: var(--muted); }
 .legend span { display: inline-flex; gap: 8px; align-items: center; }
 .legend i { font: normal 500 12px/1 var(--mono); color: var(--ink); min-width: 2.6em; height: 22px; display: inline-grid; place-items: center; }
 .legend i.flag { color: var(--flag); }
 .legend i.hatch { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule) 5px 6px); }
 .legend i.na { background: var(--tint); }
-.empty-note { font-size: 0.95rem; color: var(--muted); }
+.toggle { display: inline-flex; border: 1px solid var(--ink); width: max-content; }
+.toggle button { font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 9px 14px; border: 0; background: var(--paper); color: var(--ink); cursor: pointer; }
+.toggle button + button { border-left: 1px solid var(--ink); }
+.toggle button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.subhead { margin-top: 10px; }
 
-/* Scored runs */
-.runs { width: 100%; min-width: 760px; font-size: 0.9rem; }
-.runs th { font: 500 11px/1.3 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0 12px 8px 0; border-bottom: 1px solid var(--ink); }
-.runs td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
-.runs td.num, .runs th.num { text-align: right; font-family: var(--mono); font-size: 0.82rem; white-space: nowrap; }
-.runs td.id { font-family: var(--mono); font-size: 0.8rem; }
-.runs td.model { white-space: nowrap; }
-.runs td.ci { color: var(--muted); }
-.runs .flags { color: var(--flag); font-size: 0.85rem; }
+/* Reference tables: models, datasets, runs, compute */
+.ref { width: 100%; font-size: 0.9rem; }
+.ref th { font: 500 11px/1.3 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0 14px 8px 0; border-bottom: 1px solid var(--ink); vertical-align: bottom; }
+.ref td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.ref tr.group td { padding-top: 22px; font: 500 11px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); border-bottom: 1px solid var(--ink); }
+.ref td.num, .ref th.num { text-align: right; font-family: var(--mono); font-size: 0.82rem; white-space: nowrap; }
+.ref td.mono { font-family: var(--mono); font-size: 0.8rem; }
+.ref td.nowrap { white-space: nowrap; }
+.ref td.dim, .ref .dim { color: var(--muted); }
+.ref .name { font-weight: 600; }
+.ref .sum { display: block; color: var(--muted); font-size: 0.86rem; line-height: 1.45; margin-top: 2px; max-width: 52ch; }
+.ref .flags { color: var(--flag); font-size: 0.85rem; }
+.models-t { min-width: 980px; }
+.models-t td:first-child, .datasets-t td:first-child { min-width: 320px; width: 34%; }
+.datasets-t { min-width: 1040px; }
+.runs-t { min-width: 860px; }
+.compute-t { min-width: 760px; }
+.est-t { min-width: 680px; }
 
 .rules { display: grid; gap: 8px; padding-left: 1.1em; margin: 0; max-width: 72ch; font-size: 0.95rem; }
 footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.85rem; color: var(--muted); }
@@ -121,66 +151,125 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
 <header class="mast">
   <div class="label">Colombo HCI Lab · South Asia deepfake detection · phase 2</div>
   <h1>deeptrace-bench</h1>
-  <p class="lede">Open deepfake detectors, run on South Asian audio and video under one evaluation setup. What has been scored so far, and how a score is produced.</p>
+  <p class="lede">Can today's deepfake detectors catch fakes in South Asian languages and faces? Most were trained on English speech and Western faces. This benchmark runs published, open detectors on South Asian audio and video under the same rules, and reports how well each one holds up.</p>
   <div class="facts" id="facts"></div>
 </header>
 
+<nav class="index" aria-label="Sections">
+  <ol>
+    <li><a href="#start">Start here</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#coverage">Coverage</a></li>
+    <li><a href="#models">Models</a></li>
+    <li><a href="#datasets">Datasets</a></li>
+    <li><a href="#runs">Results</a></li>
+    <li><a href="#compute">Compute</a></li>
+    <li><a href="https://colombo-hci-lab.github.io/deeptrace-bench/catalog.html">Full reference</a></li>
+  </ol>
+</nav>
+
+<section id="start">
+  <header><div class="label">New to this? Read this first</div><h2>How to read this page</h2></header>
+  <p class="intro">Every number here answers one question: given a clip, can the model tell whether it is real or fake? These are the terms the rest of the page uses.</p>
+  <dl class="terms">
+    <div class="term"><dt>Deepfake</dt><dd>Audio or video made or changed by AI to look or sound like a real person: a cloned voice, a swapped face, speech generated from text.</dd></div>
+    <div class="term"><dt>Detector (model)</dt><dd>A neural network that listens to a clip, or looks at the faces in it, and gives a score from 0 (real) to 1 (fake). Every detector here comes from a published paper with released weights.</dd></div>
+    <div class="term"><dt>Dataset and evalset</dt><dd>A dataset is a published collection of real and fake clips. An evalset is the exact slice we score: which dataset, which languages, which clips count as real and which as fake. One dataset can feed several evalsets.</dd></div>
+    <div class="term"><dt>AUC</dt><dd>The chance that the model gives a randomly picked fake clip a higher score than a randomly picked real one. Higher is better.
+      <div class="scale" aria-hidden="true"><div class="track"></div><div class="ticks"><span>0 · always wrong</span><span>0.5 · coin flip</span><span>1 · perfect</span></div></div></dd></div>
+    <div class="term"><dt>EER (equal error rate)</dt><dd>Pick the cut-off where the share of real clips wrongly called fake equals the share of fakes wrongly called real. That shared error rate is the EER. Lower is better; 50% is guessing.</dd></div>
+    <div class="term"><dt>Zero-shot</dt><dd>Testing a model on data unlike what it learned from, without retraining it. Most results here are zero-shot, which is the point: they show how detectors trained elsewhere do on South Asian data.</dd></div>
+    <div class="term"><dt>Reproduction</dt><dd>Running a model on the dataset its own paper used, to check our numbers match the published ones. If they do, we can trust our setup on new data.</dd></div>
+    <div class="term"><dt>Same corpus or cross corpus</dt><dd>Same corpus: real and fake clips come from the same recordings, so the only difference is the fakery. Cross corpus: they come from different sources, so a model can score well by noticing the microphone rather than the fake. Cross-corpus numbers never count as headline results.</dd></div>
+    <div class="term"><dt>Parity check</dt><dd>Before we trust our copy of a model, we run it and the authors' original code on the same ~200 clips. The scores must agree to within 0.001.</dd></div>
+    <div class="term"><dt>Contamination guard</dt><dd>A model can't be tested fairly on data it saw while training. The harness compares each model's training data with every evalset and refuses those pairs (marked ⊘).</dd></div>
+  </dl>
+</section>
+
 <section id="pipeline">
   <header><div class="label">How a score is made</div><h2>Pipeline</h2></header>
+  <p class="intro">Five steps turn a published model and a dataset into one row of results. Three checks sit along the way so that a number only counts when it can be trusted.</p>
   <div>
     <div class="flow">
-      <div class="stage"><div class="label">1 · configs/</div><h3>Configure</h3><p>One YAML per model (upstream commit, weights, training data), per dataset (access, licence) and per evalset (what gets scored). One shared evaluation setup.</p></div>
-      <div class="stage"><div class="label">2 · setup_*.py</div><h3>Set up</h3><p>Pin upstream code and weight hashes. Download each dataset and build its manifest: one row per item, with label, generator and group attributes.</p></div>
-      <div class="stage"><div class="label">3 · score.py</div><h3>Score</h3><p>Evalset to items, shared preprocessing (4&nbsp;s audio windows; SCRFD faces, per-model crops), adapter, P(fake) per item. Sharded and resumable.</p></div>
-      <div class="stage"><div class="label">4 · evaluate.py</div><h3>Evaluate</h3><p>AUC and EER with 95% bootstrap intervals, overall and per group. Failures (no face, too short) are counted per group, never dropped.</p></div>
-      <div class="stage"><div class="label">5 · --publish</div><h3>Publish</h3><p>Aggregate tables only go to <code>results/</code> in git. Every row carries its pairing and contamination verdict.</p></div>
+      <div class="stage"><div class="label">1 · configs/</div><h3>Configure</h3><p>One file per model (where its code and weights come from, what it trained on), per dataset (where to get it, its licence) and per evalset (what gets scored). One shared set of evaluation rules.</p></div>
+      <div class="stage"><div class="label">2 · setup_*.py</div><h3>Set up</h3><p>Download each model at a fixed version and check its weights. Download each dataset and list every clip with its label (real or fake), language and generator.</p></div>
+      <div class="stage"><div class="label">3 · score.py</div><h3>Score</h3><p>Prepare each clip the same way for every model (audio cut into 4&nbsp;s windows; faces found and cropped in video), run the model, store one fake-score per clip. Can stop and resume.</p></div>
+      <div class="stage"><div class="label">4 · evaluate.py</div><h3>Evaluate</h3><p>AUC and EER with 95% confidence intervals, overall and per group (language, generator). Clips that fail, such as a video with no face, are counted, never dropped.</p></div>
+      <div class="stage"><div class="label">5 · --publish</div><h3>Publish</h3><p>Only summary tables go into the public repo. Every row carries how its real and fake clips were paired and the contamination check's verdict.</p></div>
     </div>
     <div class="gates">
-      <div class="gate g-parity"><span class="label">Parity gate</span>An adapter counts only after it matches upstream code within 1e-3 on about 200 items.</div>
-      <div class="gate g-guard"><span class="label">Contamination guard</span>Training data is checked against the evalset's sources. A model that trained on the data is refused.</div>
-      <div class="gate g-pub"><span class="label">Publish guard</span>Pipeline tests, smoke runs and item-level files never reach git.</div>
+      <div class="gate g-parity"><span class="label">Parity check</span>Our copy of a model must match the authors' code within 0.001 on about 200 clips before its numbers count.</div>
+      <div class="gate g-guard"><span class="label">Contamination guard</span>A model is never scored on data it trained on.</div>
+      <div class="gate g-pub"><span class="label">Publish guard</span>Test runs and anything naming a single clip never reach the public repo.</div>
     </div>
   </div>
   <div class="homes">
-    <div class="home"><span class="label">In git</span>Code, configs, docs, weight hashes, aggregate results, parity summaries.</div>
-    <div class="home"><span class="label">In the store (DTB_ROOT)</span>Datasets, weights, manifests, face caches, per-item scores. Licences forbid sharing these.</div>
+    <div class="home"><span class="label">In the public repo</span>Code, settings, documentation, weight fingerprints, summary results.</div>
+    <div class="home"><span class="label">In private storage only</span>The datasets, model weights, clip lists and per-clip scores. Dataset licences don't allow sharing these.</div>
   </div>
-  <p class="smoke">A smoke namespace runs the same steps on two real and two fake items per evalset, to prove a model or dataset is wired up. Those numbers are never reported.</p>
 </section>
 
 <section id="coverage">
   <header><div class="label">Which model ran on which evalset</div><h2>Coverage</h2></header>
-  <p>Columns are evalsets, the unit that gets scored; one dataset can feed several. A number is the AUC on the full evalset.</p>
-  <div class="legend" id="legend">
-    <span><i>0.863</i>AUC, full evalset (darker is higher)</span>
-    <span><i class="flag">0.365</i>read the flag before quoting</span>
-    <span><i>⊘</i>guard refuses: model trained on this data</span>
+  <p class="intro">Each row is a model and each column an evalset. A number is the model's AUC on the whole evalset. Switch to estimated time to see how long a full run would take on one GPU, for evalsets whose size we know.</p>
+  <div class="toggle" role="group" aria-label="Show in cells">
+    <button type="button" id="mode-auc" aria-pressed="true">AUC</button>
+    <button type="button" id="mode-time" aria-pressed="false">Estimated GPU time</button>
+  </div>
+  <div class="legend">
+    <span><i>0.863</i>AUC on the full evalset (darker is higher)</span>
+    <span><i class="flag">0.365</i>has a caveat: see Results</span>
+    <span><i>⊘</i>refused: the model trained on this data</span>
     <span><i>·</i>not run yet</span>
-    <span><i class="hatch"></i>data access pending</span>
-    <span><i class="na"></i>model can't read this modality</span>
+    <span><i class="hatch"></i>waiting for data access</span>
+    <span><i class="na"></i>model can't read this kind of input</span>
     <span><i>●</i>adapter written · parity passed</span>
   </div>
-  <h3 class="label" style="margin:12px 0 0">Audio</h3>
+  <h3 class="label subhead">Audio</h3>
   <div class="scroll"><table class="grid" id="grid-audio"></table></div>
-  <h3 class="label" style="margin:12px 0 0">Video and audio-visual</h3>
+  <h3 class="label subhead">Video and audio-visual</h3>
   <div class="scroll"><table class="grid" id="grid-video"></table></div>
-  <p class="empty-note" id="video-note"></p>
+  <p class="note" id="video-note"></p>
+</section>
+
+<section id="models">
+  <header><div class="label">The detectors</div><h2>Models</h2></header>
+  <p class="intro">Every model comes from a published paper with released weights. Parameters are the numbers a model learned in training; a bigger model needs more computing power but isn't always more accurate. Citation counts are a rough signal of how influential a paper is, and newer papers have had less time to collect them. Each name links to a fuller description in the <a href="https://colombo-hci-lab.github.io/deeptrace-bench/catalog.html#models">models and datasets reference</a>.</p>
+  <div class="scroll"><table class="ref models-t" id="models-table"></table></div>
+  <p class="note" id="cite-note"></p>
+</section>
+
+<section id="datasets">
+  <header><div class="label">Where the test clips come from</div><h2>Datasets</h2></header>
+  <p class="intro">South Asian sets are what the benchmark is for. Reproduction sets check our numbers against published ones. Real-reference sets supply genuine speech when a dataset only contains fakes. Access says what it takes to get the data. The <a href="https://colombo-hci-lab.github.io/deeptrace-bench/catalog.html#datasets">reference</a> lists the labels each dataset ships, such as speaker, gender, age or race, and which of them our builds record.</p>
+  <div class="scroll"><table class="ref datasets-t" id="datasets-table"></table></div>
 </section>
 
 <section id="runs">
-  <header><div class="label">Every countable run</div><h2>Scored runs</h2></header>
-  <div class="scroll"><table class="runs" id="runs-table"></table></div>
+  <header><div class="label">Every countable run</div><h2>Results</h2></header>
+  <p class="intro">One row per model and evalset that has been scored in full. Wall time is how long the whole run took, including reading the audio from shared storage.</p>
+  <div class="scroll"><table class="ref runs-t" id="runs-table"></table></div>
   <ul class="rules">
-    <li>The evaluation setup is <b id="eval-status">proposed</b> until the team settles decision 5, so these numbers can still move.</li>
-    <li><b>Below chance</b> on a reproduction set means a flipped score; on a South Asian set it is a finding about the model.</li>
-    <li><b>Source overlap</b>: the model's pretraining shares a corpus with the evalset. Reported with a warning, kept out of headlines.</li>
-    <li><b>Cross-corpus</b> evalsets take real and fake from different corpora and never enter headline numbers.</li>
+    <li>The evaluation rules are <b id="eval-status">proposed</b> until the team settles them (decision 5), so these numbers can still move.</li>
+    <li><b>Below chance</b> (AUC under 0.5) on a reproduction set means a bug in how scores are read; on a South Asian set it is a real finding about the model.</li>
+    <li><b>Source overlap</b>: the model's pretraining used a corpus that the evalset also draws on. Reported with a warning, kept out of headline numbers.</li>
+    <li><b>Cross-corpus</b> evalsets take real and fake clips from different sources and never enter headline numbers.</li>
   </ul>
 </section>
 
+<section id="compute">
+  <header><div class="label">What it costs to run</div><h2>Compute</h2></header>
+  <p class="intro" id="compute-intro">Measured with each model already loaded, counting only the model's own work. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them.</p>
+  <div class="scroll"><table class="ref compute-t" id="compute-table"></table></div>
+  <h3 class="label subhead">Estimated time for a full evalset</h3>
+  <p class="note">Model time only, from the measured time per window, for every evalset whose size is known. Where a real run exists, its wall time follows in grey: real runs take longer because reading thousands of files from shared storage, not the model, is usually the slow part.</p>
+  <div class="scroll"><table class="ref est-t" id="est-table"></table></div>
+</section>
+
 <footer>
-  <span>Rebuild with <code>uv run scripts/build_site.py</code> (needs DTB_ROOT).</span>
-  <span>Docs: <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/models.md">models</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/datasets.md">datasets</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/evaluation.md">evaluation</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/data_policy.md">data policy</a></span>
+  <span id="checked"></span>
+  <span>Rebuild: <code>uv run scripts/build_site.py</code> (needs DTB_ROOT); <code>--citations</code> refreshes citation counts.</span>
+  <span>Docs: <a href="https://colombo-hci-lab.github.io/deeptrace-bench/catalog.html">models and datasets reference</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench">repo</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/models.md">models</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/datasets.md">datasets</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/evaluation.md">evaluation</a>, <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench/blob/main/docs/data_policy.md">data policy</a></span>
 </footer>
 
 </div>
@@ -188,6 +277,7 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
 {
  "built": "2026-10-05",
  "eval_status": "proposed",
+ "citations_checked": "2026-10-05",
  "models": [
   {
    "id": "aasist",
@@ -195,10 +285,43 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
+   "licence": "MIT",
+   "summary": "Looks at the raw audio waveform and uses a graph network to link patterns across time and frequency that speech synthesis leaves behind.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows, SincNet-style filters and residual encoder, spectral and temporal graph attention with a max graph operation, two-way classifier",
+   "description": "AASIST (Jung et al., ICASSP 2022) listens to the raw waveform and builds graphs over the frequency bands and over the time steps, then uses graph attention to weigh which parts of the signal look artificial. Speech made by synthesis often leaves small traces in the spectrum or in the timing, and the authors designed one network that catches both without needing an ensemble. The released weights were trained only on the ASVspoof 2019 LA training split. It is a compact standard baseline: scored on the full ASVspoof 2019 LA eval set here it reaches an equal error rate (EER) of 1.58%, against 0.83% in the paper, but on In-the-Wild, which it never saw, it sits close to chance (EER 44.0%).",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
+    "year": 2021,
+    "citations": 652,
+    "venue": "ICASSP 2022",
+    "url": "https://arxiv.org/abs/2110.01200"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access"
+   ],
    "parity": {
     "evalset": "urdu_csalt",
     "items": 200,
     "max_abs_diff": 2.6226043701171875e-06
+   },
+   "profile": {
+    "params": 297866,
+    "gflops_per_unit": 19.12407824,
+    "ms_per_unit": 4.563445500025409,
+    "ms_per_item": 9.126891000050819,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 0.36683225631713867,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -207,7 +330,73 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "CC BY-NC-ND 4.0 (repo LICENSE; the model card says CC BY-NC 4.0)",
+   "summary": "An AASIST upgrade that feeds in features from a pretrained speech model and uses a newer layer type (KAN); the released weights are a weak baseline.",
+   "architecture": "Pre-emphasised 16 kHz window, wav2vec 2.0 XLSR-53 features, KAN bridge and residual encoder, spectral and temporal graph attention, four inference branches, KAN output layer, two-way classifier",
+   "description": "AASIST3 (Borodin et al., 2024) was built for the ASVspoof 2024 challenge. It extends AASIST by feeding in features from a pretrained speech model (wav2vec 2.0 XLSR-53) and by swapping some ordinary layers for Kolmogorov-Arnold network (KAN) layers, a newer kind of learned layer. The released weights saw ASVspoof 2019 LA, ASVspoof 5, MLAAD and M-AILABS after the front end was pretrained on Common Voice, BABEL and Multilingual LibriSpeech, so the benchmark refuses it on any MLAAD-based evalset. The repository says these weights are not the ones behind the paper's numbers, and the Speech DF Arena measures them at 28 to 32% EER on In-the-Wild and ASVspoof 2021, so it is kept here as a weak multilingual baseline, not a strong one.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "Mozilla Common Voice",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "IARPA BABEL",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Multilingual LibriSpeech",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": "train"
+    },
+    {
+     "name": "ASVspoof 5",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "MLAAD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "M-AILABS speech corpus",
+     "level": "train",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "AASIST3: KAN-Enhanced AASIST Speech Deepfake Detection using SSL Features and Additional Regularization for the ASVspoof 2024 Challenge",
+    "year": 2024,
+    "citations": 44,
+    "venue": "ASVspoof 2024 Workshop",
+    "url": "https://arxiv.org/abs/2408.17352"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access",
+    "ASVspoof 5",
+    "M-AILABS speech corpus",
+    "MLAAD"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 321621908,
+    "gflops_per_unit": 154.067552512,
+    "ms_per_unit": 32.54471899890632,
+    "ms_per_item": 65.08943799781264,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 1.4064998626708984,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "aasist_l",
@@ -215,10 +404,43 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
+   "licence": "MIT",
+   "summary": "A much smaller version of AASIST that works on the raw waveform with the same graph idea but far fewer parameters, so it runs cheaply.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows, SincNet-style filters and residual encoder, spectral and temporal graph attention with a max graph operation, two-way classifier (lightweight configuration)",
+   "description": "AASIST-L is the lightweight variant of AASIST from the same paper (Jung et al., ICASSP 2022). It uses the same graph idea on the raw waveform with far fewer parameters, which the authors put at about 85 thousand, so it is cheap to run. Its released weights were trained only on the ASVspoof 2019 LA training split. Scored on the full ASVspoof 2019 LA eval set here it reaches an EER of 1.49% (paper 0.99%), and on In-the-Wild it is near chance (EER 44.9%), so it shows how little a small model trained on one corpus carries over to other data.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
+    "year": 2021,
+    "citations": 652,
+    "venue": "ICASSP 2022",
+    "url": "https://arxiv.org/abs/2110.01200"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access"
+   ],
    "parity": {
     "evalset": "urdu_csalt",
     "items": 200,
     "max_abs_diff": 3.2782554626464844e-06
+   },
+   "profile": {
+    "params": 85306,
+    "gflops_per_unit": 13.206256672,
+    "ms_per_unit": 3.7992087491147686,
+    "ms_per_item": 7.598417498229537,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 0.35856199264526367,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -227,7 +449,30 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": false,
    "blocked": true,
-   "parity": null
+   "licence": "MIT",
+   "summary": "Watches a face video in 3D and alternately freezes its space and time filters during training, so it learns both visual glitches and unnatural motion.",
+   "architecture": "Face video clip, 3D convolutional network whose spatial and temporal weight groups are frozen alternately during training, two-way classifier",
+   "description": "AltFreezing (Wang et al., CVPR 2023) looks at short face video clips with a 3D convolutional network, so it can pick up both visual flaws in single frames and unnatural motion between frames. Such a network tends to lean on one kind of clue, so during training the authors alternately freeze its space-related weights and its time-related weights, which forces it to learn both. The released weights were trained on FaceForensics++ (compression level not stated). It is built for generalising to unseen manipulations, but it is blocked in this benchmark: the weights are only on RecDrive and Baidu, upstream issues report the file gone, and there is no adapter yet.",
+   "input": null,
+   "training": [
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "AltFreezing for More General Video Face Forgery Detection",
+    "year": 2023,
+    "citations": 148,
+    "venue": "CVPR 2023",
+    "url": "https://arxiv.org/abs/2307.08317"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
+   "parity": null,
+   "profile": null
   },
   {
    "id": "antideepfake_mms_300m",
@@ -235,7 +480,226 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "CC BY-NC-SA 4.0 (checkpoint); code BSD-3",
+   "summary": "A multilingual speech model (MMS-300M) further trained on 74k hours of real and fake audio in over 100 languages to tell them apart.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows (zero mean, unit variance), MMS-300M wav2vec 2.0 front end, mean pooling over frames, linear layer, two-way classifier",
+   "description": "AntiDeepfake MMS-300M comes from the NII Yamagishi Lab (Ge et al., 2025, \"Post-training for Deepfake Speech Detection\"). The authors take a speech model that was pretrained on ordinary speech and give it a middle \"post-training\" stage on a large mix of real and fake speech, so the model learns about artefacts before any task-specific tuning. This one starts from MMS-300M, which was pretrained on about 1,400 languages, and is post-trained on 74 thousand hours from 29 corpora in over 100 languages, including FLEURS, MLAAD, all of ASVspoof 2019 LA, LJSpeech and VoxCeleb2. That wide exposure makes it a strong multilingual candidate for South Asian audio, but the benchmark refuses it on MLAAD-based evalsets and on anything built from FLEURS. The model card reports an In-the-Wild EER of 2.90%.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "MMS-lab",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Multilingual LibriSpeech",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Mozilla Common Voice",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxLingua107",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "IARPA BABEL",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxPopuli",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "AISHELL-3",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2021",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 5",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CFAD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CN-Celeb2",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "Codecfake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CodecFake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CVoiceFake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DECRO",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DFADD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "Diffuse or Confuse",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DiffSSD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DSD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "FLEURS",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "FLEURS-R",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "HABLA",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriTTS",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriTTS-R",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriTTS re-vocoded",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LJSpeech",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "MLAAD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "SpoofCeleb",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "VoiceMOS challenge data",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "VoxCeleb2",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "VoxCeleb2 re-vocoded",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "WaveFake",
+     "level": "train",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "Post-training for Deepfake Speech Detection",
+    "year": 2025,
+    "citations": 31,
+    "venue": "ASRU 2025",
+    "url": "https://arxiv.org/abs/2506.21090"
+   },
+   "trained_on": [
+    "AISHELL-3",
+    "ASVspoof 2019 Logical Access",
+    "ASVspoof 2021",
+    "ASVspoof 5",
+    "CFAD",
+    "CN-Celeb2",
+    "CVoiceFake",
+    "CodecFake",
+    "Codecfake",
+    "DECRO",
+    "DFADD",
+    "DSD",
+    "DiffSSD",
+    "Diffuse or Confuse",
+    "FLEURS",
+    "FLEURS-R",
+    "HABLA",
+    "LJSpeech",
+    "LibriTTS",
+    "LibriTTS re-vocoded",
+    "LibriTTS-R",
+    "MLAAD",
+    "SpoofCeleb",
+    "VoiceMOS challenge data",
+    "VoxCeleb2",
+    "VoxCeleb2 re-vocoded",
+    "WaveFake"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 315440770,
+    "gflops_per_unit": 148.78114816,
+    "ms_per_unit": 14.519338250465808,
+    "ms_per_item": 29.038676500931615,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 1.324605941772461,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "antideepfake_w2v_small",
@@ -243,7 +707,201 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "CC BY-NC-SA 4.0 (checkpoint); code BSD-3",
+   "summary": "The small English-pretrained wav2vec 2.0 version (95M parameters) of the same post-training recipe, a cheap counterpart to the multilingual model.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows (zero mean, unit variance), wav2vec 2.0 base front end, mean pooling over frames, linear layer, two-way classifier",
+   "description": "AntiDeepfake wav2vec 2.0 small is the smallest model of the NII Yamagishi Lab's AntiDeepfake series (Ge et al., 2025). It is a wav2vec 2.0 base model (95 million parameters) pretrained on English LibriSpeech only, then post-trained on the same 74 thousand hours of real and fake speech from 29 corpora as the MMS-300M model. It decides real versus fake by pooling its speech features over time and passing them to one linear layer. Because the post-training data are identical, comparing it with the MMS-300M version isolates the effect of multilingual pretraining. The model card reports an In-the-Wild EER of 4.24%, against 2.90% for MMS-300M, and the benchmark refuses it on MLAAD-based evalsets and on anything built from FLEURS.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "LibriSpeech 960 h",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "AISHELL-3",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2021",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 5",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CFAD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CN-Celeb2",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "Codecfake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CodecFake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CVoiceFake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DECRO",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DFADD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "Diffuse or Confuse",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DiffSSD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DSD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "FLEURS",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "FLEURS-R",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "HABLA",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriTTS",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriTTS-R",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriTTS re-vocoded",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LJSpeech",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "MLAAD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "SpoofCeleb",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "VoiceMOS challenge data",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "VoxCeleb2",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "VoxCeleb2 re-vocoded",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "WaveFake",
+     "level": "train",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "Post-training for Deepfake Speech Detection",
+    "year": 2025,
+    "citations": 31,
+    "venue": "ASRU 2025",
+    "url": "https://arxiv.org/abs/2506.21090"
+   },
+   "trained_on": [
+    "AISHELL-3",
+    "ASVspoof 2019 Logical Access",
+    "ASVspoof 2021",
+    "ASVspoof 5",
+    "CFAD",
+    "CN-Celeb2",
+    "CVoiceFake",
+    "CodecFake",
+    "Codecfake",
+    "DECRO",
+    "DFADD",
+    "DSD",
+    "DiffSSD",
+    "Diffuse or Confuse",
+    "FLEURS",
+    "FLEURS-R",
+    "HABLA",
+    "LJSpeech",
+    "LibriTTS",
+    "LibriTTS re-vocoded",
+    "LibriTTS-R",
+    "MLAAD",
+    "SpoofCeleb",
+    "VoiceMOS challenge data",
+    "VoxCeleb2",
+    "VoxCeleb2 re-vocoded",
+    "WaveFake"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 94373250,
+    "gflops_per_unit": 57.507329024,
+    "ms_per_unit": 5.5462310010625515,
+    "ms_per_item": 11.092462002125103,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 0.4506702423095703,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "core",
@@ -251,10 +909,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "An Xception image network trained so its internal view of a face stays the same under crops, colour changes and other tweaks.",
+   "architecture": "Aligned 256 px face crop, Xception CNN trained with a consistency loss across augmented views, two-way classifier",
+   "description": "CORE (Ni et al., CVPRW 2022) is an Xception image network, run here from DeepfakeBench's release, that checks individual face frames. During training it sees the same face under different augmentations, such as crops and colour changes, and a loss term pushes its internal representations of those views to stay close, which the authors say makes them more consistent and relieves overfitting. At test time it is used like a plain Xception classifier, scoring each frame. The released weights were trained on FaceForensics++ (c23 compression per the DeepfakeBench README), after ImageNet pretraining. It adds one training idea on top of the Xception baseline, so it helps show whether such tricks carry over to South Asian faces.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "CORE: Consistent Representation Learning for Face Forgery Detection",
+    "year": 2022,
+    "citations": 160,
+    "venue": "CVPRW 2022",
+    "url": "https://arxiv.org/abs/2206.02749"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 3.3974647521972656e-06
+   },
+   "profile": {
+    "params": 21861162,
+    "gflops_per_unit": 11.901479744,
+    "ms_per_unit": 2.235850765600844,
+    "ms_per_item": 71.54722449922701,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 0.9411115646362305,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -263,10 +959,116 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
+   "licence": "non-commercial (custom LICENSE.txt in the model repo)",
+   "summary": "A large audio model (XLS-R 1B) that pools features from every layer and classifies them with a conformer head; top open model on the Speech DF Arena.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows, XLS-R 1B front end, attention pooling over every hidden layer, conformer head, spoof or bona fide classifier",
+   "description": "DF Arena 1B is a universal speech anti-spoofing model released by the Speech DF Arena project (Speech-Arena-2025, 2025), the team behind a public leaderboard for audio deepfake detectors. It runs the audio through the large XLS-R 1B speech model, pools the features of every layer with learned attention weights, and passes them to a conformer, a transformer-style block with convolutions, that makes the call. Its XLS-R front end was pretrained on Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107, and it was then trained on ASVspoof 2019 and 2024, MLAAD, Codecfake, LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb and EnvSDD, so the benchmark refuses it on ASVspoof 2019 LA eval and MLAAD. It is the top open model on that leaderboard, and here it reproduces the model card's In-the-Wild result (EER 0.67% on the full set, against the card's 0.91%).",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "Mozilla Common Voice",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "IARPA BABEL",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Multilingual LibriSpeech",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxPopuli",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxLingua107",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 5",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "MLAAD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "Codecfake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriSeVoc",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DFADD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CtrSVDD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "SpoofCeleb",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "EnvSDD",
+     "level": "train",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
+    "year": 2025,
+    "citations": 36,
+    "venue": "Speech DF Arena 2025",
+    "url": "https://arxiv.org/abs/2509.02859"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access",
+    "ASVspoof 5",
+    "Codecfake",
+    "CtrSVDD",
+    "DFADD",
+    "EnvSDD",
+    "LibriSeVoc",
+    "MLAAD",
+    "SpoofCeleb"
+   ],
    "parity": {
     "evalset": "urdu_csalt",
     "items": 200,
     "max_abs_diff": 0.0
+   },
+   "profile": {
+    "params": 1147845253,
+    "gflops_per_unit": 484.756893696,
+    "ms_per_unit": 49.24517975086928,
+    "ms_per_item": 98.49035950173857,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 4.530937671661377,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -275,10 +1077,116 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
+   "licence": "non-commercial (custom LICENSE.txt in the model repo)",
+   "summary": "The mid-size sibling (XLS-R 300M) of the Speech DF Arena detector, with the same layer pooling and conformer head.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows, XLS-R 300M front end, attention pooling over every hidden layer, conformer head, spoof or bona fide classifier",
+   "description": "DF Arena 500M is the mid-size universal speech anti-spoofing model from the Speech DF Arena project (Speech-Arena-2025, 2025). It uses the XLS-R 300M speech model, pools the features of every layer with learned attention weights, and passes them to a conformer head that makes the call. Its front end was pretrained on Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107, and it was then trained on ASVspoof 2019 and 2024, MLAAD, Codecfake, LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb and EnvSDD, so the benchmark refuses it on ASVspoof 2019 LA eval and MLAAD. Here it reproduces the model card's In-the-Wild result (EER 1.51% on the full set, against the card's 1.76%), which makes it a strong, widely trained audio reference.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "Mozilla Common Voice",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "IARPA BABEL",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Multilingual LibriSpeech",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxPopuli",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxLingua107",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 5",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "MLAAD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "Codecfake",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "LibriSeVoc",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "DFADD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "CtrSVDD",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "SpoofCeleb",
+     "level": "train",
+     "split": null
+    },
+    {
+     "name": "EnvSDD",
+     "level": "train",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
+    "year": 2025,
+    "citations": 36,
+    "venue": "Speech DF Arena 2025",
+    "url": "https://arxiv.org/abs/2509.02859"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access",
+    "ASVspoof 5",
+    "Codecfake",
+    "CtrSVDD",
+    "DFADD",
+    "EnvSDD",
+    "LibriSeVoc",
+    "MLAAD",
+    "SpoofCeleb"
+   ],
    "parity": {
     "evalset": "urdu_csalt",
     "items": 200,
     "max_abs_diff": 0.0
+   },
+   "profile": {
+    "params": 436191877,
+    "gflops_per_unit": 193.788934144,
+    "ms_per_unit": 22.651899000265985,
+    "ms_per_item": 45.30379800053197,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 1.703409194946289,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -287,10 +1195,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "A standard EfficientNet-B4 image network that looks at cropped face frames and learns visual artefacts of manipulation.",
+   "architecture": "Aligned 256 px face crop, EfficientNet-B4 CNN, two-way classifier",
+   "description": "EfficientNet-B4 is a standard image network, here DeepfakeBench's single-network version of the detector studied by Bonettini et al. (ICPR 2020), whose paper combines several EfficientNet-B4 variants into an ensemble. It looks at one cropped face frame at a time and learns the visual artefacts of manipulation from examples. The released weights were trained on FaceForensics++ (c23 compression per the DeepfakeBench README), after ImageNet pretraining. It is a classic image-only baseline for video, and together with Xception it shows how far a plain CNN gets before any special forgery-detection ideas are added.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Video Face Manipulation Detection Through Ensemble of CNNs",
+    "year": 2020,
+    "citations": 278,
+    "venue": "ICPR 2020",
+    "url": "https://arxiv.org/abs/2004.07676"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 3.4570693969726562e-06
+   },
+   "profile": {
+    "params": 17552202,
+    "gflops_per_unit": 3.904101648,
+    "ms_per_unit": 2.3898297343976083,
+    "ms_per_item": 76.47455150072346,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 0.968353271484375,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -299,7 +1245,35 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "none published (README badge says CC BY-NC 4.0; issue 3 asks for a licence file)",
+   "summary": "Adapts a big pretrained CLIP vision model by tuning only a small part of its weights, keeping its general knowledge while learning to spot fakes.",
+   "architecture": "Aligned 224 px face crop, CLIP ViT-L/14 image encoder with SVD-split weights (principal part frozen, residual part tuned), linear head",
+   "description": "Effort (Yan et al., ICML 2025) adapts a large pretrained CLIP vision model by splitting its weight matrices with singular value decomposition, freezing the main components that hold general knowledge, and training only the small remainder to spot fakes. The authors argue that ordinary fine-tuning overfits to a few fake patterns, and that this split keeps the model's feature space rich enough to generalise. The paper is about AI-generated images in general, and here DeepfakeBench's Effort detector scores face frames. The released weights were trained on FaceForensics++ (c23) after CLIP pretraining on OpenAI's private data. It is blocked for now because Google Drive refused the weight file as over quota on 2026-10-05, and upstream reports a reproduction gap (Celeb-DF v2 AUC 0.885 against 0.956) and publishes no licence file.",
+   "input": "224 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "OpenAI CLIP pretraining data",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Orthogonal Subspace Decomposition for Generalizable AI-Generated Image Detection",
+    "year": 2024,
+    "citations": 128,
+    "venue": "ICML 2025",
+    "url": "https://arxiv.org/abs/2411.15633"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
+   "parity": null,
+   "profile": null
   },
   {
    "id": "f3net",
@@ -307,10 +1281,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "Splits each face image into frequency bands (fine versus coarse detail) before an Xception network, since fakes leave traces there that eyes miss.",
+   "architecture": "Aligned 256 px face crop, DCT frequency-band decomposition (12 input channels), Xception CNN, two-way classifier",
+   "description": "F3Net (Qian et al., ECCV 2020) detects fake faces by looking at frequency, not only at pixels. It splits each face image into bands of fine and coarse detail with a discrete cosine transform and feeds the bands to an Xception network, because manipulation can leave traces in those bands that the eye misses, especially after video compression. The released DeepfakeBench weights were trained on FaceForensics++ (c23) after ImageNet pretraining. The detector's yaml names only NeuralTextures, which may not describe the checkpoint, and the benchmark treats it as trained on all of FF++. It is the frequency-cue member of the classic video group.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Thinking in Frequency: Face Forgery Detection by Mining Frequency-aware Clues",
+    "year": 2020,
+    "citations": 1265,
+    "venue": "ECCV 2020",
+    "url": "https://arxiv.org/abs/2007.09355"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 3.3974647521972656e-06
+   },
+   "profile": {
+    "params": 22519114,
+    "gflops_per_unit": 12.99172544,
+    "ms_per_unit": 1.7169906719800565,
+    "ms_per_item": 54.94370150336181,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 1.0373125076293945,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -319,10 +1331,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "An Xception network with an attention map that highlights which face regions were manipulated and focuses the classifier there.",
+   "architecture": "Aligned 256 px face crop, Xception CNN with an attention map over manipulated regions, two-way classifier",
+   "description": "FFD (Dang et al., CVPR 2020) is an Xception network with an attention map. The map highlights which parts of the face look manipulated and steers the classifier towards them, and it can also be shown to a person as a rough picture of where the forgery is. The released DeepfakeBench weights were trained on FaceForensics++ (c23 per the DeepfakeBench README), after ImageNet pretraining. It is one of the classic image-based detectors in the benchmark, here representing the idea of focusing on the manipulated region, and its scores match the original code closely in the parity check.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "On the Detection of Digital Face Manipulation",
+    "year": 2019,
+    "citations": 784,
+    "venue": "CVPR 2020",
+    "url": "https://arxiv.org/abs/1910.01717"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 4.172325134277344e-06
+   },
+   "profile": {
+    "params": 21868442,
+    "gflops_per_unit": 11.905207104,
+    "ms_per_unit": 2.2504337968030086,
+    "ms_per_item": 72.01388149769627,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 0.9411392211914062,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -331,7 +1381,45 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "MIT",
+   "summary": "Fine-tunes a few parameters of a pretrained CLIP vision model on face frames so it still works on deepfakes from unseen datasets.",
+   "architecture": "Aligned face crop at native size, CLIP ViT-L/14 image encoder with only LayerNorm parameters tuned, L2-normalised features, linear head",
+   "description": "GenD (Yermakov et al., WACV 2026) takes a large pretrained CLIP vision model and tunes only its LayerNorm parameters, about 0.03% of the model, so the general knowledge in CLIP stays mostly intact. It also forces the face features onto a sphere with L2 normalisation and metric learning, and each frame gets a real-or-fake probability that is averaged over the video. The released weights were trained on FaceForensics++ only, after CLIP pretraining on OpenAI's private image-text data. The authors report that it beats more complex methods in average cross-dataset AUROC over 14 benchmarks, which makes it the main generalisation-first video model here. Its adapter runs end to end, but parity with upstream is not yet checked.",
+   "input": "native-size aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "OpenAI CLIP pretraining data",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Deepfake Detection that Generalizes Across Benchmarks",
+    "year": 2025,
+    "citations": 35,
+    "venue": "WACV 2026",
+    "url": "https://arxiv.org/abs/2508.06248"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 303968258,
+    "gflops_per_unit": 162.023968768,
+    "ms_per_unit": 12.794272156270381,
+    "ms_per_item": 409.4167090006522,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 1.6532783508300781,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "gend_pe_l",
@@ -339,7 +1427,45 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "MIT",
+   "summary": "The same GenD recipe built on Meta's Perception Encoder instead of CLIP, so the two show how much the backbone matters.",
+   "architecture": "Aligned face crop at native size resized to 224, Meta Perception Encoder L/14 with only LayerNorm parameters tuned, L2-normalised features, linear head",
+   "description": "This is GenD's second released backbone: the same recipe as GenD (Yermakov et al., WACV 2026), built on Meta's Perception Encoder instead of CLIP. Only the LayerNorm parameters are tuned, the face features are L2-normalised, and a video's score is the mean over its frames. The released weights were trained on FaceForensics++ only, after Meta's pretraining of the encoder on data that is not public, so overlap with our data cannot be checked. Because it differs from the CLIP version only in backbone, comparing the two shows how much the pretrained foundation model matters. Its adapter has not yet been through the parity check.",
+   "input": "native-size aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "Perception Encoder pretraining data",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Deepfake Detection that Generalizes Across Benchmarks",
+    "year": 2025,
+    "citations": 35,
+    "venue": "WACV 2026",
+    "url": "https://arxiv.org/abs/2508.06248"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 316104706,
+    "gflops_per_unit": 163.123929088,
+    "ms_per_unit": 12.822997171838324,
+    "ms_per_item": 410.33590949882637,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 1.572800636291504,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "havic",
@@ -347,7 +1473,45 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio_video",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "MIT",
+   "summary": "Checks whether the sound and the moving face in a video belong together, catching fakes where lips, voice or expression do not match.",
+   "architecture": "16-frame windows of 224 px face frames plus 128-bin audio filterbank, audio and video transformer encoders pretrained on real videos, audio-visual interaction module, MLP classifier, one logit per window",
+   "description": "HAVIC (CVPR 2026 Findings) is an audio-visual detector that asks whether the sound and the moving face in a video belong together. It first learns what coherent audio, video and cross-modal timing look like by pretraining on real videos only, then combines the audio and visual features to score a clip, which should help against fakes whose lips, voice or expression disagree. Its weights were pretrained on LRS2 and fine-tuned on a random 70% of FakeAVCeleb, and because that split's item list is unpublished the benchmark refuses it on FakeAVCeleb. It is the only open audio-visual detector here, and it needs videos of at least 3.2 seconds with a face in 16 sampled frames, so HiDF's 3-second clips are too short.",
+   "input": "native-size face-box crops at 5 frames per second (up to 50), with the audio under them",
+   "training": [
+    {
+     "name": "LRS2",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FakeAVCeleb",
+     "level": "finetune",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "Leave No Stone Unturned: Uncovering Holistic Audio-Visual Intrinsic Coherence for Deepfake Detection",
+    "year": 2026,
+    "citations": 1,
+    "venue": "CVPR 2026 Findings",
+    "url": "https://arxiv.org/abs/2603.23960"
+   },
+   "trained_on": [
+    "FakeAVCeleb"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 214663189,
+    "gflops_per_unit": 536.393276416,
+    "ms_per_unit": 46.41689964684326,
+    "ms_per_item": 705.4761654981121,
+    "units_per_item": 15.5,
+    "unit": "face frame",
+    "peak_memory_gb": 1.9081230163574219,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "lipforensics",
@@ -355,7 +1519,45 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "MIT (FAN landmarks from face-alignment, BSD-3)",
+   "summary": "Watches only the mouth region over time and flags lip movements that look unnatural, a cue that holds across many kinds of fakes.",
+   "architecture": "25-frame clips of 96 px grayscale mouth crops (88 px centre crop), ResNet-18 with 3D stem, multi-scale temporal convolutional network, one logit per clip",
+   "description": "LipForensics (Haliassos et al., CVPR 2021) watches only the mouth. A network is first taught to lipread, so it learns what natural mouth movement looks like, and its temporal part is then fine-tuned to tell real from forged mouth motion. The authors argue this high-level cue holds up across different manipulations and after compression, because it does not depend on low-level artefacts. The released weights were pretrained on LRW and fine-tuned on FaceForensics++ (c23, all four manipulations). It matters here because lip-sync fakes are a focus of this benchmark, though users report that its FF++ numbers do not reproduce, and it needs at least 25 consecutive frames with a detectable face.",
+   "input": "mouth crops from 25 consecutive frames at a time (up to 100 frames per video)",
+   "training": [
+    {
+     "name": "LRW",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Lips Don't Lie: A Generalisable and Robust Approach to Face Forgery Detection",
+    "year": 2020,
+    "citations": 663,
+    "venue": "CVPR 2021",
+    "url": "https://arxiv.org/abs/2012.07657"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 35990785,
+    "gflops_per_unit": 17.83982848,
+    "ms_per_unit": 5.730836997827282,
+    "ms_per_item": 11.461673995654564,
+    "units_per_item": 2,
+    "unit": "mouth clip",
+    "peak_memory_gb": 4.336434364318848,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "recce",
@@ -363,10 +1565,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "Learns to rebuild real faces only, so fake faces rebuild badly; the rebuilding error is what reveals them.",
+   "architecture": "Aligned 256 px face crop, Xception encoder with a decoder that reconstructs the face and guides attention from the reconstruction, two-way classifier",
+   "description": "RECCE (Cao et al., CVPR 2022) learns what real faces look like by training a decoder to rebuild them from the encoder's features. Fake faces rebuild poorly, and the reconstruction differences are used to guide the classifier, a cue that does not depend on any one manipulation method. The released DeepfakeBench weights were trained on FaceForensics++ (c23 per the DeepfakeBench README), after ImageNet pretraining. It is the reconstruction-based detector in the classic video group, and its scores match the original code closely in the parity check.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "End-to-End Reconstruction-Classification Learning for Face Forgery Detection",
+    "year": 2022,
+    "citations": 446,
+    "venue": "CVPR 2022",
+    "url": "https://www.semanticscholar.org/paper/1537faa9593d0d20e62055e4e6af6d382a26d313"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 5.900859832763672e-06
+   },
+   "profile": {
+    "params": 47693720,
+    "gflops_per_unit": 15.974639936,
+    "ms_per_unit": 3.155618374989899,
+    "ms_per_item": 100.97978799967677,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 1.037496566772461,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -375,7 +1615,45 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "research use only (commercial use needs a licence from the authors)",
+   "summary": "Trained on fakes made by blending a real face with a slightly altered copy of itself, which teaches it blending seams instead of one generator's style.",
+   "architecture": "Face box widened by one eighth on each side and resized to 380 px, EfficientNet-B4 CNN, two-way classifier",
+   "description": "SBI (Shiohara and Yamasaki, CVPR 2022) is trained on fakes it makes itself. Each real face is blended with a slightly altered copy of itself, which produces the seams and statistical mismatches that face swaps leave, without using any real deepfake method. The authors argue this makes the network learn general forgery traces instead of the style of one generator. Only the real videos of FaceForensics++ were used, after ImageNet pretraining, and the c23 checkpoint is the one used here. It is a widely cited baseline for generalisation, and its research-only licence means its code is never copied into this repository.",
+   "input": "380 px face-box crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Detecting Deepfakes with Self-Blended Images",
+    "year": 2022,
+    "citations": 656,
+    "venue": "CVPR 2022",
+    "url": "https://arxiv.org/abs/2204.08376"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 17552202,
+    "gflops_per_unit": 8.783965216,
+    "ms_per_unit": 4.224900437407086,
+    "ms_per_item": 135.19681399702677,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 1.0756282806396484,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "spsl",
@@ -383,10 +1661,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "Gives an Xception network the phase of the image's frequency spectrum as an extra input, where upsampling in fakes leaves a trace.",
+   "architecture": "Aligned 256 px face crop, RGB plus phase spectrum of the grey image as a fourth channel, Xception CNN, two-way classifier",
+   "description": "SPSL (Liu et al., CVPR 2021) adds the phase of the image's frequency spectrum as an extra input channel next to the colour image. The authors observe that the upsampling steps in most face forgery methods change that phase in a visible way, so it carries a clue that colour alone hides. The released DeepfakeBench weights were trained on FaceForensics++ (c23) after ImageNet pretraining. The detector's yaml lists only FaceSwap, which may not describe the checkpoint, and the benchmark treats it as trained on all of FF++. It is the phase-cue member of the classic video group, and it uses the full Xception network, not the shallower one of the paper.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Spatial-Phase Shallow Learning: Rethinking Face Forgery Detection in Frequency Domain",
+    "year": 2021,
+    "citations": 628,
+    "venue": "CVPR 2021",
+    "url": "https://arxiv.org/abs/2103.01856"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 2.0265579223632812e-06
+   },
+   "profile": {
+    "params": 21861450,
+    "gflops_per_unit": 11.910770048,
+    "ms_per_unit": 1.6702735468925312,
+    "ms_per_item": 53.448753500561,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 0.9879875183105469,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -395,10 +1711,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "Adds a second stream that keeps only fine, high-frequency noise in the image, which manipulation tends to disturb, next to the normal colour stream.",
+   "architecture": "Aligned 256 px face crop, RGB stream plus a stream of high-frequency noise residuals from SRM filters, Xception CNN with attention linking the two streams, two-way classifier",
+   "description": "SRM (Luo et al., CVPR 2021) argues that ordinary detectors overfit to colour textures that are specific to one forgery method. It therefore adds a second stream that keeps only the fine, high-frequency noise of the image, where tampered and genuine regions tend to differ, and lets the two streams guide each other with attention. The released DeepfakeBench weights were trained on FaceForensics++ (c23 per the DeepfakeBench README), after ImageNet pretraining. It is the noise-residual cue in the classic video group, and its scores match the original code closely in the parity check.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Generalizing Face Forgery Detection with High-frequency Features",
+    "year": 2021,
+    "citations": 632,
+    "venue": "CVPR 2021",
+    "url": "https://arxiv.org/abs/2103.12376"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 1.6689300537109375e-06
+   },
+   "profile": {
+    "params": 55350352,
+    "gflops_per_unit": 28.03301898,
+    "ms_per_unit": 4.649142499943082,
+    "ms_per_item": 148.77255999817862,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 1.273916244506836,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -407,10 +1761,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "Separates features specific to one forgery method from features common to all forgeries, and scores using only the common ones.",
+   "architecture": "Aligned 256 px face crop, Xception encoders separating content, method-specific forgery and common forgery features, scored with the common-forgery head only",
+   "description": "UCF (Yan et al., ICCV 2023) tries to generalise to forgery methods it has not seen. It splits what it sees in a face into three parts: features unrelated to forgery, features specific to one manipulation method, and features common to all forgeries. Only the common features are used for the real-or-fake decision, so the score does not depend on the quirks of a particular generator. The released DeepfakeBench weights were trained on all four FaceForensics++ methods (c23) after ImageNet pretraining. It is the disentangling approach in the classic video group, and its scores match the original code closely in the parity check.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "UCF: Uncovering Common Features for Generalizable Deepfake Detection",
+    "year": 2023,
+    "citations": 338,
+    "venue": "ICCV 2023",
+    "url": "https://arxiv.org/abs/2304.13949"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 4.947185516357422e-06
+   },
+   "profile": {
+    "params": 46838430,
+    "gflops_per_unit": 24.13901888,
+    "ms_per_unit": 4.226527031278238,
+    "ms_per_item": 135.2488650009036,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 1.0383291244506836,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -419,10 +1811,48 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "video",
    "adapter": true,
    "blocked": false,
+   "licence": "CC BY-NC 4.0 (DeepfakeBench)",
+   "summary": "The classic Xception image network applied to cropped face frames, the standard baseline for video deepfake detection.",
+   "architecture": "Aligned 256 px face crop, Xception CNN with depthwise separable convolutions, two-way classifier",
+   "description": "Xception is a standard image network, and this is the face-forgery detector built on it in the FaceForensics++ paper (Rossler et al., ICCV 2019). It looks at one cropped face frame at a time and learns the visual artefacts of manipulation from examples. The released DeepfakeBench weights were trained on FaceForensics++ (c23 per the README, though upstream issue 151 asking whether every checkpoint is c23 is unanswered), after ImageNet pretraining. It is the standard baseline for video deepfake detection and the model the other DeepfakeBench detectors build on. Some users report that DeepfakeBench's released weights do not reproduce its README table.",
+   "input": "256 px aligned face crops, 32 frames per video",
+   "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "FaceForensics++",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
+    "year": 2019,
+    "citations": 3394,
+    "venue": "ICCV 2019",
+    "url": "https://arxiv.org/abs/1901.08971"
+   },
+   "trained_on": [
+    "FaceForensics++"
+   ],
    "parity": {
     "evalset": "mendeley_roop_akool",
     "items": 199,
     "max_abs_diff": 2.115964889526367e-06
+   },
+   "profile": {
+    "params": 21861162,
+    "gflops_per_unit": 11.901479744,
+    "ms_per_unit": 2.255566500025452,
+    "ms_per_item": 72.17812800081447,
+    "units_per_item": 32,
+    "unit": "face frame",
+    "peak_memory_gb": 0.9411115646362305,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
    }
   },
   {
@@ -431,7 +1861,65 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "MIT",
+   "summary": "Takes rich features from a big pretrained speech model (XLS-R 300M) and classifies them with an AASIST graph network.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, AASIST graph attention back end on the last layer, two-way classifier",
+   "description": "XLS-R + AASIST (Tak et al., Odyssey 2022) puts the AASIST graph network on top of wav2vec 2.0-style speech features, here from the XLS-R 300M model, and fine-tunes the whole thing on spoofing data. The front end was pretrained on real speech only (Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107), and the full network was then trained on the ASVspoof 2019 LA training split alone. The authors report the lowest equal error rates published at the time on ASVspoof 2021 LA and DF. Training on one corpus makes it a clean zero-shot probe on South Asian sets, with no MLAAD or FLEURS in its training. Its adapter replaces the original fairseq code, so parity with upstream is not checked yet.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "Mozilla Common Voice",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "IARPA BABEL",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Multilingual LibriSpeech",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxPopuli",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxLingua107",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Automatic speaker verification spoofing and deepfake detection using wav2vec 2.0 and data augmentation",
+    "year": 2022,
+    "citations": 358,
+    "venue": "Odyssey 2022",
+    "url": "https://arxiv.org/abs/2202.12233"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 315885962,
+    "gflops_per_unit": 150.200974848,
+    "ms_per_unit": 15.468368499568896,
+    "ms_per_item": 30.936736999137793,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 1.3263330459594727,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "xlsr_mamba",
@@ -439,7 +1927,65 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "MIT",
+   "summary": "Takes XLS-R speech features and reads them forwards and backwards with a Mamba sequence model instead of attention.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, dual-column bidirectional Mamba back end (six blocks per direction), two-way classifier",
+   "description": "XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention layers of the back end with Mamba, a state space model that reads a sequence efficiently, and runs it forwards and backwards over XLS-R speech features. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107), and the released network was trained on the ASVspoof 2019 LA training split alone. The authors report that on In-the-Wild it emerged as the strongest candidate among the systems they compared. Here it runs without the original compiled Mamba kernels, using plain PyTorch stand-ins that are slower, and parity against those kernels is not checked yet.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "Mozilla Common Voice",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "IARPA BABEL",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Multilingual LibriSpeech",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxPopuli",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxLingua107",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "XLSR-Mamba: A Dual-Column Bidirectional State Space Model for Spoofing Attack Detection",
+    "year": 2024,
+    "citations": 77,
+    "venue": "IEEE SPL 2024",
+    "url": "https://arxiv.org/abs/2411.10027"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 317375670,
+    "gflops_per_unit": 298.31939808,
+    "ms_per_unit": 45.621619747180375,
+    "ms_per_item": 91.24323949436075,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 1.3333797454833984,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
   },
   {
    "id": "xlsr_sls",
@@ -447,7 +1993,1366 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "adapter": true,
    "blocked": false,
-   "parity": null
+   "licence": "none declared (code and weights); a Hugging Face mirror re-hosts the weights as MIT",
+   "summary": "Pools the outputs of all 24 layers of XLS-R with learned attention weights, since different layers hold different spoofing clues.",
+   "architecture": "Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, learned attention over all 24 layers (SLS), two linear layers, two-way classifier",
+   "description": "XLS-R + SLS (Zhang et al., ACM Multimedia 2024) is built on the observation that different layers of the XLS-R speech model hold different spoofing clues. Its Sensitive Layer Selection (SLS) module pools the outputs of all 24 layers with learned attention weights before a small classifier makes the call. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107), and the network was trained on the ASVspoof 2019 LA training split alone. It is the strongest open model trained on that corpus only, so it works as a clean zero-shot probe on every South Asian set. The repository declares no licence, so its code is imported but never copied, and its parity with upstream is not checked yet.",
+   "input": "4.04 s windows of raw 16 kHz audio",
+   "training": [
+    {
+     "name": "Mozilla Common Voice",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "IARPA BABEL",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Multilingual LibriSpeech",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxPopuli",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "VoxLingua107",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "ASVspoof 2019 Logical Access",
+     "level": "train",
+     "split": "train"
+    }
+   ],
+   "paper": {
+    "title": "Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier",
+    "year": 2024,
+    "citations": 136,
+    "venue": "ACM MM 2024",
+    "url": "https://doi.org/10.1145/3664647.3681345"
+   },
+   "trained_on": [
+    "ASVspoof 2019 Logical Access"
+   ],
+   "parity": null,
+   "profile": {
+    "params": 338838149,
+    "gflops_per_unit": 297.609132032,
+    "ms_per_unit": 29.958879749756306,
+    "ms_per_item": 59.91775949951261,
+    "units_per_item": 2,
+    "unit": "4 s audio window",
+    "peak_memory_gb": 1.4140405654907227,
+    "gpu": "24 GB GPU",
+    "precision": "fp32"
+   }
+  }
+ ],
+ "datasets": [
+  {
+   "id": "asvspoof2019_la",
+   "name": "ASVspoof 2019 Logical Access",
+   "modality": "audio",
+   "role": "reproduction",
+   "status": "open",
+   "languages": [
+    "en"
+   ],
+   "licence": "see LICENSE_text.txt on the DataShare page",
+   "summary": "English speech from the VCTK corpus, real clips plus fakes made by text-to-speech and voice conversion systems; the standard audio benchmark.",
+   "scale": "7.6 GB; train, dev and eval with disjoint speakers",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "19 attack systems A01 to A19: text-to-speech, voice conversion, and TTS output passed through voice conversion (A13 to A15)"
+   ],
+   "annotations": [
+    "speaker id",
+    "attack id: A01 to A19 (TTS, VC or TTS+VC)",
+    "official split: train, dev, eval (disjoint speakers)"
+   ],
+   "format": "FLAC, 16 kHz, 16-bit (VCTK downsampled)",
+   "notes": "Train and dev share attacks A01 to A06; most eval attacks are unseen in training.",
+   "recorded": [
+    "full",
+    [
+     "generator",
+     "kind of fake",
+     "language",
+     "speaker or face id",
+     "official split"
+    ]
+   ],
+   "paper": {
+    "title": "ASVspoof 2019: A large-scale public database of synthesized, converted and replayed speech",
+    "year": 2019,
+    "citations": 700,
+    "venue": "CSL 2020",
+    "url": "https://doi.org/10.1016/j.csl.2020.101114"
+   },
+   "evalsets": [
+    "asvspoof2019_la_eval"
+   ]
+  },
+  {
+   "id": "bangla_voices",
+   "name": "Bangla Audio Dataset, original and deepfake voices (Mendeley)",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [
+    "bn"
+   ],
+   "licence": "CC BY 4.0",
+   "summary": "Bangla speech from 75 Bangladeshi speakers: each of 30 sentences read once and faked once, with a real twin for every fake (generator not named).",
+   "scale": "4,500 clips, 2 to 5 s each",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": null,
+   "annotations": [
+    "speaker id (75 speakers)",
+    "gender: male, female (from the speaker folder)",
+    "sentence set: 15 sets of 30 sentences",
+    "real/fake twin: every fake has a real clip by the same speaker and sentence"
+   ],
+   "format": "WAV, 2 to 5 s clips",
+   "notes": "The record never names the tool that made the fakes.",
+   "recorded": [
+    "sample",
+    [
+     "language",
+     "speaker or face id",
+     "source identity of each fake",
+     "gender"
+    ]
+   ],
+   "paper": null,
+   "evalsets": [
+    "bangla_voices"
+   ]
+  },
+  {
+   "id": "banglafake",
+   "name": "BanglaFake",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [
+    "bn"
+   ],
+   "licence": "none declared",
+   "summary": "Bengali speech: about 13,800 real clips and 12,800 fakes made with the VITS text-to-speech system, in three sub-collections.",
+   "scale": "13,796 real and 12,796 fake clips",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "VITS (text-to-speech)"
+   ],
+   "annotations": [
+    "sub-corpus: sust, mozilla, news",
+    "speaker id (mozilla sub-corpus only, five Common Voice speakers)",
+    "transcript"
+   ],
+   "format": "WAV, 22.05 kHz, 6 to 7 s clips",
+   "notes": "The news sub-corpus has real clips only, and the archive's counts (13,796 real, 12,796 fake) differ from the README's.",
+   "recorded": [
+    "full",
+    [
+     "generator",
+     "kind of fake",
+     "language",
+     "speaker or face id",
+     "source identity of each fake",
+     "sub-corpus"
+    ]
+   ],
+   "paper": {
+    "title": "BanglaFake: Constructing and Evaluating a Specialized Bengali Deepfake Audio Dataset",
+    "year": 2025,
+    "citations": 2,
+    "venue": "arXiv 2025",
+    "url": "https://arxiv.org/abs/2505.10885"
+   },
+   "evalsets": [
+    "banglafake"
+   ]
+  },
+  {
+   "id": "bd_grf6",
+   "name": "BD-GRF6 (Bangladeshi real and fake speech, three genders)",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [
+    "bn"
+   ],
+   "licence": "CC BY 4.0",
+   "summary": "Bangla speech by Bangladeshi speakers, real and fake, grouped by male, female and third gender; the only set with a third-gender group.",
+   "scale": "13,566 clips, 18.7 h",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": null,
+   "annotations": [
+    "gender: male, female, third gender"
+   ],
+   "format": "WAV and MP3 (format differs by class), 13,566 clips, 18.7 h in all",
+   "notes": "Third-gender real clips are MP3 while female fakes are WAV, so file format may give the label away.",
+   "recorded": [
+    "sample",
+    [
+     "language",
+     "gender"
+    ]
+   ],
+   "paper": null,
+   "evalsets": [
+    "bd_grf6"
+   ]
+  },
+  {
+   "id": "casual_conversations_v2",
+   "name": "Casual Conversations v2",
+   "modality": "video",
+   "role": "real_reference",
+   "status": "request",
+   "languages": [
+    "hi",
+    "ta",
+    "te",
+    "en"
+   ],
+   "licence": "Casual Conversations v2 licence (Meta)",
+   "summary": "Real videos only: consenting people in seven countries (India the largest group) labelled by skin tone, age, gender and language, for checking false alarms on real faces.",
+   "scale": "5,567 participants",
+   "contains": [
+    "real"
+   ],
+   "generators": [],
+   "annotations": [
+    "participant id",
+    "age (self-reported)",
+    "gender (self-reported)",
+    "language and dialect (self-reported)",
+    "country and region",
+    "disability, adornments and physical attributes (self-reported)",
+    "skin tone: Fitzpatrick and Monk scales (annotated)",
+    "voice timbre (annotated)",
+    "recording setup: scripted or unscripted",
+    "per-second activity labels"
+   ],
+   "format": "video, 26,467 recordings, about 674 h in all",
+   "notes": "Real videos only; some labels are licensed for evaluation use only.",
+   "recorded": null,
+   "paper": {
+    "title": "The Casual Conversations v2 Dataset : A diverse, large benchmark for measuring fairness and robustness in audio/vision/speech models",
+    "year": 2023,
+    "citations": 4,
+    "venue": "CVPRW 2023",
+    "url": "https://arxiv.org/abs/2303.04838"
+   },
+   "evalsets": []
+  },
+  {
+   "id": "celeb_df_v2",
+   "name": "Celeb-DF (v2)",
+   "modality": "video",
+   "role": "reproduction",
+   "status": "request",
+   "languages": [
+    "en"
+   ],
+   "licence": "Celeb-DF terms of use (research only)",
+   "summary": "English-language celebrity face-swap videos: 890 real and 5,639 fake, made with improved methods so they look more natural than earlier sets.",
+   "scale": "890 real and 5,639 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "DeepFake face swap with the authors' improved synthesis process"
+   ],
+   "annotations": [
+    "source folder: Celeb-real, YouTube-real, Celeb-synthesis",
+    "official test list (518 videos)"
+   ],
+   "format": "MP4",
+   "notes": "About 88% of subjects are Caucasian, so it carries no South Asian signal.",
+   "recorded": null,
+   "paper": {
+    "title": "Celeb-DF: A Large-Scale Challenging Dataset for DeepFake Forensics",
+    "year": 2019,
+    "citations": 1861,
+    "venue": "CVPR 2020",
+    "url": "https://arxiv.org/abs/1909.12962"
+   },
+   "evalsets": [
+    "celeb_df_v2_test"
+   ]
+  },
+  {
+   "id": "deepfake_eval_2024",
+   "name": "Deepfake-Eval-2024",
+   "modality": "audio_video",
+   "role": "in_the_wild",
+   "status": "request",
+   "languages": [],
+   "licence": "CC BY-SA 4.0",
+   "summary": "Real and fake video, audio and images collected from social media in 2024, covering 52 languages; for evaluation only, not training.",
+   "scale": "20.3 GB",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "in the wild, unknown tools; manipulation types include lip-sync, face swap and diffusion (per the paper)"
+   ],
+   "annotations": [
+    "media type: video, audio, image",
+    "language (Whisper-detected, per the paper)",
+    "source website (per the paper)",
+    "manipulation type (per the paper)"
+   ],
+   "format": "video about 30 fps, average 576 x 720 px, about 80 s average; audio about 44.7 kHz, about 115 s average; images mostly 1024 x 1024",
+   "notes": "Evaluation only, no training on it, and its metadata columns are unverified until access is granted.",
+   "recorded": null,
+   "paper": {
+    "title": "Deepfake-Eval-2024: A Multi-Modal In-the-Wild Benchmark of Deepfakes Circulated in 2024",
+    "year": 2025,
+    "citations": 89,
+    "venue": "arXiv 2025",
+    "url": "https://arxiv.org/abs/2503.02857"
+   },
+   "evalsets": []
+  },
+  {
+   "id": "deephy",
+   "name": "DeePhy",
+   "modality": "video",
+   "role": "south_asian",
+   "status": "request",
+   "languages": [],
+   "licence": "IAB Rubric database licence",
+   "summary": "Face-swap videos made by applying up to three different swap tools in a row, to study which tools made a fake.",
+   "scale": "100 real and 5,040 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "FaceShifter",
+    "FaceSwap",
+    "FSGAN"
+   ],
+   "annotations": [
+    "swap succession: one, two or three successive swaps",
+    "sequence of generators used",
+    "gender",
+    "age group",
+    "skin tone",
+    "facial hair, spectacles, shades, mic and head or hair occlusion attributes"
+   ],
+   "format": "MP4, 720p, 25 fps, about 20 s",
+   "notes": "Only 100 real videos against 5,040 fakes.",
+   "recorded": null,
+   "paper": {
+    "title": "DeePhy: On Deepfake Phylogeny",
+    "year": 2022,
+    "citations": 23,
+    "venue": "IJCB 2022",
+    "url": "https://arxiv.org/abs/2209.09111"
+   },
+   "evalsets": [
+    "deephy"
+   ]
+  },
+  {
+   "id": "dfplatter",
+   "name": "DF-Platter",
+   "modality": "video",
+   "role": "south_asian",
+   "status": "request",
+   "languages": [],
+   "licence": "IAB Rubric database licence",
+   "summary": "Face-swap videos of Indian people, including clips with several faces, labelled by gender, age, skin tone and occlusion.",
+   "scale": "133,260 videos, over 500 GB",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "FSGAN",
+    "FaceShifter",
+    "FaceSwap"
+   ],
+   "annotations": [
+    "set: A (single subject), B and C (multiple subjects)",
+    "gender",
+    "age",
+    "Fitzpatrick skin tone",
+    "occlusion",
+    "resolution: low or high",
+    "compression: c0, c23, c40"
+   ],
+   "format": "videos at low and high resolution, c0, c23 and c40 compression, over 500 GB",
+   "notes": "Its licence limits use to research colleagues at the signing institution.",
+   "recorded": null,
+   "paper": {
+    "title": "DF-Platter: Multi-Face Heterogeneous Deepfake Dataset",
+    "year": 2023,
+    "citations": 78,
+    "venue": "CVPR 2023",
+    "url": "https://www.semanticscholar.org/paper/f1a9f5f42a68a8b5ee07e06dee800629fccc533f"
+   },
+   "evalsets": [
+    "dfplatter_sample"
+   ]
+  },
+  {
+   "id": "fakeavceleb",
+   "name": "FakeAVCeleb",
+   "modality": "audio_video",
+   "role": "south_asian",
+   "status": "request",
+   "languages": [
+    "en"
+   ],
+   "licence": "non-commercial research and education (site says CC BY 4.0; the GitHub README defers to the request form)",
+   "summary": "English-speaking celebrity videos in which the face, the voice or both are faked, across five ethnic groups including 100 South Asian real videos.",
+   "scale": "500 real and 19,500 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "FaceSwap (video)",
+    "FSGAN (video)",
+    "Wav2Lip (lip-sync)",
+    "SV2TTS (voice cloning)"
+   ],
+   "annotations": [
+    "category: RealVideo-RealAudio, RealVideo-FakeAudio, FakeVideo-RealAudio, FakeVideo-FakeAudio (which track is fake)",
+    "ethnicity: African, Asian (East), Asian (South), Caucasian (American), Caucasian (European)",
+    "gender",
+    "subject id",
+    "generation method"
+   ],
+   "format": "MP4 from VoxCeleb2, about 7.8 s on average",
+   "notes": "Ethnicity and gender come from the folder layout, which is unverified until a copy arrives.",
+   "recorded": null,
+   "paper": {
+    "title": "FakeAVCeleb: A Novel Audio-Video Multimodal Deepfake Dataset",
+    "year": 2021,
+    "citations": 413,
+    "venue": "NeurIPS D&B 2021",
+    "url": "https://arxiv.org/abs/2108.05080"
+   },
+   "evalsets": [
+    "fakeavceleb"
+   ]
+  },
+  {
+   "id": "ffpp",
+   "name": "FaceForensics++",
+   "modality": "video",
+   "role": "reproduction",
+   "status": "request",
+   "languages": [],
+   "licence": "FaceForensics++ terms of use (research only)",
+   "summary": "1,000 real YouTube videos and their fakes made with several face-swap and face-reenactment methods; the standard video deepfake benchmark.",
+   "scale": "1,000 real videos plus fakes, about 40 GB",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "Deepfakes",
+    "Face2Face",
+    "FaceSwap",
+    "NeuralTextures",
+    "FaceShifter"
+   ],
+   "annotations": [
+    "manipulation method",
+    "target id and source id of each fake",
+    "official split: train, val, test (JSON pair lists)",
+    "binary manipulation masks"
+   ],
+   "format": "MP4, c23 compression used here (raw and c40 also exist)",
+   "notes": "Real videos come from 977 YouTube videos, mostly frontal faces.",
+   "recorded": null,
+   "paper": {
+    "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
+    "year": 2019,
+    "citations": 3394,
+    "venue": "ICCV 2019",
+    "url": "https://arxiv.org/abs/1901.08971"
+   },
+   "evalsets": [
+    "ffpp_test"
+   ]
+  },
+  {
+   "id": "hidf",
+   "name": "HiDF (human-indistinguishable deepfakes), videos",
+   "modality": "video",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [],
+   "licence": "CC BY-NC 4.0",
+   "summary": "Face swaps made with commercial tools and picked because people cannot tell them from real; faces are labelled by race, with an Indian group.",
+   "scale": "4,361 real and 4,361 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "commercial face-swap tools (which tool made which video is not stated)"
+   ],
+   "annotations": [
+    "base video id",
+    "donor face id",
+    "race: White, Asian, Latino, Black, Indian",
+    "gender",
+    "age: adult, child, elderly"
+   ],
+   "format": "MP4 with audio, 512 px face crops, about 3 s",
+   "notes": "Clips are too short for HAVIC's 3.2 s windows, and the 62k images are not fetched.",
+   "recorded": [
+    "sample",
+    [
+     "kind of fake",
+     "speaker or face id",
+     "source identity of each fake",
+     "gender",
+     "age",
+     "race"
+    ]
+   ],
+   "paper": {
+    "title": "HiDF: A Human-Indistinguishable Deepfake Dataset",
+    "year": 2025,
+    "citations": 13,
+    "venue": "KDD 2025",
+    "url": "https://doi.org/10.1145/3711896.3737399"
+   },
+   "evalsets": [
+    "hidf_video"
+   ]
+  },
+  {
+   "id": "iav_df",
+   "name": "IAV-DF",
+   "modality": "audio_video",
+   "role": "south_asian",
+   "status": "dead",
+   "languages": [],
+   "licence": "unknown",
+   "summary": "Indian audio-video deepfakes with face swaps and lip-sync using cloned voices; only a sample was ever released and its link is dead.",
+   "scale": null,
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "First Order Motion Model",
+    "Thin Plate Spline Motion Model",
+    "FaceApp face swap",
+    "Wav2Lip lip-sync with cloned voices"
+   ],
+   "annotations": null,
+   "format": null,
+   "notes": "Only a sample was ever released and its link is dead, so nothing can be downloaded.",
+   "recorded": null,
+   "paper": null,
+   "evalsets": []
+  },
+  {
+   "id": "in_the_wild",
+   "name": "In-the-Wild (M\u00fcller et al. 2022)",
+   "modality": "audio",
+   "role": "reproduction",
+   "status": "open",
+   "languages": [
+    "en"
+   ],
+   "licence": "CC BY-SA 4.0",
+   "summary": "English clips of 54 public figures, real speech and fakes collected from the internet, used to test audio detectors on realistic material.",
+   "scale": "31,779 clips (19,963 real, 11,816 fake)",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": null,
+   "annotations": [
+    "speaker (public figure name)"
+   ],
+   "format": "WAV, 37.9 h in all (20.7 h real, 17.2 h fake)",
+   "notes": "meta.csv lists 54 speakers while the card says 58 celebrities and politicians.",
+   "recorded": [
+    "full",
+    [
+     "language",
+     "speaker or face id"
+    ]
+   ],
+   "paper": {
+    "title": "Does Audio Deepfake Detection Generalize?",
+    "year": 2022,
+    "citations": 381,
+    "venue": "Interspeech 2022",
+    "url": "https://arxiv.org/abs/2203.16263"
+   },
+   "evalsets": [
+    "in_the_wild"
+   ]
+  },
+  {
+   "id": "indeepfake",
+   "name": "InDeepFake",
+   "modality": "audio_video",
+   "role": "south_asian",
+   "status": "request",
+   "languages": [],
+   "licence": "InDeepFake access agreement",
+   "summary": "Indian videos in seven languages with face swaps, text-to-speech voices and Wav2Lip lip-sync fakes.",
+   "scale": "389 real and 4,680 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "FSGAN",
+    "FaceSwap",
+    "DeepFaceLab",
+    "text-to-speech plus Wav2Lip lip-sync"
+   ],
+   "annotations": [
+    "language: English, Hindi, Bengali, Telugu, Tamil, Punjabi, Rajasthani",
+    "gender",
+    "age group"
+   ],
+   "format": "video excerpts of about 10 to 12 s from YouTube",
+   "notes": "Access is restricted to academic institutions on request.",
+   "recorded": null,
+   "paper": {
+    "title": "InDeepFake: A novel multimodal multilingual indian deepfake video dataset",
+    "year": 2025,
+    "citations": 6,
+    "venue": "Pattern Recognition Letters 2025",
+    "url": "https://doi.org/10.1016/j.patrec.2025.07.002"
+   },
+   "evalsets": [
+    "indeepfake"
+   ]
+  },
+  {
+   "id": "indic_codecfake",
+   "name": "Indic-CodecFake",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "dead",
+   "languages": [],
+   "licence": "CC BY 4.0 (arXiv)",
+   "summary": "Fake speech in 12 Indian languages made by re-encoding real IndicSUPERB speech with neural audio codecs (DAC, Encodec); no download exists yet.",
+   "scale": null,
+   "contains": [
+    "fake"
+   ],
+   "generators": [
+    "DAC neural audio codec (16, 24 and 44 kHz)",
+    "Encodec neural audio codec (24 and 48 kHz)"
+   ],
+   "annotations": [
+    "language (12 Indic languages)"
+   ],
+   "format": null,
+   "notes": "No download exists yet; its real side is IndicSUPERB.",
+   "recorded": null,
+   "paper": {
+    "title": "Indic-CodecFake meets SATYAM: Towards Detecting Neural Audio Codec Synthesized Speech Deepfakes in Indic Languages",
+    "year": 2026,
+    "citations": 1,
+    "venue": "ACL 2026 Findings",
+    "url": "https://arxiv.org/abs/2604.19949"
+   },
+   "evalsets": []
+  },
+  {
+   "id": "indicsuperb",
+   "name": "IndicSUPERB (Kathbath)",
+   "modality": "audio",
+   "role": "real_reference",
+   "status": "open",
+   "languages": [
+    "hi",
+    "bn",
+    "ur",
+    "ta",
+    "mr",
+    "kn",
+    "ml",
+    "gu",
+    "pa",
+    "te",
+    "or",
+    "sa"
+   ],
+   "licence": "CC BY 4.0 (the Hugging Face card of ai4bharat/Kathbath; the IndicSUPERB code repo is Apache-2.0)",
+   "summary": "Real read speech in 12 Indian languages (Kathbath), used here as the real counterpart for IndicSynth; only the clean test splits are fetched.",
+   "scale": "5.8 GB (test splits)",
+   "contains": [
+    "real"
+   ],
+   "generators": [],
+   "annotations": [
+    "speaker id (shared with IndicSynth)",
+    "gender: male, female",
+    "language (12)",
+    "split: test_known, test_unknown",
+    "transcript"
+   ],
+   "format": "m4a",
+   "notes": "Only the clean test splits are fetched; the 85 GB train split is left out.",
+   "recorded": [
+    "full",
+    [
+     "language",
+     "speaker or face id",
+     "official split",
+     "gender"
+    ]
+   ],
+   "paper": {
+    "title": "IndicSUPERB: A Speech Processing Universal Performance Benchmark for Indian languages",
+    "year": 2022,
+    "citations": 74,
+    "venue": "AAAI 2023",
+    "url": "https://arxiv.org/abs/2208.11761"
+   },
+   "evalsets": [
+    "indicsynth_bn",
+    "indicsynth_hi",
+    "indicsynth_ur",
+    "mlaad_bn",
+    "mlaad_hi",
+    "speechfake_bn",
+    "speechfake_ml",
+    "speechfake_mr",
+    "speechfake_ta"
+   ]
+  },
+  {
+   "id": "indicsynth",
+   "name": "IndicSynth",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [
+    "hi",
+    "bn",
+    "ur",
+    "ta",
+    "mr",
+    "kn",
+    "ml",
+    "gu",
+    "pa",
+    "te",
+    "or",
+    "sa"
+   ],
+   "licence": "CC BY-NC 4.0",
+   "summary": "Fake speech only, in 12 Indian languages, made with three systems (XTTS-v2, VITS, FreeVC24) from IndicSUPERB speakers.",
+   "scale": "4,000 h, 989 target speakers, 845 GB",
+   "contains": [
+    "fake"
+   ],
+   "generators": [
+    "XTTS-v2 (text-to-speech)",
+    "VITS (text-to-speech)",
+    "FreeVC24 (voice conversion)"
+   ],
+   "annotations": [
+    "generator",
+    "target speaker id (Kathbath numbering)",
+    "source speaker id (voice conversion only)",
+    "gender: male, female",
+    "language (12)",
+    "source and target reference audio",
+    "TTS transcript"
+   ],
+   "format": "WAV embedded in parquet rows",
+   "notes": "Fake only; real speech comes from IndicSUPERB, and shards are sorted by generator so small samples may miss some.",
+   "recorded": [
+    "sample",
+    [
+     "generator",
+     "kind of fake",
+     "language",
+     "speaker or face id",
+     "source identity of each fake",
+     "gender"
+    ]
+   ],
+   "paper": {
+    "title": "IndicSynth: A Large-Scale Multilingual Synthetic Speech Dataset for Low-Resource Indian Languages",
+    "year": 2025,
+    "citations": 11,
+    "venue": "ACL 2025",
+    "url": "https://doi.org/10.18653/v1/2025.acl-long.1070"
+   },
+   "evalsets": [
+    "indicsynth_bn",
+    "indicsynth_hi",
+    "indicsynth_ur"
+   ]
+  },
+  {
+   "id": "indictts_challenge",
+   "name": "IndicTTS Deepfake Challenge data",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [
+    "as",
+    "bn",
+    "brx",
+    "doi",
+    "en",
+    "gu",
+    "hi",
+    "kn",
+    "ml",
+    "mni",
+    "mr",
+    "ne",
+    "or",
+    "sa",
+    "ta",
+    "te"
+   ],
+   "licence": "CC BY 4.0",
+   "summary": "Real and text-to-speech clips in 16 Indian languages, including Nepali, from a Hugging Face community challenge; the TTS system is not named.",
+   "scale": "31,102 labelled training clips, 17.4 GB",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": null,
+   "annotations": [
+    "language (16)",
+    "transcript",
+    "speaker code and gender (from the id)",
+    "emotion (from the id)",
+    "official split: train, test (test labels hidden)"
+   ],
+   "format": "16 kHz audio embedded in parquet rows",
+   "notes": "The card names neither the TTS system nor where the real speech comes from.",
+   "recorded": [
+    "sample",
+    [
+     "kind of fake",
+     "language",
+     "speaker or face id",
+     "official split",
+     "gender"
+    ]
+   ],
+   "paper": null,
+   "evalsets": [
+    "indictts_challenge"
+   ]
+  },
+  {
+   "id": "indiefake",
+   "name": "IndieFake",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "request",
+   "languages": [
+    "en"
+   ],
+   "licence": "CC BY 4.0 (site footer)",
+   "summary": "Indian-accented English from 50 speakers, real recordings and deepfakes made with hypothetical, same-speaker and cross-speaker transcripts.",
+   "scale": "27.17 h",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "voice cloning with tools such as Amazon Polly, Play.ht or ElevenLabs"
+   ],
+   "annotations": [
+    "speaker id (50 speakers)",
+    "gender: 38 male, 12 female",
+    "age group (18 to 75)",
+    "background: celebrity, politician, academic, businessman, member of the public",
+    "region and accent",
+    "transcript type: hypothetical, same-speaker, cross-speaker",
+    "official 80/20 subject-independent train/test split"
+   ],
+   "format": "WAV, 16 kHz, about 5 s on average",
+   "notes": "Indian-accented English only, no South Asian languages.",
+   "recorded": null,
+   "paper": {
+    "title": "IndieFake Dataset: A Benchmark Dataset for Audio Deepfake Detection",
+    "year": 2025,
+    "citations": 3,
+    "venue": "arXiv 2025",
+    "url": "https://arxiv.org/abs/2506.19014"
+   },
+   "evalsets": []
+  },
+  {
+   "id": "lrlspoof",
+   "name": "LRLspoof (low-resource language spoofs)",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "deferred",
+   "languages": [
+    "ne",
+    "hi",
+    "gu",
+    "ml",
+    "mr",
+    "or",
+    "te",
+    "as"
+   ],
+   "licence": "MIT",
+   "summary": "Fake speech only in 66 low-resource languages, including Nepali and Assamese; deferred because it ships as one huge archive.",
+   "scale": "1.3 million utterances, 462 GB",
+   "contains": [
+    "fake"
+   ],
+   "generators": [
+    "24 open-source text-to-speech systems"
+   ],
+   "annotations": [
+    "language (66)",
+    "TTS model (from the folder)"
+   ],
+   "format": "WAV, shipped as one gzipped tarball in 47 parts",
+   "notes": "Spoof only, and no language can be fetched without the whole 462 GB archive.",
+   "recorded": null,
+   "paper": {
+    "title": "When Spoof Detectors Travel: Evaluation Across 66 Languages in the Low-Resource Language Spoofing Corpus",
+    "year": 2026,
+    "citations": 3,
+    "venue": "Interspeech 2026 (arXiv)",
+    "url": "https://arxiv.org/abs/2603.02364"
+   },
+   "evalsets": []
+  },
+  {
+   "id": "mavos_dd_hi",
+   "name": "MAVOS-DD, Hindi subset",
+   "modality": "audio_video",
+   "role": "south_asian",
+   "status": "click_through",
+   "languages": [
+    "hi"
+   ],
+   "licence": "CC BY-NC-SA 4.0",
+   "summary": "Hindi talking-head and lip-sync videos from eight generators, real clips from YouTube; the one South Asian audio-video set we can download.",
+   "scale": "3,632 real and 3,881 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "inswapper (face swap)",
+    "hififace (face swap)",
+    "roop (face swap)",
+    "echomimic (talking head)",
+    "sonic (talking head)",
+    "memo (talking head)",
+    "liveportrait (reenactment)",
+    "knnvc (voice conversion)"
+   ],
+   "annotations": [
+    "generator",
+    "which track was manipulated: video, audio",
+    "language: Hindi",
+    "open-set split (per the paper)"
+   ],
+   "format": "MP4, 256 x 256 to 1920 x 1080, 23 to 60 fps, audio 16 to 44.1 kHz",
+   "notes": "The paper says face swaps keep their source audio, but the repo leaves the audio label of non-knnvc fakes null until the metadata confirms it.",
+   "recorded": null,
+   "paper": {
+    "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
+    "year": 2025,
+    "citations": 11,
+    "venue": "arXiv 2025",
+    "url": "https://arxiv.org/abs/2505.11109"
+   },
+   "evalsets": [
+    "mavos_dd_hi_audio",
+    "mavos_dd_hi_video"
+   ]
+  },
+  {
+   "id": "mendeley_roop_akool",
+   "name": "Comprehensive Deepfake Detection Dataset: Real and Synthetic Frames from Roop and Akool (Mendeley v3)",
+   "modality": "image",
+   "role": "pipeline_test",
+   "status": "open",
+   "languages": [],
+   "licence": "CC BY 4.0",
+   "summary": "Face-crop still frames of Bangladeshi and Indian people, real and fakes made with Roop and Akool; used only to test the pipeline.",
+   "scale": "3,746 real and 106,948 fake frames",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "Roop",
+    "Akool"
+   ],
+   "annotations": [
+    "technique: Tech-1, Tech-2 (which is Roop and which Akool is not stated)",
+    "source video",
+    "name of the person swapped in (file name)"
+   ],
+   "format": "JPEG face crops, 500 x 500, frames taken at 5 fps",
+   "notes": "Pipeline test only, never reported; frames of one video are near-duplicates, so never split them across train and test.",
+   "recorded": [
+    "sample",
+    [
+     "generator",
+     "kind of fake"
+    ]
+   ],
+   "paper": null,
+   "evalsets": []
+  },
+  {
+   "id": "mlaad",
+   "name": "MLAAD",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "click_through",
+   "languages": [
+    "hi",
+    "bn",
+    "ta",
+    "ur",
+    "si",
+    "kn",
+    "mr",
+    "ml"
+   ],
+   "licence": "CC BY-NC 4.0",
+   "summary": "Fake speech only, made by many text-to-speech systems in many languages (Hindi, Bengali, Tamil, Urdu, Sinhala and more); real speech must come from elsewhere.",
+   "scale": "1,000 clips per language and generator, 9.5 GB",
+   "contains": [
+    "fake"
+   ],
+   "generators": [
+    "text-to-speech systems, one folder each (Hindi 9, Bengali 4, Kannada 2, one each for Tamil, Marathi, Urdu, Sinhala, Malayalam)"
+   ],
+   "annotations": [
+    "generator",
+    "language",
+    "original M-AILABS source file",
+    "duration"
+   ],
+   "format": "WAV",
+   "notes": "Fake only; real speech must come from another corpus, so every evalset on it is cross-corpus.",
+   "recorded": null,
+   "paper": {
+    "title": "MLAAD: The Multi-Language Audio Anti-Spoofing Dataset",
+    "year": 2024,
+    "citations": 182,
+    "venue": "IJCNN 2024",
+    "url": "https://arxiv.org/abs/2401.09512"
+   },
+   "evalsets": [
+    "mlaad_bn",
+    "mlaad_hi",
+    "mlaad_si"
+   ]
+  },
+  {
+   "id": "openslr_sinhala",
+   "name": "Large Sinhala ASR training data (OpenSLR SLR52)",
+   "modality": "audio",
+   "role": "real_reference",
+   "status": "open",
+   "languages": [
+    "si"
+   ],
+   "licence": "CC BY-SA 4.0",
+   "summary": "Real Sinhala read speech crowd-sourced by Google, used as the real half for MLAAD's Sinhala fakes; only the first of 16 zips is fetched.",
+   "scale": "11,550 clips used (full set 185k utterances)",
+   "contains": [
+    "real"
+   ],
+   "generators": [],
+   "annotations": [
+    "anonymised speaker id",
+    "transcript"
+   ],
+   "format": "FLAC",
+   "notes": "No gender labels, and only the first of 16 zips is fetched.",
+   "recorded": [
+    "full",
+    [
+     "language",
+     "speaker or face id"
+    ]
+   ],
+   "paper": {
+    "title": "Crowd-Sourced Speech Corpora for Javanese, Sundanese, Sinhala, Nepali, and Bangladeshi Bengali",
+    "year": 2018,
+    "citations": 102,
+    "venue": "SLTU 2018",
+    "url": "https://doi.org/10.21437/SLTU.2018-11"
+   },
+   "evalsets": [
+    "mlaad_si"
+   ]
+  },
+  {
+   "id": "sea_spoof",
+   "name": "SEA-Spoof (Hindi and Tamil parts)",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "request",
+   "languages": [
+    "hi",
+    "ta"
+   ],
+   "licence": "other (non-commercial academic research only; the paper says CC BY-NC-ND 4.0)",
+   "summary": "Real and fake speech in seven languages, with Hindi and Tamil parts used here, fakes from ten generators including commercial voice tools.",
+   "scale": "Hindi 71,171 and Tamil 49,640 utterances",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "VITS-MMS",
+    "FastSpeech2",
+    "Indic-TTS",
+    "F5-TTS",
+    "Tacotron2",
+    "FastPitch",
+    "HeyGen (commercial)",
+    "ElevenLabs (commercial)",
+    "MiniMax (commercial)",
+    "GPT-4o-mini-TTS (commercial)"
+   ],
+   "annotations": [
+    "language",
+    "spoof type",
+    "source model",
+    "source dataset",
+    "speaker or voice",
+    "category: offline or online spoof",
+    "official split: train, validation, test (8:1:1)"
+   ],
+   "format": "FLAC, 16 kHz, in parquet shards",
+   "notes": "The schema comes from the card and paper; nobody on the team has seen the files yet.",
+   "recorded": null,
+   "paper": {
+    "title": "SEA-Spoof: Bridging The Gap in Multilingual Audio Deepfake Detection for South-East Asian",
+    "year": 2025,
+    "citations": 4,
+    "venue": "arXiv 2025",
+    "url": "https://arxiv.org/abs/2509.19865"
+   },
+   "evalsets": [
+    "sea_spoof_hi",
+    "sea_spoof_ta"
+   ]
+  },
+  {
+   "id": "speechfake",
+   "name": "SpeechFake (South Asian languages)",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [
+    "hi",
+    "bn",
+    "ta",
+    "mr",
+    "ml"
+   ],
+   "licence": "CC BY 4.0 (README; ModelScope metadata says Apache-2.0)",
+   "summary": "Real and fake speech in many languages; we use the Hindi, Bengali, Tamil, Marathi and Malayalam parts, mostly Edge-TTS plus SeedVC voice conversion for Hindi.",
+   "scale": "143 GB for the South Asian parts",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "Edge-TTS (text-to-speech)",
+    "SeedVC (voice conversion, Hindi only)"
+   ],
+   "annotations": [
+    "generator",
+    "language",
+    "Edge-TTS voice name",
+    "Common Voice split folder (real clips)"
+   ],
+   "format": "WAV, 16 kHz mono, mostly 2 to 20 s",
+   "notes": "The paper promises transcripts and voice ids, but the metadata CSVs we read carry only label, generator kind, model and language.",
+   "recorded": [
+    "sample",
+    [
+     "generator",
+     "kind of fake",
+     "language",
+     "speaker or face id"
+    ]
+   ],
+   "paper": {
+    "title": "SpeechFake: A Large-Scale Multilingual Speech Deepfake Dataset Incorporating Cutting-Edge Generation Methods",
+    "year": 2025,
+    "citations": 28,
+    "venue": "ACL 2025",
+    "url": "https://arxiv.org/abs/2507.21463"
+   },
+   "evalsets": [
+    "speechfake_bn",
+    "speechfake_hi",
+    "speechfake_ml",
+    "speechfake_mr",
+    "speechfake_ta"
+   ]
+  },
+  {
+   "id": "svarah",
+   "name": "Svarah (Indian-accented English)",
+   "modality": "audio",
+   "role": "real_reference",
+   "status": "click_through",
+   "languages": [
+    "en"
+   ],
+   "licence": "none declared on the Hugging Face card (AI4Bharat)",
+   "summary": "Real Indian-accented English from 117 speakers across India, labelled by gender, age, state and first language; used to check false alarms.",
+   "scale": "9.6 h, 117 speakers",
+   "contains": [
+    "real"
+   ],
+   "generators": [],
+   "annotations": [
+    "speaker id",
+    "gender",
+    "age group",
+    "native state and district",
+    "first language",
+    "transcript"
+   ],
+   "format": "audio embedded in parquet, test split only, 9.6 h in all",
+   "notes": "No licence is declared, so nothing derived from it is published yet.",
+   "recorded": null,
+   "paper": {
+    "title": "Svarah: Evaluating English ASR Systems on Indian Accents",
+    "year": 2023,
+    "citations": 29,
+    "venue": "Interspeech 2023",
+    "url": "https://arxiv.org/abs/2305.15760"
+   },
+   "evalsets": []
+  },
+  {
+   "id": "unidatapro_videos",
+   "name": "UniDataPro deepfake videos (free Hugging Face preview)",
+   "modality": "audio_video",
+   "role": "pipeline_test",
+   "status": "open",
+   "languages": [],
+   "licence": "CC BY-NC-ND 4.0",
+   "summary": "A tiny free preview of five real phone videos and five face-swap fakes made from them; used only to test the pipeline.",
+   "scale": "10 videos, about 68 MB",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "aisaver.io",
+    "faceswapvideo.ai",
+    "magichour.ai (which service made which fake is not stated)"
+   ],
+   "annotations": [
+    "pairing of real video, fake and source face image (CSV)"
+   ],
+   "format": "MP4 and MOV phone videos with audio, 480p to 1080p",
+   "notes": "Pipeline test only, never reported; whether the fakes keep the original audio is unknown.",
+   "recorded": [
+    "sample",
+    [
+     "kind of fake",
+     "which track was faked"
+    ]
+   ],
+   "paper": null,
+   "evalsets": []
+  },
+  {
+   "id": "urdu_csalt",
+   "name": "Urdu Deepfake Audio (CSALT-LUMS)",
+   "modality": "audio",
+   "role": "south_asian",
+   "status": "open",
+   "languages": [
+    "ur"
+   ],
+   "licence": "CC BY-NC 4.0",
+   "summary": "Urdu speech from 17 speakers: about 3,400 real clips and matching fakes made with two text-to-speech systems (VITS and Tacotron).",
+   "scale": "6,794 clips (3,398 real, 3,396 fake)",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "generators": [
+    "VITS (text-to-speech)",
+    "Tacotron (text-to-speech)"
+   ],
+   "annotations": [
+    "speaker id (17 speakers)",
+    "generator",
+    "bona fide part: Part 1, Part 2"
+   ],
+   "format": "WAV",
+   "notes": "This release has 6,794 clips, far fewer than the paper's 20,451 real and 16,830 fake utterances.",
+   "recorded": [
+    "full",
+    [
+     "generator",
+     "kind of fake",
+     "language",
+     "speaker or face id",
+     "source identity of each fake"
+    ]
+   ],
+   "paper": {
+    "title": "Deepfake Defense: Constructing and Evaluating a Specialized Urdu Deepfake Audio Dataset",
+    "year": 2024,
+    "citations": 7,
+    "venue": "ACL 2024 Findings",
+    "url": "https://doi.org/10.18653/v1/2024.findings-acl.861"
+   },
+   "evalsets": [
+    "urdu_csalt"
+   ]
   }
  ],
  "evalsets": [
@@ -456,203 +3361,244 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "modality": "audio",
    "role": "reproduction",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": {
+    "items": 71237,
+    "windows": 86129
+   }
   },
   {
    "id": "bangla_voices",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "banglafake",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": {
+    "items": 25592,
+    "windows": 50954
+   }
   },
   {
    "id": "bd_grf6",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "celeb_df_v2_test",
    "modality": "video",
    "role": "reproduction",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "deephy",
    "modality": "video",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "dfplatter_sample",
    "modality": "video",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "fakeavceleb",
    "modality": "video",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "ffpp_test",
    "modality": "video",
    "role": "reproduction",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "hidf_video",
    "modality": "video",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "in_the_wild",
    "modality": "audio",
    "role": "reproduction",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": {
+    "items": 31779,
+    "windows": 48385
+   }
   },
   {
    "id": "indeepfake",
    "modality": "video",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "indicsynth_bn",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "indicsynth_hi",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "indicsynth_ur",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "indictts_challenge",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "mavos_dd_hi_audio",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "mavos_dd_hi_video",
    "modality": "video",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "mlaad_bn",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "mlaad_hi",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "mlaad_si",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "sea_spoof_hi",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "sea_spoof_ta",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "pending_access"
+   "status": "pending_access",
+   "size": null
   },
   {
    "id": "speechfake_bn",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "speechfake_hi",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "speechfake_ml",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "speechfake_mr",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "speechfake_ta",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "cross_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": null
   },
   {
    "id": "urdu_csalt",
    "modality": "audio",
    "role": "south_asian",
    "pairing": "same_corpus",
-   "status": "ready"
+   "status": "ready",
+   "size": {
+    "items": 6794,
+    "windows": 17745
+   }
   }
  ],
  "cells": {
@@ -1118,7 +4064,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.017541474027740006,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 2793,
+   "windows": 86129
   },
   {
    "model": "aasist",
@@ -1139,7 +4087,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "reasons": [],
    "flags": [
     "below chance"
-   ]
+   ],
+   "wall_s": 1412,
+   "windows": 50954
   },
   {
    "model": "aasist",
@@ -1158,7 +4108,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.44611129057343396,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 1392,
+   "windows": 48385
   },
   {
    "model": "aasist",
@@ -1177,7 +4129,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.23131888534477335,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 413,
+   "windows": 17745
   },
   {
    "model": "aasist_l",
@@ -1196,7 +4150,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.016589611096002176,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 2714,
+   "windows": 86129
   },
   {
    "model": "aasist_l",
@@ -1217,7 +4173,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "reasons": [],
    "flags": [
     "below chance"
-   ]
+   ],
+   "wall_s": 1367,
+   "windows": 50954
   },
   {
    "model": "aasist_l",
@@ -1236,7 +4194,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.4541936269878035,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 1492,
+   "windows": 48385
   },
   {
    "model": "aasist_l",
@@ -1255,7 +4215,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.2413189236888462,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 365,
+   "windows": 17745
   },
   {
    "model": "df_arena_1b",
@@ -1278,7 +4240,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    ],
    "flags": [
     "source overlap"
-   ]
+   ],
+   "wall_s": 4580,
+   "windows": 50954
   },
   {
    "model": "df_arena_1b",
@@ -1297,7 +4261,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.007725043021344271,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 4191,
+   "windows": 48385
   },
   {
    "model": "df_arena_1b",
@@ -1316,7 +4282,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.04532077692760447,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 3083,
+   "windows": 17745
   },
   {
    "model": "df_arena_500m",
@@ -1339,7 +4307,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    ],
    "flags": [
     "source overlap"
-   ]
+   ],
+   "wall_s": 1923,
+   "windows": 50954
   },
   {
    "model": "df_arena_500m",
@@ -1358,7 +4328,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.016602150537634364,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 1354,
+   "windows": 48385
   },
   {
    "model": "df_arena_500m",
@@ -1377,7 +4349,9 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
    "eer_hi": 0.08469055374592838,
    "verdict": "clean",
    "reasons": [],
-   "flags": []
+   "flags": [],
+   "wall_s": 1612,
+   "windows": 17745
   }
  ]
 }
@@ -1385,29 +4359,50 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
 <script>
 (() => {
   const D = JSON.parse(document.getElementById("status-data").textContent);
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const fmt = (x, d = 3) => x.toFixed(d);
   const pct = (x) => (100 * x).toFixed(1) + "%";
-  const int = (x) => x.toLocaleString("en-US");
+  const int = (x) => Math.round(x).toLocaleString("en-US");
+  const params = (n) => n >= 1e9 ? (n / 1e9).toFixed(2) + " B" : n >= 1e7 ? (n / 1e6).toFixed(0) + " M" : n >= 1e6 ? (n / 1e6).toFixed(1) + " M" : (n / 1e3).toFixed(0) + " K";
+  const dur = (s) => s < 90 ? Math.max(1, Math.round(s)) + " s" : s < 5400 ? Math.round(s / 60) + " min" : s < 172800 ? (s / 3600).toFixed(1) + " h" : (s / 86400).toFixed(1) + " days";
+  const ms = (x) => x < 10 ? x.toFixed(1) + " ms" : Math.round(x) + " ms";
+  const WINDOW_S = 64600 / 16000;
+  const REF = "https://colombo-hci-lab.github.io/deeptrace-bench/catalog.html";
+  const LANG = { hi: "Hindi", en: "English", bn: "Bengali", ta: "Tamil", mr: "Marathi", ml: "Malayalam", te: "Telugu", ur: "Urdu", or: "Odia", kn: "Kannada", gu: "Gujarati", sa: "Sanskrit", si: "Sinhala", pa: "Punjabi", ne: "Nepali", as: "Assamese", mni: "Manipuri", doi: "Dogri", brx: "Bodo" };
+  const ACCESS = { open: "Open download", click_through: "Accept terms online", request: "On request", deferred: "Deferred", dead: "Unavailable" };
+  const ROLE = { south_asian: "South Asian", reproduction: "Reproduction", real_reference: "Real reference", in_the_wild: "In the wild" };
+  const MOD = { audio: "Audio", video: "Video", audio_video: "Audio-visual", image: "Image" };
+
   const runs = new Map(D.runs.map((r) => [r.model + "|" + r.evalset, r]));
   const models = new Map(D.models.map((m) => [m.id, m]));
+  const evalsets = new Map(D.evalsets.map((e) => [e.id, e]));
+  const nRuns = (m) => D.runs.filter((r) => r.model === m.id).length;
   const GROUPS = [
     ["reproduction", "same_corpus", "Reproduction"],
     ["south_asian", "same_corpus", "South Asian · same corpus"],
     ["south_asian", "cross_corpus", "South Asian · cross corpus"],
   ];
-  const nRuns = (m) => D.runs.filter((r) => r.model === m.id).length;
+  // Model-only time for a full evalset: audio from its 4 s windows, video from its clips.
+  const estimate = (m, e) => {
+    const p = m.profile, size = e.size;
+    if (!p || !size) return null;
+    if (m.modality === "audio") return size.windows ? (size.windows * p.ms_per_unit) / 1000 : null;
+    return (size.items * p.ms_per_item) / 1000;
+  };
 
-  document.getElementById("facts").innerHTML = [
+  $("facts").innerHTML = [
     `<span><b>${D.models.length}</b> models</span>`,
+    `<span><b>${D.datasets.filter((d) => d.role !== "pipeline_test").length}</b> datasets</span>`,
     `<span><b>${D.evalsets.length}</b> evalsets</span>`,
-    `<span><b>${D.runs.length}</b> scored pairs</span>`,
-    `<span><b>${D.models.filter((m) => m.parity).length}</b> parity-checked</span>`,
-    `<span>eval setup <b>${esc(D.eval_status)}</b></span>`,
-    `<span>built ${esc(D.built)}</span>`,
+    `<span><b>${D.runs.length}</b> model–evalset pairs scored</span>`,
+    `<span><b>${D.models.filter((m) => m.parity).length}</b> models parity-checked</span>`,
+    `<span>rules: <b>${esc(D.eval_status)}</b></span>`,
+    `<span>updated ${esc(D.built)}</span>`,
   ].join("");
-  document.getElementById("eval-status").textContent = D.eval_status;
+  $("eval-status").textContent = D.eval_status;
 
+  let mode = "auc";
   function grid(id, modelMods, evMods) {
     const evs = D.evalsets.filter((e) => evMods.includes(e.modality));
     const groups = GROUPS.map(([role, pairing, label]) => ({
@@ -1415,7 +4410,7 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
       evs: evs.filter((e) => e.role === role && e.pairing === pairing).sort((a, b) => a.id.localeCompare(b.id)),
     })).filter((g) => g.evs.length);
     const cols = groups.flatMap((g) => g.evs.map((e, i) => ({ ...e, first: i === 0 })));
-    const ms = D.models
+    const ms_ = D.models
       .filter((m) => modelMods.includes(m.modality))
       .sort((a, b) => nRuns(b) - nRuns(a) || !!b.parity - !!a.parity || a.name.localeCompare(b.name));
 
@@ -1424,59 +4419,161 @@ footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; fl
     h += groups.map((g) => `<th class='grp' colspan='${g.evs.length}'>${esc(g.label)}</th>`).join("") + "</tr><tr>";
     h += cols.map((e) => `<th class='v${e.first ? " first" : ""}${e.status !== "ready" ? " pending" : ""}' title='${esc(e.id)}: ${esc(e.status.replace("_", " "))}'><span>${esc(e.id)}</span></th>`).join("");
     h += "</tr></thead><tbody>";
-    for (const m of ms) {
+    for (const m of ms_) {
       const tag = m.blocked ? "<small>blocked</small>" : "";
-      const par = m.parity ? `parity on ${m.parity.items} items of ${m.parity.evalset}, max diff ${m.parity.max_abs_diff.toExponential(1)}` : "no parity check yet";
+      const par = m.parity ? `parity on ${m.parity.items} clips of ${m.parity.evalset}, largest difference ${m.parity.max_abs_diff.toExponential(1)}` : "no parity check yet";
       h += `<tr><th scope='row' title='${esc(m.id)}'>${esc(m.name)}${tag}</th>`;
       h += `<td class='lad${m.adapter ? " on" : ""}' title='${m.adapter ? "adapter written" : "no adapter"}'>${m.adapter ? "●" : "○"}</td>`;
       h += `<td class='lad${m.parity ? " on" : ""}' title='${esc(par)}'>${m.parity ? "●" : "○"}</td>`;
       for (const e of cols) {
         const key = m.id + "|" + e.id;
         const r = runs.get(key);
+        const state = D.cells[key];
         const cls = [e.first ? "first" : "", e.status !== "ready" ? "pending" : ""];
-        let body = "", title = "";
-        if (r) {
-          const shade = Math.max(0, Math.min(1, (r.auc - 0.5) / 0.5)) * 24;
-          cls.push("run", r.flags.length && r.flags.some((f) => f !== "cross-corpus") ? "flag" : "");
-          body = fmt(r.auc);
-          title = `AUC ${fmt(r.auc)} [${fmt(r.auc_lo)}, ${fmt(r.auc_hi)}], EER ${pct(r.eer)}, n ${int(r.n)}${r.flags.length ? ", " + r.flags.join(", ") : ""}`;
-          h += `<td class='${cls.join(" ")}' style='background-color: color-mix(in oklab, var(--ink) ${shade.toFixed(1)}%, transparent)' title='${esc(title)}'>${body}</td>`;
+        if (state === "na") { h += `<td class='${cls.join(" ")} na' title='different kind of input'></td>`; continue; }
+        if (state === "guard") { h += `<td class='${cls.join(" ")} guard' title='refused: trained on this data'>⊘</td>`; continue; }
+        if (mode === "time") {
+          const t = estimate(m, e);
+          const title = t == null ? (e.size ? "no compute profile for this model" : "size unknown until the data is downloaded") : `about ${dur(t)} of GPU time for ${int(e.size.items)} clips`;
+          h += `<td class='${cls.join(" ")} ${t == null ? "empty" : "time"}' title='${esc(title)}'>${t == null ? "·" : dur(t).replace(" ", "&nbsp;")}</td>`;
           continue;
         }
-        const state = D.cells[key];
-        if (state === "na") { cls.push("na"); title = "different modality"; }
-        else if (state === "guard") { cls.push("guard"); body = "⊘"; title = "contamination guard: trained on this data"; }
-        else { cls.push("empty"); body = "·"; title = e.status === "ready" ? "not run yet" : "data access pending"; }
-        h += `<td class='${cls.join(" ")}' title='${esc(title)}'>${body}</td>`;
+        if (r) {
+          const shade = Math.max(0, Math.min(1, (r.auc - 0.5) / 0.5)) * 24;
+          const flagged = r.flags.some((f) => f !== "cross-corpus");
+          const title = `AUC ${fmt(r.auc)} [${fmt(r.auc_lo)}, ${fmt(r.auc_hi)}], EER ${pct(r.eer)}, ${int(r.n)} clips${r.flags.length ? "; " + r.flags.join(", ") : ""}`;
+          h += `<td class='${cls.join(" ")} run${flagged ? " flag" : ""}' style='background-color: color-mix(in oklab, var(--ink) ${shade.toFixed(1)}%, transparent)' title='${esc(title)}'>${fmt(r.auc)}</td>`;
+        } else {
+          h += `<td class='${cls.join(" ")} empty' title='${e.status === "ready" ? "not run yet" : "waiting for data access"}'>·</td>`;
+        }
       }
       h += "</tr>";
     }
-    document.getElementById(id).innerHTML = h + "</tbody>";
-    return ms;
+    $(id).innerHTML = h + "</tbody>";
+    return ms_;
   }
-
-  grid("grid-audio", ["audio"], ["audio"]);
-  const vms = grid("grid-video", ["video", "audio_video"], ["video", "image", "audio_video"]);
-  if (!D.runs.some((r) => vms.some((m) => m.id === r.model))) {
-    const open = D.evalsets.filter((e) => e.modality !== "audio" && e.status === "ready").map((e) => e.id);
-    document.getElementById("video-note").textContent =
-      `No video model has a full-evalset run yet. Open video evalsets: ${open.join(", ") || "none"}; the rest wait on access requests.`;
+  function grids() {
+    grid("grid-audio", ["audio"], ["audio"]);
+    const vms = grid("grid-video", ["video", "audio_video"], ["video", "image", "audio_video"]);
+    if (!D.runs.some((r) => vms.some((m) => m.id === r.model))) {
+      const open = D.evalsets.filter((e) => e.modality !== "audio" && e.status === "ready").map((e) => e.id);
+      $("video-note").textContent = `No video model has a full run yet. Open video evalsets: ${open.join(", ") || "none"}; the rest are waiting for access requests to be approved.`;
+    }
   }
+  for (const [btn, value] of [["mode-auc", "auc"], ["mode-time", "time"]]) {
+    $(btn).addEventListener("click", () => {
+      mode = value;
+      $("mode-auc").setAttribute("aria-pressed", String(mode === "auc"));
+      $("mode-time").setAttribute("aria-pressed", String(mode === "time"));
+      grids();
+    });
+  }
+  grids();
 
+  const paperCell = (p) => p
+    ? `<a href='${esc(p.url)}' title='${esc(p.title)}'>${esc(p.venue || p.year)}</a>`
+    : "<span class='dim'>no paper</span>";
+  const citeCell = (p) => p && p.citations != null ? int(p.citations) : "<span class='dim'>·</span>";
+  const status = (m) => {
+    if (m.blocked) return "<span class='dim'>blocked: weights unreachable</span>";
+    const n = nRuns(m);
+    const parts = [m.parity ? "parity ✓" : "<span class='dim'>parity pending</span>"];
+    if (n) parts.push(`${n} evalset${n > 1 ? "s" : ""} scored`);
+    return parts.join("<br>");
+  };
+
+  // Models, grouped by modality, most cited first.
+  const byCites = (a, b) => ((b.paper && b.paper.citations) || 0) - ((a.paper && a.paper.citations) || 0) || a.name.localeCompare(b.name);
+  let t = "<thead><tr><th>Model</th><th>Paper</th><th class='num'>Citations</th><th>Trained on</th><th class='num'>Parameters</th><th>Status</th></tr></thead><tbody>";
+  for (const mod of ["audio", "video", "audio_video"]) {
+    const rows = D.models.filter((m) => m.modality === mod).sort(byCites);
+    if (!rows.length) continue;
+    t += `<tr class='group'><td colspan='6'>${MOD[mod]} · ${rows.length}</td></tr>`;
+    for (const m of rows) {
+      t += `<tr><td><a class='name' href='${REF}#model-${esc(m.id)}'>${esc(m.name)}</a>${m.summary ? `<span class='sum'>${esc(m.summary)}</span>` : ""}</td>`;
+      t += `<td class='nowrap'>${paperCell(m.paper)}</td><td class='num'>${citeCell(m.paper)}</td>`;
+      t += `<td>${esc(m.trained_on.join(", ")) || "<span class='dim'>·</span>"}</td>`;
+      t += `<td class='num'>${m.profile ? params(m.profile.params) : "<span class='dim'>·</span>"}</td>`;
+      t += `<td class='nowrap'>${status(m)}</td></tr>`;
+    }
+  }
+  $("models-table").innerHTML = t + "</tbody>";
+  if (D.citations_checked) $("cite-note").textContent = `Citation counts from Semantic Scholar, checked ${D.citations_checked}. Google Scholar usually reports higher numbers.`;
+
+  // Datasets, grouped by role.
+  t = "<thead><tr><th>Dataset</th><th>Languages</th><th>Size</th><th>Paper</th><th class='num'>Citations</th><th>Access</th><th>Used in evalsets</th></tr></thead><tbody>";
+  for (const role of ["south_asian", "reproduction", "real_reference", "in_the_wild"]) {
+    const rows = D.datasets.filter((d) => d.role === role).sort((a, b) => a.name.localeCompare(b.name));
+    if (!rows.length) continue;
+    t += `<tr class='group'><td colspan='7'>${ROLE[role]} · ${rows.length}</td></tr>`;
+    for (const d of rows) {
+      const langs = d.languages.map((l) => LANG[l] || l);
+      const langText = langs.length > 4 ? `${langs.slice(0, 3).join(", ")} and ${langs.length - 3} more` : langs.join(", ");
+      t += `<tr><td><a class='name' href='${REF}#dataset-${esc(d.id)}'>${esc(d.name)}</a><span class='sum'>${esc(MOD[d.modality] || d.modality)}${d.summary ? ". " + esc(d.summary) : ""}</span></td>`;
+      t += `<td title='${esc(langs.join(", "))}'>${esc(langText) || "<span class='dim'>·</span>"}</td>`;
+      t += `<td>${esc(d.scale) || "<span class='dim'>·</span>"}</td>`;
+      t += `<td class='nowrap'>${paperCell(d.paper)}</td><td class='num'>${citeCell(d.paper)}</td>`;
+      t += `<td class='nowrap${d.status === "open" ? "" : " dim"}'>${esc(ACCESS[d.status] || d.status)}</td>`;
+      t += `<td class='mono'>${d.evalsets.map(esc).join("<br>") || "<span class='dim'>·</span>"}</td></tr>`;
+    }
+  }
+  $("datasets-table").innerHTML = t + "</tbody>";
+
+  // Results.
   const order = (r) => {
-    const e = D.evalsets.find((x) => x.id === r.evalset);
+    const e = evalsets.get(r.evalset);
     return GROUPS.findIndex(([role, pairing]) => e.role === role && e.pairing === pairing);
   };
-  const rows = D.runs.slice().sort((a, b) => order(a) - order(b) || a.evalset.localeCompare(b.evalset) || a.model.localeCompare(b.model));
-  let t = "<thead><tr><th>Evalset</th><th>Model</th><th class='num'>Real / fake</th><th class='num'>Failed</th><th class='num'>AUC</th><th class='num'>95% CI</th><th class='num'>EER</th><th>Flags</th></tr></thead><tbody>";
+  const rows = D.runs.slice().sort((a, b) => order(a) - order(b) || a.evalset.localeCompare(b.evalset) || b.auc - a.auc);
+  t = "<thead><tr><th>Evalset</th><th>Model</th><th class='num'>Real / fake clips</th><th class='num'>Failed</th><th class='num'>AUC</th><th class='num'>95% CI</th><th class='num'>EER</th><th class='num'>Wall time</th><th>Caveats</th></tr></thead><tbody>";
   for (const r of rows) {
     const title = [r.run_id, ...r.reasons].join("\n");
-    t += `<tr title='${esc(title)}'><td class='id'>${esc(r.evalset)}</td><td class='model'>${esc(models.get(r.model).name)}</td>`;
+    t += `<tr title='${esc(title)}'><td class='mono'>${esc(r.evalset)}</td><td class='nowrap'>${esc(models.get(r.model).name)}</td>`;
     t += `<td class='num'>${int(r.n_real)} / ${int(r.n_fake)}</td><td class='num'>${int(r.n_failed)}</td>`;
-    t += `<td class='num'>${fmt(r.auc)}</td><td class='num ci'>${fmt(r.auc_lo)}–${fmt(r.auc_hi)}</td><td class='num'>${pct(r.eer)}</td>`;
-    t += `<td class='flags'>${esc(r.flags.join(", "))}</td></tr>`;
+    t += `<td class='num'>${fmt(r.auc)}</td><td class='num dim'>${fmt(r.auc_lo)}–${fmt(r.auc_hi)}</td><td class='num'>${pct(r.eer)}</td>`;
+    t += `<td class='num'>${r.wall_s ? dur(r.wall_s) : "·"}</td><td class='flags'>${esc(r.flags.join(", "))}</td></tr>`;
   }
-  document.getElementById("runs-table").innerHTML = t + "</tbody>";
+  $("runs-table").innerHTML = t + "</tbody>";
+
+  // Compute.
+  const profiled = D.models.filter((m) => m.profile);
+  const gpu = profiled.find((m) => m.profile.gpu)?.profile;
+  if (gpu) $("compute-intro").textContent = `Measured on one ${gpu.gpu} in ${gpu.precision === "fp32" ? "full 32-bit precision" : gpu.precision}, with each model already loaded and only the model's own work counted. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them. GFLOPs (billions of arithmetic operations) measure the work regardless of hardware; milliseconds are what it took on this GPU.`;
+  t = "<thead><tr><th>Model</th><th class='num'>Parameters</th><th class='num'>GFLOPs per input</th><th class='num'>GPU time per input</th><th class='num'>GPU memory</th><th class='num'>Time for 1 h of audio or 1,000 videos</th></tr></thead><tbody>";
+  for (const mod of ["audio", "video", "audio_video"]) {
+    const rows = profiled.filter((m) => m.modality === mod).sort((a, b) => a.profile.ms_per_unit - b.profile.ms_per_unit);
+    if (!rows.length) continue;
+    const unit = mod === "audio" ? "per 4 s window" : "per frame";
+    t += `<tr class='group'><td colspan='6'>${MOD[mod]} · ${unit}</td></tr>`;
+    for (const m of rows) {
+      const p = m.profile;
+      const scaleTime = mod === "audio" ? (3600 / WINDOW_S) * p.ms_per_unit / 1000 : 1000 * p.ms_per_item / 1000;
+      t += `<tr><td class='nowrap'>${esc(m.name)}</td><td class='num'>${params(p.params)}</td>`;
+      t += `<td class='num'>${p.gflops_per_unit == null ? "·" : p.gflops_per_unit.toFixed(1)}</td><td class='num'>${ms(p.ms_per_unit)}${/clip/.test(p.unit) ? " <span class='dim'>per " + esc(p.unit) + "</span>" : ""}</td>`;
+      t += `<td class='num'>${p.peak_memory_gb == null ? "·" : p.peak_memory_gb.toFixed(1) + " GB"}</td>`;
+      t += `<td class='num'>${dur(scaleTime)}${mod === "audio" ? "" : " <span class='dim'>(" + Math.round(p.units_per_item) + (/clip/.test(p.unit) ? " clips" : " frames") + " each)</span>"}</td></tr>`;
+    }
+  }
+  const missing = D.models.filter((m) => !m.profile).map((m) => m.name);
+  if (missing.length) t += `<tr><td colspan='6' class='dim'>Not measured yet: ${esc(missing.join(", "))} (weights not available).</td></tr>`;
+  $("compute-table").innerHTML = t + "</tbody>";
+
+  const sized = D.evalsets.filter((e) => e.size).sort((a, b) => a.size.items - b.size.items);
+  const est = profiled.filter((m) => sized.some((e) => estimate(m, e) != null && !D.cells[m.id + "|" + e.id]))
+    .sort((a, b) => nRuns(b) - nRuns(a) || a.profile.ms_per_unit - b.profile.ms_per_unit);
+  t = `<thead><tr><th>Model</th>${sized.map((e) => `<th class='num'>${esc(e.id)}<br><span class='dim'>${int(e.size.items)} clips</span></th>`).join("")}</tr></thead><tbody>`;
+  for (const m of est) {
+    t += `<tr><td class='nowrap'>${esc(m.name)}</td>`;
+    for (const e of sized) {
+      const x = D.cells[m.id + "|" + e.id] ? null : estimate(m, e);
+      const r = runs.get(m.id + "|" + e.id);
+      t += `<td class='num'>${x == null ? "<span class='dim'>·</span>" : dur(x)}${r && r.wall_s ? ` <span class='dim'>· ran ${dur(r.wall_s)}</span>` : ""}</td>`;
+    }
+    t += "</tr>";
+  }
+  $("est-table").innerHTML = t + "</tbody>";
+
+  $("checked").textContent = `Updated ${D.built}.`;
 })();
 </script>
 </body>

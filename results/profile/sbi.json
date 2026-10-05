@@ -1,0 +1,19 @@
+{
+  "model": "sbi",
+  "checked_utc": "2026-10-05T14:50:22+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 32,
+  "params": 17552202,
+  "gflops_per_unit": 8.783965216,
+  "ms_per_unit": 4.224900437407086,
+  "ms_per_item": 135.19681399702677,
+  "load_ms_per_item": 14.994988501712214,
+  "peak_memory_gb": 1.0756282806396484
+}

@@ -13,13 +13,22 @@ from __future__ import annotations
 import hashlib
 import logging
 from collections.abc import Callable, Sequence
+from functools import partial
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
 from .models.base import Detector
+from .paths import dataset_dir, weights_dir
 from .preprocess import PreprocessError
+from .preprocess.audio import load_audio, segment
+from .preprocess.av import AudioVideoLoader
+from .preprocess.faces import FaceLoader
+from .preprocess.mouths import MouthLoader
+from .registry import Modality, ModelConfig, Registry
+from .upstream import checkout_dir
 
 log = logging.getLogger(__name__)
 
@@ -122,3 +131,48 @@ def _flush(rows: list[dict], directory: Path, prefix: str, part: int) -> None:
     pd.DataFrame(rows).to_parquet(tmp, index=False)
     tmp.rename(path)
     log.info("wrote %s (%d rows)", path.name, len(rows))
+
+
+def load_audio_inputs(row: pd.Series, segment_samples: int, min_samples: int) -> np.ndarray:
+    """Read one audio item and cut it into model windows."""
+    path = dataset_dir(row["dataset"]) / row["rel_path"]
+    return segment(load_audio(path), segment_samples=segment_samples, min_samples=min_samples)
+
+
+def build_loader(
+    registry: Registry,
+    model: ModelConfig,
+    device: str,
+    crops_dir: Path | None = None,
+    save_crops: int = 0,
+    prefix: str = "part",
+) -> tuple[Callable[[pd.Series], Any], str]:
+    """The input loader for ``model`` and the rule that aggregates its scores into one per item.
+
+    An audio model on an audio-video evalset hears the audio track; a video model sees the
+    frames. So the model, not the evalset, decides which loader runs.
+    """
+    if model.modality == Modality.AUDIO:
+        audio = registry.eval.audio
+        loader = partial(
+            load_audio_inputs,
+            segment_samples=audio["segment_samples"],
+            min_samples=int(audio["min_seconds"] * audio["sample_rate"]),
+        )
+        return loader, audio["aggregation"]
+    loader = FaceLoader.from_registry(
+        registry, model, save_crops_to=crops_dir, save_crops=save_crops, part_prefix=prefix
+    )
+    if model.modality == Modality.AUDIO_VIDEO:
+        # an audio-visual model gets its faces and the audio track together
+        loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
+    elif model.input.get("inputs") == "mouths":
+        # a lip-based model gets mouth crops cut from landmarks, not face crops
+        loader = MouthLoader(
+            loader,
+            fan_path=weights_dir(model.id) / model.input["landmarks"],
+            upstream_dir=checkout_dir(model.upstream),
+            device=device,
+            min_frames=int(model.input["clip_frames"]),
+        )
+    return loader, registry.eval.video["aggregation"]

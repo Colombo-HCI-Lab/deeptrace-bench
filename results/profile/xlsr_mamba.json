@@ -1,0 +1,19 @@
+{
+  "model": "xlsr_mamba",
+  "checked_utc": "2026-10-05T14:50:51+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "urdu_csalt",
+  "items": 4,
+  "repeats": 3,
+  "unit": "4 s audio window",
+  "units_per_item": 2,
+  "params": 317375670,
+  "gflops_per_unit": 298.31939808,
+  "ms_per_unit": 45.621619747180375,
+  "ms_per_item": 91.24323949436075,
+  "load_ms_per_item": 7.114539501344552,
+  "peak_memory_gb": 1.3333797454833984
+}

@@ -1,0 +1,19 @@
+{
+  "model": "antideepfake_w2v_small",
+  "checked_utc": "2026-10-05T14:48:17+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "urdu_csalt",
+  "items": 4,
+  "repeats": 3,
+  "unit": "4 s audio window",
+  "units_per_item": 2,
+  "params": 94373250,
+  "gflops_per_unit": 57.507329024,
+  "ms_per_unit": 5.5462310010625515,
+  "ms_per_item": 11.092462002125103,
+  "load_ms_per_item": 4.23960349871777,
+  "peak_memory_gb": 0.4506702423095703
+}

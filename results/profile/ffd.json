@@ -1,0 +1,19 @@
+{
+  "model": "ffd",
+  "checked_utc": "2026-10-05T14:49:16+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 32,
+  "params": 21868442,
+  "gflops_per_unit": 11.905207104,
+  "ms_per_unit": 2.2504337968030086,
+  "ms_per_item": 72.01388149769627,
+  "load_ms_per_item": 17.334881998976925,
+  "peak_memory_gb": 0.9411392211914062
+}

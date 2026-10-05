@@ -1,0 +1,19 @@
+{
+  "model": "havic",
+  "checked_utc": "2026-10-05T14:50:05+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "unidatapro_av",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 15.5,
+  "params": 214663189,
+  "gflops_per_unit": 536.393276416,
+  "ms_per_unit": 46.41689964684326,
+  "ms_per_item": 705.4761654981121,
+  "load_ms_per_item": 66.46790600279928,
+  "peak_memory_gb": 1.9081230163574219
+}

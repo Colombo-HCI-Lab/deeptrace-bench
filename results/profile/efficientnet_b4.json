@@ -1,0 +1,19 @@
+{
+  "model": "efficientnet_b4",
+  "checked_utc": "2026-10-05T14:49:02+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "face frame",
+  "units_per_item": 32,
+  "params": 17552202,
+  "gflops_per_unit": 3.904101648,
+  "ms_per_unit": 2.3898297343976083,
+  "ms_per_item": 76.47455150072346,
+  "load_ms_per_item": 19.639869497041218,
+  "peak_memory_gb": 0.968353271484375
+}

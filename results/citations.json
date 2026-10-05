@@ -1,0 +1,231 @@
+{
+ "checked": "2026-10-05",
+ "papers": {
+  "1537faa9593d0d20e62055e4e6af6d382a26d313": {
+   "citations": 446,
+   "title": "End-to-End Reconstruction-Classification Learning for Face Forgery Detection",
+   "year": 2022
+  },
+  "ARXIV:1901.08971": {
+   "citations": 3394,
+   "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
+   "year": 2019
+  },
+  "ARXIV:1909.12962": {
+   "citations": 1861,
+   "title": "Celeb-DF: A Large-Scale Challenging Dataset for DeepFake Forensics",
+   "year": 2019
+  },
+  "ARXIV:1910.01717": {
+   "citations": 784,
+   "title": "On the Detection of Digital Face Manipulation",
+   "year": 2019
+  },
+  "ARXIV:2004.07676": {
+   "citations": 278,
+   "title": "Video Face Manipulation Detection Through Ensemble of CNNs",
+   "year": 2020
+  },
+  "ARXIV:2007.09355": {
+   "citations": 1265,
+   "title": "Thinking in Frequency: Face Forgery Detection by Mining Frequency-aware Clues",
+   "year": 2020
+  },
+  "ARXIV:2012.07657": {
+   "citations": 663,
+   "title": "Lips Don't Lie: A Generalisable and Robust Approach to Face Forgery Detection",
+   "year": 2020
+  },
+  "ARXIV:2103.01856": {
+   "citations": 628,
+   "title": "Spatial-Phase Shallow Learning: Rethinking Face Forgery Detection in Frequency Domain",
+   "year": 2021
+  },
+  "ARXIV:2103.12376": {
+   "citations": 632,
+   "title": "Generalizing Face Forgery Detection with High-frequency Features",
+   "year": 2021
+  },
+  "ARXIV:2108.05080": {
+   "citations": 413,
+   "title": "FakeAVCeleb: A Novel Audio-Video Multimodal Deepfake Dataset",
+   "year": 2021
+  },
+  "ARXIV:2110.01200": {
+   "citations": 652,
+   "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
+   "year": 2021
+  },
+  "ARXIV:2202.12233": {
+   "citations": 358,
+   "title": "Automatic speaker verification spoofing and deepfake detection using wav2vec 2.0 and data augmentation",
+   "year": 2022
+  },
+  "ARXIV:2203.16263": {
+   "citations": 381,
+   "title": "Does Audio Deepfake Detection Generalize?",
+   "year": 2022
+  },
+  "ARXIV:2204.08376": {
+   "citations": 656,
+   "title": "Detecting Deepfakes with Self-Blended Images",
+   "year": 2022
+  },
+  "ARXIV:2206.02749": {
+   "citations": 160,
+   "title": "CORE: Consistent Representation Learning for Face Forgery Detection",
+   "year": 2022
+  },
+  "ARXIV:2208.11761": {
+   "citations": 74,
+   "title": "IndicSUPERB: A Speech Processing Universal Performance Benchmark for Indian languages",
+   "year": 2022
+  },
+  "ARXIV:2209.09111": {
+   "citations": 23,
+   "title": "DeePhy: On Deepfake Phylogeny",
+   "year": 2022
+  },
+  "ARXIV:2303.04838": {
+   "citations": 4,
+   "title": "The Casual Conversations v2 Dataset : A diverse, large benchmark for measuring fairness and robustness in audio/vision/speech models",
+   "year": 2023
+  },
+  "ARXIV:2304.13949": {
+   "citations": 338,
+   "title": "UCF: Uncovering Common Features for Generalizable Deepfake Detection",
+   "year": 2023
+  },
+  "ARXIV:2305.15760": {
+   "citations": 29,
+   "title": "Svarah: Evaluating English ASR Systems on Indian Accents",
+   "year": 2023
+  },
+  "ARXIV:2307.08317": {
+   "citations": 148,
+   "title": "AltFreezing for More General Video Face Forgery Detection",
+   "year": 2023
+  },
+  "ARXIV:2401.09512": {
+   "citations": 182,
+   "title": "MLAAD: The Multi-Language Audio Anti-Spoofing Dataset",
+   "year": 2024
+  },
+  "ARXIV:2408.17352": {
+   "citations": 44,
+   "title": "AASIST3: KAN-Enhanced AASIST Speech Deepfake Detection using SSL Features and Additional Regularization for the ASVspoof 2024 Challenge",
+   "year": 2024
+  },
+  "ARXIV:2411.10027": {
+   "citations": 77,
+   "title": "XLSR-Mamba: A Dual-Column Bidirectional State Space Model for Spoofing Attack Detection",
+   "year": 2024
+  },
+  "ARXIV:2411.15633": {
+   "citations": 128,
+   "title": "Orthogonal Subspace Decomposition for Generalizable AI-Generated Image Detection",
+   "year": 2024
+  },
+  "ARXIV:2503.02857": {
+   "citations": 89,
+   "title": "Deepfake-Eval-2024: A Multi-Modal In-the-Wild Benchmark of Deepfakes Circulated in 2024",
+   "year": 2025
+  },
+  "ARXIV:2505.10885": {
+   "citations": 2,
+   "title": "BanglaFake: Constructing and Evaluating a Specialized Bengali Deepfake Audio Dataset",
+   "year": 2025
+  },
+  "ARXIV:2505.11109": {
+   "citations": 11,
+   "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
+   "year": 2025
+  },
+  "ARXIV:2506.19014": {
+   "citations": 3,
+   "title": "IndieFake Dataset: A Benchmark Dataset for Audio Deepfake Detection",
+   "year": 2025
+  },
+  "ARXIV:2506.21090": {
+   "citations": 31,
+   "title": "Post-training for Deepfake Speech Detection",
+   "year": 2025
+  },
+  "ARXIV:2507.21463": {
+   "citations": 28,
+   "title": "SpeechFake: A Large-Scale Multilingual Speech Deepfake Dataset Incorporating Cutting-Edge Generation Methods",
+   "year": 2025
+  },
+  "ARXIV:2508.06248": {
+   "citations": 35,
+   "title": "Deepfake Detection that Generalizes Across Benchmarks",
+   "year": 2025
+  },
+  "ARXIV:2509.02859": {
+   "citations": 36,
+   "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
+   "year": 2025
+  },
+  "ARXIV:2509.19865": {
+   "citations": 4,
+   "title": "SEA-Spoof: Bridging The Gap in Multilingual Audio Deepfake Detection for South-East Asian",
+   "year": 2025
+  },
+  "ARXIV:2603.02364": {
+   "citations": 3,
+   "title": "When Spoof Detectors Travel: Evaluation Across 66 Languages in the Low-Resource Language Spoofing Corpus",
+   "year": 2026
+  },
+  "ARXIV:2603.23960": {
+   "citations": 1,
+   "title": "Leave No Stone Unturned: Uncovering Holistic Audio-Visual Intrinsic Coherence for Deepfake Detection",
+   "year": 2026
+  },
+  "ARXIV:2604.19949": {
+   "citations": 1,
+   "title": "Indic-CodecFake meets SATYAM: Towards Detecting Neural Audio Codec Synthesized Speech Deepfakes in Indic Languages",
+   "year": 2026
+  },
+  "DOI:10.1016/j.csl.2020.101114": {
+   "citations": 700,
+   "title": "ASVspoof 2019: A large-scale public database of synthesized, converted and replayed speech",
+   "year": 2019
+  },
+  "DOI:10.1016/j.patrec.2025.07.002": {
+   "citations": 6,
+   "title": "InDeepFake: A novel multimodal multilingual indian deepfake video dataset",
+   "year": 2025
+  },
+  "DOI:10.1145/3664647.3681345": {
+   "citations": 136,
+   "title": "Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier",
+   "year": 2024
+  },
+  "DOI:10.1145/3711896.3737399": {
+   "citations": 13,
+   "title": "HiDF: A Human-Indistinguishable Deepfake Dataset",
+   "year": 2025
+  },
+  "DOI:10.18653/v1/2024.findings-acl.861": {
+   "citations": 7,
+   "title": "Deepfake Defense: Constructing and Evaluating a Specialized Urdu Deepfake Audio Dataset",
+   "year": 2024
+  },
+  "DOI:10.18653/v1/2025.acl-long.1070": {
+   "citations": 11,
+   "title": "IndicSynth: A Large-Scale Multilingual Synthetic Speech Dataset for Low-Resource Indian Languages",
+   "year": 2025
+  },
+  "DOI:10.21437/SLTU.2018-11": {
+   "citations": 102,
+   "title": "Crowd-Sourced Speech Corpora for Javanese, Sundanese, Sinhala, Nepali, and Bangladeshi Bengali",
+   "year": 2018
+  },
+  "f1a9f5f42a68a8b5ee07e06dee800629fccc533f": {
+   "citations": 78,
+   "title": "DF-Platter: Multi-Face Heterogeneous Deepfake Dataset",
+   "year": 2023
+  }
+ },
+ "source": "Semantic Scholar"
+}

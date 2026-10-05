@@ -1,0 +1,19 @@
+{
+  "model": "lipforensics",
+  "checked_utc": "2026-10-05T14:50:14+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "hidf_video",
+  "items": 4,
+  "repeats": 3,
+  "unit": "mouth clip",
+  "units_per_item": 2,
+  "params": 35990785,
+  "gflops_per_unit": 17.83982848,
+  "ms_per_unit": 5.730836997827282,
+  "ms_per_item": 11.461673995654564,
+  "load_ms_per_item": 686.8741665020934,
+  "peak_memory_gb": 4.336434364318848
+}

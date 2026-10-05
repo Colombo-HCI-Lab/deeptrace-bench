@@ -1,0 +1,19 @@
+{
+  "model": "aasist_l",
+  "checked_utc": "2026-10-05T14:48:07+00:00",
+  "device": "cuda",
+  "gpu": "24 GB GPU",
+  "precision": "fp32",
+  "torch": "2.8.0+cu128",
+  "evalset": "urdu_csalt",
+  "items": 4,
+  "repeats": 3,
+  "unit": "4 s audio window",
+  "units_per_item": 2,
+  "params": 85306,
+  "gflops_per_unit": 13.206256672,
+  "ms_per_unit": 3.7992087491147686,
+  "ms_per_item": 7.598417498229537,
+  "load_ms_per_item": 6.843197999842232,
+  "peak_memory_gb": 0.35856199264526367
+}
