@@ -100,3 +100,21 @@ def test_track_labels_need_an_audio_video_dataset(registry):
         assert any("from_audio" in p for p in registry.problems())
     finally:
         del registry.evalsets["wrong_track"]
+
+
+@pytest.mark.parametrize(("modality", "label"), [("audio", "from_video"), ("video", "from_audio")])
+def test_a_track_label_must_match_the_evalset_modality(registry, modality, label):
+    # An audio evalset taking video labels would call voice-converted clips real.
+    wrong = EvalsetConfig(
+        id="wrong_modality",
+        modality=modality,
+        role="south_asian",
+        pairing="same_corpus",
+        components=[Component(dataset="mavos_dd_hi", label=label)],
+        status="ready",
+    )
+    registry.evalsets["wrong_modality"] = wrong
+    try:
+        assert any(label in p and "modality" in p for p in registry.problems())
+    finally:
+        del registry.evalsets["wrong_modality"]

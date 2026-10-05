@@ -465,6 +465,12 @@ class Registry:
                         f"evalset {e.id}: {comp.label} needs an audio_video dataset, not "
                         f"{ds.modality} {ds.id}"
                     )
+                wanted = _TRACK_FOR.get(e.modality)
+                if comp.label in _TRACK_LABELS and comp.label != wanted:
+                    found.append(
+                        f"evalset {e.id}: a {e.modality} evalset can't take {comp.label} labels "
+                        f"(modality {e.modality} scores {wanted or 'neither track'})"
+                    )
                 if comp.label in ("real", "fake") and comp.label not in ds.contains:
                     found.append(
                         f"evalset {e.id}: {ds.id} has no {comp.label} items ({ds.contains})"
@@ -486,6 +492,12 @@ class Registry:
 
 
 _TRACK_LABELS = ("from_video", "from_audio")
+# The track label an evalset of each modality scores.
+_TRACK_FOR = {
+    Modality.AUDIO: "from_audio",
+    Modality.VIDEO: "from_video",
+    Modality.IMAGE: "from_video",
+}
 
 
 def _modality_fits(evalset: Modality, dataset: Modality) -> bool:

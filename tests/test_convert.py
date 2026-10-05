@@ -14,7 +14,7 @@ from deeptrace_bench.registry import ModelConfig
 class _Tiny(Detector):
     def load(self, device: str) -> None:
         self.model = torch.nn.Linear(3, 2)
-        self.load_converted(self.model)
+        self.load_converted(self.model, source="ckpt.pth")
 
     def score(self, inputs):
         return np.zeros(len(inputs))
@@ -63,3 +63,25 @@ def test_conversion_needs_a_pinned_source(detector):
     detector.weights_dir.mkdir(parents=True)
     with pytest.raises(RuntimeError, match="--record"):
         detector.save_converted({"weight": torch.zeros(2, 3)}, "unpinned.pth")
+
+
+def test_a_conversion_of_another_file_is_refused(detector):
+    # Both downloads are pinned, but the adapter now expects the other one.
+    _download(detector, torch.nn.Linear(3, 2).state_dict())
+    detector.save_converted(
+        torch.load(detector.weights_dir / "ckpt.pth", weights_only=True), "ckpt.pth"
+    )
+    fetch.record_hash("tiny", "other.pth", "0" * 64)
+    with pytest.raises(RuntimeError, match="other.pth"):
+        detector.load_converted(torch.nn.Linear(3, 2), source="other.pth")
+
+
+def test_a_conversion_from_older_conversion_code_is_refused(detector, monkeypatch):
+    _download(detector, torch.nn.Linear(3, 2).state_dict())
+    detector.save_converted(
+        torch.load(detector.weights_dir / "ckpt.pth", weights_only=True), "ckpt.pth"
+    )
+    monkeypatch.setattr(type(detector), "conversion_version", 99)
+    assert not detector.converted_is_current("ckpt.pth")
+    with pytest.raises(RuntimeError, match="setup_models"):
+        detector.load_converted(torch.nn.Linear(3, 2), source="ckpt.pth")

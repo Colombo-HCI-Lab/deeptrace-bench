@@ -14,8 +14,11 @@ so its relative imports work, and two things change without altering the network
 - The pickled ``pytorch_model.bin`` is converted once to safetensors and loaded with every
   key matching.
 
-Input: 16 kHz mono windows of 64,600 samples, exactly what the card's feature extractor cuts
-(``pad`` to 64,600). ``forward`` unsqueezes a 1-D waveform, so windows go through one at a
+Input: 16 kHz mono windows of 64,600 samples. The card's feature extractor scores only a
+clip's first 64,600 samples (tiling a shorter clip up to that length); the harness scores
+every window and averages them (``configs/eval/default.yaml``), so the two agree on clips up
+to about 4 s and differ on longer ones. Parity compares window by window and can't see this;
+reproduced EERs can. ``forward`` unsqueezes a 1-D waveform, so windows go through one at a
 time. Output: two logits with ``id2label {0: spoof, 1: bonafide}``; P(fake) is the softmax at
 ``label2id["spoof"]``. Training data per the card: ASVspoof 2019 and 2024, MLAAD, Codecfake,
 LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb, EnvSDD (see the model configs for the guard).
@@ -115,7 +118,7 @@ class DFArenaDetector(Detector):
 
         self.device = resolve_device(device)
         model, config = self._build()
-        self.load_converted(model)
+        self.load_converted(model, SOURCE)
         self.model = model.eval().to(self.device)
         self.fake_index = int(config.label2id["spoof"])
         self._torch = torch

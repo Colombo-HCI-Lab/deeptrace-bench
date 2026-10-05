@@ -38,7 +38,13 @@ _WRAPPERS = ("state_dict", "model", "model_state_dict", "net")
 
 
 class Detector(ABC):
-    """Base class for detector adapters."""
+    """Base class for detector adapters.
+
+    ``conversion_version`` is recorded in every converted file; an adapter bumps it whenever
+    its ``convert_checkpoint`` changes what it writes, so older conversions are redone.
+    """
+
+    conversion_version = 1
 
     def __init__(self, config: ModelConfig) -> None:
         self.config = config
@@ -72,10 +78,12 @@ class Detector(ABC):
         return None
 
     def converted_is_current(self, source: str) -> bool:
-        """True if the converted file was made from the download now pinned as ``source``."""
+        """True if the converted file was made from the download now pinned as ``source``,
+        by the current conversion code."""
         if not self.converted_path.exists():
             return False
-        return _converted_from(self.converted_path) == (source, self._pinned_hash(source))
+        expected = (source, self._pinned_hash(source), str(self.conversion_version))
+        return _converted_from(self.converted_path) == expected
 
     def save_converted(self, state: Mapping[str, Any], source: str) -> Path:
         """Write ``state`` as the converted weights, recording which download it came from.
@@ -98,27 +106,32 @@ class Detector(ABC):
         state = unwrap_state(state)
         tensors = {k.removeprefix("module."): v.contiguous() for k, v in state.items()}
         part = self.converted_path.with_name(CONVERTED + ".part")
-        save_file(tensors, str(part), metadata={"source": source, "source_sha256": digest})
+        metadata = {
+            "source": source,
+            "source_sha256": digest,
+            "conversion_version": str(self.conversion_version),
+        }
+        save_file(tensors, str(part), metadata=metadata)
         os.replace(part, self.converted_path)
         return self.converted_path
 
-    def load_converted(self, module: Any, strict: bool = True) -> None:
-        """Load the converted weights into ``module``, every key matching when ``strict``.
+    def load_converted(self, module: Any, source: str, strict: bool = True) -> None:
+        """Load the weights converted from ``source`` into ``module``, every key matching.
 
         Raises:
-            RuntimeError: if the file is missing or was converted from a different download
-                than the one pinned now.
+            RuntimeError: if the file is missing, was converted from another file or another
+                download of ``source``, or by older conversion code.
         """
         from safetensors.torch import load_model
 
         path = self.converted_path
         if not path.exists():
             raise RuntimeError(f"{path} is missing; run scripts/setup_models.py {self.config.id}")
-        source, digest = _converted_from(path)
-        if digest is None or digest != self._pinned_hash(source):
+        if not self.converted_is_current(source):
+            found, _, version = _converted_from(path)
             raise RuntimeError(
-                f"{path} was converted from another download of {source}; re-run "
-                f"scripts/setup_models.py {self.config.id}"
+                f"{path} isn't a current conversion of {source} (it came from {found}, "
+                f"conversion version {version}); re-run scripts/setup_models.py {self.config.id}"
             )
         load_model(module, str(path), strict=strict)
 
@@ -143,12 +156,12 @@ def unwrap_state(state: Mapping[str, Any]) -> Mapping[str, Any]:
     return state
 
 
-def _converted_from(path: Path) -> tuple[str | None, str | None]:
+def _converted_from(path: Path) -> tuple[str | None, str | None, str | None]:
     from safetensors import safe_open
 
     with safe_open(str(path), framework="pt") as fh:
         meta = fh.metadata() or {}
-    return meta.get("source"), meta.get("source_sha256")
+    return meta.get("source"), meta.get("source_sha256"), meta.get("conversion_version")
 
 
 def resolve_device(device: str) -> str:

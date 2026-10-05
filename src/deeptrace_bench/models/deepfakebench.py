@@ -125,7 +125,7 @@ class DeepfakeBenchDetector(Detector):
 
         self.device = resolve_device(device)
         model = self._build()
-        self.load_converted(model)
+        self.load_converted(model, self.source)
         config = self.detector_config()
         self.resolution = int(config["resolution"])
         self.mean = np.asarray(config["mean"], dtype=np.float32)

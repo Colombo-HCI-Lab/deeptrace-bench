@@ -74,7 +74,7 @@ class AASISTDetector(Detector):
 
         self.device = resolve_device(device)
         model = self._module().Model(self._model_config())
-        self.load_converted(model)
+        self.load_converted(model, self.source)
         self.model = model.eval().to(self.device)
         self.fake_index = int(self.config.input.get("fake_index", 0))
         self._torch = torch
