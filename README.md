@@ -101,4 +101,4 @@ Datasets, weights, manifests and per-item scores live under `DTB_ROOT`, never in
 
 ## Licence
 
-Not yet chosen; this repo is private. Upstream detector code keeps its own licence and is never copied in unless it is MIT.
+Not yet chosen. The repo has been public since 2026-10-05, so GitHub Pages can serve the status page at <https://colombo-hci-lab.github.io/deeptrace-bench/>. Upstream detector code keeps its own licence and is never copied in unless it is MIT.
