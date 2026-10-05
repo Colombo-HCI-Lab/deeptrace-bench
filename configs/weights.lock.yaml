@@ -11,6 +11,8 @@ antideepfake_mms_300m:
   mms-300m-anti-deepfake.safetensors: 9bd5d9785bf72f91dfca8508651354946c4b307921cb358505e1b94035102224
 antideepfake_w2v_small:
   wav2vec-small-anti-deepfake.safetensors: 828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0
+core:
+  core_best.pth: 3d34dca33ab66ee027425e0bc48fb889811ecd4ea53f72f958d83124144d1af7
 df_arena_1b:
   pytorch_model.bin: 780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988
   xls-r-1b-config/config.json: 36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997
@@ -21,6 +23,8 @@ efficientnet_b4:
   effnb4_best.pth: 74cbd82d7be1bf5e6adec717824274a95b4509b02e1e78401608d32b3cbeaf0f
 f3net:
   f3net_best.pth: deee7d25bfc1b8b5ba83054a664880078de51213b1067f1e472c2bed7cc667f9
+ffd:
+  ffd_best.pth: 445f5b70f115bf777067a4bc498dd73847964dc23f90e5d516b71d0ebb4f65a7
 gend:
   clip-vit-large-patch14/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
   clip-vit-large-patch14/merges.txt: 9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a
@@ -35,6 +39,8 @@ gend:
 gend_pe_l:
   config.json: c04ccdd62714a25884a65dde2086fd740006159455be4afb200c78808bc8ea67
   model.safetensors: e2367f8db3a6b76f8d5cc5857f1ed0ea0993b33c9e1f428d3b06e5ca95de2213
+recce:
+  recce_best.pth: 1349fd80d75cdb2d212f2dc4035529140b147b80ae87ad227242fa0451586ceb
 sbi:
   FFc23.tar: 2b05c2ba36ccb9e9f4f9e1aae9acd443ae2e6400ce725f56104fdb175d3c3267
   FFraw.tar: e477fc1789f8c1d2147cffe86a47eb37a24adedae10b106b7d47c1eeb73777e2
@@ -42,6 +48,8 @@ scrfd_10g:
   det_10g.onnx: 5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91
 spsl:
   spsl_best.pth: 7305d660c68aa6ac138f8d59c068832a43244f390fa6e54355f211d81bc246bd
+srm:
+  srm_best.pth: 666e8fc7f9938f541a7f5cea7b11d975cc749ec1c8ba6b350ae3eb3d2d34a1e8
 ucf:
   ucf_best.pth: 4afa2517feeb473024e1b73049bfa61ce446eb4da14d17c864f2e2a76b3223e5
 xception:

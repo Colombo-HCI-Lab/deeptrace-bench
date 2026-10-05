@@ -2,7 +2,8 @@
 
 One adapter serves every frame-level DeepfakeBench detector whose checkpoint the release
 ships; ``input.detector`` names it (``xception``, ``efficientnetb4``, ``ucf``, ``f3net``,
-``spsl``), which is also the name of its ``training/config/detector/<name>.yaml``.
+``spsl``, ``recce``, ``srm``, ``core``, ``ffd``), which is also the name of its
+``training/config/detector/<name>.yaml``.
 
 Upstream code is never copied (the licence is non-commercial). The adapter imports the one
 detector file it needs from the pinned checkout. DeepfakeBench's packages import every
@@ -12,8 +13,10 @@ detector, the training losses and tensorboard on the way in, so while the detect
 - ``metrics``, ``networks`` and ``detectors`` become empty packages over the checkout's
   folders, carrying the real ``metrics.registry`` registries, so only the files actually
   needed are imported.
-- ``loss`` (training losses), ``metrics.base_metrics_class`` (training metrics) and
-  ``torch.utils.tensorboard`` (not installed) become stubs; inference never calls them.
+- ``loss`` (training losses), ``metrics.base_metrics_class`` (training metrics),
+  ``torch.utils.tensorboard`` and ``imageio`` (not installed) become stubs. Inference never
+  calls the first three; FFD reads templates with ``imageio`` that its released map type
+  doesn't use.
 
 All of these names are removed again afterwards. The detector is built by upstream's own
 class from upstream's own yaml. Its constructor loads ImageNet weights from a local path
@@ -53,6 +56,10 @@ _BACKBONES = {
     "ucf": "xception",
     "f3net": "xception",
     "spsl": "xception",
+    "recce": "xception",
+    "srm": "xception",
+    "core": "xception",
+    "ffd": "xception",
 }
 _GENERIC = ["metrics", "networks", "detectors", "loss"]
 _BATCH = 32
@@ -96,6 +103,10 @@ class DeepfakeBenchDetector(Detector):
         stubs = {
             "loss": _module("loss", LOSSFUNC=_AnyLoss()),
             "torch.utils.tensorboard": _module("torch.utils.tensorboard", SummaryWriter=object),
+            # FFD's constructor reads ten template images with imageio (a relative path, and
+            # imageio isn't installed); only its "tmp" and "pca" map types use them, and the
+            # released FFD is "reg", so blank templates of the right shape build it unchanged
+            "imageio": _module("imageio", imread=_blank_template),
         }
         with scoped_modules(stubs, purge=_GENERIC):
             load_package(training / "metrics", "metrics")
@@ -106,7 +117,14 @@ class DeepfakeBenchDetector(Detector):
             load_package(training / "networks", "networks").BACKBONE = registry.BACKBONE
             load_package(training / "detectors", "detectors").DETECTOR = registry.DETECTOR
             importlib.import_module(f"networks.{_BACKBONES[self.name]}")
-            importlib.import_module(f"detectors.{self.name}_detector")
+            detector = importlib.import_module(f"detectors.{self.name}_detector")
+            if self.name == "recce":
+                # RECCE builds its encoder with timm's xception(pretrained=True), a download
+                # the checkpoint then replaces; build the same network without it
+                import functools
+
+                params = detector.encoder_params["xception"]
+                params["init_op"] = functools.partial(detector.xception, pretrained=False)
             with _imagenet_stand_in(torch):
                 return registry.DETECTOR[self.name](config)
 
@@ -160,6 +178,11 @@ class DeepfakeBenchDetector(Detector):
                     getattr(self.model, attr).clear()
             scores.append(logits.softmax(dim=-1)[:, 1].float().cpu().numpy())
         return np.concatenate(scores) if scores else np.zeros(0)
+
+
+def _blank_template(path: str) -> np.ndarray:
+    """A stand-in for one of FFD's 19 x 19 template images."""
+    return np.zeros((19, 19, 3), dtype=np.uint8)
 
 
 def _module(name: str, **attrs: Any) -> types.ModuleType:

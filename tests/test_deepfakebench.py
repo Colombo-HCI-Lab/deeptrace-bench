@@ -11,7 +11,7 @@ from deeptrace_bench.models.base import load_detector
 from deeptrace_bench.paths import RootNotConfiguredError, weights_dir
 from deeptrace_bench.upstream import checkout_dir
 
-DETECTORS = ["xception", "efficientnet_b4", "ucf", "f3net", "spsl"]
+DETECTORS = ["xception", "efficientnet_b4", "ucf", "f3net", "spsl", "recce", "srm", "core", "ffd"]
 GENERIC_NAMES = ["metrics", "networks", "detectors", "loss", "torch.utils.tensorboard"]
 
 
