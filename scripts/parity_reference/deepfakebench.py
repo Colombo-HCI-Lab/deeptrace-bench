@@ -53,6 +53,9 @@ class AnyLoss:
 stubs = {
     "loss": stub("loss", LOSSFUNC=AnyLoss()),
     "torch.utils.tensorboard": stub("torch.utils.tensorboard", SummaryWriter=object),
+    # FFD reads templates its released map type never uses (as the adapter does)
+    "imageio": stub("imageio", imread=lambda path: np.zeros((19, 19, 3), dtype=np.uint8)),
+    "loralib": stub("loralib"),
 }
 with helper.scoped_modules(stubs, purge=["metrics", "networks", "detectors", "loss"]):
     helper.load_package(training / "metrics", "metrics")
@@ -65,7 +68,13 @@ with helper.scoped_modules(stubs, purge=["metrics", "networks", "detectors", "lo
     importlib.import_module(
         "networks." + ("efficientnetb4" if name == "efficientnetb4" else "xception")
     )
-    importlib.import_module(f"detectors.{name}_detector")
+    detector = importlib.import_module(f"detectors.{name}_detector")
+    if name == "recce":  # timm's xception(pretrained=True) would download what the .pth replaces
+        import functools
+
+        detector.encoder_params["xception"]["init_op"] = functools.partial(
+            detector.xception, pretrained=False
+        )
     original_load = torch.load
     torch.load = lambda *args, **kwargs: {"conv1.weight": torch.zeros(32, 3, 3, 3)}
     try:
