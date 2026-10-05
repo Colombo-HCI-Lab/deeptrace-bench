@@ -29,13 +29,21 @@ from deeptrace_bench import evalset as evalsets
 from deeptrace_bench.eval.contamination import Verdict, check
 from deeptrace_bench.fetch import locked_hashes
 from deeptrace_bench.models.base import load_detector, resolve_device, set_tf32
-from deeptrace_bench.paths import dataset_dir, namespace, prepare_store, use_namespace
+from deeptrace_bench.paths import (
+    dataset_dir,
+    namespace,
+    prepare_store,
+    use_namespace,
+    weights_dir,
+)
 from deeptrace_bench.preprocess.audio import load_audio, segment
 from deeptrace_bench.preprocess.av import AudioVideoLoader
 from deeptrace_bench.preprocess.faces import FaceLoader
+from deeptrace_bench.preprocess.mouths import MouthLoader
 from deeptrace_bench.registry import Modality, Registry, accepts
 from deeptrace_bench.runs import config_hash, start_run
 from deeptrace_bench.score import part_prefix, score_items, shard_items
+from deeptrace_bench.upstream import checkout_dir
 
 log = logging.getLogger("score")
 
@@ -138,6 +146,15 @@ def main() -> int:
         if model.modality == Modality.AUDIO_VIDEO:
             # an audio-visual model gets its faces and the audio track together
             loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
+        elif model.input.get("inputs") == "mouths":
+            # a lip-based model gets mouth crops cut from landmarks, not face crops
+            loader = MouthLoader(
+                loader,
+                fan_path=weights_dir(model.id) / model.input["landmarks"],
+                upstream_dir=checkout_dir(model.upstream),
+                device=device,
+                min_frames=int(model.input["clip_frames"]),
+            )
         aggregate = registry.eval.video["aggregation"]
 
     detector = load_detector(model)

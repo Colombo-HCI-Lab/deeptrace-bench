@@ -8,6 +8,7 @@ dependencies = [
     "av>=19.0.1",
     "efficientnet-pytorch==0.7.1",
     "einops>=0.8.2",
+    "face-alignment>=1.4,<1.5",
     "gdown>=5.2",
     "huggingface-hub>=0.34,<1.0",
     "numpy>=2.0",
@@ -21,6 +22,7 @@ dependencies = [
     "pyyaml>=6.0",
     "requests>=2.32",
     "safetensors>=0.4",
+    "scikit-image>=0.24",
     "scikit-learn>=1.5",
     "soundfile>=0.12",
     "soxr>=0.5",
@@ -39,6 +41,9 @@ requires = ["uv_build>=0.12,<0.13"]
 build-backend = "uv_build"
 
 [tool.uv]
+# face-alignment asks for opencv-python, which would shadow the headless 4.x build above (both
+# install cv2); it runs on the headless one.
+override-dependencies = ["opencv-python; sys_platform == 'never'"]
 # Only the platforms we run on: Curnagl's x86 GPU partitions and Apple Silicon laptops.
 # Leaving out aarch64 Linux keeps the GH200 nodes (and their wheel gaps) out of the lock.
 environments = [

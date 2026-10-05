@@ -41,6 +41,11 @@ gend:
 gend_pe_l:
   config.json: c04ccdd62714a25884a65dde2086fd740006159455be4afb200c78808bc8ea67
   model.safetensors: e2367f8db3a6b76f8d5cc5857f1ed0ea0993b33c9e1f428d3b06e5ca95de2213
+havic:
+  best_ft_model.pth: 7a0e3ddc6effd6813c81d915eb2ea57e7dc7d4711cb39798680ff477de2ca19d
+lipforensics:
+  2DFAN4-cd938726ad.zip: cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46
+  lipforensics_ff.pth: 4b7790bc8e02d0c25ecfa0d8d6a2907123c2206cc32e2bad6044e50f013c253d
 recce:
   recce_best.pth: 1349fd80d75cdb2d212f2dc4035529140b147b80ae87ad227242fa0451586ceb
 sbi:

@@ -122,10 +122,11 @@ def read_image(path: Path) -> np.ndarray:
 
 
 def read_video_frames(
-    path: Path, k: int, rate: float | None = None
+    path: Path, k: int, rate: float | None = None, consecutive: bool = False
 ) -> tuple[list[tuple[int, np.ndarray]], int]:
-    """Read ``k`` evenly spread frames of a video as RGB uint8, or with ``rate`` set, the
-    first ``k`` frames at ``rate`` per second (``rate_frame_indices``).
+    """Read ``k`` evenly spread frames of a video as RGB uint8; with ``rate`` set, the first
+    ``k`` frames at ``rate`` per second (``rate_frame_indices``); with ``consecutive``, the
+    first ``k`` frames.
 
     Frames are decoded in order with ``grab`` and only the wanted ones converted, which is
     robust to formats that seek badly. OpenCV applies the rotation stored in phone videos.
@@ -146,7 +147,9 @@ def read_video_frames(
             n_frames = _count_frames(cap)
             cap.release()
             cap = cv2.VideoCapture(str(path))
-        if rate is None:
+        if consecutive:
+            wanted = list(range(min(k, n_frames)))
+        elif rate is None:
             wanted = sample_frame_indices(n_frames, k)
         else:
             wanted = rate_frame_indices(n_frames, cap.get(cv2.CAP_PROP_FPS), rate, k)
@@ -326,7 +329,9 @@ class FaceLoader:
         settings: everything that changes detections (weights hash, thresholds, sampling).
         frames_per_clip: frames sampled per video (with ``frame_rate``, the most taken).
         frame_rate: if set, frames at this many per second from the start instead of spread
-            evenly; for models whose network takes consecutive frames (HAVIC).
+            evenly; for models whose network takes frames at a fixed rate (HAVIC).
+        consecutive: if set, the first ``frames_per_clip`` frames, every one of them; for
+            models whose network takes runs of consecutive frames (LipForensics).
         min_face_frames: a video needs at least this many frames with a face.
         image_min_face_frames: the same for an image (a one-frame clip).
         image_pad_retry: border to add when an image shows no face, as a fraction of each
@@ -344,6 +349,7 @@ class FaceLoader:
         settings: dict[str, Any],
         frames_per_clip: int = 32,
         frame_rate: float | None = None,
+        consecutive: bool = False,
         min_face_frames: int = 8,
         image_min_face_frames: int = 1,
         image_pad_retry: float = 0.0,
@@ -358,6 +364,7 @@ class FaceLoader:
         self.key = cache_key(detector_id, settings)
         self.frames_per_clip = frames_per_clip
         self.frame_rate = frame_rate
+        self.consecutive = consecutive
         self.min_face_frames = min_face_frames
         self.image_min_face_frames = image_min_face_frames
         self.image_pad_retry = image_pad_retry
@@ -393,8 +400,13 @@ class FaceLoader:
         # sampling with its own (input.frame_rate, input.max_frames, input.min_face_frames);
         # the cache key changes with it, so its detections are kept apart.
         rate = model.input.get("frame_rate")
+        consecutive = model.input.get("frame_sampling") == "consecutive"
         frames_per_clip, min_faces = video["frames_per_clip"], video["min_face_frames"]
-        if rate is not None:
+        if consecutive:
+            frames_per_clip = int(model.input["max_frames"])
+            min_faces = int(model.input.get("min_face_frames", min_faces))
+            settings.update(frame_sampling="consecutive", frames_per_clip=frames_per_clip)
+        elif rate is not None:
             frames_per_clip = int(model.input["max_frames"])
             min_faces = int(model.input.get("min_face_frames", min_faces))
             settings.update(
@@ -419,7 +431,8 @@ class FaceLoader:
             detector_id=tool.id,
             settings=settings,
             frames_per_clip=frames_per_clip,
-            frame_rate=float(rate) if rate is not None else None,
+            frame_rate=float(rate) if rate is not None and not consecutive else None,
+            consecutive=consecutive,
             min_face_frames=min_faces,
             image_min_face_frames=video["image_min_face_frames"],
             image_pad_retry=video["image_pad_retry"],
@@ -470,26 +483,40 @@ class FaceLoader:
             records.append(record)
         return records
 
-    def __call__(self, row: pd.Series) -> list[np.ndarray]:
-        """The crops for one item, in frame order.
+    def detections(self, row: pd.Series) -> tuple[dict[int, np.ndarray], list[dict]]:
+        """The sampled frames of one item (``{frame index: RGB}``) and their detections.
+
+        Detections come from the cache when the item has been seen with these settings; each
+        record has ``frame_index`` and ``box`` / ``kps`` (null without a face). Loaders that
+        need more than a crop (mouth crops) start from here.
 
         Raises:
-            PreprocessError: ``unreadable`` or ``no_face``.
+            PreprocessError: ``unreadable``.
         """
         path = dataset_dir(row["dataset"]) / row["rel_path"]
         is_image = row["modality"] == "image"
         if is_image:
             frames, n_frames = [(0, read_image(path))], 1
         else:
-            frames, n_frames = read_video_frames(path, self.frames_per_clip, self.frame_rate)
+            frames, n_frames = read_video_frames(
+                path, self.frames_per_clip, self.frame_rate, self.consecutive
+            )
 
         cache = self._cache(row["dataset"])
         records = cache.get(row["item_id"])
         if records is None:
             records = self._detect(frames, n_frames, is_image)
             cache.put(row["item_id"], records)
+        return dict(frames), records
 
-        images = dict(frames)
+    def __call__(self, row: pd.Series) -> list[np.ndarray]:
+        """The crops for one item, in frame order.
+
+        Raises:
+            PreprocessError: ``unreadable`` or ``no_face``.
+        """
+        is_image = row["modality"] == "image"
+        images, records = self.detections(row)
         crops: list[tuple[int, np.ndarray]] = []
         for record in records:
             image = images.get(record["frame_index"])

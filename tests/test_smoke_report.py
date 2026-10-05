@@ -59,3 +59,8 @@ def test_a_video_model_is_smoked_once_per_sample(registry):
     assert {e.id for e in smoke.default_evalsets(registry, registry.model("havic"))} == {
         "unidatapro_av"
     }
+
+
+def test_a_lip_model_skips_still_images(registry):
+    chosen = {e.id for e in _smoke().default_evalsets(registry, registry.model("lipforensics"))}
+    assert chosen == {"unidatapro_videos"}

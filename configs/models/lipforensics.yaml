@@ -1,9 +1,9 @@
 id: lipforensics
 name: LipForensics
 modality: video
-status: later
-licence: MIT
-paper: Haliassos et al., CVPR 2021
+status: workable
+licence: MIT (FAN landmarks from face-alignment, BSD-3)
+paper: Haliassos et al., Lips Don't Lie, CVPR 2021
 upstream:
   repo: ahaliassos/LipForensics
   commit: d0bf5553bfb9676f1771d590472b26a3a76de894
@@ -11,10 +11,21 @@ weights:
   - name: lipforensics_ff.pth
     kind: gdrive
     drive_id: 1wfZnxZpyNd5ouJs0LjVls7zU0N_W73L7
+    size_bytes: 144124225
+  # FAN (2DFAN4) for the 68 landmarks, the TorchScript archive face-alignment 1.4 downloads
+  - name: 2DFAN4-cd938726ad.zip
+    kind: url
+    url: https://www.adrianbulat.com/downloads/python-fan/2DFAN4-cd938726ad.zip
+    size_bytes: 96316515
 training_data:
   - {dataset: lrw, level: pretrain}
   - {dataset: ffpp, level: train, split: train, note: "c23, all four manipulations"}
+adapter: deeptrace_bench.models.lipforensics:LipForensicsDetector
 input:
-  crop: mouth
-  frames_per_clip: 25
-notes: Needs a RetinaFace plus FAN landmark pipeline to cut mouth crops, and users report its numbers don't reproduce (issue 9). Relevant for lip-sync fakes.
+  inputs: mouths                  # preprocess.mouths.MouthLoader, not face crops
+  frame_sampling: consecutive
+  max_frames: 100                 # the first four clips of a video
+  min_face_frames: 25
+  clip_frames: 25
+  landmarks: 2DFAN4-cd938726ad.zip
+notes: Adapter written 2026-10-05. Mouth crops follow upstream's own preprocessing (its warp and crop functions imported from the checkout) on FAN landmarks over the shared detector's boxes, where upstream suggests RetinaFace boxes. Users report its FF++ numbers don't reproduce (issue 9); parity not run yet. Relevant for lip-sync fakes, v1's focus.

@@ -73,11 +73,17 @@ def default_evalsets(registry: Registry, model: ModelConfig) -> list[EvalsetConf
 
     Where two evalsets cover the same data (``unidatapro_videos`` and ``unidatapro_av``), the
     one of the model's own modality is kept, so a video model isn't run twice on one sample.
+    A model that reads runs of frames (``input.frame_sampling: consecutive``) skips image
+    evalsets, where every item would fail as too short.
     """
+    runs = model.input.get("frame_sampling") == "consecutive"
     accepted = [
         e
         for e in registry.evalsets.values()
-        if e.role == "pipeline_test" and e.status == "ready" and accepts(model, e)
+        if e.role == "pipeline_test"
+        and e.status == "ready"
+        and accepts(model, e)
+        and not (runs and e.modality == Modality.IMAGE)
     ]
     by_data: dict[frozenset[str], list[EvalsetConfig]] = {}
     for e in accepted:
