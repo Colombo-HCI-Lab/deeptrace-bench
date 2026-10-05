@@ -497,3 +497,34 @@ def test_bangla_voices_manifest(tmp_path):
         ("S1F02", "female"),
         ("S2M01", "male"),
     }
+
+
+@pytest.mark.parametrize(
+    ("path", "label"),
+    [
+        ("kb_data_clean_m4a/hindi/test_known/audio/111-22-f.m4a", "real"),
+        ("kb_data_clean_m4a/urdu/test_unknown/audio/333-4-m.m4a", "real"),
+        ("kb_data_clean_m4a/hindi/test_known/audio/notes.txt", None),
+        ("kb_data_clean_m4a/klingon/test_known/audio/1-2-f.m4a", None),
+        ("testkn_audio.tar", None),
+    ],
+)
+def test_indicsuperb_labels(path, label):
+    from deeptrace_bench.datasets import indicsuperb
+
+    assert indicsuperb.label_from_path(path) == label
+
+
+def test_indicsuperb_manifest_reads_speaker_and_gender(tmp_path):
+    from deeptrace_bench.datasets import indicsuperb
+
+    _tree(tmp_path, ["kb_data_clean_m4a/hindi/test_known/audio/111-22-f.m4a", "testkn_audio.tar"])
+    df = indicsuperb.build_manifest(tmp_path)
+    validate_manifest(df, "indicsuperb")
+    row = df.iloc[0]
+    assert (row.language, row.subject_id, row.g_gender, row.split) == (
+        "hi",
+        "22",
+        "female",
+        "test_known",
+    )

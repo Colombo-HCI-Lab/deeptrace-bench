@@ -499,7 +499,19 @@ def _source(
                 return _HfParquetSource(config, languages, builder, seed)
             return _HfSource(config, languages)
         case "url":
-            return _ZipSource(config, builder)
+            if any(name.lower().endswith(".zip") for name in config.access.urls or {}):
+                return _ZipSource(config, builder)
+            # Archives that can't be read in place (tar): sample the full copy if one exists.
+            from .paths import dtb_root
+
+            full = dtb_root() / "datasets" / config.id
+            if full.is_dir() and any(full.iterdir()):
+                log.info("%s: sampling the full copy at %s", config.id, full)
+                return _LocalSource(full)
+            raise ManualStepRequiredError(
+                f"{config.id}'s archives can't be sampled remotely; download it in full first "
+                f"(setup_datasets.py {config.id}), then sample"
+            )
         case _:
             raise ManualStepRequiredError(
                 f"{config.id} can't be fetched by a script ({config.access.kind}); sample a "

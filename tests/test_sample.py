@@ -327,3 +327,19 @@ def test_a_nested_zip_is_fetched_once_per_label_and_its_members_sampled(monkeypa
     source.materialize(chosen, tmp_path / "sample")
     for path in chosen:
         assert (tmp_path / "sample" / path).read_bytes() in {b"a", b"b", b"c", b"d"}
+
+
+def test_tar_only_datasets_are_sampled_from_their_full_copy(monkeypatch, tmp_path):
+    from deeptrace_bench.fetch import ManualStepRequiredError
+    from deeptrace_bench.sample import _LocalSource, _source
+
+    monkeypatch.setenv("DTB_ROOT", str(tmp_path))
+    builder = _builder(monkeypatch, "dtb_toy_tar", label_from_path=lambda p: "real")
+    config = _config(builder, ["real"])
+    config.access = config.access.model_copy(
+        update={"kind": "url", "urls": {"a.tar": "https://x/a.tar"}}
+    )
+    with pytest.raises(ManualStepRequiredError, match="download it in full first"):
+        _source(config, None, None)
+    (tmp_path / "datasets" / "toy" / "x").mkdir(parents=True)
+    assert isinstance(_source(config, None, None), _LocalSource)
