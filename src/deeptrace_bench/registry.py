@@ -264,6 +264,7 @@ class EvalConfig(BaseModel):
     audio: dict[str, Any]
     metrics: dict[str, Any]
     reporting: dict[str, Any]
+    compute: dict[str, Any]
 
 
 class Corpus(_Strict):

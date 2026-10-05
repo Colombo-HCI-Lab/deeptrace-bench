@@ -167,3 +167,20 @@ def test_a_track_label_scores_the_track_that_was_manipulated():
 def test_a_track_label_must_be_known_for_every_item():
     with pytest.raises(EvalsetError, match="label_audio"):
         load_items(_track_evalset("from_audio"), manifests={"av": _audio_video_manifest()})
+
+
+def test_tf32_follows_the_eval_config():
+    import torch
+
+    from deeptrace_bench.models.base import set_tf32
+    from deeptrace_bench.registry import Registry
+
+    before = (torch.backends.cudnn.allow_tf32, torch.backends.cuda.matmul.allow_tf32)
+    try:
+        set_tf32(True)
+        assert torch.backends.cudnn.allow_tf32 and torch.backends.cuda.matmul.allow_tf32
+        set_tf32(Registry.load().eval.compute["tf32"])
+        assert not torch.backends.cudnn.allow_tf32
+        assert not torch.backends.cuda.matmul.allow_tf32
+    finally:
+        torch.backends.cudnn.allow_tf32, torch.backends.cuda.matmul.allow_tf32 = before

@@ -177,6 +177,19 @@ def resolve_device(device: str) -> str:
     return "cpu"
 
 
+def set_tf32(enabled: bool) -> None:
+    """Allow or forbid TF32 on CUDA (cuDNN convolutions and matmuls) for this process.
+
+    cuDNN allows TF32 convolutions by default on Ampere and newer GPUs. That moved DF Arena's
+    scores up to 2.5e-2 from fp32 on CPU, where parity holds to 1e-3; in fp32 the gap was
+    1.5e-4 (checked 2026-10-05). ``configs/eval/default.yaml`` (``compute.tf32``) decides.
+    """
+    import torch
+
+    torch.backends.cudnn.allow_tf32 = enabled
+    torch.backends.cuda.matmul.allow_tf32 = enabled
+
+
 def load_detector(config: ModelConfig) -> Detector:
     """Instantiate a model's adapter from its config.
 

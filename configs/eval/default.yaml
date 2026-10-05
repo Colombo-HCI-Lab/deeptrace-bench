@@ -26,6 +26,10 @@ audio:
   min_seconds: 1.0                 # shorter clips: status too_short, not tiled
   aggregation: mean                # item score = mean of window scores
 
+compute:
+  tf32: false                      # CUDA in fp32: cuDNN's default TF32 convolutions moved DF
+                                   # Arena's scores up to 2.5e-2 from CPU, beyond parity's 1e-3
+
 metrics:
   primary: [auc, eer]
   bootstrap:

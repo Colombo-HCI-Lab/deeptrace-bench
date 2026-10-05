@@ -28,7 +28,7 @@ import pandas as pd
 from deeptrace_bench import evalset as evalsets
 from deeptrace_bench.eval.contamination import Verdict, check
 from deeptrace_bench.fetch import locked_hashes
-from deeptrace_bench.models.base import load_detector, resolve_device
+from deeptrace_bench.models.base import load_detector, resolve_device, set_tf32
 from deeptrace_bench.paths import dataset_dir, namespace, prepare_store, use_namespace
 from deeptrace_bench.preprocess.audio import load_audio, segment
 from deeptrace_bench.preprocess.faces import FaceLoader
@@ -102,6 +102,7 @@ def main() -> int:
 
     prepare_store()
     device = resolve_device(args.device)
+    set_tf32(registry.eval.compute["tf32"])
     record, directory = start_run(
         model_id=model.id,
         evalset_id=evalset.id,
