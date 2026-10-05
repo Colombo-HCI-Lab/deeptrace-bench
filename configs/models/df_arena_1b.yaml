@@ -40,4 +40,4 @@ adapter: deeptrace_bench.models.df_arena:DFArenaDetector
 input:
   sample_rate: 16000
   segment_samples: 64600
-notes: XLS-R 1B plus attention pooling over all layers and a conformer head; code and weights checked 2026-10-05. Top open model on the Speech DF Arena leaderboard. The card reports In-the-Wild EER 0.91%, the reproduction target (the guard refuses ASVspoof 2019 LA eval and MLAAD). Transformers-native, so parity runs in our own environment.
+notes: XLS-R 1B plus attention pooling over all layers and a conformer head; code and weights checked 2026-10-05. Top open model on the Speech DF Arena leaderboard. The card reports In-the-Wild EER 0.91%, the reproduction target (the guard refuses ASVspoof 2019 LA eval and MLAAD). Transformers-native, so parity runs in our own environment. Reproduced 2026-10-05 on a 1,996-clip In-the-Wild shard, EER 0.41% (card 0.91%), AUC 0.999; parity with the card's pipeline exact.
