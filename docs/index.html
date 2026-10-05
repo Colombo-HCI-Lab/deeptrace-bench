@@ -19,16 +19,7 @@
   --flag: #b93c12;
   --serif: "Source Serif 4", "Source Serif Pro", Georgia, serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #121412; --ink: #e4e6e0; --muted: #989c93; --rule: #2c302a; --tint: #1c1f1b; --flag: #f2804f;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #121412; --ink: #e4e6e0; --muted: #989c93; --rule: #2c302a; --tint: #1c1f1b; --flag: #f2804f;
-  color-scheme: dark;
+  color-scheme: light; /* light only: it is projected and printed, so it never follows a dark OS */
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.55 var(--serif); }
