@@ -25,14 +25,13 @@ MLS, VoxPopuli and VoxLingua107, so evalsets whose real speech comes from those 
 from __future__ import annotations
 
 import logging
-import types
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from ._fairseq import check_config, fairseq_to_hf
+from ._fairseq import check_config, fairseq_stand_in, fairseq_style_model, fairseq_to_hf
 from ._upstream import load_module, scoped_modules
 from .base import Detector, resolve_device
 
@@ -59,36 +58,15 @@ class XLSRAASISTDetector(Detector):
     def _backbone_config(self) -> Any:
         from transformers import Wav2Vec2Config
 
-        config = Wav2Vec2Config.from_pretrained(str(self.backbone_config_dir))
-        # fairseq's features_only call returns no attentions and masks nothing at inference;
-        # the eager kernel keeps the arithmetic closest to fairseq's own attention.
-        config._attn_implementation = "eager"
-        return config
+        return Wav2Vec2Config.from_pretrained(str(self.backbone_config_dir))
 
     def _build(self) -> Any:
         """Upstream's ``Model`` with a transformers XLS-R in place of fairseq's."""
-        from transformers import Wav2Vec2Model
-
-        backbone_config = self._backbone_config()
-
-        class FairseqStyleWav2Vec2(Wav2Vec2Model):
-            """``Wav2Vec2Model`` answering fairseq's ``features_only`` call."""
-
-            def forward(self, source: Any, mask: bool = False, features_only: bool = True) -> dict:
-                if mask or not features_only:
-                    raise NotImplementedError("only fairseq's inference call is supported")
-                return {"x": super().forward(source).last_hidden_state}
-
-        def load_model_ensemble_and_task(paths: list[str], **kwargs: Any) -> tuple:
-            return [FairseqStyleWav2Vec2(backbone_config)], None, None
-
-        fairseq = types.ModuleType("fairseq")
-        fairseq.checkpoint_utils = types.SimpleNamespace(  # type: ignore[attr-defined]
-            load_model_ensemble_and_task=load_model_ensemble_and_task
-        )
+        config = self._backbone_config()
+        stubs = fairseq_stand_in(lambda _checkpoint: fairseq_style_model(config))
         assert self.upstream_dir is not None
         path = Path(self.upstream_dir) / "model.py"
-        with scoped_modules({"fairseq": fairseq}):
+        with scoped_modules(stubs):
             try:
                 module = load_module(path, _MODULE_NAME)
             except FileNotFoundError:
@@ -96,7 +74,7 @@ class XLSRAASISTDetector(Detector):
                 raise FileNotFoundError(msg) from None
             # ``SSLModel`` looks ``fairseq`` up when built, and a module imported earlier
             # still holds that load's stand-in; point it at this one.
-            module.fairseq = fairseq
+            module.fairseq = stubs["fairseq"]
             return module.Model(None, "cpu")
 
     def convert_checkpoint(self) -> Path | None:

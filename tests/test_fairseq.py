@@ -107,3 +107,54 @@ def test_config_mismatch_is_named():
     config.num_hidden_layers = 3
     with pytest.raises(ValueError, match="num_hidden_layers"):
         check_config(config, state)
+
+
+def test_conv_layers_are_parsed_without_eval():
+    from deeptrace_bench.models._fairseq import conv_layers
+
+    spec = "[(512, 10, 5)] + [(512, 3, 2)] * 4 + [(512,2,2)] + [(512,2,2)]"
+    assert conv_layers(spec) == [(512, 10, 5), *[(512, 3, 2)] * 4, (512, 2, 2), (512, 2, 2)]
+    with pytest.raises(ValueError):
+        conv_layers("__import__('os').getcwd()")
+
+
+def test_fairseq_settings_give_the_matching_transformers_config():
+    from deeptrace_bench.models._fairseq import hf_config_from_fairseq
+
+    xls_r = hf_config_from_fairseq(
+        {
+            "extractor_mode": "layer_norm",
+            "layer_norm_first": True,
+            "conv_bias": True,
+            "encoder_layers": 24,
+            "encoder_embed_dim": 1024,
+            "encoder_ffn_embed_dim": 4096,
+            "encoder_attention_heads": 16,
+        }
+    )
+    assert (xls_r.feat_extract_norm, xls_r.do_stable_layer_norm, xls_r.conv_bias) == (
+        "layer",
+        True,
+        True,
+    )
+    assert xls_r.conv_kernel == [10, 3, 3, 3, 3, 2, 2] and xls_r.num_hidden_layers == 24
+    base = hf_config_from_fairseq({})  # fairseq's defaults: wav2vec 2.0 base
+    assert (base.feat_extract_norm, base.do_stable_layer_norm, base.hidden_size) == (
+        "group",
+        False,
+        768,
+    )
+
+
+def test_the_stand_in_returns_fairseq_shaped_outputs():
+    from deeptrace_bench.models._fairseq import fairseq_style_model
+
+    config = _tiny_config(True)
+    model = fairseq_style_model(config).eval()
+    with torch.inference_mode():
+        out = model(torch.randn(2, 400), mask=False, features_only=True)
+        final = model.encoder.layer_norm(out["layer_results"][-1][0].transpose(0, 1))
+    assert len(out["layer_results"]) == config.num_hidden_layers
+    last = out["layer_results"][-1][0]  # time-major, before the final layer norm
+    assert last.shape[1] == 2
+    torch.testing.assert_close(out["x"], final)

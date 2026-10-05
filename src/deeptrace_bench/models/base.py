@@ -94,9 +94,16 @@ class Detector(ABC):
 
         Raises:
             RuntimeError: if ``source`` has no hash in the lock yet.
+            ValueError: if ``source`` is itself called ``model.safetensors``, which the
+                conversion would overwrite; such a weight needs another local ``name``.
         """
         from safetensors.torch import save_file
 
+        if source == CONVERTED:
+            raise ValueError(
+                f"{self.config.id}: the download {source} would be overwritten by its own "
+                f"conversion; rename it (the weight's name) in configs/models/{self.config.id}.yaml"
+            )
         digest = self._pinned_hash(source)
         if digest is None:
             raise RuntimeError(

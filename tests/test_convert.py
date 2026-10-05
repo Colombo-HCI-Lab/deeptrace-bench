@@ -85,3 +85,15 @@ def test_a_conversion_from_older_conversion_code_is_refused(detector, monkeypatc
     assert not detector.converted_is_current("ckpt.pth")
     with pytest.raises(RuntimeError, match="setup_models"):
         detector.load_converted(torch.nn.Linear(3, 2), source="ckpt.pth")
+
+
+def test_a_download_named_like_the_conversion_is_never_overwritten(detector):
+    from deeptrace_bench.models.base import CONVERTED
+
+    detector.weights_dir.mkdir(parents=True, exist_ok=True)
+    download = detector.weights_dir / CONVERTED
+    download.write_bytes(b"the original download")
+    fetch.record_hash("tiny", CONVERTED, fetch.sha256_file(download))
+    with pytest.raises(ValueError, match="rename"):
+        detector.save_converted(torch.nn.Linear(3, 2).state_dict(), CONVERTED)
+    assert download.read_bytes() == b"the original download"
