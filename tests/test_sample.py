@@ -219,3 +219,19 @@ def test_strata_get_their_own_share():
     stratum = lambda p: p.split("/")[0]  # noqa: E731
     chosen = choose(paths, label, 2, seed=0, stratum_of=stratum)
     assert sorted(p.split("/")[0] for p in chosen) == ["real", "real", "swap", "swap", "vc"]
+
+
+def test_asvspoof_samples_both_labels_in_every_split():
+    # The eval-only evalset needs real and fake eval items; an unstratified sample of 2 + 2
+    # can draw its real items from train and dev only.
+    from deeptrace_bench.datasets.asvspoof2019_la import sample_stratum
+
+    paths, labels = [], {}
+    for split in ("train", "dev", "eval"):
+        for i in range(20):
+            path = f"LA/ASVspoof2019_LA_{split}/flac/LA_{split[0].upper()}_{i:07d}.flac"
+            paths.append(path)
+            labels[path] = "real" if i < 3 else "fake"
+    chosen = choose(paths, labels.get, 2, seed=0, stratum_of=sample_stratum)
+    eval_labels = {labels[p] for p in chosen if "_LA_eval/" in p}
+    assert eval_labels == {"real", "fake"}

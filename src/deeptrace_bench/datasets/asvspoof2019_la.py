@@ -9,7 +9,8 @@ Layout (inside ``LA.zip``, checked by range requests on 2026-10-05; 122,328 entr
   bona fide or ``A01``..``A19`` and ``key`` is ``bonafide`` or ``spoof``.
 
 Labels live only in the protocol files, so the builder takes them from there
-(``METADATA_FILES``), and the sampler reads the same files first. Columns: ``label`` from
+(``METADATA_FILES``), and the sampler reads the same files first; it samples per split
+(``sample_stratum``), so the eval-only evalset gets both labels. Columns: ``label`` from
 ``key``; ``method`` the attack id; ``method_family`` from the challenge's description of each
 attack (``tts``, ``vc``, or ``tts_vc`` for A13 to A15, TTS output converted by VC);
 ``subject_id`` the speaker; ``split`` train, dev or eval; ``language`` en. The partitions
@@ -18,7 +19,7 @@ have disjoint speakers.
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pandas as pd
 
@@ -50,6 +51,11 @@ def _entries(files: dict[str, bytes]):
 def labels_from_metadata(files: dict[str, bytes]) -> dict[str, str]:
     """``{rel_path: label}`` for every utterance in the CM protocols."""
     return {rel: label for _, rel, _, _, label in _entries(files)}
+
+
+def sample_stratum(rel_path: str) -> str:
+    """Sample per split, so the eval-only evalset gets real and fake items."""
+    return PurePosixPath(rel_path).parts[1].removeprefix("ASVspoof2019_LA_")
 
 
 def build_manifest(root: Path) -> pd.DataFrame:
