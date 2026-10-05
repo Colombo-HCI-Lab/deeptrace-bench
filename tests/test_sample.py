@@ -342,4 +342,10 @@ def test_tar_only_datasets_are_sampled_from_their_full_copy(monkeypatch, tmp_pat
     with pytest.raises(ManualStepRequiredError, match="download it in full first"):
         _source(config, None, None)
     (tmp_path / "datasets" / "toy" / "x").mkdir(parents=True)
-    assert isinstance(_source(config, None, None), _LocalSource)
+    (tmp_path / "datasets" / "toy" / "x" / "a.m4a").write_bytes(b"audio")
+    source = _source(config, None, None)
+    assert isinstance(source, _LocalSource)
+    assert source.key() == {"kind": "full_copy", "dataset": "toy"}  # the same on every machine
+    source.materialize(["x/a.m4a"], tmp_path / "sample")
+    copied = tmp_path / "sample" / "x" / "a.m4a"
+    assert not copied.is_symlink() and copied.read_bytes() == b"audio"

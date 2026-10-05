@@ -506,12 +506,19 @@ def _names(zf: Any) -> list[str]:
 
 
 class _LocalSource(_Source):
-    def __init__(self, root: Path) -> None:
+    """Files under a local folder: a copy supplied with ``--from`` (symlinked into the sample),
+    or a dataset's own full download (``full_copy``: the few files are copied, since the store
+    is shared and a link to one machine's absolute path doesn't resolve on another)."""
+
+    def __init__(self, root: Path, full_copy: str | None = None) -> None:
         self.root = root.expanduser().resolve()
+        self.full_copy = full_copy
         if not self.root.is_dir():
             raise FileNotFoundError(self.root)
 
     def key(self) -> dict[str, Any]:
+        if self.full_copy:
+            return {"kind": "full_copy", "dataset": self.full_copy}
         return {"kind": "local", "path": str(self.root)}
 
     def candidates(self) -> list[str]:
@@ -524,7 +531,11 @@ class _LocalSource(_Source):
         for name in chosen:
             target = ensure_inside(dest, dest / name)
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.symlink_to(ensure_inside(self.root, self.root / name))
+            source = ensure_inside(self.root, self.root / name)
+            if self.full_copy:
+                shutil.copyfile(source, target)
+            else:
+                target.symlink_to(source)
 
 
 def _source(
@@ -552,7 +563,7 @@ def _source(
             full = dtb_root() / "datasets" / config.id
             if full.is_dir() and any(full.iterdir()):
                 log.info("%s: sampling the full copy at %s", config.id, full)
-                return _LocalSource(full)
+                return _LocalSource(full, full_copy=config.id)
             raise ManualStepRequiredError(
                 f"{config.id}'s archives can't be sampled remotely; download it in full first "
                 f"(setup_datasets.py {config.id}), then sample"
