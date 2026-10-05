@@ -31,6 +31,8 @@ Earlier smoke faces, scores and results are deleted first, so a fixed bug can't 
 
 Both are `role: pipeline_test`: the registry won't let them into a real evalset, and `evaluate.py --publish` refuses them. See [datasets.md](datasets.md) for their sources and licences.
 
+No open audio set is a pipeline test, so an audio model smoke-tests on two real and two fake clips of `urdu_csalt` by default (`AUDIO_FALLBACK` in `smoke.py`): `uv run scripts/smoke.py --model aasist`. Any other evalset works with `--evalsets`, e.g. `--evalsets in_the_wild banglafake`. It is still the smoke namespace: nothing there can be published.
+
 ## Reading the report
 
 `$DTB_ROOT/smoke/reports/latest.md` points at the newest report. It holds:
@@ -44,7 +46,7 @@ Open the crops and look. Faces should be centred and upright with level eyes, wi
 ## Pass criteria
 
 - every step exits 0;
-- every item has a score row, with a known status (`ok`, `no_face`, `unreadable`, `too_short`, `empty_audio`);
+- every item has a score row, with a known status (`ok`, `no_face`, `unreadable`, `too_short`, `empty_audio`, `no_audio`);
 - each evalset has at least one `ok` item;
 - every score is a probability in [0, 1].
 

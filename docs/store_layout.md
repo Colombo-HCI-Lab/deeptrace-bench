@@ -10,9 +10,11 @@ $DTB_ROOT/
 │   ├── gend/
 │   │   ├── model.safetensors, config.json
 │   │   └── clip-vit-large-patch14/          pinned backbone snapshot (8 files)
+│   ├── aasist/AASIST.pth, model.safetensors  a download and its one-time conversion
 │   └── scrfd_10g/det_10g.onnx               the shared face detector (a tool)
 ├── upstream/GenD-387a42266dd3.tar.gz        archive of each pinned upstream checkout (shared)
 ├── hf/                                      HF_HOME, if .env sets it there (shared)
+├── parity/envs/dfb/                         old-torch virtualenv for DeepfakeBench references
 │
 ├── datasets/<dataset>/                      downloads, or a symlink to a copy obtained by hand
 ├── manifests/<dataset>.parquet              one row per item
@@ -25,6 +27,8 @@ $DTB_ROOT/
 │   └── crops/<item_id>/frame_0007.png       only with score.py --save-crops
 ├── results/<model>__<evalset>__<8hex>/      summary.json, by_<group>.csv, items.parquet
 ├── splits/                                  identity-safe fine-tuning splits
+├── parity/<model>/<UTC time>/               a parity run: inputs.npz, parity.json, adapter.npy,
+│                                            reference.npy, reference.json
 │
 └── smoke/                                   the smoke namespace: same layout as above
     ├── README.txt                           "pipeline tests; never reported; safe to delete"

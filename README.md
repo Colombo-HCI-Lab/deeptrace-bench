@@ -4,7 +4,7 @@ Benchmark harness for deepfake detection in South Asia. It runs open video and a
 
 It starts with existing datasets and models: reproduce each model's published numbers, test it zero-shot on South Asian data, then fine-tune baselines. Later it evaluates the data collected through [deeptrace](https://github.com/Colombo-HCI-Lab/deeptrace), and becomes the benchmark released with that dataset.
 
-**Status (2026-10-04):** the pipeline runs end to end. One command (`scripts/smoke.py`) fetches GenD and a few items of two open datasets, detects and aligns faces, scores, evaluates and writes a readable report, on a laptop in about a minute. The GenD adapter, the shared face pipeline and dataset sampling are written; GenD's parity with upstream isn't checked yet. Other adapters and dataset builders are documented stubs, written as each model and dataset arrives. The evaluation setup is proposed, not yet settled.
+**Status (2026-10-05):** ten adapters are written: GenD; AASIST and AASIST-L; DF Arena 500M and 1B; and Xception, EfficientNet-B4, UCF, F3Net and SPSL through one DeepfakeBench adapter. Every one but GenD passes its parity check against upstream (`results/parity/`), and the audio models' score direction is settled. Builders are written for the open audio sets (Urdu CSALT, BanglaFake, MLAAD, ASVspoof 2019 LA, In-the-Wild, OpenSLR Sinhala) and for MAVOS-DD's Hindi videos, the only South Asian video available without an institutional request. One command (`scripts/smoke.py`) proves any model end to end on a few items. The evaluation setup is proposed, not yet settled.
 
 ## Quickstart
 
@@ -22,6 +22,7 @@ uv run scripts/smoke.py                        # the whole pipeline on a few ite
 uv run scripts/setup_models.py --list     # what's available, and its status
 uv run scripts/setup_datasets.py --list
 uv run scripts/setup_datasets.py urdu_csalt asvspoof2019_la
+uv run scripts/smoke.py --model aasist         # an audio model, on a few Urdu clips
 ```
 
 [docs/smoke_test.md](docs/smoke_test.md) explains the smoke test and its report; [docs/store_layout.md](docs/store_layout.md) maps everything the scripts write.
@@ -33,6 +34,7 @@ uv run scripts/setup_datasets.py urdu_csalt asvspoof2019_la
 3. **Score** (`scripts/score.py --model <id> --evalset <id>`): the model must read the evalset's modality and the contamination guard checks the pair first; video and image items go through the shared face pipeline; scoring is sharded and resumes after a kill.
 4. **Evaluate** (`scripts/evaluate.py`): AUC and EER overall and per group, with bootstrap intervals, failure counts and the contamination verdict. `--publish` copies the aggregates into `results/`.
 5. **Smoke test** (`scripts/smoke.py`): steps 1 to 4 on a few items per dataset, in `DTB_ROOT/smoke/`, with a report per run. Run it after any change, and to prove a new model or dataset is wired up.
+6. **Parity** (`scripts/parity.py`): before a model's numbers count, its adapter and the upstream code score the same ~200 items within 1e-3; the summary goes to `results/parity/<model>.json`.
 
 Adding a model or a dataset: [docs/adding_a_model.md](docs/adding_a_model.md), [docs/adding_a_dataset.md](docs/adding_a_dataset.md).
 
@@ -40,16 +42,17 @@ On the cluster the same steps run as SLURM jobs from `slurm/`. See [docs/cluster
 
 ## What's in scope
 
-| Wave | Video                                | Audio                            |
-| ---- | ------------------------------------ | -------------------------------- |
-| 1    | Xception, EfficientNet-B4, SBI, GenD | AASIST, AASIST-L, XLS-R + AASIST |
-| 2    | Effort, HAVIC, LipForensics          |                                  |
+| Wave       | Video                                | Audio                            |
+| ---------- | ------------------------------------ | -------------------------------- |
+| 1          | Xception, EfficientNet-B4, SBI, GenD | AASIST, AASIST-L, XLS-R + AASIST |
+| 2          | Effort, HAVIC, LipForensics          |                                  |
+| added, no wave yet | UCF, F3Net, SPSL             | DF Arena 500M, DF Arena 1B       |
 
-| Data available now                                                                         | Data on request                                                       |
-| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| Urdu (CSALT), BanglaFake, IndicSynth + IndicSUPERB, MLAAD (accept terms), ASVspoof 2019 LA | FF++, FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, Deepfake-Eval-2024 |
+| Data available now                                                                                                                                  | Data on request                                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Urdu (CSALT), BanglaFake, IndicSynth + IndicSUPERB, MLAAD (accept terms), MAVOS-DD Hindi (accept terms), OpenSLR Sinhala, ASVspoof 2019 LA, In-the-Wild | FF++, Celeb-DF v2, FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, Deepfake-Eval-2024, Casual Conversations v2 |
 
-No South Asian video dataset is downloadable without approval yet. Two open sets, Mendeley Roop/Akool frames and the UniDataPro video preview, serve as pipeline tests only: they prove the code works and are never reported. Details, access routes and licence terms: [docs/models.md](docs/models.md), [docs/datasets.md](docs/datasets.md).
+MAVOS-DD's Hindi subset is the only South Asian video available without an institutional request (accept its terms on Hugging Face). Two open sets, Mendeley Roop/Akool frames and the UniDataPro video preview, serve as pipeline tests only: they prove the code works and are never reported. Details, access routes and licence terms: [docs/models.md](docs/models.md), [docs/datasets.md](docs/datasets.md).
 
 ## Layout
 
@@ -74,14 +77,16 @@ src/deeptrace_bench/
   splits.py      identity-safe fine-tuning splits
   evalset.py     evalset to item table
   preprocess/    audio windows; face detection (SCRFD), alignment and crops
-  models/        detector adapters behind one interface
+  models/        detector adapters behind one interface; _upstream.py imports upstream code
+  parity.py      adapter-versus-upstream checks
   score.py       resumable, sharded scoring
   runs.py        run records (provenance)
   eval/          metrics, contamination guard, publish guard, shortcut probe
-scripts/         setup_models, setup_datasets, score, evaluate, smoke; hooks/pre-commit
+scripts/         setup_models, setup_datasets, score, evaluate, smoke, parity; hooks/pre-commit
+  parity_reference/  upstream-side scorers for parity checks, one per upstream
 slurm/           job templates for Curnagl
 patches/         compatibility patches for upstream code
-results/         published aggregate results (no item-level data)
+results/         published aggregate results and parity summaries (no item-level data)
 docs/            smoke test, store layout, adding a model or dataset, models, datasets,
                  evaluation, cluster, data policy
 tests/           synthetic fixtures only

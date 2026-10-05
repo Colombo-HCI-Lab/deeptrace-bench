@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repo.
 
 The benchmark harness for the Colombo HCI Lab's South Asia deepfake detection project: open video and audio detectors run on South Asian deepfake datasets under one evaluation setup, with results reported per group. It starts with existing datasets and models (reproduce published numbers, zero-shot runs, fine-tuned baselines) and later evaluates the data collected through the sibling repo `deeptrace`. `README.md` has the workflow; `docs/` has models, datasets, evaluation, cluster and data policy.
 
-Scaffolded 2026-10-03; runs end to end since 2026-10-04: `scripts/smoke.py` fetches GenD and a few items of two open pipeline-test datasets, detects and aligns faces, scores, evaluates and writes a report under `DTB_ROOT/smoke/reports/`. Written: the GenD adapter, the shared face pipeline (`preprocess/faces.py`, `preprocess/scrfd.py`), dataset sampling (`sample.py`, `remote_zip.py`) and the builders for `mendeley_roop_akool` and `unidatapro_videos`. Still documented stubs: the other adapters and builders, native preprocessing, the shortcut probe. GenD's parity with upstream is not checked yet.
+Scaffolded 2026-10-03; runs end to end since 2026-10-04. As of 2026-10-05, adapters are written for GenD, AASIST, AASIST-L, DF Arena 500M and 1B (code pinned from Hugging Face, `upstream.host: hf`) and five DeepfakeBench detectors (Xception, EfficientNet-B4, UCF, F3Net, SPSL, one adapter); all but GenD pass parity (`scripts/parity.py`, `results/parity/`). Builders are written for the pipeline-test sets, Urdu CSALT, BanglaFake, MLAAD, ASVspoof 2019 LA, In-the-Wild, OpenSLR Sinhala, MAVOS-DD Hindi and Celeb-DF v2. Still stubs: SBI, XLS-R + AASIST (waits on a fairseq-to-transformers key remap) and the other adapters, the IndicSynth, IndicSUPERB and request-only builders, native preprocessing, the shortcut probe.
 
 ## Commands
 
@@ -20,6 +20,7 @@ uv run scripts/setup_datasets.py <ids> --sample N [--seed S] --manifest   # smok
 uv run scripts/score.py --model <id> --evalset <id> [--shard i/n] [--smoke] [--save-crops K]
 uv run scripts/evaluate.py --model <id> --evalset <id> [--publish] [--smoke]
 uv run scripts/smoke.py [--model gend] [--sample 2] [--device auto|cpu|mps|cuda] [--keep]
+uv run scripts/parity.py export --model <id> --evalset <id> --smoke   # then the reference and compare it prints
 ```
 
 Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/store_layout.md` maps the tree. `DTB_NAMESPACE=smoke` (set by `--smoke`, `--sample` and `smoke.py`, never in `.env`) moves everything item-level under `DTB_ROOT/smoke/`.
@@ -35,7 +36,8 @@ Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/s
 - **Weight hashes** are pinned in `configs/weights.lock.yaml` via `--record` on first fetch, never edited by hand.
 - **Failures are data.** Preprocessing failures get a status and are counted per group, never dropped.
 - **Pipeline tests are never results.** Datasets and evalsets with `role: pipeline_test` only prove the code works; the registry keeps them out of real evalsets and `--publish` refuses them and anything in the smoke namespace. Run `scripts/smoke.py` after any change to the pipeline.
-- **Builders are samplable.** A dataset builder defines `label_from_path` as well as `build_manifest`, and works on a partial tree; test fixtures use invented file names.
+- **Builders are samplable.** A dataset builder defines `build_manifest` and a way to label items before download: `label_from_path`, or `METADATA_FILES` with `labels_from_metadata` where labels live in a file. It works on a partial tree; test fixtures use invented file names.
+- **Upstream code is imported, never copied.** Through `models/_upstream.py`; code inside a Hugging Face repo is pinned as `upstream.host: hf` and never loaded with `trust_remote_code`. Downloads are converted once to `model.safetensors` and loaded with every key matching.
 
 ## Conventions
 
