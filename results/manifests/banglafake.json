@@ -1,0 +1,17 @@
+{
+  "by_label": {
+    "fake": 12796,
+    "real": 13796
+  },
+  "content_hash": "b1b046a4239fcfd18c37a9293b7cc3c2ea23218343acd89b4cef2b33f134cad4",
+  "groups": {
+    "g_subcorpus": {
+      "mozilla|fake": 2797,
+      "mozilla|real": 2797,
+      "news|real": 1000,
+      "sust|fake": 9999,
+      "sust|real": 9999
+    }
+  },
+  "rows": 26592
+}

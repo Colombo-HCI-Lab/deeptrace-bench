@@ -8,6 +8,8 @@ access:
   page: https://datashare.ed.ac.uk/handle/10283/3336
   urls:
     LA.zip: https://datashare.ed.ac.uk/bitstreams/a9f87c35-f055-4015-80e2-2fdff0d46269/download
+  sha256:
+    LA.zip: 208a7e4e3913f8c75ae1afd19bf32a5b29ae68435e9e30e23e5e98b6a155e4ec
 licence: see LICENSE_text.txt on the DataShare page
 contains: [real, fake]
 languages: [en]
