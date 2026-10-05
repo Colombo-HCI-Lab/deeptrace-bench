@@ -10,6 +10,10 @@ access:
     testkn_audio.tar: https://objectstore.e2enetworks.net/indic-superb/kathbath/clean/testkn_audio.tar
     testunk_audio.tar: https://objectstore.e2enetworks.net/indic-superb/kathbath/clean/testunk_audio.tar
     transcripts_n2w.tar: https://objectstore.e2enetworks.net/indic-superb/kathbath/clean/transcripts_n2w.tar
+  sha256:
+    testkn_audio.tar: 3e1d31a8d7385b27fe1968b66c439dbad2cb5c0ca2f08fd5742e247e45d51339
+    testunk_audio.tar: 051dbd460a0f1773f0bd6839ddbdc55a27c6a3e41d86cc54309542c6edff4948
+    transcripts_n2w.tar: 29156057ebbc428146a7a851ebe3238cb19e1c9793000b60de45667c55e40d3e
 licence: CC BY 4.0 (the Hugging Face card of ai4bharat/Kathbath; the IndicSUPERB code repo is Apache-2.0)
 contains: [real]
 languages: [hi, bn, ur, ta, mr, kn, ml, gu, pa, te, or, sa]

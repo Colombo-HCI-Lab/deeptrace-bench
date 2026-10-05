@@ -1,0 +1,13 @@
+{
+  "by_label": {
+    "real": 51412
+  },
+  "content_hash": "f17da0457afecfba13bb32f2580e46565a6a347d91e7da5019a44154007e8c21",
+  "groups": {
+    "g_gender": {
+      "female|real": 26084,
+      "male|real": 25328
+    }
+  },
+  "rows": 51412
+}
