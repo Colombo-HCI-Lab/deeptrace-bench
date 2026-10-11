@@ -60,6 +60,24 @@ Audio models have no pipeline-test set, so their smoke test runs on a sample of 
     timm==0.6.13   # RECCE's encoder; install it in the same command, or uv upgrades torch
   ```
 
+  SBI's reference (`sbi.py`) runs in the same one. The fairseq models need two more, on a local disk: a virtualenv's `python` is a symlink, which a CIFS-mounted store can't hold. Each needs pip older than 24.1, since fairseq's pinned omegaconf has metadata newer pip rejects, and torchaudio pinned beside torch, or fairseq's install pulls the newest torch. AntiDeepfake's (`antideepfake.py`) uses fairseq 0.12.2:
+
+  ```bash
+  uv venv --seed --python 3.9 <envs>/fairseq && <envs>/fairseq/bin/python -m pip install "pip<24.1"
+  <envs>/fairseq/bin/pip install torch==1.13.1 torchaudio==0.13.1 "numpy<1.24" cython soundfile \
+    safetensors fairseq==0.12.2
+  ```
+
+  The XLS-R wrapper models (`ssl_xlsr.py`) need upstream's own stack, because fairseq 0.12.2 rejects the config inside `xlsr2_300m.pt`: torch 1.8.1 and the fairseq the SSL_Anti-spoofing checkout vendors, installed from a copy outside the checkout. `SSLModel` loads `xlsr2_300m.pt` (3.8 GB, <https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt>) from the working directory, so keep it in the virtualenv's root, where the script runs:
+
+  ```bash
+  uv venv --seed --python 3.9 <envs>/fairseq-tak && <envs>/fairseq-tak/bin/python -m pip install "pip<24.1"
+  <envs>/fairseq-tak/bin/pip install torch==1.8.1 torchaudio==0.8.1 "numpy<1.24" cython soundfile
+  cp -r third_party/SSL_Anti-spoofing-*/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1 /tmp/fairseq-tak
+  <envs>/fairseq-tak/bin/pip install /tmp/fairseq-tak
+  curl -L -o <envs>/fairseq-tak/xlsr2_300m.pt https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt
+  ```
+
 - **Score direction**: on the reproduction evalset (FF++ test, ASVspoof 2019 LA eval, or In-the-Wild for models the guard refuses on ASVspoof 2019), AUC must come out above 0.5. An inverted logit flips every result silently. A seeded sample is enough for the direction (`setup_datasets.py <id> --sample 300 --manifest`, then `score.py --smoke` and `evaluate.py --smoke`); the full set reproduces the published number.
 - Then give the model a `wave:`.
 

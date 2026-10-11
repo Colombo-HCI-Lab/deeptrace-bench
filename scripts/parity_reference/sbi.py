@@ -1,15 +1,15 @@
 """Reference scores for SBI, in an old PyTorch generation.
 
 Runs in the DeepfakeBench reference virtualenv (Python 3.9, torch 1.13, efficientnet-pytorch
-0.7.1; docs/models.md says how to make it), not in this repo's environment, and doesn't import
-this package. It builds upstream's own ``Detector`` from ``src/inference/model.py`` in the
-checkout, loads the original ``FFc23.tar`` (its ``"model"`` entry, not the converted
+0.7.1; docs/adding_a_model.md says how to make it), not in this repo's environment, and doesn't
+import this package. It builds upstream's own ``Detector`` from ``src/inference/model.py`` in
+the checkout, loads the original ``FFc23.tar`` (its ``"model"`` entry, not the converted
 safetensors) with every key matching, and scores the exported crops as
 ``src/inference/inference_video.py`` does: RGB scaled to [0, 1], softmax index 1.
 
 ``Detector`` calls ``EfficientNet.from_pretrained``, which downloads ImageNet weights the
-checkpoint then replaces; it is pointed at ``from_name`` while the network is built, as in
-the adapter, so nothing is fetched and the network is the same.
+checkpoint then replaces; it is pointed at ``from_name`` while the network is built, as in the
+adapter, so nothing is fetched and the network is the same.
 
 Usage: $DTB_ROOT/parity/envs/dfb/bin/python scripts/parity_reference/sbi.py <run dir>
 """
