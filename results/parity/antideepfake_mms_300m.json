@@ -1,0 +1,30 @@
+{
+  "model": "antideepfake_mms_300m",
+  "checked_utc": "2026-10-11T20:20:19+00:00",
+  "evalset": "urdu_csalt",
+  "namespace": "smoke",
+  "items": 200,
+  "n": 521,
+  "max_abs_diff": 8.952617645263672e-05,
+  "mean_abs_diff": 2.4023145167317937e-06,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "nii-yamagishilab/AntiDeepfake",
+    "commit": "0dea622bde8f064c8ee5a557f2598643123fc6b6"
+  },
+  "weights_sha256": {
+    "mms-300m-anti-deepfake.safetensors": "9bd5d9785bf72f91dfca8508651354946c4b307921cb358505e1b94035102224"
+  },
+  "adapter_env": {
+    "python": "3.12.14",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.9.25",
+    "torch": "1.13.1+cu117",
+    "fairseq": "0.12.2"
+  },
+  "reference": "upstream models/W2V.py (mms_300m) and the Hub's mms-300m-anti-deepfake.safetensors, one window at a time"
+}

@@ -52,6 +52,9 @@ REFERENCES = {
     "AASISTDetector": ("aasist.py", "uv run python"),
     "DFArenaDetector": ("df_arena.py", "uv run python"),
     "DeepfakeBenchDetector": ("deepfakebench.py", "{dtb_root}/parity/envs/dfb/bin/python"),
+    "SBIDetector": ("sbi.py", "{dtb_root}/parity/envs/dfb/bin/python"),
+    "SSLXLSRDetector": ("ssl_xlsr.py", "<fairseq venv>/bin/python"),
+    "AntiDeepfakeDetector": ("antideepfake.py", "<fairseq venv>/bin/python"),
 }
 
 

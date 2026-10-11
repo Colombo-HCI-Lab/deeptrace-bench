@@ -1,0 +1,30 @@
+{
+  "model": "antideepfake_w2v_small",
+  "checked_utc": "2026-10-11T20:21:07+00:00",
+  "evalset": "urdu_csalt",
+  "namespace": "smoke",
+  "items": 200,
+  "n": 521,
+  "max_abs_diff": 3.203749656677246e-05,
+  "mean_abs_diff": 1.7263290516375438e-06,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "nii-yamagishilab/AntiDeepfake",
+    "commit": "0dea622bde8f064c8ee5a557f2598643123fc6b6"
+  },
+  "weights_sha256": {
+    "wav2vec-small-anti-deepfake.safetensors": "828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0"
+  },
+  "adapter_env": {
+    "python": "3.12.14",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.9.25",
+    "torch": "1.13.1+cu117",
+    "fairseq": "0.12.2"
+  },
+  "reference": "upstream models/W2V.py (w2v_small) and the Hub's wav2vec-small-anti-deepfake.safetensors, one window at a time"
+}

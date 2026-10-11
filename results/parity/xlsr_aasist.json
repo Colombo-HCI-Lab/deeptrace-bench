@@ -1,0 +1,31 @@
+{
+  "model": "xlsr_aasist",
+  "checked_utc": "2026-10-11T20:29:03+00:00",
+  "evalset": "urdu_csalt",
+  "namespace": "smoke",
+  "items": 200,
+  "n": 521,
+  "max_abs_diff": 0.00011336803436279297,
+  "mean_abs_diff": 5.900742261698398e-06,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "TakHemlata/SSL_Anti-spoofing",
+    "commit": "4acaa61dcef5f7610f43aa4d0b29c4559b970cd2"
+  },
+  "weights_sha256": {
+    "LA_model.pth": "bd6f36097259fe54e7004eb983651e5304d807be81156dbd04faccb70d91e10c",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "adapter_env": {
+    "python": "3.12.14",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.9.25",
+    "torch": "1.8.1+cu102",
+    "fairseq": "1.0.0a0"
+  },
+  "reference": "upstream model.py with fairseq's xlsr2_300m.pt and the original LA_model.pth"
+}
