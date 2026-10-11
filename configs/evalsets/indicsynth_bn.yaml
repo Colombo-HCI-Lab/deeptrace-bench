@@ -4,7 +4,7 @@ role: south_asian
 pairing: same_corpus
 components:
   - dataset: indicsynth
-    filter: {language: bn}
+    filter: {language: bn, split: sample}
     label: fake
   - dataset: indicsuperb
     filter: {language: bn}
@@ -12,4 +12,4 @@ components:
 match_on: [language, subject_id]
 group_by: [g_gender, method]
 status: ready
-notes: IndicSynth fakes against real speech from IndicSUPERB, the corpus they were generated from, matched by speaker where the ids line up. Recording conditions match, so this counts as same-corpus.
+notes: IndicSynth fakes against real speech from IndicSUPERB, the corpus they were generated from, matched by speaker where the ids line up. Recording conditions match, so this counts as same-corpus. The fakes are the builder's seeded sample (5,000 per generator), since all of them would outnumber the reals about 40 to 1.

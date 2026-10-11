@@ -13,6 +13,12 @@ follow Kathbath's ``<utterance>-<speaker>-<m|f>`` scheme, so ``subject_id`` is t
 speaker id and ``source_subject_id`` the source speaker of a voice conversion, both as
 Kathbath numbers. ``g_gender`` from ``Gender`` (source ``dataset``). Audio is written out once
 to ``<Language>/wav/<shard>-<row>.wav``; ``item_id`` is ``indicsynth/<Language>/<shard>/<row>``.
+
+The fakes outnumber their real side about 40 to 1 (Hindi: 205,938 rows against IndicSUPERB's
+5,059 test clips), so scoring every row costs a day per large model and adds nothing to AUC or
+EER. The builder draws a seeded sample of ``SAMPLE_PER_GENERATOR`` rows per language and
+generator and marks it ``split`` "sample" (the rest keep the Hub's "train"); evalsets filter on
+it, as DF-Platter's does.
 """
 
 from __future__ import annotations
@@ -42,6 +48,8 @@ _LANGUAGES = {
 }
 _FAMILIES = {"xtts_v2": "tts", "vits": "tts", "freevc24": "vc"}
 _COLUMNS = ["audio", "Generative Model", "Target Speaker ID", "Source Speaker_ID", "Gender"]
+SAMPLE_PER_GENERATOR = 5000
+SAMPLE_SEED = 0
 
 
 def label_from_row(row: dict[str, Any]) -> str | None:
@@ -83,6 +91,20 @@ def build_manifest(root: Path) -> pd.DataFrame:
                 "source_subject_id": _speaker(row.get("Source Speaker_ID")),
                 "g_gender": gender,
                 "g_gender_src": "dataset" if gender else None,
+                "split": "train",
             }
         )
-    return pd.DataFrame(rows)
+    return mark_sample(pd.DataFrame(rows))
+
+
+def mark_sample(df: pd.DataFrame, per_generator: int = SAMPLE_PER_GENERATOR) -> pd.DataFrame:
+    """Mark a seeded sample of rows per language and generator with ``split`` "sample"."""
+    if df.empty:
+        return df
+    ordered = df.sort_values("item_id")
+    picked = ordered.groupby(["language", "method"], dropna=False, group_keys=False).apply(
+        lambda g: g.sample(n=min(per_generator, len(g)), random_state=SAMPLE_SEED)
+    )
+    df = df.copy()
+    df.loc[picked.index, "split"] = "sample"
+    return df

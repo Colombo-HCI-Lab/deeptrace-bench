@@ -364,6 +364,29 @@ def test_indicsynth_manifest_writes_audio_and_reads_speakers(tmp_path):
     )
     assert (tmp_path / vc.rel_path).read_bytes() == _wav(2)["bytes"]
     assert vc.item_id == "indicsynth/Hindi/train-00000-of-00002/1"
+    assert set(df.split) == {"sample"}  # under the cap, every row is drawn
+
+
+def test_indicsynth_sample_is_capped_per_generator_and_seeded():
+    from deeptrace_bench.datasets import indicsynth
+
+    df = pd.DataFrame(
+        {
+            "item_id": [f"indicsynth/Hindi/s/{i}" for i in range(30)],
+            "language": ["hi"] * 30,
+            "method": ["vits"] * 20 + ["freevc24"] * 10,
+            "split": ["train"] * 30,
+        }
+    )
+    first = indicsynth.mark_sample(df, per_generator=4)
+    again = indicsynth.mark_sample(df.sample(frac=1, random_state=1), per_generator=4)
+    assert first[first.split == "sample"].groupby("method").size().to_dict() == {
+        "freevc24": 4,
+        "vits": 4,
+    }
+    assert set(first.item_id[first.split == "sample"]) == set(
+        again.item_id[again.split == "sample"]
+    )
 
 
 def test_indictts_challenge_labels_and_skips_the_unlabelled(tmp_path):
