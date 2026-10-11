@@ -10,6 +10,8 @@ access:
     # Mendeley's whole-dataset zip; the endpoint redirects to a short-lived signed S3 link,
     # which serves range requests
     bangla_voices.zip: https://data.mendeley.com/public-api/zip/4ftmwt86vr/download/1
+  sha256:
+    bangla_voices.zip: 25064d0f9017ea0f7ab56a7f7d19a750c17c7eb11607a0a00d779da9a2eaff43
 licence: CC BY 4.0
 contains: [real, fake]
 languages: [bn]

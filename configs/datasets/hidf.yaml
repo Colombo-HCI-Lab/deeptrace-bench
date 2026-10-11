@@ -10,6 +10,10 @@ access:
     Real-vid.zip: "https://zenodo.org/records/16140829/files/Real-vid.zip?download=1"
     Fake-vid.zip: "https://zenodo.org/records/16140829/files/Fake-vid.zip?download=1"
     metadata.csv: "https://zenodo.org/records/16140829/files/metadata.csv?download=1"
+  sha256:
+    Real-vid.zip: d7ecd565b638e699ac7ec928eae954cc206ca68837a1939587696dbee9ae560c
+    Fake-vid.zip: a5833c23e0fe98285146f313bcc3ecd9f0af6b098de87aeb775af8960655cd6c
+    metadata.csv: 62d49f5abebdefbbe100184ae1408cdc10d824019800881fcf6745493d358db1
 licence: CC BY-NC 4.0
 licence_terms:
   - Non-commercial use only.

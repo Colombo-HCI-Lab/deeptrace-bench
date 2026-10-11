@@ -1,0 +1,36 @@
+{
+  "by_label": {
+    "fake": 4361,
+    "real": 4361
+  },
+  "content_hash": "c6c65ea296bc99184d00c78810cc3982c48d1e0f9c61ecf19ba4343fbcfa168a",
+  "groups": {
+    "g_age": {
+      "adult|fake": 3908,
+      "adult|real": 3923,
+      "child|fake": 68,
+      "child|real": 67,
+      "elderly|fake": 385,
+      "elderly|real": 371
+    },
+    "g_gender": {
+      "female|fake": 1744,
+      "female|real": 1694,
+      "male|fake": 2617,
+      "male|real": 2667
+    },
+    "g_race": {
+      "asian|fake": 206,
+      "asian|real": 215,
+      "black|fake": 241,
+      "black|real": 456,
+      "indian|fake": 65,
+      "indian|real": 90,
+      "latino|fake": 365,
+      "latino|real": 194,
+      "white|fake": 3484,
+      "white|real": 3406
+    }
+  },
+  "rows": 8722
+}
