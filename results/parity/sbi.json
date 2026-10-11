@@ -1,0 +1,30 @@
+{
+  "model": "sbi",
+  "checked_utc": "2026-10-11T21:18:00+00:00",
+  "evalset": "mendeley_roop_akool",
+  "namespace": "smoke",
+  "items": 199,
+  "n": 199,
+  "max_abs_diff": 3.5762786865234375e-06,
+  "mean_abs_diff": 3.3775653371858834e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "mapooon/SelfBlendedImages",
+    "commit": "d6d9a351f32334ae9a3a250872c05836e0dd0f2c"
+  },
+  "weights_sha256": {
+    "FFc23.tar": "2b05c2ba36ccb9e9f4f9e1aae9acd443ae2e6400ce725f56104fdb175d3c3267",
+    "FFraw.tar": "e477fc1789f8c1d2147cffe86a47eb37a24adedae10b106b7d47c1eeb73777e2"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.9.6",
+    "torch": "1.13.1"
+  },
+  "reference": "upstream src/inference/model.py Detector and FFc23.tar"
+}

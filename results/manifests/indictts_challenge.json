@@ -1,0 +1,18 @@
+{
+  "by_label": {
+    "fake": 15544,
+    "real": 15558
+  },
+  "content_hash": "def306b21355e1237aaa4bdd7be25141f5ec1e53ae0759d3540f7d093c96bb72",
+  "groups": {
+    "g_gender": {
+      "<null>|fake": 2767,
+      "<null>|real": 2761,
+      "female|fake": 6788,
+      "female|real": 6791,
+      "male|fake": 5989,
+      "male|real": 6006
+    }
+  },
+  "rows": 31102
+}

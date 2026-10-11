@@ -11,9 +11,14 @@ safetensors) with every key matching, and scores the exported crops as
 checkpoint then replaces; it is pointed at ``from_name`` while the network is built, as in the
 adapter, so nothing is fetched and the network is the same.
 
+torch 1.13's ``weights_only`` unpickler refuses ``FFc23.tar`` (torch 2.8's, which the adapter
+uses, accepts it), so the file is first checked against its pinned sha256 and then loaded in
+full: the bytes are the ones the adapter's safe load already read.
+
 Usage: $DTB_ROOT/parity/envs/dfb/bin/python scripts/parity_reference/sbi.py <run dir>
 """
 
+import hashlib
 import importlib.util
 import json
 import platform
@@ -41,7 +46,10 @@ finally:
     EfficientNet.from_pretrained = original
 
 checkpoint = Path(spec["weights_dir"]) / spec["input"].get("checkpoint", "FFc23.tar")
-model.load_state_dict(torch.load(checkpoint, map_location="cpu", weights_only=True)["model"])
+digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+if digest != spec["weights"][checkpoint.name]:
+    sys.exit(f"{checkpoint} doesn't match its pinned sha256")
+model.load_state_dict(torch.load(checkpoint, map_location="cpu", weights_only=False)["model"])
 model.eval()
 
 units = np.load(run / "inputs.npz")["units"]
