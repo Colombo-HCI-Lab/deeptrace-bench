@@ -1,0 +1,360 @@
+---
+// What the runs show: results.md laid out as tables and charts, joined with every run in
+// status.json. The full write-up stays at docs/results/.
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import { buildResults } from "../lib/guide";
+
+const base = import.meta.env.BASE_URL;
+const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
+---
+
+<Base
+  title="Results · deeptrace-bench"
+  description="What the runs so far show: open deepfake detectors on South Asian speech and faces, with the numbers and their caveats."
+  section="results"
+>
+  <div class="stack">
+    <header class="mast">
+      <div class="kicker">Results · snapshot of {R.asOf}</div>
+      <h1>What the runs show</h1>
+      <p class="lede">
+        Every number is zero-shot: a published detector tested on data unlike its training data, without retraining.
+        Most numbers are AUC, the chance a detector scores a random fake above a random real clip.
+      </p>
+      <div class="scale" aria-label="Colour scale">
+        <div class="track"></div>
+        <div class="ticks"><span>0 backwards</span><span>0.5 coin flip</span><span>1 perfect</span></div>
+      </div>
+    </header>
+
+    <section id="read-this-first" class="firstbox">
+      <h2>Read this first</h2>
+      <div class="cols-2">
+        {
+          R.first.map((b) => (
+            <div class="item">
+              <strong>{b.label}</strong>
+              <div class="snip" set:html={b.body} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <nav class="index" aria-label="On this page">
+      <ol>
+        <li><a href="#audio-south-asian-speech">South Asian speech</a></li>
+        <li><a href="#reproductions">Reproductions</a></li>
+        <li><a href="#video-hidf">Faces</a></li>
+        <li><a href="#all-runs">All runs</a></li>
+        <li><a href="#what-the-results-cant-say-yet">Not covered yet</a></li>
+        <li><a href={`${base}docs/results/`}>Full write-up</a></li>
+      </ol>
+    </nav>
+
+    <section id="audio-south-asian-speech" class="block" data-metric="auc">
+      <header>
+        <div class="kicker">Audio</div>
+        <h2>South Asian speech</h2>
+        <p>
+          Seven detectors on five open South Asian sets, grouped by what they were trained on. Hover a cell for its
+          interval and clip count. <sup class="mono">so</sup> marks source overlap: the detector's pretraining used a
+          corpus this set also draws on.
+        </p>
+      </header>
+      <div class="toggle" role="group" aria-label="Metric">
+        <button type="button" data-metric="auc" aria-pressed="true">AUC · higher is better</button>
+        <button type="button" data-metric="eer" aria-pressed="false">EER · lower is better</button>
+      </div>
+      <div class="scroll">
+        <table class="heat sa">
+          <thead>
+            <tr>
+              <th>Detector</th>
+              {R.sa.cols.map((c) => <th style="width: 14%"><span>{c.name}</span><span>{c.sub}</span></th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              R.sa.groups.map((g) => (
+                <Fragment>
+                  <tr class="tierrow">
+                    <td colspan={R.sa.span}>
+                      <div class="tierhead"><span class={g.badge}>{g.label}</span><span>{g.title}</span></div>
+                    </td>
+                  </tr>
+                  {g.rows.map((m) => (
+                    <tr>
+                      <th scope="row">{m.name}</th>
+                      {m.cells.map((c) =>
+                        c ? (
+                          <td title={c.title} style={c.style}>
+                            <span class="auc">{c.auc}</span>
+                            <span class="eer">{c.eer}</span>
+                            {c.overlap && <sup>so</sup>}
+                          </td>
+                        ) : (
+                          <td title="not run yet">·</td>
+                        ),
+                      )}
+                    </tr>
+                  ))}
+                </Fragment>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="cols-3">
+        {
+          R.tierItems.map((t) => (
+            <div class="card">
+              <span class={t.badge}>Tier {t.n}</span>
+              <strong>{t.label}</strong>
+              <div class="snip" set:html={t.body} />
+            </div>
+          ))
+        }
+      </div>
+      <div class="snip text" set:html={R.tierAfter} />
+
+      <h3 class="sub">{R.lang.title}</h3>
+      <div class="snip text muted" set:html={R.lang.intro} />
+      <div class="scroll">
+        <table class="heat lang">
+          <thead>
+            <tr>
+              <th>{R.lang.first}</th>
+              {R.lang.cols.map((c) => <th style="width: 16%"><span>{c.name}</span><span>{c.range}</span></th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              R.lang.rows.map((r) => (
+                <tr>
+                  <th scope="row">{r.name}</th>
+                  {r.cells.map((c) => (
+                    <td title={c.title} style={`background: ${c.bg}; color: ${c.fg}`}>
+                      {c.text}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="snip text" set:html={R.lang.after} />
+
+      <div class="cols-2" style="margin-top: 12px">
+        <div class="card">
+          <h3>{R.pre.title}</h3>
+          <div class="scroll">
+            <table class="heat pre">
+              <thead>
+                <tr><th>{R.pre.first}</th>{R.pre.cols.map((c) => <th>{c.name}</th>)}</tr>
+              </thead>
+              <tbody>
+                {
+                  R.pre.rows.map((r) => (
+                    <tr>
+                      <th scope="row">{r.name}</th>
+                      {r.cells.map((c) => <td style={`background: ${c.bg}; color: ${c.fg}`}>{c.text}</td>)}
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="snip" style="font-size: 0.9rem" set:html={R.pre.body} />
+        </div>
+        <div class="stack" style="gap: 16px; align-content: start">
+          {
+            R.notes.map((n) => (
+              <div class="card" style="font-size: 0.9rem">
+                <h3>{n.title}</h3>
+                <div class="snip" set:html={n.body} />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section id="reproductions" class="block">
+      <header>
+        <div class="kicker">Sanity check</div>
+        <h2>Reproductions: do our numbers match the papers?</h2>
+        <p>
+          Each detector on the data its own paper used. If our EER lands near the published one, the setup can be
+          trusted on new data. Difference is in percentage points; positive means we measure more errors.
+        </p>
+      </header>
+      <div class="scroll">
+        <table class="tbl repro">
+          <thead>
+            <tr>
+              <th>Detector</th><th>Evalset</th><th class="num">Our EER (95% interval)</th><th>Published</th><th
+                class="num">Difference</th
+              ><th class="num">AUC</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              R.repro.map((r) => (
+                <tr>
+                  <td class="nowrap">{r.model}</td>
+                  <td class="nowrap">{r.evalset}</td>
+                  <td class="num">{r.eer}</td>
+                  <td class="dim">{r.published}</td>
+                  <td class="num diff">{r.diff}</td>
+                  <td class="num">{r.auc}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="snip text" set:html={R.reproBody} />
+    </section>
+
+    <section id="video-hidf" class="block">
+      <header>
+        <div class="kicker">Video · provisional</div>
+        <h2>Faces: HiDF</h2>
+        <div class="snip" style="max-width: 66ch; color: var(--muted)" set:html={R.video.intro} />
+      </header>
+      <div class="cirows">
+        {
+          R.video.rows.map((v) => (
+            <div class="row">
+              <span>{v.name}</span>
+              <div class="ci">
+                <span class="bar" aria-hidden="true" style={`left: ${v.ciLeft}; width: ${v.ciWidth}`} />
+                <span class="dot" style={`left: ${v.left}; background: ${v.dot}`} />
+              </div>
+              <span class="val"><b>{v.auc}</b> <span class="dim">({v.ci}) · EER {v.eer}</span></span>
+            </div>
+          ))
+        }
+        <div class="row axisrow">
+          <span></span>
+          <div class="axis"><span>0.5</span><span>0.75</span><span>1.0 AUC</span></div>
+          <span></span>
+        </div>
+      </div>
+      <div class="snip text" set:html={R.video.raceIntro} />
+      <div class="scroll">
+        <table class="tbl race">
+          <thead>
+            <tr>{R.video.race.head.map((h) => <th>{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {R.video.race.rows.map((r) => <tr>{r.map((c) => <td class={c.hot ? "hot" : undefined}>{c.text}</td>)}</tr>)}
+          </tbody>
+        </table>
+      </div>
+      <div class="cols-3">
+        {
+          R.video.points.map((p) => (
+            <div class="card" style="font-size: 0.9rem">
+              <strong style="font-size: 1rem">{p.label}</strong>
+              <div class="snip" set:html={p.body} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="all-runs" class="block">
+      <header>
+        <div class="kicker">Every countable run</div>
+        <h2>All runs</h2>
+        <p>
+          One row per detector and evalset scored in full. Failed clips, such as a video with no face, are counted,
+          never dropped. Wall time includes reading files from shared storage.
+        </p>
+      </header>
+      <div class="filters" role="group" aria-label="Filter runs">
+        {
+          R.runs.filters.map((f) => (
+            <button type="button" data-filter={f.id} aria-pressed={String(f.id === "all")}>
+              {f.label} · {f.n}
+            </button>
+          ))
+        }
+      </div>
+      <div class="scroll">
+        <table class="tbl runs">
+          <thead>
+            <tr>
+              <th>Evalset</th><th>Detector</th><th class="num">AUC</th><th class="num">95% interval</th><th
+                class="num">EER</th
+              ><th class="num">Real / fake</th><th class="num">Failed</th><th class="num">Wall time</th><th>Caveats</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              R.runs.rows.map((r) => (
+                <tr title={r.title} data-group={r.group}>
+                  <td>
+                    <span class="nowrap">{r.evalset}</span>
+                    <span class="id">{r.evalsetId}</span>
+                  </td>
+                  <td class="nowrap">{r.model}</td>
+                  <td class="auc">
+                    <span class="auc-pill" style={`background: ${r.bg}; color: ${r.fg}`}>{r.auc}</span>
+                  </td>
+                  <td class="num dim">{r.ci}</td>
+                  <td class="num">{r.eer}</td>
+                  <td class="num">{r.realFake}</td>
+                  <td class="num">{r.failed}</td>
+                  <td class="num">{r.wall}</td>
+                  <td>
+                    <div class="flaglist">{r.flags.map((f) => <span class="flagtag">{f}</span>)}</div>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <dl class="terms-dl">
+        <div><dt>below chance</dt><dd>AUC under 0.5. On a reproduction set it means a bug in how scores are read; on a South Asian set it is a real finding about the detector.</dd></div>
+        <div><dt>source overlap</dt><dd>The detector's pretraining used a corpus the evalset also draws on. Reported with a warning, kept out of headline numbers.</dd></div>
+        <div><dt>no parity check</dt><dd>The adapter hasn't yet been shown to score like the authors' code. Treat as provisional.</dd></div>
+        <div><dt>score direction unchecked</dt><dd>The detector hasn't yet scored above chance on a reproduction set, so its scores could be read backwards.</dd></div>
+      </dl>
+    </section>
+
+    <section id="what-the-results-cant-say-yet" class="block" style="gap: 16px">
+      <header>
+        <div class="kicker">Not covered yet</div>
+        <h2>What the results can't say yet</h2>
+      </header>
+      <div class="snip" style="max-width: 72ch" set:html={R.gaps} />
+      <a class="more" href={`${base}docs/results/`}>Read the full write-up →</a>
+    </section>
+  </div>
+</Base>
+
+<script>
+  // AUC or EER in the South Asian table, and which runs the table below shows. Both views are
+  // in the page; these only switch.
+  const sa = document.getElementById("audio-south-asian-speech")!;
+  for (const b of sa.querySelectorAll<HTMLButtonElement>(".toggle button")) {
+    b.addEventListener("click", () => {
+      sa.dataset.metric = b.dataset.metric;
+      for (const o of sa.querySelectorAll(".toggle button")) o.setAttribute("aria-pressed", String(o === b));
+    });
+  }
+  const runs = document.getElementById("all-runs")!;
+  for (const b of runs.querySelectorAll<HTMLButtonElement>(".filters button")) {
+    b.addEventListener("click", () => {
+      const f = b.dataset.filter;
+      for (const o of runs.querySelectorAll(".filters button")) o.setAttribute("aria-pressed", String(o === b));
+      for (const tr of runs.querySelectorAll<HTMLTableRowElement>("tbody tr")) tr.hidden = f !== "all" && tr.dataset.group !== f;
+    });
+  }
+</script>

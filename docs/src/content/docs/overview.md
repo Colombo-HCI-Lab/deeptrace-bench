@@ -5,7 +5,7 @@ group: start
 order: 1
 ---
 
-deeptrace-bench runs open deepfake detectors on South Asian audio and video under one evaluation setup, and reports how well each holds up overall and per group. The [status page](https://colombo-hci-lab.github.io/deeptrace-bench/) shows every model, dataset and run; these docs explain them.
+deeptrace-bench runs open deepfake detectors on South Asian audio and video under one evaluation setup, and reports how well each holds up overall and per group. [Models and data](https://colombo-hci-lab.github.io/deeptrace-bench/inventory/) shows every model, dataset and run, and [Results](results.md) what the runs show; these docs explain them.
 
 | Doc | What it covers |
 | --- | --- |

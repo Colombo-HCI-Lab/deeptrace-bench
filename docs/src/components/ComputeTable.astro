@@ -13,12 +13,12 @@ const groups = (["audio", "video", "audio_video"] as const)
 const missing = D.models.filter((m) => !m.profile).map((m) => m.name);
 ---
 
-<table class="ref compute-t">
+<table class="tbl compute">
   <thead>
     <tr>
-      <th>Model</th><th class="num">Parameters</th><th class="num">GFLOPs per input</th><th class="num"
+      <th>Detector</th><th class="num">Parameters</th><th class="num">GFLOPs per input</th><th class="num"
         >GPU time per input</th
-      ><th class="num">GPU memory</th><th class="num">Time for 1 h of audio or 1,000 videos</th>
+      ><th class="num">GPU memory</th><th class="num">1 h of audio or 1,000 videos</th>
     </tr>
   </thead>
   <tbody>

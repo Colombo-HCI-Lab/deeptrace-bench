@@ -14,9 +14,9 @@ interface Props {
 }
 
 const { id, title, description, group, headings } = Astro.props;
-// Docs with their own site-bar link light it up; the rest light up Docs.
-const section = id === "catalog" ? "reference" : id === "progress" || id === "results" ? id : "docs";
-const sections = headings.filter((h) => h.depth === 2);
+// Results and Progress have guided pages that already index them, so their full write-ups don't.
+const guided = id === "results" || id === "progress";
+const sections = guided ? [] : headings.filter((h) => h.depth === 2);
 // A title may carry a code span, as `DTB_ROOT` does.
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
 const titleHtml = esc(title).replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -25,17 +25,17 @@ const titleHtml = esc(title).replace(/`([^`]+)`/g, "<code>$1</code>");
 <Base
   title={`${title.replaceAll("`", "")} · deeptrace-bench`}
   description={description}
-  section={section}
+  section="docs"
 >
   <div class="doc">
     <nav class="rail" aria-label="Docs"><DocList current={id} /></nav>
     <div class="page">
       <details class="rail-mobile">
-        <summary class="label">All docs</summary>
+        <summary>All docs</summary>
         <nav class="rail rail-open" aria-label="Docs"><DocList current={id} /></nav>
       </details>
       <header class="mast">
-        <div class="label">{GROUPS[group]}</div>
+        <div class="kicker">Docs · {GROUPS[group]}</div>
         <h1 set:html={titleHtml} />
         <p class="lede">{description}</p>
       </header>

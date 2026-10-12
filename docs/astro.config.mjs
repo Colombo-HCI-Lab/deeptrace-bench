@@ -1,4 +1,4 @@
-// The deeptrace-bench site: the status page and every doc, served by GitHub Pages from the
+// The deeptrace-bench site: the guided pages and every doc, served by GitHub Pages from the
 // build of this folder (see .github/workflows/pages.yml).
 import { satteri } from "@astrojs/markdown-satteri";
 import { defineConfig } from "astro/config";

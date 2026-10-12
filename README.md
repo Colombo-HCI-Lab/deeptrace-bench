@@ -25,7 +25,7 @@ uv run scripts/setup_datasets.py urdu_csalt asvspoof2019_la
 uv run scripts/smoke.py --model aasist         # an audio model, on a few Urdu clips
 ```
 
-[Smoke test](https://colombo-hci-lab.github.io/deeptrace-bench/smoke_test/) explains the smoke test and its report; [The store](https://colombo-hci-lab.github.io/deeptrace-bench/store_layout/) maps everything the scripts write.
+[Smoke test](https://colombo-hci-lab.github.io/deeptrace-bench/docs/smoke_test/) explains the smoke test and its report; [The store](https://colombo-hci-lab.github.io/deeptrace-bench/docs/store_layout/) maps everything the scripts write.
 
 ## Workflow
 
@@ -36,11 +36,11 @@ uv run scripts/smoke.py --model aasist         # an audio model, on a few Urdu c
 5. **Smoke test** (`scripts/smoke.py`): steps 1 to 4 on a few items per dataset, in `DTB_ROOT/smoke/`, with a report per run. Run it after any change, and to prove a new model or dataset is wired up.
 6. **Parity** (`scripts/parity.py`): before a model's numbers count, its adapter and the upstream code score the same ~200 items within 1e-3; the summary goes to `results/parity/<model>.json`.
 7. **Profile** (`scripts/profile_models.py --device cuda`): parameters, FLOPs per input, GPU time per input and peak memory for every model, on sampled smoke items, into `results/profile/<model>.json`.
-8. **Site** (`scripts/build_site.py`): rewrites the data behind the status page of the public site at <https://colombo-hci-lab.github.io/deeptrace-bench/>, which also carries every doc: a primer for newcomers, the pipeline, which model was scored on which evalset, every model and dataset with its paper and citation count, every countable run, and compute costs with time estimates. It reads run summaries from the store, so rebuild it where `DTB_ROOT` is set, and commit `docs/src/reference/status.json` and the regenerated `catalog.md`; a push to `main` redeploys the site. Plain-language summaries and paper ids live in `docs/src/reference/catalog.yaml`; `--citations` refreshes the counts from Semantic Scholar into `results/citations.json`.
+8. **Site** (`scripts/build_site.py`): rewrites the data behind the public site at <https://colombo-hci-lab.github.io/deeptrace-bench/>: the findings at a glance, Results with every countable run, Progress, How it works (the pipeline and a primer for newcomers), Models & data (which model was scored on which evalset, every model and dataset with its paper and citation count, compute costs with time estimates) and every doc. It reads run summaries from the store, so rebuild it where `DTB_ROOT` is set, and commit `docs/src/reference/status.json` and the regenerated `catalog.md`; a push to `main` redeploys the site. Plain-language summaries and paper ids live in `docs/src/reference/catalog.yaml`; `--citations` refreshes the counts from Semantic Scholar into `results/citations.json`.
 
-Adding a model or a dataset: [Adding a model](https://colombo-hci-lab.github.io/deeptrace-bench/adding_a_model/), [Adding a dataset](https://colombo-hci-lab.github.io/deeptrace-bench/adding_a_dataset/).
+Adding a model or a dataset: [Adding a model](https://colombo-hci-lab.github.io/deeptrace-bench/docs/adding_a_model/), [Adding a dataset](https://colombo-hci-lab.github.io/deeptrace-bench/docs/adding_a_dataset/).
 
-On the cluster the same steps run as SLURM jobs from `slurm/`. See [Running on Curnagl](https://colombo-hci-lab.github.io/deeptrace-bench/cluster/).
+On the cluster the same steps run as SLURM jobs from `slurm/`. See [Running on Curnagl](https://colombo-hci-lab.github.io/deeptrace-bench/docs/cluster/).
 
 ## What's in scope
 
@@ -54,7 +54,7 @@ On the cluster the same steps run as SLURM jobs from `slurm/`. See [Running on C
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | Urdu (CSALT), BanglaFake, BD-GRF6, Bangla voices (Mendeley), IndicTTS challenge, IndicSynth + IndicSUPERB, SpeechFake, OpenSLR Sinhala, HiDF, ASVspoof 2019 LA, In-the-Wild                                        | MLAAD, MAVOS-DD Hindi, Svarah                          | FF++, Celeb-DF v2, FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, Deepfake-Eval-2024, Casual Conversations v2, IndieFake, SEA-Spoof |
 
-MAVOS-DD's Hindi subset is the only South Asian video available without an institutional request (accept its terms on Hugging Face). Two open sets, Mendeley Roop/Akool frames and the UniDataPro video preview (with its audio, for the audio-visual path), serve as pipeline tests only: they prove the code works and are never reported. Details, access routes and licence terms: [Models](https://colombo-hci-lab.github.io/deeptrace-bench/models/), [Datasets](https://colombo-hci-lab.github.io/deeptrace-bench/datasets/).
+MAVOS-DD's Hindi subset is the only South Asian video available without an institutional request (accept its terms on Hugging Face). Two open sets, Mendeley Roop/Akool frames and the UniDataPro video preview (with its audio, for the audio-visual path), serve as pipeline tests only: they prove the code works and are never reported. Details, access routes and licence terms: [Models](https://colombo-hci-lab.github.io/deeptrace-bench/docs/models/), [Datasets](https://colombo-hci-lab.github.io/deeptrace-bench/docs/datasets/).
 
 ## Layout
 
@@ -91,15 +91,15 @@ scripts/         setup_models, setup_datasets, score, evaluate, smoke, parity; h
 slurm/           job templates for Curnagl
 patches/         compatibility patches for upstream code
 results/         published aggregate results and parity summaries (no item-level data)
-docs/            the public site (Astro): the status page and every doc, in
+docs/            the public site (Astro): the guided pages and every doc, in
                  src/content/docs/; npm run dev to preview
 tests/           synthetic fixtures only
 ```
 
 ## Data stays out of git
 
-Datasets, weights, manifests and per-item scores live under `DTB_ROOT`, never in the repo: most licences are research only, and several count item names as derived data. Only code, configs and aggregate tables are committed, and the pre-commit hook enforces it. See [Data policy](https://colombo-hci-lab.github.io/deeptrace-bench/data_policy/).
+Datasets, weights, manifests and per-item scores live under `DTB_ROOT`, never in the repo: most licences are research only, and several count item names as derived data. Only code, configs and aggregate tables are committed, and the pre-commit hook enforces it. See [Data policy](https://colombo-hci-lab.github.io/deeptrace-bench/docs/data_policy/).
 
 ## Licence
 
-Not yet chosen. The repo has been public since 2026-10-05, so GitHub Pages can serve the status page at <https://colombo-hci-lab.github.io/deeptrace-bench/>. Upstream detector code keeps its own licence and is never copied in unless it is MIT.
+Not yet chosen. The repo has been public since 2026-10-05, so GitHub Pages can serve the site at <https://colombo-hci-lab.github.io/deeptrace-bench/>. Upstream detector code keeps its own licence and is never copied in unless it is MIT.

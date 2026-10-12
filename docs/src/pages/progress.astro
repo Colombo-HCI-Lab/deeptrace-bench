@@ -1,0 +1,105 @@
+---
+// Where the benchmark stands, each round of work and the plan: progress.md laid out. The full
+// doc stays at docs/progress/.
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import { buildProgress } from "../lib/guide";
+
+const base = import.meta.env.BASE_URL;
+const P = buildProgress((await getEntry("docs", "progress"))!.body ?? "");
+---
+
+<Base
+  title="Progress · deeptrace-bench"
+  description="Where the benchmark stands, what each round of work added, and what comes next."
+  section="progress"
+>
+  <div class="stack">
+    <header class="mast">
+      <div class="kicker">Progress · as of {P.asOf}</div>
+      <h1>What's done, and what's next</h1>
+      <p class="lede">
+        Where the benchmark stands, each round of work newest first, and the plan from here. For what the numbers say,
+        see <a href={`${base}results/`}>Results</a>.
+      </p>
+    </header>
+
+    <section id="where-things-stand" class="block">
+      <header><h2>Where things stand</h2></header>
+      <div class="cols-2" style="gap: 12px">
+        {
+          P.stand.map((s) => (
+            <div class="card fill">
+              <h3 style="font-size: 1.1rem">{s.label}</h3>
+              <div class="snip" set:html={s.body} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <div class="prog">
+      <section id="timeline" class="block">
+        <header>
+          <h2>Timeline</h2>
+          <p>Newest first. Each round lists what it added and its commit range.</p>
+        </header>
+        {
+          P.timeline.map((t) => (
+            <article class="round">
+              <div class="when">
+                <time datetime={t.date}>{t.date}</time>
+                {t.latest && <span class="tag">Latest</span>}
+              </div>
+              <div>
+                <h3>{t.title}</h3>
+                {t.commits && <div class="snip commits" set:html={t.commits} />}
+                <div class="snip" set:html={t.body} />
+              </div>
+            </article>
+          ))
+        }
+      </section>
+      <div>
+        <section id="next" class="block">
+          <header>
+            <h2>Next</h2>
+            <p>In order.</p>
+          </header>
+          <ol class="steps">
+            {
+              P.next.map((n) => (
+                <li>
+                  <span class="n">{n.n}</span>
+                  <div>
+                    <div class="head">
+                      <strong>{n.label}</strong>
+                      {n.now && <span class="tag">Now</span>}
+                    </div>
+                    <div class="snip" set:html={n.body} />
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </section>
+        <section id="open-decisions-that-shape-the-results" class="block">
+          <header><h2>Open decisions that shape the results</h2></header>
+          {
+            P.decisions.map((d) => (
+              <div class="decision">
+                {d.code ? <code>{d.label}</code> : <strong>{d.label}</strong>}
+                <div class="snip" set:html={d.body} />
+              </div>
+            ))
+          }
+        </section>
+      </div>
+    </div>
+
+    <section class="adding">
+      <h2>Adding an entry</h2>
+      <div class="snip" set:html={P.adding} />
+    </section>
+  </div>
+</Base>

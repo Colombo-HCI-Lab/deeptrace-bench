@@ -1,0 +1,23 @@
+---
+// A page that moved: send the reader on, keeping the #anchor they came with.
+interface Props {
+  to: string;
+  title: string;
+}
+
+const { to, title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title} · deeptrace-bench</title>
+    <link rel="canonical" href={new URL(to, Astro.site).href} />
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+    <script is:inline define:vars={{ to }}>location.replace(to + location.hash);</script>
+  </head>
+  <body>
+    <p>This page is now at <a href={to}>{to}</a>.</p>
+  </body>
+</html>

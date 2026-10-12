@@ -1,0 +1,145 @@
+---
+// Every detector and dataset: what ran on what, where each comes from and what a run costs,
+// rendered from src/reference/status.json (scripts/build_site.py writes it). Four tabs, chosen
+// by the URL's #anchor; without scripts all four show in turn.
+import ComputeTable from "../components/ComputeTable.astro";
+import CoverageGrid from "../components/CoverageGrid.astro";
+import DatasetsTable from "../components/DatasetsTable.astro";
+import EstimateTable from "../components/EstimateTable.astro";
+import ModelsTable from "../components/ModelsTable.astro";
+import Base from "../layouts/Base.astro";
+import { D } from "../lib/status";
+
+const base = import.meta.env.BASE_URL;
+const tabs = [
+  ["coverage", "Coverage", D.evalsets.length],
+  ["models", "Models", D.models.length],
+  ["datasets", "Datasets", D.datasets.filter((d) => d.role !== "pipeline_test").length],
+  ["compute", "Compute", D.models.filter((m) => m.profile).length],
+] as const;
+
+const videoModels = D.models.filter((m) => m.modality === "video" || m.modality === "audio_video");
+const open = D.evalsets.filter((e) => e.modality !== "audio" && e.status === "ready").map((e) => e.id);
+const videoNote = D.runs.some((r) => videoModels.some((m) => m.id === r.model))
+  ? null
+  : `No video model has a full run yet. Open video evalsets: ${open.join(", ") || "none"}; the rest are waiting for access requests to be approved.`;
+
+const gpu = D.models.find((m) => m.profile?.gpu)?.profile;
+const gpuIntro = gpu
+  ? `Measured on one ${gpu.gpu} in ${gpu.precision === "fp32" ? "full 32-bit precision" : gpu.precision}, with each model already loaded and only the model's own work counted. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them. GFLOPs (billions of arithmetic operations) measure the work regardless of hardware; milliseconds are what it took on this GPU.`
+  : "Measured with each model already loaded, counting only the model's own work. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them.";
+---
+
+<Base
+  title="Models and data · deeptrace-bench"
+  description="Every detector and dataset in deeptrace-bench: what ran on what, where each comes from, and what a run costs."
+  section="inventory"
+>
+  <div class="inventory">
+    <header class="mast">
+      <div class="kicker">Models &amp; data</div>
+      <h1>Every detector, every dataset</h1>
+      <p class="lede">
+        What ran on what, where each model and dataset comes from, and what a run costs. Plain-language descriptions of
+        each are in the <a href={`${base}docs/catalog/`}>reference</a>.
+      </p>
+    </header>
+    <div id="inventory-tabs" class="tabs" role="tablist" aria-label="Sections">
+      {
+        tabs.map(([id, label, n], i) => (
+          <a href={`#${id}`} role="tab" aria-selected={String(i === 0)} aria-controls={`panel-${id}`}>
+            {label} <span>{n}</span>
+          </a>
+        ))
+      }
+    </div>
+
+    <section id="panel-coverage" class="panel on" role="tabpanel" data-mode="auc">
+      <p class="intro">
+        Each row is a detector and each column an evalset. A number is the detector's AUC on the whole evalset. Switch
+        to estimated time to see how long a full run would take on one GPU.
+      </p>
+      <div class="toggle" role="group" aria-label="Show in cells">
+        <button type="button" data-mode="auc" aria-pressed="true">AUC</button>
+        <button type="button" data-mode="time" aria-pressed="false">Estimated GPU time</button>
+      </div>
+      <div class="legend">
+        <span><i class="cell" style="background: var(--good)">0.99</i><i class="cell" style="background: color-mix(in oklab, var(--bad) 80%, var(--paper))">0.10</i>AUC: green high, red below chance</span>
+        <span><i>*</i>has a caveat (hover)</span>
+        <span><i class="guard">⊘</i>refused: trained on this data</span>
+        <span><i>·</i>not run yet</span>
+        <span><i class="hatch"></i>waiting for data access</span>
+        <span><i class="na"></i>can't read this kind of input</span>
+      </div>
+      <h3>Audio</h3>
+      <div class="scroll"><CoverageGrid models={["audio"]} evalsets={["audio"]} /></div>
+      <h3>Video and audio-visual</h3>
+      <div class="scroll"><CoverageGrid models={["video", "audio_video"]} evalsets={["video", "image", "audio_video"]} /></div>
+      <p class="note">● adapter written / parity passed · ○ not yet. Italic column names are evalsets waiting for data access.</p>
+      {videoNote && <p class="note" style="font-size: 0.9rem">{videoNote}</p>}
+    </section>
+
+    <section id="panel-models" class="panel" role="tabpanel">
+      <p class="intro">
+        Every detector comes from a published paper with released weights. Parameters are the numbers a model learned;
+        bigger needs more compute but isn't always more accurate. Citation counts are a rough signal of influence. Names
+        link to the full description.
+      </p>
+      <div class="scroll"><ModelsTable /></div>
+      {
+        D.citations_checked && (
+          <p class="note">
+            Citation counts from Semantic Scholar, checked {D.citations_checked}. Google Scholar usually reports higher
+            numbers.
+          </p>
+        )
+      }
+    </section>
+
+    <section id="panel-datasets" class="panel" role="tabpanel">
+      <p class="intro">
+        South Asian sets are what the benchmark is for. Reproduction sets check our numbers against published ones.
+        Real-reference sets supply genuine speech when a dataset only has fakes. Access says what it takes to get the
+        data.
+      </p>
+      <div class="scroll"><DatasetsTable /></div>
+    </section>
+
+    <section id="panel-compute" class="panel" role="tabpanel">
+      <p class="intro">{gpuIntro}</p>
+      <div class="scroll"><ComputeTable /></div>
+      <h3 class="est">Estimated time for a full evalset</h3>
+      <p class="note" style="font-size: 0.92rem">
+        Model time only, from the measured time per window. Where a real run exists, its wall time follows in grey:
+        reading thousands of files from shared storage, not the model, is usually the slow part.
+      </p>
+      <div class="scroll"><EstimateTable /></div>
+    </section>
+  </div>
+</Base>
+
+<script>
+  // The tab is the URL's #anchor (#models, #compute ...), so links can name one.
+  const ids = ["coverage", "models", "datasets", "compute"];
+  const bar = document.getElementById("inventory-tabs")!;
+  function show(scroll: boolean) {
+    const hash = location.hash.slice(1);
+    const id = ids.includes(hash) ? hash : "coverage";
+    for (const t of ids) {
+      document.getElementById(`panel-${t}`)!.classList.toggle("on", t === id);
+      bar.querySelector(`[href="#${t}"]`)!.setAttribute("aria-selected", String(t === id));
+    }
+    if (scroll && ids.includes(hash)) window.scrollTo(0, bar.getBoundingClientRect().top + window.scrollY);
+  }
+  show(true);
+  window.addEventListener("hashchange", () => show(true));
+
+  // AUC or estimated GPU time in the coverage grids. Both are in the page; this only switches.
+  const coverage = document.getElementById("panel-coverage")!;
+  for (const b of coverage.querySelectorAll<HTMLButtonElement>(".toggle button")) {
+    b.addEventListener("click", () => {
+      coverage.dataset.mode = b.dataset.mode;
+      for (const o of coverage.querySelectorAll(".toggle button")) o.setAttribute("aria-pressed", String(o === b));
+    });
+  }
+</script>

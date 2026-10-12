@@ -13,7 +13,7 @@ As of 2026-10-12:
 
 - **Models.** 25 detectors have adapters, and 24 have their weights (Effort's wait on Google Drive's download quota; AltFreezing's weights can't be reached at all). 17 pass their parity check against upstream code ([models.md](models.md#parity)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. The request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on their requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** Ten models have full runs, 48 model and evalset pairs in all, shown on the [status page](https://colombo-hci-lab.github.io/deeptrace-bench/#runs). Every audio model with a parity check has a settled score direction. No video model does yet, since that needs FF++ or Celeb-DF v2.
+- **Runs.** Ten models have full runs, 48 model and evalset pairs in all, shown in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs). Every audio model with a parity check has a settled score direction. No video model does yet, since that needs FF++ or Celeb-DF v2.
 - **Rules.** The evaluation setup in [`configs/eval/default.yaml`](/configs/eval/default.yaml) is still `proposed`: decision 5 was due 2026-10-09 and isn't settled. Every number so far can still move.
 
 ## Timeline

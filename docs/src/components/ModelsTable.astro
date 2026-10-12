@@ -3,7 +3,7 @@
 import { D, MOD, nRuns, params, type Model } from "../lib/status";
 import PaperCells from "./PaperCells.astro";
 
-const ref = `${import.meta.env.BASE_URL}catalog/`;
+const ref = `${import.meta.env.BASE_URL}docs/catalog/`;
 const cites = (m: Model) => m.paper?.citations ?? 0;
 const groups = (["audio", "video", "audio_video"] as const)
   .map((mod) => ({
@@ -13,10 +13,10 @@ const groups = (["audio", "video", "audio_video"] as const)
   .filter((g) => g.rows.length);
 ---
 
-<table class="ref models-t">
+<table class="tbl models">
   <thead>
     <tr>
-      <th>Model</th><th>Paper</th><th class="num">Citations</th><th>Trained on</th><th class="num">Parameters</th><th
+      <th>Detector</th><th>Paper</th><th class="num">Citations</th><th>Trained on</th><th class="num">Parameters</th><th
         >Status</th
       >
     </tr>
@@ -34,14 +34,24 @@ const groups = (["audio", "video", "audio_video"] as const)
             const n = nRuns(m);
             return (
               <tr>
-                <td>
+                <td class="wide">
                   <a class="name" href={`${ref}#model-${m.id}`}>
                     {m.name}
                   </a>
                   {m.summary && <span class="sum">{m.summary}</span>}
                 </td>
                 <PaperCells paper={m.paper} />
-                <td>{m.trained_on.length ? m.trained_on.join(", ") : <span class="dim">·</span>}</td>
+                <td title={m.trained_on.join(", ")}>
+                  {m.trained_on.length ? (
+                    m.trained_on.length > 4 ? (
+                      `${m.trained_on.slice(0, 3).join(", ")} and ${m.trained_on.length - 3} more`
+                    ) : (
+                      m.trained_on.join(", ")
+                    )
+                  ) : (
+                    <span class="dim">·</span>
+                  )}
+                </td>
                 <td class="num">{m.profile ? params(m.profile.params) : <span class="dim">·</span>}</td>
                 <td class="nowrap">
                   {m.blocked ? (

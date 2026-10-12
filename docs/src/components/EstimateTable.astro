@@ -10,10 +10,10 @@ const rows = D.models
   .sort((a, b) => nRuns(b) - nRuns(a) || a.profile!.ms_per_unit - b.profile!.ms_per_unit);
 ---
 
-<table class="ref est-t">
+<table class="tbl est">
   <thead>
     <tr>
-      <th>Model</th>
+      <th>Detector</th>
       {
         sized.map((e) => (
           <th class="num">

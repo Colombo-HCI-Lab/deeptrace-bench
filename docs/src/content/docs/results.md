@@ -7,7 +7,7 @@ order: 2
 
 ## Read this first
 
-- **A snapshot as of 2026-10-12.** The [status page](https://colombo-hci-lab.github.io/deeptrace-bench/#runs) always holds the latest numbers for every run; this page explains them. What was run and why is in [Experiments](experiments.md).
+- **A snapshot as of 2026-10-12.** The [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) always holds the latest numbers for every run; this page explains them. What was run and why is in [Experiments](experiments.md).
 - **Zero-shot.** No model has seen these evalsets in training; none has been fine-tuned.
 - **Provisional rules.** The evaluation setup is still `proposed` (decision 5), and nothing has been published with `evaluate.py --publish`. Numbers can move when the setup is settled.
 - **The guard compares datasets, not generators.** A `clean` verdict means no known dataset overlap. A model can still have trained on the same TTS systems an evalset's fakes were made with, and the guard can't see that.

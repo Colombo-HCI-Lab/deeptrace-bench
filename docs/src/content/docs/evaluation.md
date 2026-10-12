@@ -64,6 +64,6 @@ For every cross-corpus evalset: a logistic regression on trivial features only (
 
 `splits.identity_safe_split` links items that share a `subject_id` or `source_subject_id` and keeps each linked group in one split, so no face or voice appears on both sides. The seed and code live in git; the assignments live in `DTB_ROOT/splits/`.
 
-## Flags on the status page
+## Flags on each run
 
-Beside the verdict, the [status page](https://colombo-hci-lab.github.io/deeptrace-bench/#runs) flags what a reader must know before quoting a run: `cross-corpus`; `below chance`; `no parity check`, when the model's adapter hasn't been shown to score like its upstream code; and `score direction unchecked`, when the model hasn't yet scored above chance on a reproduction evalset, so its scores could be read backwards. Runs with either of the last two are provisional.
+Beside the verdict, the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) flags what a reader must know before quoting a run: `cross-corpus`; `below chance`; `no parity check`, when the model's adapter hasn't been shown to score like its upstream code; and `score direction unchecked`, when the model hasn't yet scored above chance on a reproduction evalset, so its scores could be read backwards. Runs with either of the last two are provisional.

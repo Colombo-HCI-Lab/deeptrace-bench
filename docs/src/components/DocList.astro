@@ -1,27 +1,26 @@
 ---
 // Every doc, in its group and order; the current one marked.
 import { getCollection } from "astro:content";
-import { GROUPS } from "../lib/docs";
+import { GROUPS, docHref } from "../lib/docs";
 
 interface Props {
   current: string;
 }
 
 const { current } = Astro.props;
-const base = import.meta.env.BASE_URL;
 const docs = (await getCollection("docs")).sort((a, b) => a.data.order - b.data.order);
 ---
 
 {
   Object.entries(GROUPS).map(([group, label]) => (
     <div>
-      <div class="label">{label}</div>
+      <div class="kicker">{label}</div>
       <ol>
         {docs
           .filter((d) => d.data.group === group)
           .map((d) => (
             <li>
-              <a href={`${base}${d.id}/`} aria-current={d.id === current ? "page" : undefined}>
+              <a href={docHref(d.id)} aria-current={d.id === current ? "page" : undefined}>
                 {d.data.title.replaceAll("`", "")}
               </a>
             </li>
