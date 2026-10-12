@@ -1,17 +1,26 @@
 ---
 title: "Overview"
 description: "The docs at a glance, and how configs, setup, scoring and evaluation fit together"
-group: benchmark
+group: start
 order: 1
 ---
 
+deeptrace-bench runs open deepfake detectors on South Asian audio and video under one evaluation setup, and reports how well each holds up overall and per group. The [status page](https://colombo-hci-lab.github.io/deeptrace-bench/) shows every model, dataset and run; these docs explain them.
+
 | Doc | What it covers |
 | --- | --- |
+| **Start here** | |
+| [Progress](progress.md) | Where the benchmark stands, what each round of work added, and what comes next |
+| **Experiments and results** | |
+| [Experiments](experiments.md) | What has been run, the question each run answers, and how to run it again |
+| [Results](results.md) | What the runs so far show, with the numbers and their caveats |
+| **Reference** | |
 | [Models](models.md) | Every detector: status, wave, where code and weights come from, training data, porting notes, parity check |
 | [Datasets](datasets.md) | Every dataset: how to get it, who requests or signs, licence terms, what's in it |
 | [Models and datasets](catalog.md) | Every detector and dataset in plain language: paper, size, cost, what each records (generated) |
 | [Evaluation](evaluation.md) | Evalsets, preprocessing, metrics, failure accounting, contamination verdicts, the shortcut probe |
 | [Data policy](data_policy.md) | What may enter git, licence clauses that bind us, sharing data across institutions |
+| **Working on it** | |
 | [Smoke test](smoke_test.md) | One command that runs the whole pipeline on a few items per dataset, and how to read its report |
 | [The store](store_layout.md) | The `DTB_ROOT` tree: what each folder holds, naming rules, the smoke namespace, what's safe to delete |
 | [Adding a model](adding_a_model.md) | Recipe: config, pinned weights, adapter, smoke test, parity (GenD as the worked example) |
@@ -40,4 +49,4 @@ Paths on the right are under `DTB_ROOT`; [store_layout.md](store_layout.md) has 
 4. **Evaluation** computes overall and per-group metrics with intervals, and publishes the aggregates (never for pipeline tests).
 5. **Smoke test** runs 2 to 4 on a few items per dataset and writes a report, to prove the plumbing works.
 
-Status as of 2026-10-04: the whole pipeline runs end to end for GenD on two open pipeline-test datasets (an image set and a video set), on a laptop. The face pipeline, sampling and the GenD adapter are written; GenD's parity with upstream isn't checked yet. Other adapters and dataset builders are documented stubs, written as each model and dataset arrives.
+Where the work stands, and what changed in each round, is in [Progress](progress.md).
