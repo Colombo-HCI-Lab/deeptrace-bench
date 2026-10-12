@@ -13,6 +13,50 @@ order: 2
 - **The guard compares datasets, not generators.** `clean` means no known dataset overlap. A model may still have trained on the TTS systems that made an evalset's fakes.
 - **Video is provisional.** No video model has a settled score direction, and GenD has no parity check.
 
+## The datasets
+
+Every dataset a detector was scored on, plus FF++, the training set of every video detector.
+
+| Dataset | Type | Role | Language | Real / fake | Fakes made by | Groups | Licence |
+| ------- | ---- | ---- | -------- | ----------: | ------------- | ------ | ------- |
+| ASVspoof 2019 LA (eval) | Audio · TTS and voice conversion | Reproduction | English | 7,355 / 63,882 | 13 attack systems (A07 to A19) | attack | open |
+| In-the-Wild | Audio · real-world deepfakes | Reproduction | English | 19,963 / 11,816 | collected from the web | none | CC BY-SA 4.0 |
+| Urdu CSALT | Audio · TTS | South Asian | Urdu | 3,398 / 3,396 | VITS, Tacotron | generator | CC BY-NC |
+| BanglaFake | Audio · TTS | South Asian | Bengali | 12,796 / 12,796 | VITS | sub-corpus | none declared |
+| Bangla voices | Audio · TTS, each fake paired with its real twin | South Asian | Bengali | 2,250 / 2,250 | not named | gender | CC BY 4.0 |
+| IndicTTS challenge | Audio · TTS | South Asian | 16 Indian languages, Nepali among them | 15,558 / 15,544 | not named | language, gender | CC BY 4.0 |
+| IndicSynth Hindi | Audio · TTS and voice conversion | South Asian | Hindi | 5,059 / 10,000 | XTTS-v2, FreeVC24 | generator, gender | CC BY-NC |
+| HiDF | Video · face swap | Race-labelled, not South Asian | n/a | 4,361 / 4,361 | a commercial face-swap tool | race, gender, age | CC BY-NC 4.0 |
+| FF++ | Video · face swap and reenactment | Training set only | n/a | 1,000 / 4,000 | Deepfakes, Face2Face, FaceSwap, NeuralTextures | none | on request |
+
+IndicSynth Hindi's 10,000 fakes are a seeded sample, 5,000 per generator, of its 205,938; its real side is IndicSUPERB, the corpus the fakes were cloned from.
+
+## The detectors
+
+| Detector | Type | Backbone | Trained on |
+| -------- | ---- | -------- | ---------- |
+| `aasist` | Graph attention network, 0.3 M parameters | none, trained from scratch | ASVspoof 2019 LA |
+| `aasist_l` | Graph attention network, 85 K parameters | none, trained from scratch | ASVspoof 2019 LA |
+| `xlsr_aasist` | Speech foundation model with a graph attention head | XLS-R 300M, 128 languages | ASVspoof 2019 LA |
+| `antideepfake_w2v_small` | Speech foundation model with a linear head | wav2vec 2.0 base, English only | 74k hours of real and fake speech, 100+ languages |
+| `antideepfake_mms_300m` | Speech foundation model with a linear head | MMS 300M, about 1,400 languages | 74k hours of real and fake speech, 100+ languages |
+| `df_arena_500m` | Speech foundation model with a conformer head | XLS-R 300M | ASVspoof 2019 and 5, MLAAD and six more |
+| `df_arena_1b` | Speech foundation model with a conformer head | XLS-R 1B | ASVspoof 2019 and 5, MLAAD and six more |
+| `xception` | CNN, 22 M parameters | ImageNet | FF++ |
+| `sbi` | CNN (EfficientNet-B4), 18 M parameters | ImageNet | FF++ real videos, with fakes made by blending each face into itself |
+| `gend` | Vision foundation model, only its LayerNorms tuned | CLIP ViT-L/14 | FF++ |
+
+## Insights
+
+1. **Doing well on its home set says nothing about South Asian speech.** AASIST scores 0.999 on ASVspoof, 0.578 on In-the-Wild and 0.048 on Bangla voices. It is below chance on four of the five South Asian sets, and on Bangla voices it is confidently backwards: almost every real clip looks more fake to it than the fakes. It most likely learned studio-clean audio as a sign of real speech, which flips on crowd-sourced recordings.
+2. **What a detector was trained on matters more than how big it is.** XLS-R + AASIST has a 300M multilingual backbone but AASIST's English-only training, and still fails on Bengali (0.467 BanglaFake, 0.389 Bangla voices). AntiDeepfake w2v2 small is a third of the size with an English-only backbone, but trained on 74k hours of multilingual real and fake speech, and scores 0.955 and 1.000 on the same sets. Shrinking AASIST to 85K parameters (AASIST-L) changes no score by more than 0.03.
+3. **With training held fixed, multilingual pretraining still helps.** The two AntiDeepfake models differ only in pretraining. Going from English-only to about 1,400 languages lifts IndicTTS from 0.895 to 0.997, Urdu from 0.969 to 0.998 and BanglaFake from 0.955 to 0.999. This is the cleanest comparison in the grid.
+4. **Past a point, bigger doesn't help.** DF Arena 1B against 500M is mixed: better on IndicTTS (0.988 against 0.978), worse on Bangla voices (0.993 against 0.998). Both are at the ceiling, which these sets can't see past.
+5. **The open South Asian sets no longer separate modern detectors.** All four multilingually trained detectors score 0.978 or more on all five South Asian sets: 20 cells of 20. Two cautions: some carry a source-overlap flag, and these detectors trained on multilingual TTS collections such as MLAAD that likely share generator families (VITS, XTTS) with these sets, which the guard can't see. Either way, studio TTS has stopped telling modern detectors apart, which is why the dataset track goes after harder material: lip-sync with cloned voices, in-the-wild clips, Sinhala and Nepali.
+6. **Urdu is the odd one out, and a warning about dataset artefacts.** The classic detectors score 0.86 on Urdu but about 0.4 on every Bengali and Indic set. Nothing about these models favours Urdu, so the difference is likely in how each dataset was recorded. Some results may reflect a corpus's quirks rather than how fake its speech is, which the planned shortcut probe will test.
+7. **Voice conversion is the classic detectors' blind spot.** On IndicSynth Hindi, at the overall EER threshold, XLS-R + AASIST misses 46% of FreeVC24 voice conversions but 3% of XTTS-v2 clips; AASIST misses 92% against 27%. The multilingual detectors miss at most 5% of either.
+8. **In video, newer and foundation-based detectors generalise better from FF++.** On HiDF, GenD scores 0.952, SBI 0.877, Xception 0.804. SBI beats Xception without ever seeing a real deepfake in training, which supports learning from self-blended faces. The fairness signal sits below AUC: at its threshold, GenD flags 28% of real Indian faces as fake, against 6 to 13% for the other groups. Provisional until FF++ or Celeb-DF confirms the score direction.
+
 ## Reproductions
 
 | Model                   | Evalset               | EER (95% interval)    | AUC    | Published               |

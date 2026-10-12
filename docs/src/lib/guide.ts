@@ -267,45 +267,99 @@ export function buildOverview(P: Progress) {
   };
 }
 
+// ---------- At a glance: every detector on every dataset ----------
+// The grid's columns: reproduction sets, the South Asian sets, then video, ending with FF++,
+// which every video detector trained on and nobody has scored yet.
+const GRID_COLS = ["asvspoof2019_la_eval", "in_the_wild", ...SA, "hidf_video", "ffpp_test"];
+const GRID_NAMES: Record<string, [string, string]> = { ...EV, ffpp_test: ["FF++", "Faces · training set"] };
+const VIDEO_GROUP = { label: "Faces", title: "Video detectors, all trained on FF++", models: ["xception", "sbi", "gend"] };
+
+export interface GridCell {
+  kind: "run" | "trained" | "na" | "todo";
+  text: string;
+  style?: string;
+  title: string;
+  overlap?: boolean;
+  home?: boolean;
+}
+
+function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) {
+  const facts = new Map((detectors?.rows ?? []).map((r) => [plain(r[0]), r.slice(1).map(plain)]));
+  const trainedOn = (modelId: string, ev: string) => {
+    const m = D.models.find((x) => x.id === modelId);
+    const names = D.datasets.filter((d) => d.evalsets.includes(ev)).map((d) => d.name);
+    return !!m && names.some((n) => m.trained_on.includes(n));
+  };
+  const cell = (id: string, ev: string): GridCell => {
+    const m = D.models.find((x) => x.id === id);
+    const e = D.evalsets.find((x) => x.id === ev);
+    const r = runs.get(`${id}|${ev}`);
+    const trained = trainedOn(id, ev);
+    if (r) {
+      const t = tone(r.auc);
+      return {
+        kind: "run",
+        text: fmt3(r.auc),
+        style: `background: ${t.bg}; color: ${t.fg}`,
+        overlap: r.flags.includes("source overlap"),
+        home: trained,
+        title:
+          `AUC ${fmt3(r.auc)} (${fmt3(r.auc_lo)}–${fmt3(r.auc_hi)}), EER ${pct(r.eer)}, ${int(r.n)} clips` +
+          (trained ? " · trained on its train split, scored on the held-out eval split" : "") +
+          (r.flags.length ? " · " + r.flags.join(", ") : ""),
+      };
+    }
+    if (trained || D.cells[`${id}|${ev}`] === "guard")
+      return { kind: "trained", text: "trained", title: "Trained on this dataset, so it isn't scored here" };
+    const audio = (x?: string) => x === "audio";
+    if (m && e && audio(m.modality) !== audio(e.modality)) return { kind: "na", text: "–", title: "Different modality" };
+    return { kind: "todo", text: "·", title: "Not run yet" };
+  };
+  const groups = [...TIERS.map((t) => ({ label: t.label, title: t.title, badge: badge(t.kind), models: t.models })), {
+    ...VIDEO_GROUP,
+    badge: badge("mid"),
+  }];
+  return {
+    cols: GRID_COLS.map((ev) => ({ id: ev, name: (GRID_NAMES[ev] ?? [ev, ""])[0], sub: (GRID_NAMES[ev] ?? [ev, ""])[1] })),
+    groups: groups.map((g) => ({
+      label: g.label,
+      title: g.title,
+      badge: g.badge,
+      rows: g.models
+        .filter((id) => D.models.some((m) => m.id === id))
+        .map((id) => {
+          const [type = "", built = "", trained = ""] = facts.get(id) ?? [];
+          return { name: name(id), type, built, trained, cells: GRID_COLS.map((ev) => cell(id, ev)) };
+        }),
+    })),
+    span: GRID_COLS.length + 1,
+  };
+}
+
 // ---------- Results ----------
 export function buildResults(body: string) {
   const secs = split(body, 2);
   const get = (re: RegExp) => section(secs, re).text;
+
+  const dsT = get(/^The datasets/);
+  const dsTable = tables(dsT)[0];
+  const datasets = {
+    head: (dsTable?.head ?? []).map(plain),
+    rows: (dsTable?.rows ?? []).map((r) => r.map(plain)),
+    note: md(prose(dsT)),
+  };
+  const grid = buildGrid(tables(get(/^The detectors/))[0]);
+  const insights = items(get(/^Insights/))
+    .map(lead)
+    .map((b, i) => ({ n: i + 1, label: b.label, body: md(b.rest) }));
 
   const firstT = get(/^Read this first/);
   const first = items(firstT)
     .map(lead)
     .map((b) => ({ label: b.label, body: md(b.rest) }));
 
-  // South Asian speech: every cell carries AUC and EER; the page's toggle shows one.
-  const sa = SA.filter((e) => D.runs.some((r) => r.evalset === e));
-  const cell = (r: Run | undefined) => {
-    if (!r) return null;
-    const a = tone(r.auc);
-    const e = tone(1 - r.eer);
-    return {
-      auc: fmt3(r.auc),
-      eer: pct(r.eer),
-      style: `--bg-auc: ${a.bg}; --fg-auc: ${a.fg}; --bg-eer: ${e.bg}; --fg-eer: ${e.fg}`,
-      overlap: r.flags.includes("source overlap"),
-      title: `AUC ${fmt3(r.auc)} (${fmt3(r.auc_lo)}–${fmt3(r.auc_hi)}), EER ${pct(r.eer)}, ${int(r.n)} clips${r.flags.length ? " · " + r.flags.join(", ") : ""}`,
-    };
-  };
-  const groups = TIERS.map((t) => ({
-    label: t.label,
-    title: t.title,
-    badge: badge(t.kind),
-    rows: t.models
-      .filter((id) => sa.some((e) => runs.has(`${id}|${e}`)))
-      .map((id) => ({ name: name(id), cells: sa.map((e) => cell(runs.get(`${id}|${e}`))) })),
-  })).filter((g) => g.rows.length);
-
   const audio = split(get(/^Audio: South Asian/), 3);
   const sub = (re: RegExp) => section(audio, re);
-  const tiersT = sub(/^Three tiers/).text;
-  const tierItems = items(tiersT)
-    .map(lead)
-    .map((b, i) => ({ n: i + 1, label: b.label, body: md(b.rest), badge: badge(TIERS[i]?.kind ?? "mid") }));
   const langS = sub(/^Language matters/);
   const langP = paras(langS.text).filter((p) => !p.startsWith("|"));
   const preS = sub(/^Multilingual pretraining/);
@@ -385,9 +439,9 @@ export function buildResults(body: string) {
   return {
     asOf: firstT.match(/as of (\d{4}-\d{2}-\d{2})/)?.[1] ?? D.built,
     first,
-    sa: { cols: sa.map((e) => ({ name: EV[e][0], sub: EV[e][1] })), groups, span: sa.length + 1 },
-    tierItems,
-    tierAfter: md(prose(tiersT)),
+    datasets,
+    grid,
+    insights,
     lang: { title: plain(langS.title), ...heat(tables(langS.text)[0]), intro: md(langP[0] ?? ""), after: md(langP.slice(1).join("\n\n")) },
     pre: { title: plain(preS.title), ...heat(tables(preS.text)[0]), body: md(prose(preS.text)) },
     notes,

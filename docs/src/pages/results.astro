@@ -41,7 +41,10 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
 
     <nav class="index" aria-label="On this page">
       <ol>
-        <li><a href="#audio-south-asian-speech">South Asian speech</a></li>
+        <li><a href="#the-datasets">Datasets</a></li>
+        <li><a href="#at-a-glance">Every detector, every dataset</a></li>
+        <li><a href="#insights">Insights</a></li>
+        <li><a href="#audio-south-asian-speech">Detail: speech</a></li>
         <li><a href="#reproductions">Reproductions</a></li>
         <li><a href="#video-hidf">Faces</a></li>
         <li><a href="#all-runs">All runs</a></li>
@@ -50,50 +53,69 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
       </ol>
     </nav>
 
-    <section id="audio-south-asian-speech" class="block" data-metric="auc">
+    <section id="the-datasets" class="block">
       <header>
-        <div class="kicker">Audio</div>
-        <h2>South Asian speech</h2>
-        <p>
-          Seven detectors on five open sets, grouped by training data. Hover a cell for its 95% interval and clip count.
-          <sup class="mono">so</sup>: source overlap (pretraining used a corpus this set draws on).
-        </p>
+        <div class="kicker">1 · What they were tested on</div>
+        <h2>The datasets</h2>
       </header>
-      <div class="toggle" role="group" aria-label="Metric">
-        <button type="button" data-metric="auc" aria-pressed="true">AUC · higher is better</button>
-        <button type="button" data-metric="eer" aria-pressed="false">EER · lower is better</button>
-      </div>
       <div class="scroll">
-        <table class="heat sa">
+        <table class="tbl dsets">
+          <thead>
+            <tr>{R.datasets.head.map((h, i) => <th class={i === 4 ? "num" : undefined}>{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {
+              R.datasets.rows.map((r) => (
+                <tr>
+                  {r.map((c, i) => (
+                    <td class={i === 0 ? "name" : i === 4 ? "num" : undefined}>{c}</td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="snip text muted" set:html={R.datasets.note} />
+    </section>
+
+    <section id="at-a-glance" class="block">
+      <header>
+        <div class="kicker">2 · The results</div>
+        <h2>Every detector on every dataset</h2>
+        <p>AUC: 0.5 is a coin flip, 1 is perfect, below 0.5 means the detector has real and fake backwards. Rows are grouped by what each detector was trained on. Hover a cell for its EER, interval and clip count.</p>
+      </header>
+      <div class="scroll">
+        <table class="heat grid">
           <thead>
             <tr>
               <th>Detector</th>
-              {R.sa.cols.map((c) => <th style="width: 14%"><span>{c.name}</span><span>{c.sub}</span></th>)}
+              {R.grid.cols.map((c) => <th><span>{c.name}</span><span>{c.sub}</span></th>)}
             </tr>
           </thead>
           <tbody>
             {
-              R.sa.groups.map((g) => (
+              R.grid.groups.map((g) => (
                 <Fragment>
                   <tr class="tierrow">
-                    <td colspan={R.sa.span}>
+                    <td colspan={R.grid.span}>
                       <div class="tierhead"><span class={g.badge}>{g.label}</span><span>{g.title}</span></div>
                     </td>
                   </tr>
                   {g.rows.map((m) => (
                     <tr>
-                      <th scope="row">{m.name}</th>
-                      {m.cells.map((c) =>
-                        c ? (
-                          <td title={c.title} style={c.style}>
-                            <span class="auc">{c.auc}</span>
-                            <span class="eer">{c.eer}</span>
-                            {c.overlap && <sup>so</sup>}
-                          </td>
-                        ) : (
-                          <td title="not run yet">·</td>
-                        ),
-                      )}
+                      <th scope="row">
+                        <span class="dname">{m.name}</span>
+                        <span class="dtype">{m.type}</span>
+                        <span class="dtype">Backbone: {m.built}</span>
+                        <span class="dtype">Trained on: {m.trained}</span>
+                      </th>
+                      {m.cells.map((c) => (
+                        <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>
+                          {c.text}
+                          {c.overlap && <sup>so</sup>}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </Fragment>
@@ -102,20 +124,43 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
           </tbody>
         </table>
       </div>
-      <div class="cols-3">
+      <ul class="gridkey">
+        <li><span class="sw g-trained"></span>trained on it, so not scored</li>
+        <li><span class="sw home"></span>scored on the held-out part of its own training set</li>
+        <li><sup>so</sup> source overlap: the detector's pretraining shares a corpus with this set</li>
+        <li><span class="sw g-na">–</span>different modality</li>
+        <li><span class="sw g-todo">·</span>not run yet</li>
+      </ul>
+    </section>
+
+    <section id="insights" class="block">
+      <header>
+        <div class="kicker">3 · What it shows</div>
+        <h2>Insights</h2>
+        <p>Each point names the cells in the grid above that support it.</p>
+      </header>
+      <ol class="insights">
         {
-          R.tierItems.map((t) => (
-            <div class="card">
-              <span class={t.badge}>Tier {t.n}</span>
-              <strong>{t.label}</strong>
-              <div class="snip" set:html={t.body} />
-            </div>
+          R.insights.map((it) => (
+            <li>
+              <span class="n">{it.n}</span>
+              <div>
+                <strong>{it.label}</strong>
+                <div class="snip" set:html={it.body} />
+              </div>
+            </li>
           ))
         }
-      </div>
-      <div class="snip text" set:html={R.tierAfter} />
+      </ol>
+    </section>
 
-      <h3 class="sub">{R.lang.title}</h3>
+    <section id="audio-south-asian-speech" class="block">
+      <header>
+        <div class="kicker">Detail · audio</div>
+        <h2>South Asian speech, in more depth</h2>
+        <p>The breakdowns behind insights 3 and 7, and what else the per-group numbers show.</p>
+      </header>
+      <h3 class="sub" style="margin-top: 0">{R.lang.title}</h3>
       <div class="snip text muted" set:html={R.lang.intro} />
       <div class="scroll">
         <table class="heat lang">
@@ -330,15 +375,7 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
 </Base>
 
 <script>
-  // AUC or EER in the South Asian table, and which runs the table below shows. Both views are
-  // in the page; these only switch.
-  const sa = document.getElementById("audio-south-asian-speech")!;
-  for (const b of sa.querySelectorAll<HTMLButtonElement>(".toggle button")) {
-    b.addEventListener("click", () => {
-      sa.dataset.metric = b.dataset.metric;
-      for (const o of sa.querySelectorAll(".toggle button")) o.setAttribute("aria-pressed", String(o === b));
-    });
-  }
+  // Which runs the table at the bottom shows. Every row is in the page; this only switches.
   const runs = document.getElementById("all-runs")!;
   for (const b of runs.querySelectorAll<HTMLButtonElement>(".filters button")) {
     b.addEventListener("click", () => {
