@@ -69,6 +69,10 @@ def test_flags(registry):
     assert run_flags(summary, registry.evalset("banglafake")) == ["source overlap", "below chance"]
     clean = _summary("aasist", "mlaad_hi", "x", auc=0.9)
     assert run_flags(clean, registry.evalset("mlaad_hi")) == ["cross-corpus"]
+    unchecked = _summary("gend", "hidf_video", "x", auc=0.9)
+    assert run_flags(
+        unchecked, registry.evalset("hidf_video"), parity_checked=False, direction_checked=False
+    ) == ["no parity check", "score direction unchecked"]
 
 
 def test_page_shows_no_pipeline_tests_and_marks_the_guard(registry, tmp_path, monkeypatch):

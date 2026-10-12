@@ -36,13 +36,28 @@ _METRICS = ("n", "n_real", "n_fake", "n_failed")
 _METRICS += ("auc", "auc_lo", "auc_hi", "eer", "eer_lo", "eer_hi")
 
 
-def run_flags(summary: dict[str, Any], evalset: EvalsetConfig) -> list[str]:
-    """What a reader must know before quoting a run's numbers, worst first."""
+def run_flags(
+    summary: dict[str, Any],
+    evalset: EvalsetConfig,
+    *,
+    parity_checked: bool = True,
+    direction_checked: bool = True,
+) -> list[str]:
+    """What a reader must know before quoting a run's numbers, worst first.
+
+    ``parity_checked``: the model's adapter has passed its parity check against upstream.
+    ``direction_checked``: the model has scored above chance on a reproduction evalset, so its
+    score can't be silently inverted.
+    """
     flags = []
     if summary["verdict"] != "clean":
         flags.append(summary["verdict"].replace("_", " "))
     if evalset.pairing == "cross_corpus":
         flags.append("cross-corpus")
+    if not parity_checked:
+        flags.append("no parity check")
+    if not direction_checked:
+        flags.append("score direction unchecked")
     # Below chance on a reproduction set means a flipped score; elsewhere it is a finding.
     if summary["overall"]["auc"] < 0.5:
         flags.append("below chance")
@@ -75,9 +90,15 @@ def scored_runs(registry: Registry) -> list[dict[str, Any]]:
         key = (model.id, evalset.id)
         if key not in best or started > best[key][0]:
             best[key] = (started, summary)
+    directed = {
+        model_id
+        for (model_id, evalset_id), (_, summary) in best.items()
+        if registry.evalset(evalset_id).role == "reproduction" and summary.get("score_direction_ok")
+    }
     rows = []
     for (model_id, evalset_id), (_, summary) in sorted(best.items()):
         evalset = registry.evalset(evalset_id)
+        parity = _json(PUBLISHED_RESULTS_DIR / "parity" / f"{model_id}.json")
         rows.append(
             {
                 "model": model_id,
@@ -87,7 +108,12 @@ def scored_runs(registry: Registry) -> list[dict[str, Any]]:
                 **{k: summary["overall"][k] for k in _METRICS},
                 "verdict": summary["verdict"],
                 "reasons": summary["verdict_reasons"] if summary["verdict"] != "clean" else [],
-                "flags": run_flags(summary, evalset),
+                "flags": run_flags(
+                    summary,
+                    evalset,
+                    parity_checked=bool(parity and parity["passed"]),
+                    direction_checked=model_id in directed,
+                ),
                 **run_timing(summary["run_id"]),
             }
         )
