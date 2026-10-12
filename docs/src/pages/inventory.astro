@@ -26,8 +26,8 @@ const videoNote = D.runs.some((r) => videoModels.some((m) => m.id === r.model))
 
 const gpu = D.models.find((m) => m.profile?.gpu)?.profile;
 const gpuIntro = gpu
-  ? `Measured on one ${gpu.gpu} in ${gpu.precision === "fp32" ? "full 32-bit precision" : gpu.precision}, with each model already loaded and only the model's own work counted. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them. GFLOPs (billions of arithmetic operations) measure the work regardless of hardware; milliseconds are what it took on this GPU.`
-  : "Measured with each model already loaded, counting only the model's own work. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them.";
+  ? `Forward pass only, model loaded, one ${gpu.gpu}, ${gpu.precision}. Audio per 4 s window; video per face crop, 32 frames per video for most models.`
+  : "Forward pass only, model loaded. Audio per 4 s window; video per face crop, 32 frames per video for most models.";
 ---
 
 <Base
@@ -40,8 +40,8 @@ const gpuIntro = gpu
       <div class="kicker">Models &amp; data</div>
       <h1>Every detector, every dataset</h1>
       <p class="lede">
-        What ran on what, where each model and dataset comes from, and what a run costs. Plain-language descriptions of
-        each are in the <a href={`${base}docs/catalog/`}>reference</a>.
+        What ran on what, each model's published numbers beside ours, and what a run costs. Full entries in the
+        <a href={`${base}docs/catalog/`}>reference</a>.
       </p>
     </header>
     <div id="inventory-tabs" class="tabs" role="tablist" aria-label="Sections">
@@ -55,10 +55,7 @@ const gpuIntro = gpu
     </div>
 
     <section id="panel-coverage" class="panel on" role="tabpanel" data-mode="auc">
-      <p class="intro">
-        Each row is a detector and each column an evalset. A number is the detector's AUC on the whole evalset. Switch
-        to estimated time to see how long a full run would take on one GPU.
-      </p>
+      <p class="intro">AUC per detector and evalset, or the estimated single-GPU time for a full run.</p>
       <div class="toggle" role="group" aria-label="Show in cells">
         <button type="button" data-mode="auc" aria-pressed="true">AUC</button>
         <button type="button" data-mode="time" aria-pressed="false">Estimated GPU time</button>
@@ -81,26 +78,21 @@ const gpuIntro = gpu
 
     <section id="panel-models" class="panel" role="tabpanel">
       <p class="intro">
-        Every detector comes from a published paper with released weights. Parameters are the numbers a model learned;
-        bigger needs more compute but isn't always more accurate. Citation counts are a rough signal of influence. Names
-        link to the full description.
+        Training data of the released weights, the authors' headline numbers (hover for the table cited) and our
+        zero-shot runs. * marks a run with a caveat; see <a href={`${base}results/#all-runs`}>all runs</a>.
       </p>
       <div class="scroll"><ModelsTable /></div>
-      {
-        D.citations_checked && (
-          <p class="note">
-            Citation counts from Semantic Scholar, checked {D.citations_checked}. Google Scholar usually reports higher
-            numbers.
-          </p>
-        )
-      }
+      <p class="note">
+        Published numbers are as reported, under each paper's protocol (frame- or video-level, its own preprocessing),
+        so they aren't directly comparable with ours. DeepfakeBench rows are from its benchmark (frame-level, FF++ c23
+        training), since those are the weights we run. Checked 2026-10-12.
+      </p>
     </section>
 
     <section id="panel-datasets" class="panel" role="tabpanel">
       <p class="intro">
-        South Asian sets are what the benchmark is for. Reproduction sets check our numbers against published ones.
-        Real-reference sets supply genuine speech when a dataset only has fakes. Access says what it takes to get the
-        data.
+        South Asian sets are the target; reproduction sets check our numbers against published ones; real-reference
+        sets supply bona fide speech for fake-only datasets.
       </p>
       <div class="scroll"><DatasetsTable /></div>
     </section>
@@ -110,8 +102,7 @@ const gpuIntro = gpu
       <div class="scroll"><ComputeTable /></div>
       <h3 class="est">Estimated time for a full evalset</h3>
       <p class="note" style="font-size: 0.92rem">
-        Model time only, from the measured time per window. Where a real run exists, its wall time follows in grey:
-        reading thousands of files from shared storage, not the model, is usually the slow part.
+        Model time only, from the measured time per window. Grey: wall time of a real run, usually I/O-bound.
       </p>
       <div class="scroll"><EstimateTable /></div>
     </section>

@@ -1,19 +1,17 @@
 ---
 title: "Results"
-description: "What the runs so far show, with the numbers and their caveats"
+description: "What the runs so far show, with numbers and caveats"
 group: findings
 order: 2
 ---
 
 ## Read this first
 
-- **A snapshot as of 2026-10-12.** The [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) always holds the latest numbers for every run; this page explains them. What was run and why is in [Experiments](experiments.md).
-- **Zero-shot.** No model has seen these evalsets in training; none has been fine-tuned.
-- **Provisional rules.** The evaluation setup is still `proposed` (decision 5), and nothing has been published with `evaluate.py --publish`. Numbers can move when the setup is settled.
-- **The guard compares datasets, not generators.** A `clean` verdict means no known dataset overlap. A model can still have trained on the same TTS systems an evalset's fakes were made with, and the guard can't see that.
-- **Video is provisional.** No video model has a settled score direction yet, and GenD has no parity check.
-
-AUC is the chance that a random fake clip scores higher than a random real one: 0.5 is guessing, 1.0 is perfect, and below 0.5 means the model ranks them backwards. EER is the error rate at the threshold where false alarms and misses are equal; lower is better.
+- **A snapshot as of 2026-10-12.** The [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) holds the latest numbers for every run. What was run and why: [Experiments](experiments.md).
+- **Zero-shot.** No model has seen these evalsets or been fine-tuned.
+- **Provisional rules.** The evaluation setup is still `proposed` (decision 5) and nothing has been published with `evaluate.py --publish`. Numbers can move.
+- **The guard compares datasets, not generators.** `clean` means no known dataset overlap. A model may still have trained on the TTS systems that made an evalset's fakes.
+- **Video is provisional.** No video model has a settled score direction, and GenD has no parity check.
 
 ## Reproductions
 
@@ -28,15 +26,15 @@ AUC is the chance that a random fake clip scores higher than a random real one: 
 | AntiDeepfake w2v2 small | In-the-Wild           | 4.23% (3.97 to 4.47)  | 0.993  | 4.24% (model card)      |
 | AntiDeepfake MMS-300M   | In-the-Wild           | 4.29% (4.04 to 4.54)  | 0.991  | 2.90% (model card)      |
 
-Every model in this table has its score direction settled. The AASIST and DF Arena gaps are expected protocol differences: upstream scores each clip's first 4 seconds, or the whole clip, where this setup averages every 4-second window and refuses clips under a second ([models.md](models.md#per-model)).
+Every score direction here is settled. The AASIST and DF Arena gaps are protocol differences: upstream scores each clip's first 4 seconds, or the whole clip; this setup averages every 4-second window and refuses clips under a second ([models.md](models.md#per-model)).
 
-MMS-300M is the one to watch. It comes out 1.4 points worse than its card, while its smaller sibling, scored exactly the same way, matches its card. Parity passed window by window, so the gap lies in the protocol or the card, not the adapter. It's a concrete case for decision 5.
+MMS-300M is 1.4 points worse than its card, while w2v2 small, scored the same way, matches its card. Parity passed window by window, so the gap is in the protocol or the card, not the adapter: a concrete case for decision 5.
 
-For contrast, the ASVspoof-only models collapse on In-the-Wild, real public figures' speech: AASIST 44.0% EER, AASIST-L 44.9%.
+On In-the-Wild (real public figures' speech) the ASVspoof-only models collapse: AASIST 44.0% EER, AASIST-L 44.9%.
 
 ## Audio: South Asian speech
 
-AUC, with EER in brackets. Cells marked * are runs from 2026-10-05, made under the previous version of the setup, which differs only in a video setting. "so" marks a `source_overlap` verdict.
+AUC (EER). * marks runs from 2026-10-05 under the previous setup version, which differs only in a video setting. "so" marks a `source_overlap` verdict.
 
 | Model                   | Urdu CSALT    | BanglaFake       | Bangla voices | IndicTTS        | IndicSynth Hindi |
 | ----------------------- | ------------- | ---------------- | ------------- | --------------- | ---------------- |
@@ -50,15 +48,15 @@ AUC, with EER in brackets. Cells marked * are runs from 2026-10-05, made under t
 
 ### Three tiers
 
-1. **Trained only on ASVspoof 2019 LA (AASIST, AASIST-L): they fail.** They sit below chance on every Bengali and Indic set. On Bangla voices, AUC 0.05 means they are confidently backwards: they find the real recordings more fake than the fakes. The likely reason is that they learned studio-clean audio as a sign of real speech. These crowd-sourced real recordings are noisier than the TTS fakes, so the cue flips. Urdu is the exception (0.86).
-2. **The same training data with a multilingual front end (XLS-R + AASIST): better, but uneven.** In-the-Wild drops from 44% to 10.8% EER, and Urdu (0.80) and IndicSynth Hindi (0.83) hold up, but the Bengali sets (0.39 and 0.47) and most IndicTTS languages (0.49 to 0.70) stay near or below chance.
-3. **Post-trained on large multilingual collections of real and fake speech (AntiDeepfake, DF Arena): near the ceiling everywhere.** AUC is 0.98 or more on every set, mostly above 0.99.
+1. **Trained only on ASVspoof 2019 LA (AASIST, AASIST-L): they fail.** Below chance on every Bengali and Indic set. On Bangla voices, AUC 0.05: confidently backwards. Likely cause: they learned studio-clean audio as a cue for real, and these crowd-sourced real recordings are noisier than the TTS fakes. Urdu is the exception (0.86).
+2. **The same training data with a multilingual front end (XLS-R + AASIST): better, but uneven.** In-the-Wild drops from 44% to 10.8% EER and Urdu (0.80) and IndicSynth Hindi (0.83) hold up, but the Bengali sets (0.39 and 0.47) and most IndicTTS languages (0.49 to 0.70) stay near or below chance.
+3. **Post-trained on large multilingual collections of real and fake speech (AntiDeepfake, DF Arena): near the ceiling everywhere.** AUC 0.98 or more on every set, mostly above 0.99.
 
-So the open South Asian TTS sets separate the classic detectors from the modern ones, but no longer rank the modern ones. Some of that ceiling may be familiarity: these models trained on multilingual TTS collections that likely share generators (VITS, XTTS) with these sets, which the guard can't see.
+The open South Asian TTS sets separate classic from modern detectors but no longer rank the modern ones. Part of the ceiling may be familiarity: these models trained on multilingual TTS collections that likely share generators (VITS, XTTS) with these sets, which the guard can't see.
 
 ### Multilingual pretraining helps
 
-The two AntiDeepfake models share their post-training data; only their pretraining differs.
+The two AntiDeepfake models share post-training data and differ only in pretraining.
 
 | Evalset    | w2v2 small (English pretraining) | MMS-300M (about 1,400 languages) |
 | ---------- | -------------------------------: | -------------------------------: |
@@ -66,7 +64,7 @@ The two AntiDeepfake models share their post-training data; only their pretraini
 | BanglaFake | 0.955                            | 0.999                            |
 | Urdu CSALT | 0.969                            | 0.998                            |
 
-Multilingual pretraining shrinks the distance to a perfect score (1 minus AUC) by 15 to 45 times on these sets.
+Multilingual pretraining cuts 1 minus AUC by 15 to 45 times on these sets.
 
 ### Language matters for the classic models only
 
@@ -91,19 +89,19 @@ AUC by language on the IndicTTS challenge set:
 | Tamil      | 0.297  | 0.686          | 0.928                   | 0.999                 | 0.996       |
 | Telugu     | 0.388  | 0.680          | 0.935                   | 1.000                 | 0.999       |
 
-XLS-R + AASIST ranges from 0.49 (Gujarati) to 0.86 (English), the language it was trained on. AASIST ranges from 0.23 to 0.52. MMS-300M stays at 0.996 or above in all 16. Under decision 4's proposed rule (an attribute matters if both models in a modality shift by 5 or more AUC points), language qualifies for the classic pair and not for the multilingual one.
+XLS-R + AASIST ranges from 0.49 (Gujarati) to 0.86 (English, its training language); AASIST from 0.23 to 0.52. MMS-300M stays at 0.996 or above in all 16. Under decision 4's proposed rule (an attribute matters if both models in a modality shift by 5 or more AUC points), language qualifies for the classic pair, not the multilingual one.
 
 ### Voice conversion is the classic models' blind spot
 
-On IndicSynth Hindi, at the global threshold (the overall EER point), XLS-R + AASIST misses 46% of the FreeVC24 voice conversions but 3% of the XTTS-v2 clips. AASIST misses 92% against 27%. The multilingual models miss at most 5% of either.
+On IndicSynth Hindi, at the global (overall EER) threshold, XLS-R + AASIST misses 46% of FreeVC24 voice conversions and 3% of XTTS-v2 clips; AASIST misses 92% and 27%. The multilingual models miss at most 5% of either.
 
 ### Gender
 
-Mostly flat. The exception is XLS-R + AASIST on Bangla voices: AUC 0.29 for women, 0.48 for men.
+Mostly flat. Exception: XLS-R + AASIST on Bangla voices, AUC 0.29 for women, 0.48 for men.
 
 ### Ranking isn't calibration
 
-A high AUC says real and fake clips are ranked apart, not that one threshold serves every set. DF Arena 1B ranks Bangla voices at AUC 0.993 and Urdu CSALT at 0.995, yet its EER is 4.3% and 4.0% on them, against 0.7% on In-the-Wild. A detector used with a fixed threshold needs the per-group error rates, not just AUC.
+DF Arena 1B ranks Bangla voices at AUC 0.993 and Urdu CSALT at 0.995, yet its EER there is 4.3% and 4.0%, against 0.7% on In-the-Wild. A fixed threshold needs per-group error rates, not just AUC.
 
 ## Video: HiDF
 
@@ -113,9 +111,9 @@ A high AUC says real and fake clips are ranked apart, not that one threshold ser
 | SBI      | 0.877 (0.870 to 0.884) | 20.0% |
 | Xception | 0.804 (0.794 to 0.812) | 27.2% |
 
-All three were trained on FF++ and tested on commercial face swaps, a real cross-dataset test. The newest model generalises best, as the literature reports.
+All three trained on FF++, so HiDF's commercial face swaps are a true cross-dataset test. The newest model generalises best, as the literature reports.
 
-By race, AUC with the false-positive rate on real faces at each model's global threshold:
+By race: AUC, and the false-positive rate on real faces at each model's global threshold.
 
 | Group  | Real / fake | GenD AUC | GenD FPR | SBI AUC | SBI FPR | Xception AUC | Xception FPR |
 | ------ | ----------: | -------: | -------: | ------: | ------: | -----------: | -----------: |
@@ -125,13 +123,13 @@ By race, AUC with the false-positive rate on real faces at each model's global t
 | Latino | 194 / 365   | 0.954    | 11%      | 0.879   | 20%     | 0.851        | 21%          |
 | White  | 3,406 / 3,484 | 0.951  | 12%      | 0.876   | 20%     | 0.797        | 28%          |
 
-- **Ranking barely moves.** "Indian" has the lowest AUC for all three models, but its intervals are wide (GenD 0.901 to 0.972) and overlap the others. GenD's spread across groups is 2.6 points and SBI's 3.2, so race doesn't meet decision 4's AUC rule.
-- **False alarms do.** At GenD's threshold, 28% of real Indian faces are flagged fake (25 of 90), against 6 to 13% for every other group: about 10 would be expected at the white group's rate. This is the gap [evaluation.md](evaluation.md#metrics) warned an AUC gap would miss. SBI is the most even model, at about 21% for every group.
-- **Provisional.** The group is small, the direction check is pending, and HiDF isn't South Asian. The finding is a reason to measure false-positive rates on real South Asian faces once the request-only sets arrive, not a result in itself.
+- **Ranking barely moves.** "Indian" has the lowest AUC for all three models, but its intervals are wide (GenD 0.901 to 0.972) and overlap the others. Spread across groups is 2.6 points for GenD and 3.2 for SBI, so race doesn't meet decision 4's AUC rule.
+- **False alarms do.** At GenD's threshold, 28% of real Indian faces are flagged fake (25 of 90), against 6 to 13% for every other group; the white group's rate would predict about 10. This is the gap [evaluation.md](evaluation.md#metrics) warned AUC would miss. SBI is the most even, about 21% for every group.
+- **Provisional.** The group is small, the direction check is pending, and HiDF isn't South Asian. This is a reason to measure false-positive rates on real South Asian faces once the request-only sets arrive, not a result in itself.
 
 ## What the results can't say yet
 
-- Nothing about **lip-sync with cloned voices**, v1's focus: no such data has been scored. MAVOS-DD Hindi is next ([Progress](progress.md#next)).
-- Nothing about **Sinhala**: its only fakes are in a cross-corpus set that waits on the shortcut probe.
+- Nothing about **lip-sync with cloned voices**, v1's focus: none scored yet. MAVOS-DD Hindi is next ([Progress](progress.md#next)).
+- Nothing about **Sinhala**: its only fakes are in a cross-corpus set waiting on the shortcut probe.
 - Nothing about **in-the-wild South Asian audio**: every South Asian audio set so far is read or studio speech.
 - Little about **demographics in audio**: these sets carry gender at most.

@@ -5,7 +5,7 @@ group: benchmark
 order: 6
 ---
 
-Almost every dataset here is licensed for non-commercial research only, several forbid passing on any derived data, and one restricts use to a single institution. This page is what the repo does about it and what it can't do on its own.
+Almost every dataset here is non-commercial research only, several forbid passing on derived data, and one restricts use to a single institution. Below: what the repo enforces, and what it can't.
 
 ## What may enter git
 
@@ -16,9 +16,9 @@ Almost every dataset here is licensed for non-commercial research only, several 
 | manifest summaries: counts per label and group, content hash | per-item scores, per-subject tables, split assignments |
 | synthetic test fixtures                                      | anything derived from a real item, even a tiny sample  |
 
-The pre-commit hook (`git config core.hooksPath scripts/hooks`) refuses data, media, archive and weight files, anything over 5 MB, and any CSV or JSON with an `item_id` or `rel_path` column. `evaluate.py --publish` copies only aggregate tables and leaves per-subject tables behind.
+The pre-commit hook (`git config core.hooksPath scripts/hooks`) refuses data, media, archive and weight files, anything over 5 MB, and any CSV or JSON with an `item_id` or `rel_path` column. `evaluate.py --publish` copies only aggregate tables, never per-subject ones.
 
-Pipeline tests are item-level too: sampled datasets, face crops, smoke reports (which name items and embed crops) all stay in `DTB_ROOT/smoke/`, and `--publish` refuses pipeline-test evalsets and anything in the smoke namespace. Test fixtures use invented file names, since some datasets' file names carry real people's names.
+Pipeline tests are item-level too: sampled datasets, face crops and smoke reports (which name items and embed crops) stay in `DTB_ROOT/smoke/`, and `--publish` refuses pipeline-test evalsets and anything in the smoke namespace. Test fixtures use invented file names, since some datasets' file names carry real people's names.
 
 ## Licence clauses that bind us
 
@@ -34,16 +34,16 @@ Pipeline tests are item-level too: sampled datasets, face crops, smoke reports (
 | Mendeley Roop/Akool | CC BY 4.0 with attribution; the page warns third-party content in the source videos may need permission |
 | most others         | CC BY-NC 4.0: non-commercial, with attribution                                                          |
 
-Models carry licences too. insightface's pretrained models, including the shared face detector (`det_10g.onnx`), are for non-commercial research only; the detection code we port is MIT. SBI is research only, DeepfakeBench CC BY-NC; their code is never copied into the repo.
+Model licences: insightface's pretrained models, including the shared face detector (`det_10g.onnx`), are non-commercial research only; the detection code we port is MIT. SBI is research only, DeepfakeBench CC BY-NC; their code is never copied into the repo.
 
-Publishing aggregate results is allowed for every dataset we've read the terms of, with the required citation.
+Every dataset whose terms we've read allows publishing aggregate results, with the required citation.
 
 ## Sharing across institutions
 
-The team spans more than one institution, and the cluster belongs to a third. A licence signed by one institution doesn't automatically cover members of another. **Before anyone downloads DF-Platter or DeePhy**, settle who signs and whether each institution needs its own agreement, and ask IAB Rubric if unsure.
+The team spans more than one institution, and the cluster belongs to a third. A licence signed by one institution doesn't automatically cover members of another. **Before anyone downloads DF-Platter or DeePhy**, settle who signs and whether each institution needs its own agreement; ask IAB Rubric if unsure.
 
-On the cluster, the repo can't enforce licences, but filesystem permissions can. Give each restricted dataset its own Unix group, with access lists on `datasets/<id>/`, and on the matching `scores/` and `results/` folders (per-item scores carry item ids), so only people covered by the agreement can read them. Record who is covered in the dataset's config notes.
+The repo can't enforce licences on the cluster; filesystem permissions can. Give each restricted dataset its own Unix group, with access lists on `datasets/<id>/` and the matching `scores/` and `results/` folders (per-item scores carry item ids), so only people covered by the agreement can read them. Record who is covered in the dataset's config notes.
 
 ## Data collected through deeptrace
 
-Participant media (real people's faces and voices) stays in deeptrace's own storage until three things are true: the consent form covers processing outside Sri Lanka, DCSR confirms it may sit on Curnagl rather than Urblauna (UNIL's cluster for sensitive data), and the ethics approval covers it. None of it enters this repo, ever, including in test fixtures.
+Participant media (real people's faces and voices) stays in deeptrace's own storage until all three hold: the consent form covers processing outside Sri Lanka, DCSR confirms it may sit on Curnagl rather than Urblauna (UNIL's cluster for sensitive data), and the ethics approval covers it. None of it ever enters this repo, test fixtures included.

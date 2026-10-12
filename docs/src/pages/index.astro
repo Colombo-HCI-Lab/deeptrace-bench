@@ -20,13 +20,11 @@ const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body
     <div class="kicker">Colombo HCI Lab · Deepfake detection for South Asia · Phase 2</div>
     <h1>Do deepfake detectors work on South Asian speech and faces?</h1>
     <p class="lede">
-      Most detectors were trained on English speech and Western faces. deeptrace-bench runs published, open detectors
-      on South Asian audio and video under one set of rules, and reports how each one holds up. This site is the
-      guide: what we found, how it was measured, and what's left to do.
+      Published open detectors, trained mostly on English speech and Western faces, scored zero-shot on South Asian
+      audio and video under one evaluation setup.
     </p>
     <div class="chips">
       <a class="chip" href={`${base}results/#read-this-first`}><span class="dot" aria-hidden="true"></span>Evaluation rules {D.eval_status}: numbers can still move</a>
-      <span class="chip">All zero-shot: no detector was retrained</span>
       <span class="chip dim">Updated {D.built}</span>
     </div>
   </header>
@@ -36,9 +34,8 @@ const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body
       <div class="kicker">The short answer</div>
       <h2>It depends on what the detector learned from</h2>
       <p>
-        Each row is a detector; each dot is its AUC on one open South Asian set: Urdu, two Bengali sets, 16 Indic
-        languages and Hindi for audio, HiDF for faces. Right is better. Left of the dashed line a detector does worse
-        than a coin flip: it finds the real clips more fake than the fakes.
+        AUC per detector on each open set: Urdu, two Bengali, IndicTTS (16 languages) and Hindi for audio; HiDF for
+        faces. Left of the dashed line is below chance.
       </p>
     </header>
     <div class="chart">
@@ -74,17 +71,17 @@ const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body
       <a class="card" href={`${base}results/#audio-south-asian-speech`}>
         <span class="kicker">Audio</span>
         <strong>Multilingual pretraining helps</strong>
-        <span>Two AntiDeepfake models share their training data. The one pretrained on about 1,400 languages gets 15 to 45 times closer to a perfect score.</span>
+        <span>Same post-training data, different SSL pretraining: the MMS-300M AntiDeepfake model (about 1,400 languages) gets 15 to 45 times closer to AUC 1 than its wav2vec 2.0 small sibling.</span>
       </a>
       <a class="card" href={`${base}results/#audio-south-asian-speech`}>
         <span class="kicker">Audio</span>
-        <strong>Language matters for classic detectors only</strong>
+        <strong>Language matters only for ASVspoof-trained detectors</strong>
         <span>Across 16 Indic languages, XLS-R + AASIST ranges from 0.49 to 0.86 AUC. MMS-300M stays at 0.996 or above in every one.</span>
       </a>
       <a class="card" href={`${base}results/#video-hidf`}>
         <span class="kicker">Faces</span>
         <strong>Even ranking, uneven false alarms</strong>
-        <span>AUC barely moves by race, but GenD flags 28% of real Indian faces as fake, against 6 to 13% for every other group.</span>
+        <span>AUC barely moves by race, but at its global threshold GenD flags 28% of real Indian faces as fake, against 6 to 13% for other groups.</span>
       </a>
     </div>
     <a class="more" href={`${base}results/`}>All results and caveats →</a>
@@ -94,10 +91,7 @@ const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body
     <header>
       <div class="kicker">As of {O.asOf}</div>
       <h2>Where the work stands</h2>
-      <p>
-        A detector's numbers count once its adapter matches the authors' code. An evalset can be scored once its data
-        is in hand; most of the rest wait on access requests.
-      </p>
+      <p>A detector counts once its adapter passes parity with the authors' code. Most unscored evalsets wait on access requests.</p>
     </header>
     <div class="cols-2">
       <div class="bars">
@@ -148,44 +142,6 @@ const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body
     </div>
   </section>
 
-  <section id="find" class="block">
-    <header>
-      <div class="kicker">Find your way</div>
-      <h2>What are you looking for?</h2>
-    </header>
-    <div class="cards">
-      <a class="card find" href={`${base}results/`}>
-        <span class="kicker">Results →</span>
-        <strong>How well does each detector do?</strong>
-        <span>Scores by detector and dataset, per language and per race, with every caveat.</span>
-      </a>
-      <a class="card find" href={`${base}method/`}>
-        <span class="kicker">How it works →</span>
-        <strong>How is a score made, and why trust it?</strong>
-        <span>The five-step pipeline, the checks along it, and the terms this site uses.</span>
-      </a>
-      <a class="card find" href={`${base}progress/`}>
-        <span class="kicker">Progress →</span>
-        <strong>What's been done, and what's next?</strong>
-        <span>Each round of work with its commits, the plan in order, and open decisions.</span>
-      </a>
-      <a class="card find" href={`${base}inventory/`}>
-        <span class="kicker">Models &amp; data →</span>
-        <strong>Which detectors and datasets?</strong>
-        <span>Every model and dataset, what ran on what, and what each run costs in GPU time.</span>
-      </a>
-      <a class="card find" href={`${base}method/#run`}>
-        <span class="kicker">Run it yourself →</span>
-        <strong>How do I run it myself?</strong>
-        <span>Install, run the tests, and push a few clips through the whole pipeline.</span>
-      </a>
-      <a class="card find" href={`${base}docs/adding_a_model/`}>
-        <span class="kicker">Docs →</span>
-        <strong>How do I add a model or dataset?</strong>
-        <span>Step-by-step recipes, plus the store layout, data policy and cluster guide.</span>
-      </a>
-    </div>
-  </section>
 </Base>
 
 <script is:inline define:vars={{ base, legacy: LEGACY }}>

@@ -1,475 +1,513 @@
-# Plain-language facts for the status page and docs/catalog.md, keyed by config id.
-# Hand-written and checked 2026-10-05 against the configs, builders, docs and each paper.
+# Facts for the site's Models & data tables and docs/catalog.md, keyed by config id.
+# Descriptions rewritten 2026-10-12 against the configs, builders, docs and each paper;
+# published numbers checked 2026-10-12.
 #   s2_id      Semantic Scholar id of the paper (ARXIV:, DOI: or a paperId); counts are
 #              fetched into results/citations.json by `scripts/build_site.py --citations`
 #   venue      short venue and year, as the page shows it
-#   summary    one sentence for a newcomer
-#   models:    architecture (building blocks, input to output), description (a paragraph)
+#   summary    one technical line for an ML reader
+#   models:    architecture (building blocks, input to output), description (2 to 3 sentences:
+#              architecture, training data of the released weights, the caveat that matters
+#              here; no result numbers, the site shows them from `published` and our runs)
+#   published  list of {test, metric, value, source, cite, evalset}: source is one of paper,
+#              model card, repo README, DeepfakeBench; cite is the table or section; evalset is
+#              our evalset id when we score the same set. Only numbers read in the source for
+#              the released weights or their paper.
 #   datasets:  scale, generators (how fakes were made; [] for real only), annotations (per-clip
 #              labels the dataset ships), format, notes (a caveat users must know)
 models:
   aasist:
     s2_id: ARXIV:2110.01200
     venue: ICASSP 2022
+    published:
+      - {test: "ASVspoof 2019 LA eval", metric: EER, value: "0.83%", source: paper, cite: "Table 2, best single run; 3-seed mean 1.13%", evalset: asvspoof2019_la_eval}
     summary: >-
-      Looks at the raw audio waveform and uses a graph network to link patterns across time and frequency
-      that speech synthesis leaves behind.
+      Raw-waveform sinc filters and residual encoder, then spectral and temporal graph attention
+      joined by a max graph operation; trained on ASVspoof 2019 LA only.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows, SincNet-style filters and residual encoder, spectral
       and temporal graph attention with a max graph operation, two-way classifier
     description: >-
-      AASIST (Jung et al., ICASSP 2022) listens to the raw waveform and builds graphs over the frequency
-      bands and over the time steps, then uses graph attention to weigh which parts of the signal
-      look artificial. Speech made by synthesis often leaves small traces in the spectrum or in the
-      timing, and the authors designed one network that catches both without needing an ensemble.
-      The released weights were trained only on the ASVspoof 2019 LA training split. It is a compact
-      standard baseline: scored on the full ASVspoof 2019 LA eval set here it reaches an equal error
-      rate (EER) of 1.58%, against 0.83% in the paper, but on In-the-Wild, which it never saw, it
-      sits close to chance (EER 44.0%).
+      AASIST (Jung et al., ICASSP 2022) builds graphs over spectral and temporal nodes of a learned
+      time-frequency map and combines them with heterogeneous graph attention, so one model covers
+      artefacts that earlier work needed an ensemble for. The released weights saw only the ASVspoof
+      2019 LA training split, with no pretraining. A compact single-corpus baseline that sits near
+      chance on In-the-Wild.
   aasist3:
     s2_id: ARXIV:2408.17352
     venue: ASVspoof 2024 Workshop
+    published:
+      - {test: "ASVspoof 5 eval, open condition", metric: EER, value: "4.89%", source: paper, cite: "Table 1, ensemble with extra data; not the released weights"}
+      - {test: "ASVspoof 2019 LA eval", metric: EER, value: "9.44%", source: model card, cite: "released weights, Speech Arena re-scoring", evalset: asvspoof2019_la_eval}
+      - {test: "In-the-Wild", metric: EER, value: "29.72%", source: model card, cite: "released weights, Speech Arena re-scoring", evalset: in_the_wild}
     summary: >-
-      An AASIST upgrade that feeds in features from a pretrained speech model and uses a newer layer
-      type (KAN); the released weights are a weak baseline.
+      AASIST on wav2vec 2.0 XLSR-53 features with Kolmogorov-Arnold (KAN) layers; the released weights
+      are not the paper's and are weak.
     architecture: >-
       Pre-emphasised 16 kHz window, wav2vec 2.0 XLSR-53 features, KAN bridge and residual encoder,
       spectral and temporal graph attention, four inference branches, KAN output layer, two-way classifier
     description: >-
-      AASIST3 (Borodin et al., 2024) was built for the ASVspoof 2024 challenge. It extends AASIST
-      by feeding in features from a pretrained speech model (wav2vec 2.0 XLSR-53) and by swapping
-      some ordinary layers for Kolmogorov-Arnold network (KAN) layers, a newer kind of learned layer.
-      The released weights saw ASVspoof 2019 LA, ASVspoof 5, MLAAD and M-AILABS after the front end
-      was pretrained on Common Voice, BABEL and Multilingual LibriSpeech, so the benchmark refuses
-      it on any MLAAD-based evalset. The repository says these weights are not the ones behind the
-      paper's numbers, and the Speech DF Arena measures them at 28 to 32% EER on In-the-Wild and ASVspoof
-      2021, so it is kept here as a weak multilingual baseline, not a strong one.
+      AASIST3 (Borodin et al., 2024), built for ASVspoof 5, feeds XLSR-53 features into AASIST and
+      replaces some layers with KAN layers. The released weights saw ASVspoof 2019 LA, ASVspoof 5,
+      MLAAD and M-AILABS on a front end pretrained on Common Voice, BABEL and Multilingual LibriSpeech,
+      so the contamination guard refuses it on MLAAD-based evalsets. The repository says these are
+      not the weights behind the paper's numbers, and the model card's Speech Arena re-scoring puts
+      them far lower, so treat it as a weak multilingual baseline; parity is not checked yet.
   aasist_l:
     s2_id: ARXIV:2110.01200
     venue: ICASSP 2022
+    published:
+      - {test: "ASVspoof 2019 LA eval", metric: EER, value: "0.99%", source: paper, cite: "Table 2, best single run", evalset: asvspoof2019_la_eval}
     summary: >-
-      A much smaller version of AASIST that works on the raw waveform with the same graph idea but
-      far fewer parameters, so it runs cheaply.
+      The lightweight AASIST configuration (about 85k parameters): same raw-waveform graph attention,
+      trained on ASVspoof 2019 LA only.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows, SincNet-style filters and residual encoder, spectral
       and temporal graph attention with a max graph operation, two-way classifier (lightweight configuration)
     description: >-
-      AASIST-L is the lightweight variant of AASIST from the same paper (Jung et al., ICASSP 2022).
-      It uses the same graph idea on the raw waveform with far fewer parameters, which the authors
-      put at about 85 thousand, so it is cheap to run. Its released weights were trained only on the
-      ASVspoof 2019 LA training split. Scored on the full ASVspoof 2019 LA eval set here it reaches
-      an EER of 1.49% (paper 0.99%), and on In-the-Wild it is near chance (EER 44.9%), so it shows
-      how little a small model trained on one corpus carries over to other data.
+      AASIST-L is the reduced configuration from the AASIST paper (Jung et al., ICASSP 2022), with
+      the same architecture at a fraction of the width. The released weights saw only the ASVspoof
+      2019 LA training split. The cheapest single-corpus baseline here; like AASIST it is near chance
+      on In-the-Wild.
   altfreezing:
     s2_id: ARXIV:2307.08317
     venue: CVPR 2023
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.895", source: paper, cite: "Table 1, video-level", evalset: celeb_df_v2_test}
+      - {test: "DFD", metric: AUC, value: "0.985", source: paper, cite: "Table 1, video-level"}
+      - {test: "FaceShifter", metric: AUC, value: "0.994", source: paper, cite: "Table 1, video-level"}
     summary: >-
-      Watches a face video in 3D and alternately freezes its space and time filters during training,
-      so it learns both visual glitches and unnatural motion.
+      3D CNN on face clips whose spatial and temporal weight groups are frozen alternately in training,
+      so it learns both cue types; FF++. Blocked.
     architecture: >-
       Face video clip, 3D convolutional network whose spatial and temporal weight groups are frozen
       alternately during training, two-way classifier
     description: >-
-      AltFreezing (Wang et al., CVPR 2023) looks at short face video clips with a 3D convolutional
-      network, so it can pick up both visual flaws in single frames and unnatural motion between frames.
-      Such a network tends to lean on one kind of clue, so during training the authors alternately
-      freeze its space-related weights and its time-related weights, which forces it to learn both.
-      The released weights were trained on FaceForensics++ (compression level not stated). It is built
-      for generalising to unseen manipulations, but it is blocked in this benchmark: the weights are
-      only on RecDrive and Baidu, upstream issues report the file gone, and there is no adapter yet.
+      AltFreezing (Wang et al., CVPR 2023) counters a 3D CNN's tendency to rely on either spatial
+      or temporal cues by training the two weight groups in alternation. The released weights were
+      trained on FaceForensics++ (compression not stated). Blocked here: the weights are only on
+      RecDrive and Baidu, upstream issues report the file gone, and there is no adapter.
   antideepfake_mms_300m:
     s2_id: ARXIV:2506.21090
     venue: ASRU 2025
+    published:
+      - {test: "In-the-Wild", metric: EER, value: "2.90%", source: model card, cite: "results table; paper Table II", evalset: in_the_wild}
+      - {test: "ADD 2023", metric: EER, value: "7.93%", source: model card, cite: "results table; paper Table II"}
+      - {test: "Deepfake-Eval-2024", metric: EER, value: "32.84%", source: model card, cite: "results table; paper Table II"}
     summary: >-
-      A multilingual speech model (MMS-300M) further trained on 74k hours of real and fake audio in
-      over 100 languages to tell them apart.
+      MMS-300M wav2vec 2.0 front end, mean pooling and a linear head, post-trained on 74k hours of
+      real and fake speech in over 100 languages.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows (zero mean, unit variance), MMS-300M wav2vec 2.0
       front end, mean pooling over frames, linear layer, two-way classifier
     description: >-
-      AntiDeepfake MMS-300M comes from the NII Yamagishi Lab (Ge et al., 2025, "Post-training for
-      Deepfake Speech Detection"). The authors take a speech model that was pretrained on ordinary
-      speech and give it a middle "post-training" stage on a large mix of real and fake speech, so
-      the model learns about artefacts before any task-specific tuning. This one starts from MMS-300M,
-      which was pretrained on about 1,400 languages, and is post-trained on 74 thousand hours from
-      29 corpora in over 100 languages, including FLEURS, MLAAD, all of ASVspoof 2019 LA, LJSpeech
-      and VoxCeleb2. That wide exposure makes it a strong multilingual candidate for South Asian audio,
-      but the benchmark refuses it on MLAAD-based evalsets and on anything built from FLEURS. The
-      model card reports an In-the-Wild EER of 2.90%.
+      AntiDeepfake (Ge et al., NII Yamagishi Lab, 2025) inserts a post-training stage on real and
+      fake speech between SSL pretraining and task fine-tuning. This model starts from MMS-300M (pretrained
+      on about 1,400 languages) and is post-trained on 74k hours from 29 corpora in over 100 languages,
+      including FLEURS, MLAAD, all of ASVspoof 2019 LA, LJSpeech and VoxCeleb2. The broadest multilingual
+      exposure of any audio model here, so the contamination guard refuses it on MLAAD-based evalsets
+      and anything built from FLEURS.
   antideepfake_w2v_small:
     s2_id: ARXIV:2506.21090
     venue: ASRU 2025
+    published:
+      - {test: "In-the-Wild", metric: EER, value: "4.24%", source: model card, cite: "results table; paper Table II gives 4.23%", evalset: in_the_wild}
+      - {test: "ADD 2023", metric: EER, value: "13.02%", source: model card, cite: "results table; paper Table II"}
+      - {test: "Deepfake-Eval-2024", metric: EER, value: "33.33%", source: model card, cite: "results table; paper Table II"}
     summary: >-
-      The small English-pretrained wav2vec 2.0 version (95M parameters) of the same post-training
-      recipe, a cheap counterpart to the multilingual model.
+      English-pretrained wav2vec 2.0 base (95M parameters) with the same AntiDeepfake post-training;
+      the cheap counterpart to MMS-300M.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows (zero mean, unit variance), wav2vec 2.0 base front
       end, mean pooling over frames, linear layer, two-way classifier
     description: >-
-      AntiDeepfake wav2vec 2.0 small is the smallest model of the NII Yamagishi Lab's AntiDeepfake
-      series (Ge et al., 2025). It is a wav2vec 2.0 base model (95 million parameters) pretrained
-      on English LibriSpeech only, then post-trained on the same 74 thousand hours of real and fake
-      speech from 29 corpora as the MMS-300M model. It decides real versus fake by pooling its speech
-      features over time and passing them to one linear layer. Because the post-training data are
-      identical, comparing it with the MMS-300M version isolates the effect of multilingual pretraining.
-      The model card reports an In-the-Wild EER of 4.24%, against 2.90% for MMS-300M, and the benchmark
-      refuses it on MLAAD-based evalsets and on anything built from FLEURS.
+      The smallest AntiDeepfake model (Ge et al., 2025): wav2vec 2.0 base pretrained on LibriSpeech
+      only, post-trained on the same 74k hours from 29 corpora as the MMS-300M model, with mean pooling
+      and one linear layer. Identical post-training data make the pair a controlled test of multilingual
+      pretraining. The contamination guard refuses it on MLAAD-based evalsets and anything built from
+      FLEURS.
   core:
     s2_id: ARXIV:2206.02749
     venue: CVPRW 2022
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.964", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.743", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.705", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      An Xception image network trained so its internal view of a face stays the same under crops,
-      colour changes and other tweaks.
+      Xception frame classifier trained with a consistency loss between representations of augmented
+      views; DeepfakeBench weights, FF++ c23.
     architecture: >-
       Aligned 256 px face crop, Xception CNN trained with a consistency loss across augmented views,
       two-way classifier
     description: >-
-      CORE (Ni et al., CVPRW 2022) is an Xception image network, run here from DeepfakeBench's release,
-      that checks individual face frames. During training it sees the same face under different augmentations,
-      such as crops and colour changes, and a loss term pushes its internal representations of those
-      views to stay close, which the authors say makes them more consistent and relieves overfitting.
-      At test time it is used like a plain Xception classifier, scoring each frame. The released weights
-      were trained on FaceForensics++ (c23 compression per the DeepfakeBench README), after ImageNet
-      pretraining. It adds one training idea on top of the Xception baseline, so it helps show whether
-      such tricks carry over to South Asian faces.
+      CORE (Ni et al., CVPRW 2022) penalises the distance between representations of differently
+      augmented views of a face (crops, colour changes) to reduce overfitting; at test time it is
+      a plain Xception frame classifier. DeepfakeBench's weights were trained on FaceForensics++ (c23
+      per the DeepfakeBench README) after ImageNet pretraining. It differs from the Xception baseline
+      only in the training loss.
   df_arena_1b:
     s2_id: ARXIV:2509.02859
     venue: Speech DF Arena 2025
+    published:
+      - {test: "In-the-Wild", metric: EER, value: "0.91%", source: model card, cite: "evaluation table", evalset: in_the_wild}
+      - {test: "ASVspoof 2019 LA", metric: EER, value: "1.14%", source: model card, cite: "evaluation table; trained on its train split"}
+      - {test: "ASVspoof 2021 DF eval", metric: EER, value: "1.75%", source: model card, cite: "evaluation table"}
     summary: >-
-      A large audio model (XLS-R 1B) that pools features from every layer and classifies them with
-      a conformer head; top open model on the Speech DF Arena.
+      XLS-R 1B front end, attention pooling over every hidden layer and a conformer head; the top
+      open model on the Speech DF Arena.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows, XLS-R 1B front end, attention pooling over every
       hidden layer, conformer head, spoof or bona fide classifier
     description: >-
-      DF Arena 1B is a universal speech anti-spoofing model released by the Speech DF Arena project
-      (Speech-Arena-2025, 2025), the team behind a public leaderboard for audio deepfake detectors.
-      It runs the audio through the large XLS-R 1B speech model, pools the features of every layer
-      with learned attention weights, and passes them to a conformer, a transformer-style block with
-      convolutions, that makes the call. Its XLS-R front end was pretrained on Common Voice, BABEL,
-      MLS, VoxPopuli and VoxLingua107, and it was then trained on ASVspoof 2019 and 2024, MLAAD, Codecfake,
-      LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb and EnvSDD, so the benchmark refuses it on ASVspoof 2019
-      LA eval and MLAAD. It is the top open model on that leaderboard, and here it reproduces the
-      model card's In-the-Wild result (EER 0.67% on the full set, against the card's 0.91%).
+      Released by the team behind the Speech DF Arena leaderboard (Speech-Arena-2025). The XLS-R
+      front end was pretrained on Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107, and the detector
+      trained on ASVspoof 2019 and 2024, MLAAD, Codecfake, LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb
+      and EnvSDD. The contamination guard therefore refuses it on ASVspoof 2019 LA eval and MLAAD-based
+      evalsets.
   df_arena_500m:
     s2_id: ARXIV:2509.02859
     venue: Speech DF Arena 2025
+    published:
+      - {test: "In-the-Wild", metric: EER, value: "1.76%", source: model card, cite: "evaluation table", evalset: in_the_wild}
+      - {test: "ASVspoof 2019 LA", metric: EER, value: "1.09%", source: model card, cite: "evaluation table; trained on its train split"}
+      - {test: "ASVspoof 2021 DF eval", metric: EER, value: "3.30%", source: model card, cite: "evaluation table"}
     summary: >-
-      The mid-size sibling (XLS-R 300M) of the Speech DF Arena detector, with the same layer pooling
-      and conformer head.
+      The XLS-R 300M sibling of DF Arena 1B: same all-layer attention pooling, conformer head and
+      broad training mix.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows, XLS-R 300M front end, attention pooling over every
       hidden layer, conformer head, spoof or bona fide classifier
     description: >-
-      DF Arena 500M is the mid-size universal speech anti-spoofing model from the Speech DF Arena
-      project (Speech-Arena-2025, 2025). It uses the XLS-R 300M speech model, pools the features of
-      every layer with learned attention weights, and passes them to a conformer head that makes the
-      call. Its front end was pretrained on Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107,
-      and it was then trained on ASVspoof 2019 and 2024, MLAAD, Codecfake, LibriSeVoc, DFADD, CtrSVDD,
-      SpoofCeleb and EnvSDD, so the benchmark refuses it on ASVspoof 2019 LA eval and MLAAD. Here
-      it reproduces the model card's In-the-Wild result (EER 1.51% on the full set, against the card's
-      1.76%), which makes it a strong, widely trained audio reference.
+      Same design and training data as DF Arena 1B (Speech-Arena-2025) with the smaller XLS-R 300M
+      front end, pretrained on Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107; the detector
+      saw ASVspoof 2019 and 2024, MLAAD, Codecfake, LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb and EnvSDD.
+      The contamination guard refuses it on ASVspoof 2019 LA eval and MLAAD-based evalsets.
   efficientnet_b4:
     s2_id: ARXIV:2004.07676
     venue: ICPR 2020
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.957", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.749", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.696", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      A standard EfficientNet-B4 image network that looks at cropped face frames and learns visual
-      artefacts of manipulation.
+      Plain EfficientNet-B4 frame classifier on aligned face crops; DeepfakeBench's single-network
+      version, trained on FF++ c23.
     architecture: Aligned 256 px face crop, EfficientNet-B4 CNN, two-way classifier
     description: >-
-      EfficientNet-B4 is a standard image network, here DeepfakeBench's single-network version of
-      the detector studied by Bonettini et al. (ICPR 2020), whose paper combines several EfficientNet-B4
-      variants into an ensemble. It looks at one cropped face frame at a time and learns the visual
-      artefacts of manipulation from examples. The released weights were trained on FaceForensics++
-      (c23 compression per the DeepfakeBench README), after ImageNet pretraining. It is a classic
-      image-only baseline for video, and together with Xception it shows how far a plain CNN gets
-      before any special forgery-detection ideas are added.
+      DeepfakeBench's single-network version of the detector studied by Bonettini et al. (ICPR 2020),
+      whose paper ensembles several EfficientNet-B4 variants. The weights were trained on FaceForensics++
+      (c23 per the DeepfakeBench README) after ImageNet pretraining. With Xception it is the plain-CNN
+      video baseline, with no forgery-specific cue.
   effort:
     s2_id: ARXIV:2411.15633
     venue: ICML 2025
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.956", source: paper, cite: "Table 1, video-level", evalset: celeb_df_v2_test}
+      - {test: "DFDCP", metric: AUC, value: "0.909", source: paper, cite: "Table 1, video-level"}
+      - {test: "DFDC", metric: AUC, value: "0.843", source: paper, cite: "Table 1, video-level"}
     summary: >-
-      Adapts a big pretrained CLIP vision model by tuning only a small part of its weights, keeping
-      its general knowledge while learning to spot fakes.
+      CLIP ViT-L/14 adapted by SVD: principal singular components frozen, residual tuned; DeepfakeBench
+      detector on FF++ c23. Blocked on weights.
     architecture: >-
       Aligned 224 px face crop, CLIP ViT-L/14 image encoder with SVD-split weights (principal part
       frozen, residual part tuned), linear head
     description: >-
-      Effort (Yan et al., ICML 2025) adapts a large pretrained CLIP vision model by splitting its
-      weight matrices with singular value decomposition, freezing the main components that hold general
-      knowledge, and training only the small remainder to spot fakes. The authors argue that ordinary
-      fine-tuning overfits to a few fake patterns, and that this split keeps the model's feature space
-      rich enough to generalise. The paper is about AI-generated images in general, and here DeepfakeBench's
-      Effort detector scores face frames. The released weights were trained on FaceForensics++ (c23)
-      after CLIP pretraining on OpenAI's private data. It is blocked for now because Google Drive
-      refused the weight file as over quota on 2026-10-05, and upstream reports a reproduction gap
-      (Celeb-DF v2 AUC 0.885 against 0.956) and publishes no licence file.
+      Effort (Yan et al., ICML 2025) splits each weight matrix by SVD, freezes the principal subspace
+      and trains only the residual, which the authors argue stops fine-tuning from collapsing the
+      feature space onto a few fake patterns. The paper targets AI-generated images broadly; here
+      DeepfakeBench's Effort detector, trained on FaceForensics++ (c23) after CLIP pretraining on
+      OpenAI's private data, scores face frames. Blocked since Google Drive refused the weight file
+      as over quota on 2026-10-05; upstream also reports a Celeb-DF v2 reproduction gap and has no
+      licence file.
   f3net:
     s2_id: ARXIV:2007.09355
     venue: ECCV 2020
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.964", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.735", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.702", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      Splits each face image into frequency bands (fine versus coarse detail) before an Xception network,
-      since fakes leave traces there that eyes miss.
+      DCT frequency-band decomposition (12 input channels) into Xception, for artefacts that survive
+      compression; DeepfakeBench weights, FF++ c23.
     architecture: >-
       Aligned 256 px face crop, DCT frequency-band decomposition (12 input channels), Xception CNN,
       two-way classifier
     description: >-
-      F3Net (Qian et al., ECCV 2020) detects fake faces by looking at frequency, not only at pixels.
-      It splits each face image into bands of fine and coarse detail with a discrete cosine transform
-      and feeds the bands to an Xception network, because manipulation can leave traces in those bands
-      that the eye misses, especially after video compression. The released DeepfakeBench weights
-      were trained on FaceForensics++ (c23) after ImageNet pretraining. The detector's yaml names
-      only NeuralTextures, which may not describe the checkpoint, and the benchmark treats it as trained
-      on all of FF++. It is the frequency-cue member of the classic video group.
+      F3Net (Qian et al., ECCV 2020) splits each face crop into frequency bands with a discrete cosine
+      transform and classifies the bands with Xception, since manipulation traces persist there after
+      video compression. DeepfakeBench's weights were trained on FaceForensics++ (c23) after ImageNet
+      pretraining. The detector's yaml names only NeuralTextures, which may not describe the checkpoint;
+      the benchmark treats it as trained on all of FF++.
   ffd:
     s2_id: ARXIV:1910.01717
     venue: CVPR 2020
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.962", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.744", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.703", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      An Xception network with an attention map that highlights which face regions were manipulated
-      and focuses the classifier there.
+      Xception with a learned attention map over manipulated regions that reweights features before
+      classification; DeepfakeBench weights, FF++ c23.
     architecture: >-
       Aligned 256 px face crop, Xception CNN with an attention map over manipulated regions, two-way
       classifier
     description: >-
-      FFD (Dang et al., CVPR 2020) is an Xception network with an attention map. The map highlights
-      which parts of the face look manipulated and steers the classifier towards them, and it can
-      also be shown to a person as a rough picture of where the forgery is. The released DeepfakeBench
-      weights were trained on FaceForensics++ (c23 per the DeepfakeBench README), after ImageNet pretraining.
-      It is one of the classic image-based detectors in the benchmark, here representing the idea
-      of focusing on the manipulated region, and its scores match the original code closely in the
-      parity check.
+      FFD (Dang et al., CVPR 2020) estimates an attention map of manipulated face regions and uses
+      it to reweight the feature maps; the map doubles as a coarse forgery localisation. DeepfakeBench's
+      weights were trained on FaceForensics++ (c23 per the DeepfakeBench README) after ImageNet pretraining.
+      Passes parity against the original code.
   gend:
     s2_id: ARXIV:2508.06248
     venue: WACV 2026
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.946", source: paper, cite: "Table 4, 5-seed mean, video-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.864", source: paper, cite: "Table 4, 5-seed mean, video-level"}
+      - {test: "14 cross-dataset sets, mean", metric: AUC, value: "0.912", source: paper, cite: "Table 4, video-level"}
     summary: >-
-      Fine-tunes a few parameters of a pretrained CLIP vision model on face frames so it still works
-      on deepfakes from unseen datasets.
+      CLIP ViT-L/14 with only LayerNorm tuned, L2-normalised features and metric learning; frame
+      probabilities averaged per video. Trained on FF++.
     architecture: >-
       Aligned face crop at native size, CLIP ViT-L/14 image encoder with only LayerNorm parameters
       tuned, L2-normalised features, linear head
     description: >-
-      GenD (Yermakov et al., WACV 2026) takes a large pretrained CLIP vision model and tunes only
-      its LayerNorm parameters, about 0.03% of the model, so the general knowledge in CLIP stays mostly
-      intact. It also forces the face features onto a sphere with L2 normalisation and metric learning,
-      and each frame gets a real-or-fake probability that is averaged over the video. The released
-      weights were trained on FaceForensics++ only, after CLIP pretraining on OpenAI's private image-text
-      data. The authors report that it beats more complex methods in average cross-dataset AUROC over
-      14 benchmarks, which makes it the main generalisation-first video model here. Its adapter runs
-      end to end, but parity with upstream is not yet checked.
+      GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 0.03% of the
+      model), constrains features to the hypersphere with L2 normalisation and metric learning, and
+      averages per-frame P(fake) over the video. The released weights were trained on FaceForensics++
+      only, after CLIP pretraining on OpenAI's private image-text data. The main generalisation-first
+      video model here; the adapter runs end to end but parity is not checked yet.
   gend_pe_l:
     s2_id: ARXIV:2508.06248
     venue: WACV 2026
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.950", source: paper, cite: "Table 4, 5-seed mean, video-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.822", source: paper, cite: "Table 4, 5-seed mean, video-level"}
+      - {test: "14 cross-dataset sets, mean", metric: AUC, value: "0.914", source: paper, cite: "Table 4, video-level"}
     summary: >-
-      The same GenD recipe built on Meta's Perception Encoder instead of CLIP, so the two show how
-      much the backbone matters.
+      The GenD recipe (LayerNorm-only tuning, L2-normalised features) on Meta's Perception Encoder
+      L/14 instead of CLIP.
     architecture: >-
       Aligned face crop at native size resized to 224, Meta Perception Encoder L/14 with only LayerNorm
       parameters tuned, L2-normalised features, linear head
     description: >-
-      This is GenD's second released backbone: the same recipe as GenD (Yermakov et al., WACV 2026),
-      built on Meta's Perception Encoder instead of CLIP. Only the LayerNorm parameters are tuned,
-      the face features are L2-normalised, and a video's score is the mean over its frames. The released
-      weights were trained on FaceForensics++ only, after Meta's pretraining of the encoder on data
-      that is not public, so overlap with our data cannot be checked. Because it differs from the
-      CLIP version only in backbone, comparing the two shows how much the pretrained foundation model
-      matters. Its adapter has not yet been through the parity check.
+      GenD's second released backbone (Yermakov et al., WACV 2026): identical training on Perception
+      Encoder, so the pair isolates the effect of the foundation model. Trained on FaceForensics++
+      only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Parity
+      is not checked yet.
   havic:
     s2_id: ARXIV:2603.23960
     venue: CVPR 2026 Findings
+    published:
+      - {test: "FakeAVCeleb", metric: AUC, value: "0.999", source: paper, cite: "Table 2, in-domain", evalset: fakeavceleb}
+      - {test: "KoDF", metric: AUC, value: "0.989", source: paper, cite: "Table 3, cross-dataset"}
+      - {test: "HiFi-AVDF, 6-generator mean", metric: AUC, value: "0.758", source: paper, cite: "Table 4, cross-dataset"}
     summary: >-
-      Checks whether the sound and the moving face in a video belong together, catching fakes where
-      lips, voice or expression do not match.
+      Audio and video transformers pretrained on real videos for audio-visual coherence, fused to
+      score 16-frame windows; fine-tuned on FakeAVCeleb.
     architecture: >-
       16-frame windows of 224 px face frames plus 128-bin audio filterbank, audio and video transformer
       encoders pretrained on real videos, audio-visual interaction module, MLP classifier, one logit
       per window
     description: >-
-      HAVIC (CVPR 2026 Findings) is an audio-visual detector that asks whether the sound and the moving
-      face in a video belong together. It first learns what coherent audio, video and cross-modal
-      timing look like by pretraining on real videos only, then combines the audio and visual features
-      to score a clip, which should help against fakes whose lips, voice or expression disagree. Its
-      weights were pretrained on LRS2 and fine-tuned on a random 70% of FakeAVCeleb, and because that
-      split's item list is unpublished the benchmark refuses it on FakeAVCeleb. It is the only open
-      audio-visual detector here, and it needs videos of at least 3.2 seconds with a face in 16 sampled
-      frames, so HiDF's 3-second clips are too short.
+      HAVIC (CVPR 2026 Findings) pretrains its audio and video encoders on real videos only (LRS2)
+      to model temporal and cross-modal coherence, then fuses them to score clips whose lips, voice
+      or expression disagree. It was fine-tuned on a random 70% of FakeAVCeleb with an unpublished
+      item list, so the contamination guard refuses it on FakeAVCeleb. The only open audio-visual
+      detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long
+      for HiDF), and parity is not checked yet.
   lipforensics:
     s2_id: ARXIV:2012.07657
     venue: CVPR 2021
+    published:
+      - {test: "FF++, unseen manipulations", metric: AUC, value: "0.971", source: paper, cite: "Table 1, leave-one-out mean, video-level"}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.824", source: paper, cite: "Table 2, video-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.735", source: paper, cite: "Table 2, video-level"}
     summary: >-
-      Watches only the mouth region over time and flags lip movements that look unnatural, a cue that
-      holds across many kinds of fakes.
+      Lipreading-pretrained ResNet-18 and multi-scale temporal CNN on grayscale mouth crops, flagging
+      unnatural mouth motion; LRW, then FF++ c23.
     architecture: >-
       25-frame clips of 96 px grayscale mouth crops (88 px centre crop), ResNet-18 with 3D stem, multi-scale
       temporal convolutional network, one logit per clip
     description: >-
-      LipForensics (Haliassos et al., CVPR 2021) watches only the mouth. A network is first taught
-      to lipread, so it learns what natural mouth movement looks like, and its temporal part is then
-      fine-tuned to tell real from forged mouth motion. The authors argue this high-level cue holds
-      up across different manipulations and after compression, because it does not depend on low-level
-      artefacts. The released weights were pretrained on LRW and fine-tuned on FaceForensics++ (c23,
-      all four manipulations). It matters here because lip-sync fakes are a focus of this benchmark,
-      though users report that its FF++ numbers do not reproduce, and it needs at least 25 consecutive
-      frames with a detectable face.
+      LipForensics (Haliassos et al., CVPR 2021) is pretrained for lipreading on LRW, then its temporal
+      network is fine-tuned on FaceForensics++ (c23, all four manipulations) to separate real from
+      forged mouth motion, a high-level cue the authors argue survives unseen manipulations and compression.
+      Central here because lip-sync fakes are a focus. Caveats: users report its FF++ numbers do not
+      reproduce, it needs 25 consecutive frames with a detectable face, and parity is not checked
+      yet.
   recce:
     s2_id: 1537faa9593d0d20e62055e4e6af6d382a26d313
     venue: CVPR 2022
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.962", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.732", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.713", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      Learns to rebuild real faces only, so fake faces rebuild badly; the rebuilding error is what
-      reveals them.
+      Xception encoder-decoder that reconstructs real faces only; reconstruction differences guide
+      the classifier. DeepfakeBench weights, FF++ c23.
     architecture: >-
       Aligned 256 px face crop, Xception encoder with a decoder that reconstructs the face and guides
       attention from the reconstruction, two-way classifier
     description: >-
-      RECCE (Cao et al., CVPR 2022) learns what real faces look like by training a decoder to rebuild
-      them from the encoder's features. Fake faces rebuild poorly, and the reconstruction differences
-      are used to guide the classifier, a cue that does not depend on any one manipulation method.
-      The released DeepfakeBench weights were trained on FaceForensics++ (c23 per the DeepfakeBench
-      README), after ImageNet pretraining. It is the reconstruction-based detector in the classic
-      video group, and its scores match the original code closely in the parity check.
+      RECCE (Cao et al., CVPR 2022) trains a decoder to reconstruct real faces, so fakes reconstruct
+      poorly, and uses the reconstruction differences to guide attention; the cue is not tied to one
+      manipulation method. DeepfakeBench's weights were trained on FaceForensics++ (c23 per the DeepfakeBench
+      README) after ImageNet pretraining. Passes parity against the original code.
   sbi:
     s2_id: ARXIV:2204.08376
     venue: CVPR 2022
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.932", source: paper, cite: "Table 1", evalset: celeb_df_v2_test}
+      - {test: "DFDCP", metric: AUC, value: "0.862", source: paper, cite: "Table 1"}
+      - {test: "DFDC", metric: AUC, value: "0.724", source: paper, cite: "Table 1"}
     summary: >-
-      Trained on fakes made by blending a real face with a slightly altered copy of itself, which
-      teaches it blending seams instead of one generator's style.
+      EfficientNet-B4 trained on self-blended images (a real face blended with an altered copy of
+      itself); real FF++ videos only, c23 checkpoint.
     architecture: >-
       Face box widened by one eighth on each side and resized to 380 px, EfficientNet-B4 CNN, two-way
       classifier
     description: >-
-      SBI (Shiohara and Yamasaki, CVPR 2022) is trained on fakes it makes itself. Each real face is
-      blended with a slightly altered copy of itself, which produces the seams and statistical mismatches
-      that face swaps leave, without using any real deepfake method. The authors argue this makes
-      the network learn general forgery traces instead of the style of one generator. Only the real
-      videos of FaceForensics++ were used, after ImageNet pretraining, and the c23 checkpoint is the
-      one used here. It is a widely cited baseline for generalisation, and its research-only licence
-      means its code is never copied into this repository.
+      SBI (Shiohara and Yamasaki, CVPR 2022) synthesises its training fakes by blending each real
+      face with a slightly transformed copy of itself, producing the blending boundaries and statistical
+      mismatches of face swaps without any real generator. Only FaceForensics++ real videos were used,
+      after ImageNet pretraining; the c23 checkpoint is used here. Research-only licence, so its code
+      is never copied into this repository.
   spsl:
     s2_id: ARXIV:2103.01856
     venue: CVPR 2021
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.961", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.765", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.704", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      Gives an Xception network the phase of the image's frequency spectrum as an extra input, where
-      upsampling in fakes leaves a trace.
+      Xception with the grey image's phase spectrum as a fourth input channel, where upsampling leaves
+      traces; DeepfakeBench weights, FF++ c23.
     architecture: >-
       Aligned 256 px face crop, RGB plus phase spectrum of the grey image as a fourth channel, Xception
       CNN, two-way classifier
     description: >-
-      SPSL (Liu et al., CVPR 2021) adds the phase of the image's frequency spectrum as an extra input
-      channel next to the colour image. The authors observe that the upsampling steps in most face
-      forgery methods change that phase in a visible way, so it carries a clue that colour alone hides.
-      The released DeepfakeBench weights were trained on FaceForensics++ (c23) after ImageNet pretraining.
-      The detector's yaml lists only FaceSwap, which may not describe the checkpoint, and the benchmark
-      treats it as trained on all of FF++. It is the phase-cue member of the classic video group,
-      and it uses the full Xception network, not the shallower one of the paper.
+      SPSL (Liu et al., CVPR 2021) adds the phase spectrum as an input channel beside RGB, since the
+      upsampling in most face-forgery pipelines perturbs it. DeepfakeBench's weights were trained
+      on FaceForensics++ (c23) after ImageNet pretraining and use the full Xception, not the paper's
+      shallower network. The detector's yaml lists only FaceSwap, which may not describe the checkpoint;
+      the benchmark treats it as trained on all of FF++.
   srm:
     s2_id: ARXIV:2103.12376
     venue: CVPR 2021
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.958", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.755", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.700", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      Adds a second stream that keeps only fine, high-frequency noise in the image, which manipulation
-      tends to disturb, next to the normal colour stream.
+      Two-stream Xception: RGB plus SRM high-frequency noise residuals, coupled by cross-stream attention;
+      DeepfakeBench weights, FF++ c23.
     architecture: >-
       Aligned 256 px face crop, RGB stream plus a stream of high-frequency noise residuals from SRM
       filters, Xception CNN with attention linking the two streams, two-way classifier
     description: >-
-      SRM (Luo et al., CVPR 2021) argues that ordinary detectors overfit to colour textures that are
-      specific to one forgery method. It therefore adds a second stream that keeps only the fine,
-      high-frequency noise of the image, where tampered and genuine regions tend to differ, and lets
-      the two streams guide each other with attention. The released DeepfakeBench weights were trained
-      on FaceForensics++ (c23 per the DeepfakeBench README), after ImageNet pretraining. It is the
-      noise-residual cue in the classic video group, and its scores match the original code closely
-      in the parity check.
+      SRM (Luo et al., CVPR 2021) adds a stream of SRM-filtered high-frequency noise, where tampered
+      and genuine regions differ, to avoid overfitting to method-specific colour textures, and lets
+      the two streams guide each other with attention. DeepfakeBench's weights were trained on FaceForensics++
+      (c23 per the DeepfakeBench README) after ImageNet pretraining. Passes parity against the original
+      code.
   ucf:
     s2_id: ARXIV:2304.13949
     venue: ICCV 2023
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.971", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.753", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.719", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      Separates features specific to one forgery method from features common to all forgeries, and
-      scores using only the common ones.
+      Xception encoders disentangle content, method-specific and common forgery features; only the
+      common-forgery head scores. DeepfakeBench weights, FF++ c23.
     architecture: >-
       Aligned 256 px face crop, Xception encoders separating content, method-specific forgery and
       common forgery features, scored with the common-forgery head only
     description: >-
-      UCF (Yan et al., ICCV 2023) tries to generalise to forgery methods it has not seen. It splits
-      what it sees in a face into three parts: features unrelated to forgery, features specific to
-      one manipulation method, and features common to all forgeries. Only the common features are
-      used for the real-or-fake decision, so the score does not depend on the quirks of a particular
-      generator. The released DeepfakeBench weights were trained on all four FaceForensics++ methods
-      (c23) after ImageNet pretraining. It is the disentangling approach in the classic video group,
-      and its scores match the original code closely in the parity check.
+      UCF (Yan et al., ICCV 2023) splits face features into forgery-irrelevant content, method-specific
+      forgery and common forgery parts, and decides on the common part only, aiming at unseen manipulation
+      methods. DeepfakeBench's weights were trained on all four FaceForensics++ methods (c23) after
+      ImageNet pretraining. Passes parity against the original code.
   xception:
     s2_id: ARXIV:1901.08971
     venue: ICCV 2019
+    published:
+      - {test: "FF++ c23 test", metric: AUC, value: "0.964", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: ffpp_test}
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.737", source: DeepfakeBench, cite: "Table 3, frame-level", evalset: celeb_df_v2_test}
+      - {test: "DFDC", metric: AUC, value: "0.708", source: DeepfakeBench, cite: "Table 3, frame-level"}
     summary: >-
-      The classic Xception image network applied to cropped face frames, the standard baseline for
-      video deepfake detection.
+      Xception (depthwise separable CNN) frame classifier on aligned face crops; the FF++ baseline,
+      DeepfakeBench weights trained on c23.
     architecture: >-
       Aligned 256 px face crop, Xception CNN with depthwise separable convolutions, two-way classifier
     description: >-
-      Xception is a standard image network, and this is the face-forgery detector built on it in the
-      FaceForensics++ paper (Rossler et al., ICCV 2019). It looks at one cropped face frame at a time
-      and learns the visual artefacts of manipulation from examples. The released DeepfakeBench weights
-      were trained on FaceForensics++ (c23 per the README, though upstream issue 151 asking whether
-      every checkpoint is c23 is unanswered), after ImageNet pretraining. It is the standard baseline
-      for video deepfake detection and the model the other DeepfakeBench detectors build on. Some
-      users report that DeepfakeBench's released weights do not reproduce its README table.
+      The face-forgery detector from the FaceForensics++ paper (Rossler et al., ICCV 2019), and the
+      backbone the other DeepfakeBench detectors build on. DeepfakeBench's weights were trained on
+      FaceForensics++ (c23 per the README; upstream issue 151, asking whether every checkpoint is
+      c23, is unanswered) after ImageNet pretraining. Some users report the released weights do not
+      reproduce DeepfakeBench's README table.
   xlsr_aasist:
     s2_id: ARXIV:2202.12233
     venue: Odyssey 2022
+    published:
+      - {test: "ASVspoof 2021 LA eval", metric: EER, value: "0.82%", source: paper, cite: "Table 3, best run; 3-seed mean 1.00%"}
+      - {test: "ASVspoof 2021 DF eval", metric: EER, value: "2.85%", source: paper, cite: "Table 3, best run with DF-tuned augmentation"}
     summary: >-
-      Takes rich features from a big pretrained speech model (XLS-R 300M) and classifies them with
-      an AASIST graph network.
+      Fine-tuned XLS-R 300M front end with an AASIST graph-attention back end on its last layer; trained
+      on ASVspoof 2019 LA only.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, AASIST graph
       attention back end on the last layer, two-way classifier
     description: >-
-      XLS-R + AASIST (Tak et al., Odyssey 2022) puts the AASIST graph network on top of wav2vec 2.0-style
-      speech features, here from the XLS-R 300M model, and fine-tunes the whole thing on spoofing
-      data. The front end was pretrained on real speech only (Common Voice, BABEL, MLS, VoxPopuli
-      and VoxLingua107), and the full network was then trained on the ASVspoof 2019 LA training split
-      alone. The authors report the lowest equal error rates published at the time on ASVspoof 2021
-      LA and DF. Training on one corpus makes it a clean zero-shot probe on South Asian sets, with
-      no MLAAD or FLEURS in its training. Its adapter replaces the original fairseq code, so parity
-      with upstream is not checked yet.
+      XLS-R + AASIST (Tak et al., Odyssey 2022) fine-tunes the SSL front end jointly with an AASIST
+      back end. The front end was pretrained on real speech only (Common Voice, BABEL, MLS, VoxPopuli,
+      VoxLingua107) and the detector trained on the ASVspoof 2019 LA training split alone, so with
+      no MLAAD or FLEURS in training it is a clean zero-shot probe on South Asian sets. The adapter
+      replaces fairseq and passes parity against upstream's own stack (2026-10-12).
   xlsr_mamba:
     s2_id: ARXIV:2411.10027
     venue: IEEE SPL 2024
+    published:
+      - {test: "ASVspoof 2021 LA eval", metric: EER, value: "0.93%", source: paper, cite: "Tables I and II, DuaBiMamba"}
+      - {test: "ASVspoof 2021 DF eval", metric: EER, value: "1.88%", source: paper, cite: "Tables I and II, DuaBiMamba"}
+      - {test: "In-the-Wild", metric: EER, value: "6.71%", source: paper, cite: "Table III", evalset: in_the_wild}
     summary: >-
-      Takes XLS-R speech features and reads them forwards and backwards with a Mamba sequence model
-      instead of attention.
+      Fine-tuned XLS-R 300M features read by a dual-column bidirectional Mamba back end instead of
+      attention; trained on ASVspoof 2019 LA only.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, dual-column bidirectional
       Mamba back end (six blocks per direction), two-way classifier
     description: >-
-      XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention layers of the back end with
-      Mamba, a state space model that reads a sequence efficiently, and runs it forwards and backwards
-      over XLS-R speech features. The front end was pretrained on real speech (Common Voice, BABEL,
-      MLS, VoxPopuli and VoxLingua107), and the released network was trained on the ASVspoof 2019
-      LA training split alone. The authors report that on In-the-Wild it emerged as the strongest
-      candidate among the systems they compared. Here it runs without the original compiled Mamba
-      kernels, using plain PyTorch stand-ins that are slower, and parity against those kernels is
-      not checked yet.
+      XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention back end with forward and backward
+      Mamba state space blocks over XLS-R features. The front end was pretrained on real speech (Common
+      Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the released network trained on the ASVspoof
+      2019 LA training split alone. Here mamba-ssm's CUDA kernels are replaced by slower pure-PyTorch
+      stand-ins, and parity against the kernels is not checked yet.
   xlsr_sls:
     s2_id: DOI:10.1145/3664647.3681345
     venue: ACM MM 2024
+    published:
+      - {test: "ASVspoof 2021 DF eval", metric: EER, value: "1.92%", source: repo README, cite: "SLSforADD, results using pre-trained model"}
+      - {test: "ASVspoof 2021 LA eval", metric: EER, value: "2.87%", source: repo README, cite: "SLSforADD, results using pre-trained model"}
+      - {test: "In-the-Wild", metric: EER, value: "7.46%", source: repo README, cite: "SLSforADD, results using pre-trained model", evalset: in_the_wild}
     summary: >-
-      Pools the outputs of all 24 layers of XLS-R with learned attention weights, since different
-      layers hold different spoofing clues.
+      Fine-tuned XLS-R 300M with learned attention pooling over all 24 layers (Sensitive Layer Selection)
+      and a small MLP; ASVspoof 2019 LA only.
     architecture: >-
       Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, learned attention
       over all 24 layers (SLS), two linear layers, two-way classifier
     description: >-
-      XLS-R + SLS (Zhang et al., ACM Multimedia 2024) is built on the observation that different layers
-      of the XLS-R speech model hold different spoofing clues. Its Sensitive Layer Selection (SLS)
-      module pools the outputs of all 24 layers with learned attention weights before a small classifier
-      makes the call. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli
-      and VoxLingua107), and the network was trained on the ASVspoof 2019 LA training split alone.
-      It is the strongest open model trained on that corpus only, so it works as a clean zero-shot
-      probe on every South Asian set. The repository declares no licence, so its code is imported
-      but never copied, and its parity with upstream is not checked yet.
+      XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with learned attention,
+      since different layers carry different spoofing cues, before two linear layers. The front end
+      was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the network
+      trained on the ASVspoof 2019 LA training split alone, making it a clean zero-shot probe on every
+      South Asian set. The repository declares no licence, so its code is imported, never copied;
+      parity is not checked yet.
 datasets:
   asvspoof2019_la:
     s2_id: DOI:10.1016/j.csl.2020.101114
     venue: CSL 2020
     summary: >-
-      English speech from the VCTK corpus, real clips plus fakes made by text-to-speech and voice
-      conversion systems; the standard audio benchmark.
+      English VCTK speech, bona fide plus 19 TTS and voice-conversion attacks; the standard logical-access
+      anti-spoofing benchmark.
     scale: 7.6 GB; train, dev and eval with disjoint speakers
     generators:
     - >-
@@ -483,8 +521,8 @@ datasets:
     notes: Train and dev share attacks A01 to A06; most eval attacks are unseen in training.
   bangla_voices:
     summary: >-
-      Bangla speech from 75 Bangladeshi speakers: each of 30 sentences read once and faked once, with
-      a real twin for every fake (generator not named).
+      Bangla read speech from 75 Bangladeshi speakers, each of 30 sentences read once and faked once,
+      so every fake has a real twin.
     scale: 4,500 clips, 2 to 5 s each
     annotations:
     - speaker id (75 speakers)
@@ -497,8 +535,7 @@ datasets:
     s2_id: ARXIV:2505.10885
     venue: arXiv 2025
     summary: >-
-      Bengali speech: about 13,800 real clips and 12,800 fakes made with the VITS text-to-speech system,
-      in three sub-collections.
+      Bengali real speech and VITS text-to-speech fakes in three sub-corpora (sust, mozilla, news).
     scale: 13,796 real and 12,796 fake clips
     generators:
     - VITS (text-to-speech)
@@ -508,25 +545,23 @@ datasets:
     - transcript
     format: WAV, 22.05 kHz, 6 to 7 s clips
     notes: >-
-      The news sub-corpus has real clips only, and the archive's counts (13,796 real, 12,796 fake)
-      differ from the README's.
+      The news sub-corpus is real only, and the archive's counts differ from the README's.
   bd_grf6:
     summary: >-
-      Bangla speech by Bangladeshi speakers, real and fake, grouped by male, female and third gender;
+      Bangla real and fake speech by Bangladeshi speakers, grouped male, female and third gender;
       the only set with a third-gender group.
     scale: 13,566 clips, 18.7 h
     annotations:
     - 'gender: male, female, third gender'
-    format: WAV and MP3 (format differs by class), 13,566 clips, 18.7 h in all
+    format: WAV and MP3 (format differs by class)
     notes: >-
-      Third-gender real clips are MP3 while female fakes are WAV, so file format may give the label
-      away.
+      Third-gender real clips are MP3 while female fakes are WAV, so file format can leak the label.
   casual_conversations_v2:
     s2_id: ARXIV:2303.04838
     venue: CVPRW 2023
     summary: >-
-      Real videos only: consenting people in seven countries (India the largest group) labelled by
-      skin tone, age, gender and language, for checking false alarms on real faces.
+      Real video only: consenting participants in seven countries (India the largest), with self-reported
+      and annotated demographics; for false positives on real faces.
     scale: 5,567 participants
     generators: []
     annotations:
@@ -546,8 +581,8 @@ datasets:
     s2_id: ARXIV:1909.12962
     venue: CVPR 2020
     summary: >-
-      English-language celebrity face-swap videos: 890 real and 5,639 fake, made with improved methods
-      so they look more natural than earlier sets.
+      Celebrity face-swap videos from YouTube made with an improved DeepFake synthesis process; a
+      standard cross-dataset video test.
     scale: 890 real and 5,639 fake videos
     generators:
     - DeepFake face swap with the authors' improved synthesis process
@@ -560,8 +595,8 @@ datasets:
     s2_id: ARXIV:2503.02857
     venue: arXiv 2025
     summary: >-
-      Real and fake video, audio and images collected from social media in 2024, covering 52 languages;
-      for evaluation only, not training.
+      In-the-wild real and fake video, audio and images collected from social media in 2024, in 52
+      languages.
     scale: 20.3 GB
     generators:
     - >-
@@ -576,14 +611,13 @@ datasets:
       video about 30 fps, average 576 x 720 px, about 80 s average; audio about 44.7 kHz, about 115
       s average; images mostly 1024 x 1024
     notes: >-
-      Evaluation only, no training on it, and its metadata columns are unverified until access is
-      granted.
+      Evaluation only, no training on it; its metadata columns are unverified until access is granted.
   deephy:
     s2_id: ARXIV:2209.09111
     venue: IJCB 2022
     summary: >-
-      Face-swap videos made by applying up to three different swap tools in a row, to study which
-      tools made a fake.
+      Face-swap videos with one to three successive swaps (FaceShifter, FaceSwap, FSGAN), for attributing
+      the sequence of generators.
     scale: 100 real and 5,040 fake videos
     generators:
     - FaceShifter
@@ -602,8 +636,8 @@ datasets:
     s2_id: f1a9f5f42a68a8b5ee07e06dee800629fccc533f
     venue: CVPR 2023
     summary: >-
-      Face-swap videos of Indian people, including clips with several faces, labelled by gender, age,
-      skin tone and occlusion.
+      Indian face-swap videos (FSGAN, FaceShifter, FaceSwap), single- and multi-subject, labelled
+      by gender, age, skin tone and occlusion.
     scale: 133,260 videos, over 500 GB
     generators:
     - FSGAN
@@ -617,14 +651,14 @@ datasets:
     - occlusion
     - 'resolution: low or high'
     - 'compression: c0, c23, c40'
-    format: videos at low and high resolution, c0, c23 and c40 compression, over 500 GB
+    format: videos at low and high resolution, c0, c23 and c40 compression
     notes: Its licence limits use to research colleagues at the signing institution.
   fakeavceleb:
     s2_id: ARXIV:2108.05080
     venue: NeurIPS D&B 2021
     summary: >-
-      English-speaking celebrity videos in which the face, the voice or both are faked, across five
-      ethnic groups including 100 South Asian real videos.
+      VoxCeleb2 celebrity videos with fake video, fake audio or both, across five ethnic groups including
+      100 South Asian real videos.
     scale: 500 real and 19,500 fake videos
     generators:
     - FaceSwap (video)
@@ -647,8 +681,8 @@ datasets:
     s2_id: ARXIV:1901.08971
     venue: ICCV 2019
     summary: >-
-      1,000 real YouTube videos and their fakes made with several face-swap and face-reenactment methods;
-      the standard video deepfake benchmark.
+      1,000 real YouTube videos and their fakes from face-swap and face-reenactment methods; the standard
+      video training set and in-domain test.
     scale: 1,000 real videos plus fakes, about 40 GB
     generators:
     - Deepfakes
@@ -667,8 +701,8 @@ datasets:
     s2_id: DOI:10.1145/3711896.3737399
     venue: KDD 2025
     summary: >-
-      Face swaps made with commercial tools and picked because people cannot tell them from real;
-      faces are labelled by race, with an Indian group.
+      Commercial-tool face swaps selected because people cannot tell them from real, with race labels
+      including an Indian group.
     scale: 4,361 real and 4,361 fake videos
     generators:
     - commercial face-swap tools (which tool made which video is not stated)
@@ -682,8 +716,8 @@ datasets:
     notes: Clips are too short for HAVIC's 3.2 s windows, and the 62k images are not fetched.
   iav_df:
     summary: >-
-      Indian audio-video deepfakes with face swaps and lip-sync using cloned voices; only a sample
-      was ever released and its link is dead.
+      Indian audio-video deepfakes: motion-model reenactment, face swaps and Wav2Lip lip-sync with
+      cloned voices.
     generators:
     - First Order Motion Model
     - Thin Plate Spline Motion Model
@@ -694,8 +728,8 @@ datasets:
     s2_id: ARXIV:2203.16263
     venue: Interspeech 2022
     summary: >-
-      English clips of 54 public figures, real speech and fakes collected from the internet, used
-      to test audio detectors on realistic material.
+      Real and fake English speech of public figures collected from the internet; the standard out-of-domain
+      audio test.
     scale: 31,779 clips (19,963 real, 11,816 fake)
     annotations:
     - speaker (public figure name)
@@ -705,7 +739,7 @@ datasets:
     s2_id: DOI:10.1016/j.patrec.2025.07.002
     venue: Pattern Recognition Letters 2025
     summary: >-
-      Indian videos in seven languages with face swaps, text-to-speech voices and Wav2Lip lip-sync
+      Indian YouTube videos in seven languages with face swaps and text-to-speech plus Wav2Lip lip-sync
       fakes.
     scale: 389 real and 4,680 fake videos
     generators:
@@ -723,8 +757,8 @@ datasets:
     s2_id: ARXIV:2604.19949
     venue: ACL 2026 Findings
     summary: >-
-      Fake speech in 12 Indian languages made by re-encoding real IndicSUPERB speech with neural audio
-      codecs (DAC, Encodec); no download exists yet.
+      Fakes made by re-encoding IndicSUPERB speech in 12 Indian languages with neural audio codecs
+      (DAC, Encodec).
     generators:
     - DAC neural audio codec (16, 24 and 44 kHz)
     - Encodec neural audio codec (24 and 48 kHz)
@@ -735,8 +769,8 @@ datasets:
     s2_id: ARXIV:2208.11761
     venue: AAAI 2023
     summary: >-
-      Real read speech in 12 Indian languages (Kathbath), used here as the real counterpart for IndicSynth;
-      only the clean test splits are fetched.
+      Real read speech in 12 Indian languages (Kathbath); the real counterpart for IndicSynth, sharing
+      its speaker ids.
     scale: 5.8 GB (test splits)
     generators: []
     annotations:
@@ -751,8 +785,8 @@ datasets:
     s2_id: DOI:10.18653/v1/2025.acl-long.1070
     venue: ACL 2025
     summary: >-
-      Fake speech only, in 12 Indian languages, made with three systems (XTTS-v2, VITS, FreeVC24)
-      from IndicSUPERB speakers.
+      Fake-only speech in 12 Indian languages from XTTS-v2, VITS and FreeVC24, cloning IndicSUPERB
+      speakers.
     scale: 4,000 h, 989 target speakers, 845 GB
     generators:
     - XTTS-v2 (text-to-speech)
@@ -768,12 +802,12 @@ datasets:
     - TTS transcript
     format: WAV embedded in parquet rows
     notes: >-
-      Fake only; real speech comes from IndicSUPERB, and shards are sorted by generator so small samples
+      Fake only; real speech comes from IndicSUPERB. Shards are sorted by generator, so small samples
       may miss some.
   indictts_challenge:
     summary: >-
       Real and text-to-speech clips in 16 Indian languages, including Nepali, from a Hugging Face
-      community challenge; the TTS system is not named.
+      community challenge.
     scale: 31,102 labelled training clips, 17.4 GB
     annotations:
     - language (16)
@@ -787,7 +821,7 @@ datasets:
     s2_id: ARXIV:2506.19014
     venue: arXiv 2025
     summary: >-
-      Indian-accented English from 50 speakers, real recordings and deepfakes made with hypothetical,
+      Indian-accented English from 50 speakers: real recordings and voice-cloned fakes of hypothetical,
       same-speaker and cross-speaker transcripts.
     scale: 27.17 h
     generators:
@@ -806,8 +840,8 @@ datasets:
     s2_id: ARXIV:2603.02364
     venue: Interspeech 2026 (arXiv)
     summary: >-
-      Fake speech only in 66 low-resource languages, including Nepali and Assamese; deferred because
-      it ships as one huge archive.
+      Fake-only speech in 66 low-resource languages, including Nepali and Assamese, from 24 open-source
+      TTS systems; deferred.
     scale: 1.3 million utterances, 462 GB
     generators:
     - 24 open-source text-to-speech systems
@@ -820,8 +854,8 @@ datasets:
     s2_id: ARXIV:2505.11109
     venue: arXiv 2025
     summary: >-
-      Hindi talking-head and lip-sync videos from eight generators, real clips from YouTube; the one
-      South Asian audio-video set we can download.
+      Hindi YouTube videos and fakes from eight face-swap, talking-head, reenactment and voice-conversion
+      generators; our one downloadable South Asian audio-video set.
     scale: 3,632 real and 3,881 fake videos
     generators:
     - inswapper (face swap)
@@ -843,8 +877,7 @@ datasets:
       fakes null until the metadata confirms it.
   mendeley_roop_akool:
     summary: >-
-      Face-crop still frames of Bangladeshi and Indian people, real and fakes made with Roop and Akool;
-      used only to test the pipeline.
+      Face-crop frames of Bangladeshi and Indian people, real and faked with Roop and Akool.
     scale: 3,746 real and 106,948 fake frames
     generators:
     - Roop
@@ -861,8 +894,8 @@ datasets:
     s2_id: ARXIV:2401.09512
     venue: IJCNN 2024
     summary: >-
-      Fake speech only, made by many text-to-speech systems in many languages (Hindi, Bengali, Tamil,
-      Urdu, Sinhala and more); real speech must come from elsewhere.
+      Fake-only text-to-speech in many languages (Hindi, Bengali, Tamil, Urdu, Sinhala and more),
+      synthesised from M-AILABS source text.
     scale: 1,000 clips per language and generator, 9.5 GB
     generators:
     - >-
@@ -880,8 +913,7 @@ datasets:
     s2_id: DOI:10.21437/SLTU.2018-11
     venue: SLTU 2018
     summary: >-
-      Real Sinhala read speech crowd-sourced by Google, used as the real half for MLAAD's Sinhala
-      fakes; only the first of 16 zips is fetched.
+      Google's crowd-sourced Sinhala read speech, real only; the real half for MLAAD's Sinhala fakes.
     scale: 11,550 clips used (full set 185k utterances)
     generators: []
     annotations:
@@ -893,8 +925,8 @@ datasets:
     s2_id: ARXIV:2509.19865
     venue: arXiv 2025
     summary: >-
-      Real and fake speech in seven languages, with Hindi and Tamil parts used here, fakes from ten
-      generators including commercial voice tools.
+      Real and fake speech in seven languages (Hindi and Tamil used here) from six open TTS systems
+      and four commercial voice tools.
     scale: Hindi 71,171 and Tamil 49,640 utterances
     generators:
     - VITS-MMS
@@ -921,8 +953,8 @@ datasets:
     s2_id: ARXIV:2507.21463
     venue: ACL 2025
     summary: >-
-      Real and fake speech in many languages; we use the Hindi, Bengali, Tamil, Marathi and Malayalam
-      parts, mostly Edge-TTS plus SeedVC voice conversion for Hindi.
+      Multilingual real and fake speech; we use Hindi, Bengali, Tamil, Marathi and Malayalam, faked
+      mostly with Edge-TTS, plus SeedVC for Hindi.
     scale: 143 GB for the South Asian parts
     generators:
     - Edge-TTS (text-to-speech)
@@ -941,7 +973,7 @@ datasets:
     venue: Interspeech 2023
     summary: >-
       Real Indian-accented English from 117 speakers across India, labelled by gender, age, state
-      and first language; used to check false alarms.
+      and first language; for false positives.
     scale: 9.6 h, 117 speakers
     generators: []
     annotations:
@@ -951,12 +983,11 @@ datasets:
     - native state and district
     - first language
     - transcript
-    format: audio embedded in parquet, test split only, 9.6 h in all
+    format: audio embedded in parquet, test split only
     notes: No licence is declared, so nothing derived from it is published yet.
   unidatapro_videos:
     summary: >-
-      A tiny free preview of five real phone videos and five face-swap fakes made from them; used
-      only to test the pipeline.
+      Free preview: five real phone videos and five face-swap fakes made from them.
     scale: 10 videos, about 68 MB
     generators:
     - aisaver.io
@@ -970,8 +1001,7 @@ datasets:
     s2_id: DOI:10.18653/v1/2024.findings-acl.861
     venue: ACL 2024 Findings
     summary: >-
-      Urdu speech from 17 speakers: about 3,400 real clips and matching fakes made with two text-to-speech
-      systems (VITS and Tacotron).
+      Urdu speech from 17 speakers: real clips and matched fakes from two TTS systems (VITS and Tacotron).
     scale: 6,794 clips (3,398 real, 3,396 fake)
     generators:
     - VITS (text-to-speech)

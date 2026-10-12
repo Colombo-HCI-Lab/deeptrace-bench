@@ -18,10 +18,7 @@ const P = buildProgress((await getEntry("docs", "progress"))!.body ?? "");
     <header class="mast">
       <div class="kicker">Progress · as of {P.asOf}</div>
       <h1>What's done, and what's next</h1>
-      <p class="lede">
-        Where the benchmark stands, each round of work newest first, and the plan from here. For what the numbers say,
-        see <a href={`${base}results/`}>Results</a>.
-      </p>
+      <p class="lede">Status, each round of work newest first, and the plan. Numbers are on <a href={`${base}results/`}>Results</a>.</p>
     </header>
 
     <section id="where-things-stand" class="block">
@@ -42,7 +39,7 @@ const P = buildProgress((await getEntry("docs", "progress"))!.body ?? "");
       <section id="timeline" class="block">
         <header>
           <h2>Timeline</h2>
-          <p>Newest first. Each round lists what it added and its commit range.</p>
+          <p>Newest first, with commit ranges.</p>
         </header>
         {
           P.timeline.map((t) => (
@@ -97,9 +94,5 @@ const P = buildProgress((await getEntry("docs", "progress"))!.body ?? "");
       </div>
     </div>
 
-    <section class="adding">
-      <h2>Adding an entry</h2>
-      <div class="snip" set:html={P.adding} />
-    </section>
   </div>
 </Base>

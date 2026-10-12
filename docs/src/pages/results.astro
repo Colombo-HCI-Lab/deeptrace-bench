@@ -18,10 +18,7 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
     <header class="mast">
       <div class="kicker">Results · snapshot of {R.asOf}</div>
       <h1>What the runs show</h1>
-      <p class="lede">
-        Every number is zero-shot: a published detector tested on data unlike its training data, without retraining.
-        Most numbers are AUC, the chance a detector scores a random fake above a random real clip.
-      </p>
+      <p class="lede">Zero-shot throughout: released weights, no retraining. AUC unless noted.</p>
       <div class="scale" aria-label="Colour scale">
         <div class="track"></div>
         <div class="ticks"><span>0 backwards</span><span>0.5 coin flip</span><span>1 perfect</span></div>
@@ -58,9 +55,8 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
         <div class="kicker">Audio</div>
         <h2>South Asian speech</h2>
         <p>
-          Seven detectors on five open South Asian sets, grouped by what they were trained on. Hover a cell for its
-          interval and clip count. <sup class="mono">so</sup> marks source overlap: the detector's pretraining used a
-          corpus this set also draws on.
+          Seven detectors on five open sets, grouped by training data. Hover a cell for its 95% interval and clip count.
+          <sup class="mono">so</sup>: source overlap (pretraining used a corpus this set draws on).
         </p>
       </header>
       <div class="toggle" role="group" aria-label="Metric">
@@ -186,10 +182,7 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
       <header>
         <div class="kicker">Sanity check</div>
         <h2>Reproductions: do our numbers match the papers?</h2>
-        <p>
-          Each detector on the data its own paper used. If our EER lands near the published one, the setup can be
-          trusted on new data. Difference is in percentage points; positive means we measure more errors.
-        </p>
+        <p>Each detector on its own paper's test set. Difference in EER percentage points; positive means we measure more errors.</p>
       </header>
       <div class="scroll">
         <table class="tbl repro">
@@ -271,10 +264,7 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
       <header>
         <div class="kicker">Every countable run</div>
         <h2>All runs</h2>
-        <p>
-          One row per detector and evalset scored in full. Failed clips, such as a video with no face, are counted,
-          never dropped. Wall time includes reading files from shared storage.
-        </p>
+        <p>One row per detector and evalset scored in full. Failed clips (e.g. no face found) are counted, not dropped. Wall time includes I/O.</p>
       </header>
       <div class="filters" role="group" aria-label="Filter runs">
         {
@@ -321,10 +311,10 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
         </table>
       </div>
       <dl class="terms-dl">
-        <div><dt>below chance</dt><dd>AUC under 0.5. On a reproduction set it means a bug in how scores are read; on a South Asian set it is a real finding about the detector.</dd></div>
-        <div><dt>source overlap</dt><dd>The detector's pretraining used a corpus the evalset also draws on. Reported with a warning, kept out of headline numbers.</dd></div>
-        <div><dt>no parity check</dt><dd>The adapter hasn't yet been shown to score like the authors' code. Treat as provisional.</dd></div>
-        <div><dt>score direction unchecked</dt><dd>The detector hasn't yet scored above chance on a reproduction set, so its scores could be read backwards.</dd></div>
+        <div><dt>below chance</dt><dd>AUC under 0.5: a score-reading bug on a reproduction set, a real finding on a South Asian one.</dd></div>
+        <div><dt>source overlap</dt><dd>Pretraining used a corpus the evalset draws on. Kept out of headline numbers.</dd></div>
+        <div><dt>no parity check</dt><dd>Adapter not yet matched against the authors' code. Provisional.</dd></div>
+        <div><dt>score direction unchecked</dt><dd>No above-chance reproduction run yet, so the score's sign is unconfirmed.</dd></div>
       </dl>
     </section>
 

@@ -228,7 +228,14 @@ nav.index a:hover { color: var(--ink); }
 .tbl.runs td { padding-block: 8px; }
 .tbl.runs td.auc { padding-block: 6px; text-align: right; }
 .tbl.runs .id { display: block; font: 400 11.5px/1.4 var(--mono); color: var(--muted); }
-.tbl.models { min-width: 980px; }
+.tbl.models { min-width: 1080px; }
+.tbl.models td.wide { min-width: 260px; width: 26%; }
+.tbl .venue { margin-left: 8px; font: 400 12px/1.4 var(--mono); color: var(--muted); }
+.tbl td.res { font-size: 0.84rem; line-height: 1.45; min-width: 230px; }
+.tbl td.res > span + span { margin-top: 3px; }
+.tbl td.res > span { display: block; }
+.tbl td.res b { font: 500 12px/1.45 var(--mono); white-space: nowrap; }
+.tbl td.res i { font-style: normal; color: var(--muted); font-size: 0.78rem; }
 .tbl.datasets { min-width: 1040px; }
 .tbl.compute { min-width: 760px; }
 .tbl.est { min-width: 680px; }

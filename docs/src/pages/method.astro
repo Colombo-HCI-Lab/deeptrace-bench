@@ -26,10 +26,7 @@ const dirs = [
     <header class="mast">
       <div class="kicker">How it works</div>
       <h1>From a published detector to one trusted number</h1>
-      <p class="lede">
-        Every detector and dataset goes through the same five steps under the same rules. Three checks along the way
-        decide whether a number counts.
-      </p>
+      <p class="lede">Five steps, one evaluation setup for every detector and dataset, three checks that decide whether a number counts.</p>
     </header>
     <nav class="index" aria-label="On this page">
       <ol>
@@ -44,27 +41,27 @@ const dirs = [
     <section id="pipeline" class="block">
       <header>
         <h2>The pipeline</h2>
-        <p>Each step is one script. The dashed checks below the steps sit where they act.</p>
+        <p>One script per step.</p>
       </header>
       <div>
         <div class="flow">
-          <div class="stage"><div class="kicker">1 · configs/</div><h3>Configure</h3><p>One file per model (code, weights, what it trained on), per dataset (where to get it, its licence) and per evalset (what gets scored). One shared set of evaluation rules.</p></div>
-          <div class="stage"><div class="kicker">2 · setup_*.py</div><h3>Set up</h3><p>Download each model at a fixed version and check its weights. Download each dataset and list every clip with its label, language and generator.</p></div>
-          <div class="stage"><div class="kicker">3 · score.py</div><h3>Score</h3><p>Prepare every clip the same way for every model (4&nbsp;s audio windows; detected, cropped faces), run the model, store one fake-score per clip. Resumes after a stop.</p></div>
-          <div class="stage"><div class="kicker">4 · evaluate.py</div><h3>Evaluate</h3><p>AUC and EER with 95% intervals, overall and per group (language, generator, gender, race). Failed clips are counted, never dropped.</p></div>
-          <div class="stage"><div class="kicker">5 · --publish</div><h3>Publish</h3><p>Only summary tables reach the public repo, each row with its real/fake pairing and the contamination verdict.</p></div>
+          <div class="stage"><div class="kicker">1 · configs/</div><h3>Configure</h3><p>YAML per model (code, weights, training data), dataset (source, licence) and evalset (what gets scored), plus one shared evaluation setup.</p></div>
+          <div class="stage"><div class="kicker">2 · setup_*.py</div><h3>Set up</h3><p>Fetch pinned weights and verify hashes. Fetch datasets and build a manifest: label, language, generator per clip.</p></div>
+          <div class="stage"><div class="kicker">3 · score.py</div><h3>Score</h3><p>Shared preprocessing (4&nbsp;s audio windows; detected, aligned face crops), one fake score per clip. Resumable.</p></div>
+          <div class="stage"><div class="kicker">4 · evaluate.py</div><h3>Evaluate</h3><p>AUC and EER with 95% bootstrap intervals, overall and per group (language, generator, gender, race). Failures counted, not dropped.</p></div>
+          <div class="stage"><div class="kicker">5 · --publish</div><h3>Publish</h3><p>Aggregate tables only, each row with its pairing and contamination verdict.</p></div>
         </div>
         <div class="gates">
-          <div class="gate g-parity"><strong>Parity check</strong>Our copy of a model must match the authors' code within 0.001 on about 200 clips before its numbers count.</div>
-          <div class="gate g-guard"><strong>Contamination guard</strong>A model is never scored on data it trained on. Refused pairs show as ⊘.</div>
-          <div class="gate g-pub"><strong>Publish guard</strong>Test runs and anything naming a single clip never reach the public repo.</div>
+          <div class="gate g-parity"><strong>Parity check</strong>Our adapter matches the authors' code within 1e-3 on about 200 clips.</div>
+          <div class="gate g-guard"><strong>Contamination guard</strong>No model is scored on a dataset it trained on (⊘).</div>
+          <div class="gate g-pub"><strong>Publish guard</strong>Pipeline tests, smoke runs and per-clip data never reach the repo.</div>
         </div>
       </div>
       <div class="cols-2" style="margin-top: 8px">
-        <div class="where"><strong>In the public repo</strong>Code, settings, documentation, weight fingerprints, summary results.</div>
+        <div class="where"><strong>In the public repo</strong>Code, configs, docs, weight hashes, aggregate results.</div>
         <div class="where">
           <strong>In private storage only (DTB_ROOT)</strong>
-          <span>Datasets, model weights, clip lists and per-clip scores. Dataset licences don't allow sharing them. <a href={`${base}docs/data_policy/`}>Data policy</a></span>
+          <span>Datasets, weights, manifests, per-clip scores; licences forbid redistribution. <a href={`${base}docs/data_policy/`}>Data policy</a></span>
         </div>
       </div>
     </section>
@@ -72,37 +69,21 @@ const dirs = [
     <section id="terms" class="block">
       <header>
         <h2>Key terms</h2>
-        <p>Every number on this site answers one question: given a clip, can the detector tell whether it is real or fake?</p>
       </header>
       <div class="terms">
         <dl>
-          <div>What's tested</div>
-          <div><dt>Deepfake</dt><dd>Audio or video made or changed by AI to look or sound like a real person: a cloned voice, a swapped face, speech generated from text.</dd></div>
-          <div><dt>Detector</dt><dd>A neural network that scores a clip from 0 (real) to 1 (fake). Every detector here comes from a published paper with released weights.</dd></div>
-          <div><dt>Dataset and evalset</dt><dd>A dataset is a published collection of real and fake clips. An evalset is the exact slice we score: which clips, which languages, which count as real or fake.</dd></div>
-          <div><dt>Zero-shot</dt><dd>Testing a detector on data unlike its training data, without retraining it. That's the point: how do detectors built elsewhere do on South Asian data?</dd></div>
-        </dl>
-        <dl>
-          <div>How it's scored</div>
-          <div>
-            <dt>AUC</dt>
-            <dd>
-              The chance the detector gives a random fake a higher score than a random real clip. Higher is better.
-              <div class="scale small" aria-hidden="true">
-                <div class="track"></div>
-                <div class="ticks"><span>0 backwards</span><span>0.5 coin flip</span><span>1 perfect</span></div>
-              </div>
-            </dd>
-          </div>
-          <div><dt>EER (equal error rate)</dt><dd>Set the cut-off where the share of real clips called fake equals the share of fakes called real. That shared error rate is the EER. Lower is better; 50% is guessing.</dd></div>
-          <div><dt>False-positive rate</dt><dd>The share of real clips wrongly flagged as fake at a fixed cut-off. A detector can rank groups equally well and still raise far more false alarms for one of them.</dd></div>
+          <div>What's scored</div>
+          <div><dt>Dataset and evalset</dt><dd>A dataset is a published corpus. An evalset is the exact slice we score: which clips, languages and labels. Everything is scored through evalsets.</dd></div>
+          <div><dt>Zero-shot</dt><dd>Released weights on data outside their training distribution, no fine-tuning.</dd></div>
+          <div><dt>Same or cross corpus</dt><dd>Same corpus: real and fake clips share recordings. Cross corpus: they come from different sources, so channel cues can leak the label. Cross-corpus numbers never headline.</dd></div>
+          <div><dt>False-positive rate</dt><dd>Share of real clips flagged fake at the model's global (overall EER) threshold, reported per group.</dd></div>
         </dl>
         <dl>
           <div>Why a number counts</div>
-          <div><dt>Reproduction</dt><dd>Running a detector on its own paper's dataset to check our numbers match the published ones.</dd></div>
-          <div><dt>Parity check</dt><dd>Our copy and the authors' original code score the same ~200 clips; the scores must agree within 0.001.</dd></div>
-          <div><dt>Contamination guard</dt><dd>Compares each detector's training data with every evalset and refuses pairs that overlap (⊘). It compares datasets, not the TTS systems behind them.</dd></div>
-          <div><dt>Same corpus or cross corpus</dt><dd>Same corpus: real and fake clips come from the same recordings. Cross corpus: from different sources, so a detector could score well by noticing the microphone. Cross-corpus numbers never headline.</dd></div>
+          <div><dt>Reproduction</dt><dd>A detector on its own paper's test set, checked against the published number.</dd></div>
+          <div><dt>Parity check</dt><dd>Our adapter and the authors' code score the same ~200 clips; scores must agree within 1e-3.</dd></div>
+          <div><dt>Score direction</dt><dd>Settled once a reproduction run lands above chance, so the sign of the score is known.</dd></div>
+          <div><dt>Contamination guard</dt><dd>Refuses pairs where the model's training data overlaps the evalset (⊘). It compares datasets, not the TTS systems behind them.</dd></div>
         </dl>
       </div>
     </section>
@@ -128,9 +109,8 @@ const dirs = [
       <header>
         <h2>Run it yourself</h2>
         <p>
-          Needs <a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a>. Linux with CUDA 12 for real
-          runs; Apple Silicon is enough for the tests. The smoke test pushes a few clips through every step and writes a
-          readable report.
+          Needs <a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a>; Linux with CUDA 12 for real
+          runs, Apple Silicon for tests. The smoke test runs a few clips through every step.
         </p>
       </header>
       <pre class="cmd" tabindex="0"><code>git config core.hooksPath scripts/hooks   <i># refuse commits that contain data</i>

@@ -5,7 +5,7 @@ group: start
 order: 1
 ---
 
-deeptrace-bench runs open deepfake detectors on South Asian audio and video under one evaluation setup, and reports how well each holds up overall and per group. [Models and data](https://colombo-hci-lab.github.io/deeptrace-bench/inventory/) shows every model, dataset and run, and [Results](results.md) what the runs show; these docs explain them.
+deeptrace-bench runs open deepfake detectors on South Asian audio and video under one evaluation setup and reports results overall and per group. [Models and data](https://colombo-hci-lab.github.io/deeptrace-bench/inventory/) lists every model, dataset and run; [Results](results.md) says what the runs show.
 
 | Doc | What it covers |
 | --- | --- |
@@ -13,7 +13,7 @@ deeptrace-bench runs open deepfake detectors on South Asian audio and video unde
 | [Progress](progress.md) | Where the benchmark stands, what each round of work added, and what comes next |
 | **Experiments and results** | |
 | [Experiments](experiments.md) | What has been run, the question each run answers, and how to run it again |
-| [Results](results.md) | What the runs so far show, with the numbers and their caveats |
+| [Results](results.md) | What the runs so far show, with numbers and caveats |
 | **Reference** | |
 | [Models](models.md) | Every detector: status, wave, where code and weights come from, training data, porting notes, parity check |
 | [Datasets](datasets.md) | Every dataset: how to get it, who requests or signs, licence terms, what's in it |
@@ -43,10 +43,8 @@ contamination guard ─────┘            └───▶ scores/<run_id
 
 Paths on the right are under `DTB_ROOT`; [store_layout.md](store_layout.md) has the full tree.
 
-1. **Configs** say what exists: models, datasets, evalsets, tools (the face detector) and the one evaluation setup.
-2. **Setup** gets code, weights and data into place, and turns each dataset into a manifest. `--sample N` fetches only N real and N fake items, for pipeline tests.
-3. **Scoring** runs one model over one evalset, resumably, after checking the model can read the evalset's modality and the contamination guard has checked the pair. Video and image items go through the shared face pipeline; audio items are cut into windows.
-4. **Evaluation** computes overall and per-group metrics with intervals, and publishes the aggregates (never for pipeline tests).
-5. **Smoke test** runs 2 to 4 on a few items per dataset and writes a report, to prove the plumbing works.
-
-Where the work stands, and what changed in each round, is in [Progress](progress.md).
+1. **Configs** declare models, datasets, evalsets, tools (the face detector) and the one evaluation setup.
+2. **Setup** fetches code, weights and data and writes each dataset's manifest. `--sample N` fetches only N real and N fake items, for pipeline tests.
+3. **Scoring** runs one model over one evalset, resumably, once the model's modality matches the evalset and the contamination guard has checked the pair. Video and image items go through the shared face pipeline; audio is cut into windows.
+4. **Evaluation** computes overall and per-group metrics with intervals and publishes the aggregates (never for pipeline tests).
+5. **Smoke test** runs 2 to 4 on a few items per dataset and writes a report.

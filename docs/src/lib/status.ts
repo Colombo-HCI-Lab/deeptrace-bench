@@ -24,6 +24,16 @@ export interface Profile {
   precision: string;
 }
 
+// A headline number the authors report for the released weights; evalset when we score that set too.
+export interface Published {
+  test: string;
+  metric: string;
+  value: string;
+  source: string;
+  cite: string;
+  evalset?: string;
+}
+
 export interface Model {
   id: string;
   name: string;
@@ -32,6 +42,7 @@ export interface Model {
   blocked: boolean;
   summary: string | null;
   paper: Paper | null;
+  published: Published[];
   trained_on: string[];
   parity: { evalset: string; items: number; max_abs_diff: number } | null;
   profile: Profile | null;

@@ -1,9 +1,11 @@
 ---
-// Models, grouped by modality, most cited first.
-import { D, MOD, nRuns, params, type Model } from "../lib/status";
-import PaperCells from "./PaperCells.astro";
+// Models, grouped by modality, most cited first: what each trained on, what its authors report
+// and what it scored here.
+import { evName } from "../lib/guide";
+import { D, MOD, params, pct, type Model, type Run } from "../lib/status";
 
-const ref = `${import.meta.env.BASE_URL}docs/catalog/`;
+const base = import.meta.env.BASE_URL;
+const ref = `${base}docs/catalog/`;
 const cites = (m: Model) => m.paper?.citations ?? 0;
 const groups = (["audio", "video", "audio_video"] as const)
   .map((mod) => ({
@@ -11,14 +13,24 @@ const groups = (["audio", "video", "audio_video"] as const)
     rows: D.models.filter((m) => m.modality === mod).sort((a, b) => cites(b) - cites(a) || a.name.localeCompare(b.name)),
   }))
   .filter((g) => g.rows.length);
+
+// Our runs, those on a set the authors also report first, so the two columns line up.
+const ours = (m: Model): Run[] => {
+  const shared = new Set(m.published.map((p) => p.evalset).filter(Boolean));
+  return D.runs
+    .filter((r) => r.model === m.id)
+    .sort((a, b) => Number(shared.has(b.evalset)) - Number(shared.has(a.evalset)));
+};
+const trained = (m: Model) =>
+  m.trained_on.length > 4 ? `${m.trained_on.slice(0, 3).join(", ")} and ${m.trained_on.length - 3} more` : m.trained_on.join(", ");
 ---
 
 <table class="tbl models">
   <thead>
     <tr>
-      <th>Detector</th><th>Paper</th><th class="num">Citations</th><th>Trained on</th><th class="num">Parameters</th><th
-        >Status</th
-      >
+      <th>Detector</th><th>Trained on</th><th>Reported by the authors</th><th>Ours, zero-shot</th><th class="num"
+        >Params</th
+      ><th>Status</th>
     </tr>
   </thead>
   <tbody>
@@ -31,41 +43,55 @@ const groups = (["audio", "video", "audio_video"] as const)
             </td>
           </tr>
           {rows.map((m) => {
-            const n = nRuns(m);
+            const r = ours(m);
             return (
               <tr>
                 <td class="wide">
                   <a class="name" href={`${ref}#model-${m.id}`}>
                     {m.name}
                   </a>
+                  {m.paper && (
+                    <a class="venue" href={m.paper.url} title={m.paper.title ?? undefined} target="_blank" rel="noopener">
+                      {m.paper.venue || m.paper.year}
+                    </a>
+                  )}
                   {m.summary && <span class="sum">{m.summary}</span>}
                 </td>
-                <PaperCells paper={m.paper} />
-                <td title={m.trained_on.join(", ")}>
-                  {m.trained_on.length ? (
-                    m.trained_on.length > 4 ? (
-                      `${m.trained_on.slice(0, 3).join(", ")} and ${m.trained_on.length - 3} more`
-                    ) : (
-                      m.trained_on.join(", ")
-                    )
+                <td title={m.trained_on.join(", ")}>{m.trained_on.length ? trained(m) : <span class="dim">·</span>}</td>
+                <td class="res">
+                  {m.published.length ? (
+                    m.published.map((p) => (
+                      <span title={p.cite}>
+                        {p.test} <b>{p.metric} {p.value}</b> <i>· {p.source}</i>
+                      </span>
+                    ))
                   ) : (
                     <span class="dim">·</span>
+                  )}
+                </td>
+                <td class="res">
+                  {r.length ? (
+                    r.map((x) => (
+                      <span title={`${x.n_real} real / ${x.n_fake} fake${x.flags.length ? ` · ${x.flags.join(", ")}` : ""}`}>
+                        {evName(x.evalset)}{" "}
+                        <b>
+                          AUC {x.auc.toFixed(3)} · EER {pct(x.eer)}
+                          {x.flags.length > 0 && "*"}
+                        </b>
+                      </span>
+                    ))
+                  ) : (
+                    <span class="dim">not run yet</span>
                   )}
                 </td>
                 <td class="num">{m.profile ? params(m.profile.params) : <span class="dim">·</span>}</td>
                 <td class="nowrap">
                   {m.blocked ? (
-                    <span class="dim">blocked: weights unreachable</span>
+                    <span class="dim">weights unreachable</span>
+                  ) : m.parity ? (
+                    "parity ✓"
                   ) : (
-                    <Fragment>
-                      {m.parity ? "parity ✓" : <span class="dim">parity pending</span>}
-                      {n > 0 && (
-                        <Fragment>
-                          <br />
-                          {n} evalset{n > 1 ? "s" : ""} scored
-                        </Fragment>
-                      )}
-                    </Fragment>
+                    <span class="dim">parity pending</span>
                   )}
                 </td>
               </tr>

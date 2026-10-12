@@ -160,6 +160,10 @@ def load_catalog(registry: Registry) -> dict[str, dict[str, Any]]:
         unknown = set(catalog.get(kind) or {}) - set(known)
         if unknown:
             raise ValueError(f"{CATALOG.name}: unknown {kind} {sorted(unknown)}")
+    for model_id, entry in (catalog.get("models") or {}).items():
+        for row in entry.get("published") or []:
+            if row.get("evalset") and row["evalset"] not in registry.evalsets:
+                raise ValueError(f"{CATALOG.name}: {model_id}: unknown evalset {row['evalset']}")
     return catalog
 
 
@@ -265,6 +269,8 @@ def collect(registry: Registry) -> dict[str, Any]:
                     for t in m.training_data
                 ],
                 "paper": _paper(entry, citations),
+                # What the authors report for the released weights, to set beside our runs.
+                "published": entry.get("published") or [],
                 "trained_on": sorted(
                     {
                         _source_name(t.dataset, registry)

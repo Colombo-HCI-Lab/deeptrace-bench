@@ -5,7 +5,7 @@ group: working
 order: 2
 ---
 
-Everything large or item-level lives outside git, in one folder named by `DTB_ROOT` in `.env`. This page is the map: what each folder holds, how things are named, and what is safe to delete.
+Everything large or item-level lives outside git, in the folder `DTB_ROOT` names in `.env`.
 
 ## The tree
 
@@ -43,17 +43,17 @@ $DTB_ROOT/
 
 ## Naming rules
 
-- **Ids** are config file names: `configs/models/gend.yaml` is model `gend`. Folders reuse them, so `datasets/unidatapro_videos/` is that dataset.
-- **Items** keep their dataset's own relative paths under `datasets/<id>/`, and their id is `<dataset>/<local path without extension>` (`unidatapro_videos/deepfake/3`). Saved crops follow the item id, so a crop can be traced back by eye.
-- **Runs** are `<model>__<evalset>__<8 hex>`. The hex covers the upstream commit, every weight hash (including the face detector's for video and image runs), the model, evalset and eval configs and the preprocessing mode. Re-running the same thing resumes the same run; changing any input starts a new folder, so results from different settings never mix. The repo commit and device are recorded per session in `run.json`, not in the id.
-- **Face caches** are `<detector>__<8 hex>`, the hex over the detector's weights, thresholds, input size, face choice and frame sampling (`spec.json` spells them out). A changed setting never reuses stale detections.
-- **Parts** are `part-<shard>of<shards>-<n>.parquet`, so array jobs that start together never write the same file.
+- **Ids** are config file names (`configs/models/gend.yaml` is model `gend`); folders reuse them (`datasets/unidatapro_videos/`).
+- **Items** keep their dataset's relative paths under `datasets/<id>/`; their id is `<dataset>/<local path without extension>` (`unidatapro_videos/deepfake/3`). Saved crops follow the item id, so a crop traces back by eye.
+- **Runs** are `<model>__<evalset>__<8 hex>`. The hex covers the upstream commit, every weight hash (including the face detector's for video and image runs), the model, evalset and eval configs, and the preprocessing mode. Re-running the same thing resumes the run; changing any input starts a new folder, so settings never mix. Repo commit and device are recorded per session in `run.json`, not in the id.
+- **Face caches** are `<detector>__<8 hex>`, the hex over detector weights, thresholds, input size, face choice and frame sampling (spelled out in `spec.json`), so a changed setting never reuses stale detections.
+- **Parts** are `part-<shard>of<shards>-<n>.parquet`, so array jobs starting together never write the same file.
 
 ## Namespaces
 
-`DTB_NAMESPACE=smoke` moves everything item-level (datasets, manifests, faces, scores, results, reports) under `$DTB_ROOT/smoke/`. Weights and upstream archives stay at the root and are shared, so a smoke run never downloads a model twice. Scripts set it for you (`smoke.py`, `--sample`, `--smoke`); don't set it in `.env`.
+`DTB_NAMESPACE=smoke` moves everything item-level (datasets, manifests, faces, scores, results, reports) under `$DTB_ROOT/smoke/`. Weights and upstream archives stay at the root, shared, so a smoke run never downloads a model twice. Scripts set it (`smoke.py`, `--sample`, `--smoke`); never set it in `.env`.
 
-A sampled dataset can only ever land in the smoke namespace: `setup_datasets.py --sample` switches to it. That keeps a four-item "dataset" from ever being mistaken for the real one.
+`setup_datasets.py --sample` always switches to the smoke namespace, so a four-item sample can't be mistaken for the real dataset.
 
 ## What is safe to delete
 
@@ -68,4 +68,4 @@ A sampled dataset can only ever land in the smoke namespace: `setup_datasets.py 
 | `datasets/`, `weights/` | care  | re-download; for request-only datasets, someone has to supply them again |
 | `upstream/`             | no    | the archive is the copy that survives a deleted or rewritten upstream    |
 
-On a cluster, give each restricted dataset its own Unix group on `datasets/<id>/` and the matching `scores/` and `results/` folders (see [data_policy.md](data_policy.md)).
+On a cluster, give each restricted dataset its own Unix group on `datasets/<id>/` and the matching `scores/` and `results/` folders ([data_policy.md](data_policy.md)).

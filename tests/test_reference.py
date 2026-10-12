@@ -42,3 +42,18 @@ def test_render_anchors_every_model_and_dataset():
     assert '<a id="model-m"></a>' in text and '<a id="dataset-d"></a>' in text
     assert "trained on D (train split)" in text
     assert "none: real clips only" in text and "Sinhala" in text
+
+
+def test_render_sets_published_numbers_beside_ours():
+    model = {
+        "id": "m", "name": "M", "modality": "audio", "licence": "MIT", "blocked": False,
+        "training": [], "parity": None,
+    }  # fmt: skip
+    model["published"] = [
+        {"test": "In-the-Wild", "metric": "EER", "value": "1.76%", "source": "paper"}
+    ]
+    run = {"model": "m", "evalset": "in_the_wild", "auc": 0.9991, "eer": 0.0151}
+    text = render({"built": "2026-10-12", "models": [model], "datasets": [], "runs": [run]})
+    assert "| Reported by the authors | In-the-Wild: EER 1.76% (paper) |" in text
+    assert "| Our runs | `in_the_wild`: AUC 0.999, EER 1.5% |" in text
+    assert "scored on 1 evalset" in text
