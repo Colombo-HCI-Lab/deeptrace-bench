@@ -5,7 +5,7 @@ group: benchmark
 order: 5
 ---
 
-The settings live in one place, [`configs/eval/default.yaml`](/configs/eval/default.yaml). It is marked `proposed` until the team settles decision 5 (due 2026-10-09). Changing it changes every run id, so results from different settings never mix.
+The settings live in one place, [`configs/eval/default.yaml`](/configs/eval/default.yaml). It is marked `proposed` until the team settles decision 5, which was due 2026-10-09 and is still open as of 2026-10-12. Changing it changes every run id, so results from different settings never mix.
 
 ## Evalsets, not datasets
 
@@ -41,7 +41,7 @@ Open choices for decision 5, all in `configs/eval/default.yaml`:
 - **Group gap:** the headline fairness number. Its definition (`eval.metrics.group_gap`) is still open: max minus min, worst group against the rest, or the largest pair with non-overlapping intervals.
 - **Score direction:** on each reproduction evalset, AUC must be above 0.5 before the adapter is trusted.
 
-Decision 4 (proposed): an attribute becomes a required data dictionary field if both models in a modality shift by 5 or more AUC points across its values. The rule is recorded under `reporting.attribute_rule` so it is fixed before results arrive.
+Decision 4 (proposed): an attribute becomes a required data dictionary field if both models in a modality shift by 5 or more AUC points across its values. The rule is recorded under `reporting.attribute_rule` so it is fixed before results arrive. The first video runs suggest it needs a second clause: on HiDF, one group's AUC barely moves while its false-positive rate at the global threshold doubles ([Results](results.md#video-hidf)).
 
 ## Contamination verdicts
 
@@ -54,7 +54,7 @@ Before scoring, `eval.contamination.check` compares the model's `training_data` 
 | `overlap_excluded` | the model trained on this dataset, but the items it saw are listed, so they're excluded        | evaluated on the rest                    |
 | `contaminated`     | the model trained on this dataset and the items it saw aren't known                            | refused unless `--force`; never headline |
 
-Today the guard refuses HAVIC on FakeAVCeleb and AASIST3 on MLAAD. Fine-tuned checkpoints we make ourselves must list their own training items (`items_file`), so the guard covers our baselines too.
+Today the guard refuses HAVIC on FakeAVCeleb, AASIST3 and DF Arena on MLAAD, and DF Arena and both AntiDeepfake models on ASVspoof 2019 LA eval. It compares datasets, not generators: a model that trained on the same TTS system an evalset's fakes were made with, through a different dataset, still gets `clean`. The multilingual audio models' near-perfect scores on the open South Asian sets may partly reflect that ([Results](results.md#three-tiers)). Fine-tuned checkpoints we make ourselves must list their own training items (`items_file`), so the guard covers our baselines too.
 
 ## Shortcut probe (planned)
 
@@ -63,3 +63,7 @@ For every cross-corpus evalset: a logistic regression on trivial features only (
 ## Fine-tuning splits
 
 `splits.identity_safe_split` links items that share a `subject_id` or `source_subject_id` and keeps each linked group in one split, so no face or voice appears on both sides. The seed and code live in git; the assignments live in `DTB_ROOT/splits/`.
+
+## Flags on the status page
+
+Beside the verdict, the [status page](https://colombo-hci-lab.github.io/deeptrace-bench/#runs) flags what a reader must know before quoting a run: `cross-corpus`; `below chance`; `no parity check`, when the model's adapter hasn't been shown to score like its upstream code; and `score direction unchecked`, when the model hasn't yet scored above chance on a reproduction evalset, so its scores could be read backwards. Runs with either of the last two are provisional.
