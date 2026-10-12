@@ -1,0 +1,48 @@
+---
+// Model-only time for every evalset whose size is known, with the real wall time where a run
+// exists.
+import { D, dur, estimate, int, nRuns, runs } from "../lib/status";
+
+const sized = D.evalsets.filter((e) => e.size).sort((a, b) => a.size!.items - b.size!.items);
+const blocked = (id: string) => D.cells[id] !== undefined;
+const rows = D.models
+  .filter((m) => m.profile && sized.some((e) => estimate(m, e) != null && !blocked(`${m.id}|${e.id}`)))
+  .sort((a, b) => nRuns(b) - nRuns(a) || a.profile!.ms_per_unit - b.profile!.ms_per_unit);
+---
+
+<table class="ref est-t">
+  <thead>
+    <tr>
+      <th>Model</th>
+      {
+        sized.map((e) => (
+          <th class="num">
+            {e.id}
+            <br />
+            <span class="dim">{int(e.size!.items)} clips</span>
+          </th>
+        ))
+      }
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((m) => (
+        <tr>
+          <td class="nowrap">{m.name}</td>
+          {sized.map((e) => {
+            const key = `${m.id}|${e.id}`;
+            const x = blocked(key) ? null : estimate(m, e);
+            const r = runs.get(key);
+            return (
+              <td class="num">
+                {x == null ? <span class="dim">·</span> : dur(x)}
+                {r && r.wall_s ? <span class="dim"> · ran {dur(r.wall_s)}</span> : null}
+              </td>
+            );
+          })}
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

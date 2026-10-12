@@ -2,10 +2,10 @@
 
 Reads aggregates only: the configs, parity summaries in ``results/parity/``, compute profiles
 in ``results/profile/``, citation counts in ``results/citations.json``, the plain-language
-catalog in ``docs/catalog.yaml``, and the store's run summaries, score files (for timing) and
-manifests (for evalset sizes). Smoke runs and pipeline tests never count, by the same rule as
-``--publish``. A run counts only while its model and evalset configs are unchanged, and the
-latest such run wins when a pair has several.
+catalog in ``docs/src/reference/catalog.yaml``, and the store's run summaries, score files
+(for timing) and manifests (for evalset sizes). Smoke runs and pipeline tests never count, by
+the same rule as ``--publish``. A run counts only while its model and evalset configs are
+unchanged, and the latest such run wins when a pair has several.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from .reference import model_input, recorded_features
 from .registry import EvalsetConfig, ModelConfig, Registry, accepts
 from .runs import config_hash
 
-CATALOG = REPO_ROOT / "docs" / "catalog.yaml"
+CATALOG = REPO_ROOT / "docs" / "src" / "reference" / "catalog.yaml"
 CITATIONS = PUBLISHED_RESULTS_DIR / "citations.json"
 S2_BATCH = "https://api.semanticscholar.org/graph/v1/paper/batch"
 
@@ -354,12 +354,6 @@ def collect(registry: Registry) -> dict[str, Any]:
     }
 
 
-def write_page(page: Path, data: dict[str, Any]) -> None:
-    """Replace the JSON inside the page's ``status-data`` script tag."""
-    start, end = '<script id="status-data" type="application/json">', "</script>"
-    html = page.read_text()
-    head, sep, rest = html.partition(start)
-    if not sep or end not in rest:
-        raise ValueError(f"{page} has no status-data block")
-    blob = json.dumps(data, indent=1).replace("</", "<\\/")
-    page.write_text(head + start + "\n" + blob + "\n" + end + rest.split(end, 1)[1])
+def write_data(path: Path, data: dict[str, Any]) -> None:
+    """Write the status data the site renders at build time."""
+    path.write_text(json.dumps(data, indent=1) + "\n")

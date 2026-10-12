@@ -1,8 +1,8 @@
 """Reference scores for the AntiDeepfake checkpoints, with real fairseq.
 
 Runs in a throwaway Python 3.9 virtualenv with torch 1.13, fairseq 0.12.2 and safetensors
-(docs/adding_a_model.md says how to make it), not in this repo's environment. It imports
-upstream's own ``models/W2V.py`` from the checkout, whose ``SSLModel`` builds fairseq's
+(docs/src/content/docs/adding_a_model.md says how to make it), not in this repo's environment. It
+imports upstream's own ``models/W2V.py`` from the checkout, whose ``SSLModel`` builds fairseq's
 ``Wav2Vec2Model`` from ``W2V_configs.py``'s settings for ``input.variant``, and loads the Hub's
 ``model.safetensors`` (the download, not the converted file) with every key matching.
 

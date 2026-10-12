@@ -1,0 +1,66 @@
+---
+// Datasets, grouped by role.
+import { ACCESS, D, LANG, MOD, ROLE } from "../lib/status";
+import PaperCells from "./PaperCells.astro";
+
+const ref = `${import.meta.env.BASE_URL}catalog/`;
+const groups = ["south_asian", "reproduction", "real_reference", "in_the_wild"]
+  .map((role) => ({ role, rows: D.datasets.filter((d) => d.role === role).sort((a, b) => a.name.localeCompare(b.name)) }))
+  .filter((g) => g.rows.length);
+---
+
+<table class="ref datasets-t">
+  <thead>
+    <tr>
+      <th>Dataset</th><th>Languages</th><th>Size</th><th>Paper</th><th class="num">Citations</th><th>Access</th><th
+        >Used in evalsets</th
+      >
+    </tr>
+  </thead>
+  <tbody>
+    {
+      groups.map(({ role, rows }) => (
+        <Fragment>
+          <tr class="group">
+            <td colspan="7">
+              {ROLE[role]} · {rows.length}
+            </td>
+          </tr>
+          {rows.map((d) => {
+            const langs = d.languages.map((l) => LANG[l] || l);
+            const langText = langs.length > 4 ? `${langs.slice(0, 3).join(", ")} and ${langs.length - 3} more` : langs.join(", ");
+            return (
+              <tr>
+                <td>
+                  <a class="name" href={`${ref}#dataset-${d.id}`}>
+                    {d.name}
+                  </a>
+                  <span class="sum">
+                    {MOD[d.modality] || d.modality}
+                    {d.summary ? `. ${d.summary}` : ""}
+                  </span>
+                </td>
+                <td title={langs.join(", ")}>{langText || <span class="dim">·</span>}</td>
+                <td>{d.scale || <span class="dim">·</span>}</td>
+                <PaperCells paper={d.paper} />
+                <td class={d.status === "open" ? "nowrap" : "nowrap dim"}>{ACCESS[d.status] || d.status}</td>
+                <td class="mono">
+                  {d.evalsets.length ? (
+                    d.evalsets.map((e, i) => (
+                      <Fragment>
+                        {i > 0 && <br />}
+                        {e}
+                      </Fragment>
+                    ))
+                  ) : (
+                    <span class="dim">·</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </Fragment>
+      ))
+    }
+  </tbody>
+</table>

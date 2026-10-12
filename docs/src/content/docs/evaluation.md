@@ -1,6 +1,11 @@
-# Evaluation
+---
+title: "Evaluation"
+description: "Evalsets, preprocessing, metrics, failure accounting, contamination verdicts, the shortcut probe"
+group: benchmark
+order: 5
+---
 
-The settings live in one place, [`configs/eval/default.yaml`](../configs/eval/default.yaml). It is marked `proposed` until the team settles decision 5 (due 2026-10-09). Changing it changes every run id, so results from different settings never mix.
+The settings live in one place, [`configs/eval/default.yaml`](/configs/eval/default.yaml). It is marked `proposed` until the team settles decision 5 (due 2026-10-09). Changing it changes every run id, so results from different settings never mix.
 
 ## Evalsets, not datasets
 

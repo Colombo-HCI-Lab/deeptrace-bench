@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repo.
 
 ## What this repo is
 
-The benchmark harness for the Colombo HCI Lab's South Asia deepfake detection project: open video and audio detectors run on South Asian deepfake datasets under one evaluation setup, with results reported per group. It starts with existing datasets and models (reproduce published numbers, zero-shot runs, fine-tuned baselines) and later evaluates the data collected through the sibling repo `deeptrace`. `README.md` has the workflow; `docs/` has models, datasets, evaluation, cluster and data policy.
+The benchmark harness for the Colombo HCI Lab's South Asia deepfake detection project: open video and audio detectors run on South Asian deepfake datasets under one evaluation setup, with results reported per group. It starts with existing datasets and models (reproduce published numbers, zero-shot runs, fine-tuned baselines) and later evaluates the data collected through the sibling repo `deeptrace`. `README.md` has the workflow. `docs/` is the public site (https://colombo-hci-lab.github.io/deeptrace-bench/, Astro): the status page plus every doc, written in `docs/src/content/docs/` (models, datasets, evaluation, cluster, data policy and the rest).
 
 Scaffolded 2026-10-03; runs end to end since 2026-10-04. As of 2026-10-05 every configured model has an adapter except AltFreezing (weights unreachable): GenD (CLIP and PE backbones), SBI, LipForensics (FAN landmarks, upstream's mouth crops), nine DeepfakeBench detectors and Effort through one adapter (Effort's weights wait on Google Drive's quota), AASIST, AASIST-L, AASIST3, the XLS-R family (AASIST, SLS and Mamba back ends, run without fairseq or mamba-ssm through `models/_fairseq.py` and `models/_mamba.py`), AntiDeepfake MMS-300M and wav2vec 2.0 small, DF Arena 500M and 1B, and the audio-visual HAVIC. The first ten pass parity (`scripts/parity.py`, `results/parity/`), all but GenD; the rest pass strict loads and the pipeline check only. Builders are written for every open or click-through dataset, including parquet-row datasets (IndicSynth, IndicTTS challenge), zips inside zips (BD-GRF6) and tar-only IndicSUPERB. Still stubs: the request-only and gated builders whose files nobody has seen (FakeAVCeleb, DeePhy, DF-Platter, InDeepFake, IndieFake, Deepfake-Eval-2024, Casual Conversations v2, SEA-Spoof, Svarah), native preprocessing, the shortcut probe.
 
@@ -22,16 +22,17 @@ uv run scripts/evaluate.py --model <id> --evalset <id> [--publish] [--smoke]
 uv run scripts/smoke.py [--model gend] [--sample 2] [--device auto|cpu|mps|cuda] [--keep]
 uv run scripts/parity.py export --model <id> --evalset <id> --smoke   # then the reference and compare it prints
 uv run scripts/profile_models.py --device cuda   # params, FLOPs, GPU time per model -> results/profile/
-uv run scripts/build_site.py [--citations] # rewrite docs/index.html, the status page, from the store
+uv run scripts/build_site.py [--citations] # rewrite the site's data (status.json, catalog.md) from the store
+cd docs && npm ci && npm run dev           # the site locally; npm run build fails on a broken doc link
 ```
 
-Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/store_layout.md` maps the tree. `DTB_NAMESPACE=smoke` (set by `--smoke`, `--sample` and `smoke.py`, never in `.env`) moves everything item-level under `DTB_ROOT/smoke/`.
+Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/src/content/docs/store_layout.md` maps the tree. `DTB_NAMESPACE=smoke` (set by `--smoke`, `--sample` and `smoke.py`, never in `.env`) moves everything item-level under `DTB_ROOT/smoke/`.
 
 ## Rules
 
 - **No data in git.** Datasets, weights, manifests, per-item scores, split assignments and per-subject tables live under `DTB_ROOT`. Only code, configs, docs and aggregate tables are committed. `scripts/hooks/pre-commit` enforces it; keep it working. Test fixtures are synthetic.
 - **One environment.** No dlib, fairseq or mamba-ssm. Upstream code is cloned at a pinned commit into `third_party/` (git-ignored) and loaded by adapters; never copy code from Effort (no licence), SBI (research only) or DeepfakeBench (CC BY-NC) into the repo. Compatibility fixes go in `patches/<repo>/`.
-- **Parity before results.** An adapter counts only after its scores match the upstream code in its original environment on about 200 items (within about 1e-3) and its score direction checks out on the reproduction evalset. See `docs/models.md`.
+- **Parity before results.** An adapter counts only after its scores match the upstream code in its original environment on about 200 items (within about 1e-3) and its score direction checks out on the reproduction evalset. See `docs/src/content/docs/models.md`.
 - **Evalsets, not datasets.** Score only through `configs/evalsets/`. Cross-corpus evalsets never feed headline numbers.
 - **The contamination guard is only as good as `training_data`.** List every dataset a model's released weights saw, including pretraining, and give each dataset its `derived_from`. Don't bypass the guard with `--force` for anything reported.
 - **One evaluation setup.** `configs/eval/default.yaml` is the only place settings live; it is `proposed` until the team settles decision 5.
@@ -48,3 +49,4 @@ Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/s
 - Config ids match file names. Dataset and model facts in configs and docs carry the date they were checked.
 - Commit titles start lower case, no prefix, one short line.
 - Docs are read by the whole team: no personal machines, no people outside the team's working group.
+- **Docs are site pages.** Each is a Markdown file in `docs/src/content/docs/` with `title`, `description`, `group` (`benchmark` or `working`) and `order` in its front matter, and no H1 (the layout prints the title). Link another doc as `name.md#section` and a repo file as `/path/from/repo/root`; both also work on GitHub, and the build fails on a broken one. `docs/src/reference/status.json` and `catalog.md` are written by `build_site.py`, never by hand; the descriptions behind them live in `docs/src/reference/catalog.yaml`. A push to `main` touching `docs/` redeploys the site (`.github/workflows/pages.yml`). The design is the status page's: tokens and shared styles in `docs/src/styles/site.css`, light only.

@@ -1,0 +1,68 @@
+---
+// Models, grouped by modality, most cited first.
+import { D, MOD, nRuns, params, type Model } from "../lib/status";
+import PaperCells from "./PaperCells.astro";
+
+const ref = `${import.meta.env.BASE_URL}catalog/`;
+const cites = (m: Model) => m.paper?.citations ?? 0;
+const groups = (["audio", "video", "audio_video"] as const)
+  .map((mod) => ({
+    mod,
+    rows: D.models.filter((m) => m.modality === mod).sort((a, b) => cites(b) - cites(a) || a.name.localeCompare(b.name)),
+  }))
+  .filter((g) => g.rows.length);
+---
+
+<table class="ref models-t">
+  <thead>
+    <tr>
+      <th>Model</th><th>Paper</th><th class="num">Citations</th><th>Trained on</th><th class="num">Parameters</th><th
+        >Status</th
+      >
+    </tr>
+  </thead>
+  <tbody>
+    {
+      groups.map(({ mod, rows }) => (
+        <Fragment>
+          <tr class="group">
+            <td colspan="6">
+              {MOD[mod]} · {rows.length}
+            </td>
+          </tr>
+          {rows.map((m) => {
+            const n = nRuns(m);
+            return (
+              <tr>
+                <td>
+                  <a class="name" href={`${ref}#model-${m.id}`}>
+                    {m.name}
+                  </a>
+                  {m.summary && <span class="sum">{m.summary}</span>}
+                </td>
+                <PaperCells paper={m.paper} />
+                <td>{m.trained_on.length ? m.trained_on.join(", ") : <span class="dim">·</span>}</td>
+                <td class="num">{m.profile ? params(m.profile.params) : <span class="dim">·</span>}</td>
+                <td class="nowrap">
+                  {m.blocked ? (
+                    <span class="dim">blocked: weights unreachable</span>
+                  ) : (
+                    <Fragment>
+                      {m.parity ? "parity ✓" : <span class="dim">parity pending</span>}
+                      {n > 0 && (
+                        <Fragment>
+                          <br />
+                          {n} evalset{n > 1 ? "s" : ""} scored
+                        </Fragment>
+                      )}
+                    </Fragment>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </Fragment>
+      ))
+    }
+  </tbody>
+</table>

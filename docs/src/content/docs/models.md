@@ -1,4 +1,9 @@
-# Models
+---
+title: "Models"
+description: "Every detector: status, wave, where code and weights come from, training data, porting notes, parity check"
+group: benchmark
+order: 2
+---
 
 Availability checked against the live repos on 2026-10-03, and for every video model again on 2026-10-04 (pinned commits still current, every weight file still public); models added or wired on 2026-10-05 were checked that day. The source of truth is `configs/models/<id>.yaml`; `uv run scripts/setup_models.py --list` prints the current table, including which adapters are written. As of 2026-10-05 every model has an adapter except AltFreezing, and every adapter passes the pipeline check on a few items, except Effort, whose weights Google Drive won't serve today. Seventeen adapters pass their parity check (see [Parity](#parity)): nine of the ten written first (all but GenD), four written on 2026-10-05 (RECCE, SRM, CORE, FFD), and since 2026-10-12 XLS-R + AASIST, both AntiDeepfake models and SBI; the other seven haven't had theirs yet.
 

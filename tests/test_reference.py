@@ -37,6 +37,8 @@ def test_render_anchors_every_model_and_dataset():
         "evalsets": ["d"], "recorded": ("sample", ["language"]), "generators": [],
     }  # fmt: skip
     text = render({"built": "2026-10-05", "models": [model], "datasets": [dataset], "runs": []})
+    assert text.startswith("---\ntitle: Models and datasets\n")
+    assert "\ngroup: benchmark\norder: 4\n---\n" in text and "\n# " not in text
     assert '<a id="model-m"></a>' in text and '<a id="dataset-d"></a>' in text
     assert "trained on D (train split)" in text
     assert "none: real clips only" in text and "Sinhala" in text

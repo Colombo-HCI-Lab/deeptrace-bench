@@ -1,4 +1,9 @@
-# Data policy
+---
+title: "Data policy"
+description: "What may enter git, licence clauses that bind us, sharing data across institutions"
+group: benchmark
+order: 6
+---
 
 Almost every dataset here is licensed for non-commercial research only, several forbid passing on any derived data, and one restricts use to a single institution. This page is what the repo does about it and what it can't do on its own.
 

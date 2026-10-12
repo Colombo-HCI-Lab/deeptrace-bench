@@ -1,0 +1,56 @@
+---
+// One doc: the list of docs beside it, its title, a section index from its H2s, the Markdown.
+import type { MarkdownHeading } from "astro";
+import DocList from "../components/DocList.astro";
+import { GROUPS } from "../lib/docs";
+import Base from "./Base.astro";
+
+interface Props {
+  id: string;
+  title: string;
+  description: string;
+  group: keyof typeof GROUPS;
+  headings: MarkdownHeading[];
+}
+
+const { id, title, description, group, headings } = Astro.props;
+const sections = headings.filter((h) => h.depth === 2);
+// A title may carry a code span, as `DTB_ROOT` does.
+const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
+const titleHtml = esc(title).replace(/`([^`]+)`/g, "<code>$1</code>");
+---
+
+<Base
+  title={`${title.replaceAll("`", "")} · deeptrace-bench`}
+  description={description}
+  section={id === "catalog" ? "reference" : "docs"}
+>
+  <div class="doc">
+    <nav class="rail" aria-label="Docs"><DocList current={id} /></nav>
+    <div class="page">
+      <details class="rail-mobile">
+        <summary class="label">All docs</summary>
+        <nav class="rail rail-open" aria-label="Docs"><DocList current={id} /></nav>
+      </details>
+      <header class="mast">
+        <div class="label">{GROUPS[group]}</div>
+        <h1 set:html={titleHtml} />
+        <p class="lede">{description}</p>
+      </header>
+      {
+        sections.length > 1 && (
+          <nav class="index" aria-label="Sections">
+            <ol>
+              {sections.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+      <article class="prose"><slot /></article>
+    </div>
+  </div>
+</Base>

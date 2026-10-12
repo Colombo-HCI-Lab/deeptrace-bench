@@ -1,0 +1,43 @@
+---
+// One row per scored model and evalset, by evalset group, then evalset, best AUC first.
+import { D, GROUPS, dur, evalsets, fmt, int, models, pct, type Run } from "../lib/status";
+
+const order = (r: Run) => {
+  const e = evalsets.get(r.evalset)!;
+  return GROUPS.findIndex(([role, pairing]) => e.role === role && e.pairing === pairing);
+};
+const rows = D.runs
+  .slice()
+  .sort((a, b) => order(a) - order(b) || a.evalset.localeCompare(b.evalset) || b.auc - a.auc);
+---
+
+<table class="ref runs-t">
+  <thead>
+    <tr>
+      <th>Evalset</th><th>Model</th><th class="num">Real / fake clips</th><th class="num">Failed</th><th class="num"
+        >AUC</th
+      ><th class="num">95% CI</th><th class="num">EER</th><th class="num">Wall time</th><th>Caveats</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((r) => (
+        <tr title={[r.run_id, ...r.reasons].join("\n")}>
+          <td class="mono">{r.evalset}</td>
+          <td class="nowrap">{models.get(r.model)!.name}</td>
+          <td class="num">
+            {int(r.n_real)} / {int(r.n_fake)}
+          </td>
+          <td class="num">{int(r.n_failed)}</td>
+          <td class="num">{fmt(r.auc)}</td>
+          <td class="num dim">
+            {fmt(r.auc_lo)}–{fmt(r.auc_hi)}
+          </td>
+          <td class="num">{pct(r.eer)}</td>
+          <td class="num">{r.wall_s ? dur(r.wall_s) : "·"}</td>
+          <td class="flags">{r.flags.join(", ")}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

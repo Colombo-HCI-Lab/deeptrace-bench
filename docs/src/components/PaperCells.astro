@@ -1,0 +1,15 @@
+---
+// The paper and citation-count cells, as the models and datasets tables show them.
+import { int, type Paper } from "../lib/status";
+
+interface Props {
+  paper: Paper | null;
+}
+
+const { paper: p } = Astro.props;
+---
+
+<td class="nowrap">
+  {p ? <a href={p.url} title={p.title ?? undefined}>{p.venue || p.year}</a> : <span class="dim">no paper</span>}
+</td>
+<td class="num">{p && p.citations != null ? int(p.citations) : <span class="dim">·</span>}</td>

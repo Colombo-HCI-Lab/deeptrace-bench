@@ -79,3 +79,7 @@ logs/
 # Figures for the docs are fine
 !docs/**/*.png
 !docs/**/*.svg
+
+# The site in docs/ (Astro)
+node_modules/
+.astro/

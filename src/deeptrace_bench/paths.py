@@ -15,7 +15,7 @@ dataset licences treat item names and derived data as part of the dataset.
 ``DTB_NAMESPACE=smoke``, which moves everything item-level (datasets, manifests, face caches,
 scores, results, reports) under ``DTB_ROOT/smoke/``. Weights and upstream archives stay shared
 at the root, so a smoke run never downloads a model twice and never mixes with real runs. The
-full tree is in ``docs/store_layout.md``.
+full tree is in ``docs/src/content/docs/store_layout.md``.
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ def dtb_root() -> Path:
     if not value:
         raise RootNotConfiguredError(
             "DTB_ROOT is not set. Copy .env.example to .env and point DTB_ROOT at the shared "
-            "store (see docs/cluster.md)."
+            "store (see https://colombo-hci-lab.github.io/deeptrace-bench/cluster/)."
         )
     return Path(value).expanduser()
 

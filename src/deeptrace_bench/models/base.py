@@ -14,7 +14,7 @@ An adapter wraps one upstream model so the harness can treat them all the same:
 
 Adapters must match upstream: before an adapter is used for results, its scores on about 200
 items are checked against the upstream code run in its original environment (see
-docs/models.md, "Parity check").
+docs/src/content/docs/models.md, "Parity").
 """
 
 from __future__ import annotations

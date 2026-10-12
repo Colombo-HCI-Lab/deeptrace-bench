@@ -1,15 +1,15 @@
 """Reference scores for Tak et al.'s XLS-R wrapper models (XLS-R + AASIST, XLS-R + SLS), with real
 fairseq.
 
-Runs in a throwaway Python 3.9 virtualenv with upstream's own stack (torch 1.8.1 and the
-fairseq commit the checkout vendors, ``fairseq-a54021305d6b...``; fairseq 0.12.2 rejects
-``xlsr2_300m.pt``'s config; docs/adding_a_model.md says how to make it), not in this repo's
+Runs in a throwaway Python 3.9 virtualenv with upstream's own stack (torch 1.8.1 and the fairseq
+commit the checkout vendors, ``fairseq-a54021305d6b...``; fairseq 0.12.2 rejects ``xlsr2_300m.pt``'s
+config; docs/src/content/docs/adding_a_model.md says how to make it), not in this repo's
 environment, and doesn't import this package. It imports the checkout's own ``model.py``, whose
-``SSLModel`` loads fairseq's XLS-R 300M from the relative path ``xlsr2_300m.pt``, so the script
-runs from the virtualenv's root, where that file is kept. The original checkpoint
-(``input.checkpoint``, not the converted safetensors) then replaces every weight with every key
-matching, as upstream's ``main_SSL_LA.py`` loads it (``DataParallel``'s ``module.`` prefix
-stripped, which SLS's checkpoint carries).
+``SSLModel`` loads fairseq's XLS-R 300M from the relative path ``xlsr2_300m.pt``, so the script runs
+from the virtualenv's root, where that file is kept. The original checkpoint (``input.checkpoint``,
+not the converted safetensors) then replaces every weight with every key matching, as upstream's
+``main_SSL_LA.py`` loads it (``DataParallel``'s ``module.`` prefix stripped, which SLS's checkpoint
+carries).
 
 Upstream labels bona fide 1, so P(fake) is the softmax at ``input.fake_index`` (0). On CPU in
 fp32 the front end is never moved, so ``SSLModel.extract_feat`` doesn't switch it back to

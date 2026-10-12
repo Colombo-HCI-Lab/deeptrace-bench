@@ -1,8 +1,8 @@
 """Parity checks: does an adapter score exactly what the upstream code scores?
 
-An adapter counts only after its scores on about 200 items match upstream's within about
-1e-3 (``docs/models.md``). The check runs in three steps, so the upstream side can run in an
-environment of its own (old PyTorch, no access to this package):
+An adapter counts only after its scores on about 200 items match upstream's within about 1e-3
+(``docs/src/content/docs/models.md``). The check runs in three steps, so the upstream side can run
+in an environment of its own (old PyTorch, no access to this package):
 
 1. ``scripts/parity.py export`` picks items, cuts them into model inputs through the same
    loaders scoring uses, saves the inputs, and scores them with the adapter on CPU.

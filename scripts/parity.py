@@ -6,13 +6,12 @@ Examples:
     uv run python scripts/parity_reference/aasist.py <run dir>
     uv run scripts/parity.py compare --model aasist --run <run dir>
 
-``export`` picks about 200 items of an evalset (half of each label, by seeded rank), cuts
-them into model inputs with the same loaders scoring uses, saves them with a ``parity.json``
-the reference scripts read, and scores them with the adapter on CPU. It prints the command
-that runs the matching reference script: in this environment for AASIST and DF Arena, in an
-old-PyTorch virtualenv for DeepfakeBench (docs/models.md says how to make it). ``compare``
-checks every score within 1e-3 and writes ``results/parity/<model>.json``; it exits 1 when
-parity fails.
+``export`` picks about 200 items of an evalset (half of each label, by seeded rank), cuts them into
+model inputs with the same loaders scoring uses, saves them with a ``parity.json`` the reference
+scripts read, and scores them with the adapter on CPU. It prints the command that runs the matching
+reference script: in this environment for AASIST and DF Arena, in an old-PyTorch virtualenv for
+DeepfakeBench (docs/src/content/docs/models.md says how to make it). ``compare`` checks every score
+within 1e-3 and writes ``results/parity/<model>.json``; it exits 1 when parity fails.
 """
 
 from __future__ import annotations

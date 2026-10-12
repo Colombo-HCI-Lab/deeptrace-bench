@@ -1,0 +1,70 @@
+---
+// Every page: fonts, the shared styles, the site bar and the footer.
+import "../styles/site.css";
+import { D } from "../lib/status";
+
+interface Props {
+  title: string;
+  description: string;
+  // Which site-bar link is the current page.
+  section: "status" | "docs" | "reference";
+}
+
+const { title, description, section } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const nav = [
+  { id: "status", label: "Status", href: base },
+  { id: "docs", label: "Docs", href: `${base}overview/` },
+  { id: "reference", label: "Models and datasets", href: `${base}catalog/` },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap"
+    />
+  </head>
+  <body>
+    <header class="site">
+      <div class="in">
+        <a class="name" href={base}>deeptrace-bench</a>
+        <nav aria-label="Site">
+          <ol>
+            {
+              nav.map((n) => (
+                <li>
+                  <a href={n.href} aria-current={n.id === section ? "page" : undefined}>
+                    {n.label}
+                  </a>
+                </li>
+              ))
+            }
+            <li><a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench">Repo ↗</a></li>
+          </ol>
+        </nav>
+      </div>
+    </header>
+    <div class="wrap">
+      <slot />
+      <footer>
+        <span>Updated {D.built}.</span>
+        <span>
+          Rebuild the data: <code>uv run scripts/build_site.py</code> (needs DTB_ROOT); <code
+            >--citations</code
+          > refreshes citation counts. Every push to main redeploys the site.
+        </span>
+        <span>Colombo HCI Lab · <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench">source</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,173 @@
+---
+// The status page: what the benchmark is, how a score is made, and every model, dataset and
+// run so far, rendered from src/reference/status.json (scripts/build_site.py writes it).
+import ComputeTable from "../components/ComputeTable.astro";
+import CoverageGrid from "../components/CoverageGrid.astro";
+import DatasetsTable from "../components/DatasetsTable.astro";
+import EstimateTable from "../components/EstimateTable.astro";
+import ModelsTable from "../components/ModelsTable.astro";
+import RunsTable from "../components/RunsTable.astro";
+import Base from "../layouts/Base.astro";
+import { D } from "../lib/status";
+
+const ref = `${import.meta.env.BASE_URL}catalog/`;
+
+const videoModels = D.models.filter((m) => m.modality === "video" || m.modality === "audio_video");
+const open = D.evalsets.filter((e) => e.modality !== "audio" && e.status === "ready").map((e) => e.id);
+const videoNote = D.runs.some((r) => videoModels.some((m) => m.id === r.model))
+  ? null
+  : `No video model has a full run yet. Open video evalsets: ${open.join(", ") || "none"}; the rest are waiting for access requests to be approved.`;
+
+const gpu = D.models.find((m) => m.profile?.gpu)?.profile;
+const gpuIntro = gpu
+  ? `Measured on one ${gpu.gpu} in ${gpu.precision === "fp32" ? "full 32-bit precision" : gpu.precision}, with each model already loaded and only the model's own work counted. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them. GFLOPs (billions of arithmetic operations) measure the work regardless of hardware; milliseconds are what it took on this GPU.`
+  : null;
+---
+
+<Base
+  title="deeptrace-bench Status"
+  description="Open deepfake detectors run on South Asian audio and video under one evaluation setup: coverage, results and costs."
+  section="status"
+>
+<header class="mast">
+  <div class="label">Colombo HCI Lab · South Asia deepfake detection · phase 2</div>
+  <h1>deeptrace-bench</h1>
+  <p class="lede">Can today's deepfake detectors catch fakes in South Asian languages and faces? Most were trained on English speech and Western faces. This benchmark runs published, open detectors on South Asian audio and video under the same rules, and reports how well each one holds up.</p>
+  <div class="facts">
+    <span><b>{D.models.length}</b> models</span>
+    <span><b>{D.datasets.filter((d) => d.role !== "pipeline_test").length}</b> datasets</span>
+    <span><b>{D.evalsets.length}</b> evalsets</span>
+    <span><b>{D.runs.length}</b> model–evalset pairs scored</span>
+    <span><b>{D.models.filter((m) => m.parity).length}</b> models parity-checked</span>
+    <span>rules: <b>{D.eval_status}</b></span>
+    <span>updated {D.built}</span>
+  </div>
+</header>
+
+<nav class="index" aria-label="Sections">
+  <ol>
+    <li><a href="#start">Start here</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#coverage">Coverage</a></li>
+    <li><a href="#models">Models</a></li>
+    <li><a href="#datasets">Datasets</a></li>
+    <li><a href="#runs">Results</a></li>
+    <li><a href="#compute">Compute</a></li>
+    <li><a href={ref}>Full reference</a></li>
+  </ol>
+</nav>
+
+<section id="start">
+  <header><div class="label">New to this? Read this first</div><h2>How to read this page</h2></header>
+  <p class="intro">Every number here answers one question: given a clip, can the model tell whether it is real or fake? These are the terms the rest of the page uses.</p>
+  <dl class="terms">
+    <div class="term"><dt>Deepfake</dt><dd>Audio or video made or changed by AI to look or sound like a real person: a cloned voice, a swapped face, speech generated from text.</dd></div>
+    <div class="term"><dt>Detector (model)</dt><dd>A neural network that listens to a clip, or looks at the faces in it, and gives a score from 0 (real) to 1 (fake). Every detector here comes from a published paper with released weights.</dd></div>
+    <div class="term"><dt>Dataset and evalset</dt><dd>A dataset is a published collection of real and fake clips. An evalset is the exact slice we score: which dataset, which languages, which clips count as real and which as fake. One dataset can feed several evalsets.</dd></div>
+    <div class="term"><dt>AUC</dt><dd>The chance that the model gives a randomly picked fake clip a higher score than a randomly picked real one. Higher is better.
+      <div class="scale" aria-hidden="true"><div class="track"></div><div class="ticks"><span>0 · always wrong</span><span>0.5 · coin flip</span><span>1 · perfect</span></div></div></dd></div>
+    <div class="term"><dt>EER (equal error rate)</dt><dd>Pick the cut-off where the share of real clips wrongly called fake equals the share of fakes wrongly called real. That shared error rate is the EER. Lower is better; 50% is guessing.</dd></div>
+    <div class="term"><dt>Zero-shot</dt><dd>Testing a model on data unlike what it learned from, without retraining it. Most results here are zero-shot, which is the point: they show how detectors trained elsewhere do on South Asian data.</dd></div>
+    <div class="term"><dt>Reproduction</dt><dd>Running a model on the dataset its own paper used, to check our numbers match the published ones. If they do, we can trust our setup on new data.</dd></div>
+    <div class="term"><dt>Same corpus or cross corpus</dt><dd>Same corpus: real and fake clips come from the same recordings, so the only difference is the fakery. Cross corpus: they come from different sources, so a model can score well by noticing the microphone rather than the fake. Cross-corpus numbers never count as headline results.</dd></div>
+    <div class="term"><dt>Parity check</dt><dd>Before we trust our copy of a model, we run it and the authors' original code on the same ~200 clips. The scores must agree to within 0.001.</dd></div>
+    <div class="term"><dt>Contamination guard</dt><dd>A model can't be tested fairly on data it saw while training. The harness compares each model's training data with every evalset and refuses those pairs (marked ⊘).</dd></div>
+  </dl>
+</section>
+
+<section id="pipeline">
+  <header><div class="label">How a score is made</div><h2>Pipeline</h2></header>
+  <p class="intro">Five steps turn a published model and a dataset into one row of results. Three checks sit along the way so that a number only counts when it can be trusted.</p>
+  <div>
+    <div class="flow">
+      <div class="stage"><div class="label">1 · configs/</div><h3>Configure</h3><p>One file per model (where its code and weights come from, what it trained on), per dataset (where to get it, its licence) and per evalset (what gets scored). One shared set of evaluation rules.</p></div>
+      <div class="stage"><div class="label">2 · setup_*.py</div><h3>Set up</h3><p>Download each model at a fixed version and check its weights. Download each dataset and list every clip with its label (real or fake), language and generator.</p></div>
+      <div class="stage"><div class="label">3 · score.py</div><h3>Score</h3><p>Prepare each clip the same way for every model (audio cut into 4&nbsp;s windows; faces found and cropped in video), run the model, store one fake-score per clip. Can stop and resume.</p></div>
+      <div class="stage"><div class="label">4 · evaluate.py</div><h3>Evaluate</h3><p>AUC and EER with 95% confidence intervals, overall and per group (language, generator). Clips that fail, such as a video with no face, are counted, never dropped.</p></div>
+      <div class="stage"><div class="label">5 · --publish</div><h3>Publish</h3><p>Only summary tables go into the public repo. Every row carries how its real and fake clips were paired and the contamination check's verdict.</p></div>
+    </div>
+    <div class="gates">
+      <div class="gate g-parity"><span class="label">Parity check</span>Our copy of a model must match the authors' code within 0.001 on about 200 clips before its numbers count.</div>
+      <div class="gate g-guard"><span class="label">Contamination guard</span>A model is never scored on data it trained on.</div>
+      <div class="gate g-pub"><span class="label">Publish guard</span>Test runs and anything naming a single clip never reach the public repo.</div>
+    </div>
+  </div>
+  <div class="homes">
+    <div class="home"><span class="label">In the public repo</span>Code, settings, documentation, weight fingerprints, summary results.</div>
+    <div class="home"><span class="label">In private storage only</span>The datasets, model weights, clip lists and per-clip scores. Dataset licences don't allow sharing these.</div>
+  </div>
+</section>
+
+<section id="coverage" data-mode="auc">
+  <header><div class="label">Which model ran on which evalset</div><h2>Coverage</h2></header>
+  <p class="intro">Each row is a model and each column an evalset. A number is the model's AUC on the whole evalset. Switch to estimated time to see how long a full run would take on one GPU, for evalsets whose size we know.</p>
+  <div class="toggle" role="group" aria-label="Show in cells">
+    <button type="button" id="mode-auc" aria-pressed="true">AUC</button>
+    <button type="button" id="mode-time" aria-pressed="false">Estimated GPU time</button>
+  </div>
+  <div class="legend">
+    <span><i>0.863</i>AUC on the full evalset (darker is higher)</span>
+    <span><i class="flag">0.365</i>has a caveat: see Results</span>
+    <span><i>⊘</i>refused: the model trained on this data</span>
+    <span><i>·</i>not run yet</span>
+    <span><i class="hatch"></i>waiting for data access</span>
+    <span><i class="na"></i>model can't read this kind of input</span>
+    <span><i>●</i>adapter written · parity passed</span>
+  </div>
+  <h3 class="label subhead">Audio</h3>
+  <div class="scroll"><CoverageGrid models={["audio"]} evalsets={["audio"]} /></div>
+  <h3 class="label subhead">Video and audio-visual</h3>
+  <div class="scroll"><CoverageGrid models={["video", "audio_video"]} evalsets={["video", "image", "audio_video"]} /></div>
+  {videoNote && <p class="note">{videoNote}</p>}
+</section>
+
+<section id="models">
+  <header><div class="label">The detectors</div><h2>Models</h2></header>
+  <p class="intro">Every model comes from a published paper with released weights. Parameters are the numbers a model learned in training; a bigger model needs more computing power but isn't always more accurate. Citation counts are a rough signal of how influential a paper is, and newer papers have had less time to collect them. Each name links to a fuller description in the <a href={`${ref}#models`}>models and datasets reference</a>.</p>
+  <div class="scroll"><ModelsTable /></div>
+  {D.citations_checked && <p class="note">Citation counts from Semantic Scholar, checked {D.citations_checked}. Google Scholar usually reports higher numbers.</p>}
+</section>
+
+<section id="datasets">
+  <header><div class="label">Where the test clips come from</div><h2>Datasets</h2></header>
+  <p class="intro">South Asian sets are what the benchmark is for. Reproduction sets check our numbers against published ones. Real-reference sets supply genuine speech when a dataset only contains fakes. Access says what it takes to get the data. The <a href={`${ref}#datasets`}>reference</a> lists the labels each dataset ships, such as speaker, gender, age or race, and which of them our builds record.</p>
+  <div class="scroll"><DatasetsTable /></div>
+</section>
+
+<section id="runs">
+  <header><div class="label">Every countable run</div><h2>Results</h2></header>
+  <p class="intro">One row per model and evalset that has been scored in full. Wall time is how long the whole run took, including reading the audio from shared storage.</p>
+  <div class="scroll"><RunsTable /></div>
+  <ul class="rules">
+    <li>The evaluation rules are <b>{D.eval_status}</b> until the team settles them (decision 5), so these numbers can still move.</li>
+    <li><b>Below chance</b> (AUC under 0.5) on a reproduction set means a bug in how scores are read; on a South Asian set it is a real finding about the model.</li>
+    <li><b>Source overlap</b>: the model's pretraining used a corpus that the evalset also draws on. Reported with a warning, kept out of headline numbers.</li>
+    <li><b>Cross-corpus</b> evalsets take real and fake clips from different sources and never enter headline numbers.</li>
+  </ul>
+</section>
+
+<section id="compute">
+  <header><div class="label">What it costs to run</div><h2>Compute</h2></header>
+  {gpu ? <p class="intro">{gpuIntro}</p> : (
+    <p class="intro">Measured with each model already loaded, counting only the model's own work. Audio models read 4-second windows, so a longer clip costs more. Video models read one face crop per frame, 32 frames per video for most of them.</p>
+  )}
+  <div class="scroll"><ComputeTable /></div>
+  <h3 class="label subhead">Estimated time for a full evalset</h3>
+  <p class="note">Model time only, from the measured time per window, for every evalset whose size is known. Where a real run exists, its wall time follows in grey: real runs take longer because reading thousands of files from shared storage, not the model, is usually the slow part.</p>
+  <div class="scroll"><EstimateTable /></div>
+</section>
+
+</Base>
+
+<script>
+  // AUC or estimated GPU time in the coverage grids. Both are in the page; this only switches.
+  const section = document.getElementById("coverage")!;
+  for (const [id, mode] of [["mode-auc", "auc"], ["mode-time", "time"]]) {
+    document.getElementById(id)!.addEventListener("click", () => {
+      section.dataset.mode = mode;
+      for (const b of section.querySelectorAll(".toggle button")) {
+        b.setAttribute("aria-pressed", String(b.id === id));
+      }
+    });
+  }
+</script>

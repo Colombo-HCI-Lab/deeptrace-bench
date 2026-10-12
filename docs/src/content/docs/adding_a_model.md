@@ -1,4 +1,9 @@
-# Adding a model
+---
+title: "Adding a model"
+description: "Recipe: config, pinned weights, adapter, smoke test, parity (GenD as the worked example)"
+group: working
+order: 3
+---
 
 A model is a config, a pinned upstream checkout, pinned weights and an adapter. GenD is the worked example throughout; its files are `configs/models/gend.yaml` and `src/deeptrace_bench/models/gend.py`. Three other adapters show the other shapes upstream code comes in: `aasist.py` (one plain PyTorch file), `df_arena.py` (code inside a Hugging Face model repo) and `deepfakebench.py` (one detector out of a whole training framework).
 

@@ -26,9 +26,13 @@ FEATURES = [
 
 def trivial_features(wave: np.ndarray, sample_rate: int, original_sample_rate: int) -> dict:
     """Compute the probe's features for one clip. Not implemented yet."""
-    raise NotImplementedError("shortcut probe is planned; see docs/evaluation.md")
+    raise NotImplementedError(
+        "shortcut probe is planned; see https://colombo-hci-lab.github.io/deeptrace-bench/evaluation/"
+    )
 
 
 def probe_auc(features: np.ndarray, labels: np.ndarray, folds: int = 5, seed: int = 0) -> float:
     """Cross-validated AUC of logistic regression on trivial features. Not implemented yet."""
-    raise NotImplementedError("shortcut probe is planned; see docs/evaluation.md")
+    raise NotImplementedError(
+        "shortcut probe is planned; see https://colombo-hci-lab.github.io/deeptrace-bench/evaluation/"
+    )

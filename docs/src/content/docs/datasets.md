@@ -1,4 +1,9 @@
-# Datasets
+---
+title: "Datasets"
+description: "Every dataset: how to get it, who requests or signs, licence terms, what's in it"
+group: benchmark
+order: 3
+---
 
 Access checked against the live pages on 2026-10-03, and every one again on 2026-10-05, when the datasets added that day were checked too. The source of truth is `configs/datasets/<id>.yaml`; `uv run scripts/setup_datasets.py --list` prints the current table. Access terms change, so recheck a page before depending on it.
 

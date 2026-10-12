@@ -1,0 +1,112 @@
+---
+// One coverage grid: a row per model, a column per evalset, grouped by role and pairing. Every
+// cell carries both views (AUC and estimated GPU time); the toggle in index.astro picks one.
+import { D, GROUPS, dur, estimate, fmt, int, nRuns, pct, runs, type Modality } from "../lib/status";
+
+interface Props {
+  models: Modality[];
+  evalsets: Modality[];
+}
+
+const { models: modelMods, evalsets: evMods } = Astro.props;
+const evs = D.evalsets.filter((e) => evMods.includes(e.modality));
+const groups = GROUPS.map(([role, pairing, label]) => ({
+  label,
+  evs: evs.filter((e) => e.role === role && e.pairing === pairing).sort((a, b) => a.id.localeCompare(b.id)),
+})).filter((g) => g.evs.length);
+const cols = groups.flatMap((g) => g.evs.map((e, i) => ({ ...e, first: i === 0 })));
+const rows = D.models
+  .filter((m) => modelMods.includes(m.modality))
+  .sort((a, b) => nRuns(b) - nRuns(a) || Number(!!b.parity) - Number(!!a.parity) || a.name.localeCompare(b.name));
+const cls = (...c: (string | false)[]) => c.filter(Boolean).join(" ");
+---
+
+<table class="grid">
+  <thead>
+    <tr>
+      <th class="mh" rowspan="2">Model</th>
+      <th class="v lad" rowspan="2"><span>adapter</span></th>
+      <th class="v lad" rowspan="2"><span>parity</span></th>
+      {groups.map((g) => <th class="grp" colspan={g.evs.length}>{g.label}</th>)}
+    </tr>
+    <tr>
+      {
+        cols.map((e) => (
+          <th
+            class={cls("v", e.first && "first", e.status !== "ready" && "pending")}
+            title={`${e.id}: ${e.status.replace("_", " ")}`}
+          >
+            <span>{e.id}</span>
+          </th>
+        ))
+      }
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((m) => {
+        const par = m.parity
+          ? `parity on ${m.parity.items} clips of ${m.parity.evalset}, largest difference ${m.parity.max_abs_diff.toExponential(1)}`
+          : "no parity check yet";
+        return (
+          <tr>
+            <th scope="row" title={m.id}>
+              {m.name}
+              {m.blocked && <small>blocked</small>}
+            </th>
+            <td class={cls("lad", m.adapter && "on")} title={m.adapter ? "adapter written" : "no adapter"}>
+              {m.adapter ? "●" : "○"}
+            </td>
+            <td class={cls("lad", !!m.parity && "on")} title={par}>
+              {m.parity ? "●" : "○"}
+            </td>
+            {cols.map((e) => {
+              const key = `${m.id}|${e.id}`;
+              const state = D.cells[key];
+              const base = [e.first && "first", e.status !== "ready" && "pending"];
+              if (state === "na") return <td class={cls(...base, "na")} title="different kind of input" />;
+              if (state === "guard")
+                return (
+                  <td class={cls(...base, "guard")} title="refused: trained on this data">
+                    ⊘
+                  </td>
+                );
+              const t = estimate(m, e);
+              const tTitle =
+                t == null
+                  ? e.size
+                    ? "no compute profile for this model"
+                    : "size unknown until the data is downloaded"
+                  : `about ${dur(t)} of GPU time for ${int(e.size!.items)} clips`;
+              const time = <span class="t" title={tTitle}>{t == null ? "·" : dur(t).replace(" ", " ")}</span>;
+              const r = runs.get(key);
+              if (!r)
+                return (
+                  <td
+                    class={cls(...base, "empty", t != null && "ht")}
+                    title={e.status === "ready" ? "not run yet" : "waiting for data access"}
+                  >
+                    <span class="a">·</span>
+                    {time}
+                  </td>
+                );
+              const shade = Math.max(0, Math.min(1, (r.auc - 0.5) / 0.5)) * 24;
+              const flagged = r.flags.some((f) => f !== "cross-corpus");
+              const title = `AUC ${fmt(r.auc)} [${fmt(r.auc_lo)}, ${fmt(r.auc_hi)}], EER ${pct(r.eer)}, ${int(r.n)} clips${r.flags.length ? "; " + r.flags.join(", ") : ""}`;
+              return (
+                <td
+                  class={cls(...base, "run", flagged && "flag", t != null && "ht")}
+                  style={`background-color: color-mix(in oklab, var(--ink) ${shade.toFixed(1)}%, transparent)`}
+                  title={title}
+                >
+                  <span class="a">{fmt(r.auc)}</span>
+                  {time}
+                </td>
+              );
+            })}
+          </tr>
+        );
+      })
+    }
+  </tbody>
+</table>

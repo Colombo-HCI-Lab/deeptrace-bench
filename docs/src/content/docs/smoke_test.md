@@ -1,4 +1,9 @@
-# Smoke test
+---
+title: "Smoke test"
+description: "One command that runs the whole pipeline on a few items per dataset, and how to read its report"
+group: working
+order: 1
+---
 
 One command runs the whole pipeline (setup, sampling, face detection, scoring, evaluation) on a handful of items per dataset and writes a report a person can read. It is how you check that the harness works after a change, and how a new model or dataset proves it is wired up, before any real run.
 

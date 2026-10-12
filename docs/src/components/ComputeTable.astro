@@ -1,0 +1,73 @@
+---
+// Measured cost per model: size, work and GPU time per input, and what an hour of audio or a
+// thousand videos takes.
+import { D, MOD, WINDOW_S, dur, ms, params } from "../lib/status";
+
+const profiled = D.models.filter((m) => m.profile);
+const groups = (["audio", "video", "audio_video"] as const)
+  .map((mod) => ({
+    mod,
+    rows: profiled.filter((m) => m.modality === mod).sort((a, b) => a.profile!.ms_per_unit - b.profile!.ms_per_unit),
+  }))
+  .filter((g) => g.rows.length);
+const missing = D.models.filter((m) => !m.profile).map((m) => m.name);
+---
+
+<table class="ref compute-t">
+  <thead>
+    <tr>
+      <th>Model</th><th class="num">Parameters</th><th class="num">GFLOPs per input</th><th class="num"
+        >GPU time per input</th
+      ><th class="num">GPU memory</th><th class="num">Time for 1 h of audio or 1,000 videos</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      groups.map(({ mod, rows }) => (
+        <Fragment>
+          <tr class="group">
+            <td colspan="6">
+              {MOD[mod]} · {mod === "audio" ? "per 4 s window" : "per frame"}
+            </td>
+          </tr>
+          {rows.map((m) => {
+            const p = m.profile!;
+            const perClip = /clip/.test(p.unit);
+            const scaleTime = mod === "audio" ? ((3600 / WINDOW_S) * p.ms_per_unit) / 1000 : p.ms_per_item;
+            return (
+              <tr>
+                <td class="nowrap">{m.name}</td>
+                <td class="num">{params(p.params)}</td>
+                <td class="num">{p.gflops_per_unit == null ? "·" : p.gflops_per_unit.toFixed(1)}</td>
+                <td class="num">
+                  {ms(p.ms_per_unit)}
+                  {perClip && <span class="dim"> per {p.unit}</span>}
+                </td>
+                <td class="num">{p.peak_memory_gb == null ? "·" : `${p.peak_memory_gb.toFixed(1)} GB`}</td>
+                <td class="num">
+                  {dur(scaleTime)}
+                  {mod !== "audio" && (
+                    <span class="dim">
+                      {" "}
+                      ({Math.round(p.units_per_item)}
+                      {perClip ? " clips" : " frames"} each)
+                    </span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </Fragment>
+      ))
+    }
+    {
+      missing.length > 0 && (
+        <tr>
+          <td colspan="6" class="dim">
+            Not measured yet: {missing.join(", ")} (weights not available).
+          </td>
+        </tr>
+      )
+    }
+  </tbody>
+</table>

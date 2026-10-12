@@ -24,7 +24,9 @@ while IFS= read -r -d '' file; do
   fi
   case "$file" in
     *.csv|*.tsv|*.json|*.jsonl)
-      header=$(git show ":$file" | head -c 4096 | head -n 1)
+      # head stops reading early; on a large file git show then dies of SIGPIPE, which
+      # pipefail would turn into a silent failed commit.
+      header=$(git show ":$file" | head -c 4096 | head -n 1 || true)
       if [[ "$header" =~ (^|[^a-z_])(item_id|rel_path)([^a-z_]|$) ]]; then
         echo "pre-commit: refusing $file (has an item_id or rel_path column: per-item data stays in DTB_ROOT)" >&2
         status=1

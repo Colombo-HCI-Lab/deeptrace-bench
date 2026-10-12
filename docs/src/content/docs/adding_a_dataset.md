@@ -1,4 +1,9 @@
-# Adding a dataset
+---
+title: "Adding a dataset"
+description: "Recipe: config, builder, sampling, evalset (the two pipeline-test datasets as worked examples)"
+group: working
+order: 4
+---
 
 A dataset is a config, a builder that turns its files into a manifest, and at least one evalset that says how it is scored. The two pipeline-test datasets are the worked examples: `mendeley_roop_akool` (a zip at a URL, image items) and `unidatapro_videos` (Hugging Face, video items).
 

@@ -19,7 +19,7 @@ from deeptrace_bench.status import (
     run_flags,
     run_timing,
     scored_runs,
-    write_page,
+    write_data,
 )
 
 
@@ -83,14 +83,10 @@ def test_page_shows_no_pipeline_tests_and_marks_the_guard(registry, tmp_path, mo
     assert data["cells"]["aasist|hidf_video"] == "na"
 
 
-def test_write_page_replaces_only_the_data(tmp_path):
-    page = tmp_path / "index.html"
-    block = '<script id="status-data" type="application/json">{}</script>'
-    page.write_text(f"<p>keep</p>{block}<b>x</b>")
-    write_page(page, {"a": "</script>"})
-    text = page.read_text()
-    assert text.startswith("<p>keep</p>") and text.endswith("</script><b>x</b>")
-    assert '"<\\/script>"' in text
+def test_write_data_round_trips(tmp_path):
+    path = tmp_path / "status.json"
+    write_data(path, {"a": "</script>", "b": [1, None]})
+    assert json.loads(path.read_text()) == {"a": "</script>", "b": [1, None]}
 
 
 def test_run_timing_spans_first_start_to_last_part(tmp_path, monkeypatch):

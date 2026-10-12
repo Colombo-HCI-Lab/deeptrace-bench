@@ -14,7 +14,7 @@ class PendingDetector(Detector):
         """Not implemented yet."""
         raise NotImplementedError(
             f"the {self.config.id} adapter isn't written yet; porting steps are in its module "
-            "docstring and docs/models.md"
+            "docstring and https://colombo-hci-lab.github.io/deeptrace-bench/models/"
         )
 
     def score(self, inputs: np.ndarray) -> np.ndarray:

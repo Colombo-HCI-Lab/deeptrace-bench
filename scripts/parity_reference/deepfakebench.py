@@ -1,13 +1,13 @@
 """Reference scores for DeepfakeBench detectors, in DeepfakeBench's own PyTorch generation.
 
-Runs in a throwaway Python 3.9 virtualenv with torch 1.13 (docs/models.md says how to make
-it), not in this repo's environment, and doesn't import this package: only the
-standard-library import helper (``models/_upstream.py``), loaded by path. It builds the
-detector from the checkout the same way the adapter must, loads the original release
-``.pth`` (not the converted safetensors) with every key matching, and applies
-DeepfakeBench's test transform: cubic resize to the yaml's resolution, torchvision
-``ToTensor`` and ``Normalize``. So parity covers the weights, the numerics of an old torch
-and the transform, but not upstream's package imports, which pull in every detector.
+Runs in a throwaway Python 3.9 virtualenv with torch 1.13 (docs/src/content/docs/models.md says how
+to make it), not in this repo's environment, and doesn't import this package: only the
+standard-library import helper (``models/_upstream.py``), loaded by path. It builds the detector
+from the checkout the same way the adapter must, loads the original release ``.pth`` (not the
+converted safetensors) with every key matching, and applies DeepfakeBench's test transform: cubic
+resize to the yaml's resolution, torchvision ``ToTensor`` and ``Normalize``. So parity covers the
+weights, the numerics of an old torch and the transform, but not upstream's package imports, which
+pull in every detector.
 
 Usage: $DTB_ROOT/parity/envs/dfb/bin/python scripts/parity_reference/deepfakebench.py <run dir>
 """

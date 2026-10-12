@@ -1,4 +1,9 @@
-# The store (`DTB_ROOT`)
+---
+title: "The store (`DTB_ROOT`)"
+description: "The DTB_ROOT tree: what each folder holds, naming rules, the smoke namespace, what's safe to delete"
+group: working
+order: 2
+---
 
 Everything large or item-level lives outside git, in one folder named by `DTB_ROOT` in `.env`. This page is the map: what each folder holds, how things are named, and what is safe to delete.
 

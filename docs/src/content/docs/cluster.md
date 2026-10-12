@@ -1,4 +1,9 @@
-# Running on Curnagl (or any Linux GPU machine)
+---
+title: "Running on Curnagl (or any Linux GPU machine)"
+description: "Running on UNIL's Curnagl cluster (or any Linux GPU machine): storage, environment, jobs"
+group: working
+order: 5
+---
 
 The harness targets UNIL's Curnagl cluster but runs on any Linux machine with an NVIDIA GPU and CUDA 12 drivers. Laptops (Apple Silicon) run the tests and the smoke test ([smoke_test.md](smoke_test.md)), which scores a few items per dataset on the laptop's GPU or CPU.
 
