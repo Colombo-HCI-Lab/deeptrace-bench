@@ -13,6 +13,7 @@ from deeptrace_bench import status
 from deeptrace_bench.runs import config_hash
 from deeptrace_bench.status import (
     collect,
+    evalset_size,
     fetch_citations,
     load_catalog,
     run_flags,
@@ -127,3 +128,11 @@ def test_citations_are_keyed_by_catalog_id(tmp_path, monkeypatch):
     catalog = {"models": {"a": {"s2_id": "ARXIV:1"}}, "datasets": {"b": {"s2_id": "DOI:2"}}}
     data = fetch_citations(catalog)
     assert data["papers"] == {"ARXIV:1": {"title": "T", "year": 2022, "citations": 7}}
+
+
+def test_evalset_size_is_unknown_while_one_side_is_missing(registry, monkeypatch):
+    def one_sided(evalset):
+        raise status.evalsets.EvalsetError(f"{evalset.id}: needs real and fake items")
+
+    monkeypatch.setattr(status.evalsets, "load_items", one_sided)
+    assert evalset_size(registry.evalset("indicsynth_bn"), []) is None

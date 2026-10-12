@@ -111,13 +111,15 @@ def run_timing(run_id: str) -> dict[str, Any]:
 
 
 def evalset_size(evalset: EvalsetConfig, runs: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Items, and 4 s windows if a run has counted them, or None until the manifests exist.
+    """Items, and 4 s windows if a run has counted them, or None until the evalset can load.
 
-    Every audio model cuts the same windows, so any run's count holds for all of them.
+    It can't before its manifests exist, nor while a dataset is fetched only in part (one
+    language of several, so one side of an evalset is missing). Every audio model cuts the same
+    windows, so any run's count holds for all of them.
     """
     try:
         size: dict[str, Any] = {"items": len(evalsets.load_items(evalset))}
-    except FileNotFoundError:
+    except (FileNotFoundError, evalsets.EvalsetError):
         return None
     windows = [r["windows"] for r in runs if r["evalset"] == evalset.id and r["windows"]]
     if windows:
