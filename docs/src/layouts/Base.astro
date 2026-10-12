@@ -7,13 +7,15 @@ interface Props {
   title: string;
   description: string;
   // Which site-bar link is the current page.
-  section: "status" | "docs" | "reference";
+  section: "status" | "progress" | "results" | "docs" | "reference";
 }
 
 const { title, description, section } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const nav = [
   { id: "status", label: "Status", href: base },
+  { id: "progress", label: "Progress", href: `${base}progress/` },
+  { id: "results", label: "Results", href: `${base}results/` },
   { id: "docs", label: "Docs", href: `${base}overview/` },
   { id: "reference", label: "Models and datasets", href: `${base}catalog/` },
 ];

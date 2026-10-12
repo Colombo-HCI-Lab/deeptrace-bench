@@ -33,6 +33,7 @@ const gpuIntro = gpu
   <div class="label">Colombo HCI Lab · South Asia deepfake detection · phase 2</div>
   <h1>deeptrace-bench</h1>
   <p class="lede">Can today's deepfake detectors catch fakes in South Asian languages and faces? Most were trained on English speech and Western faces. This benchmark runs published, open detectors on South Asian audio and video under the same rules, and reports how well each one holds up.</p>
+  <p class="whatsnew">What's new: <a href={`${import.meta.env.BASE_URL}progress/`}>Progress</a> · What the numbers show: <a href={`${import.meta.env.BASE_URL}results/`}>Results</a></p>
   <div class="facts">
     <span><b>{D.models.length}</b> models</span>
     <span><b>{D.datasets.filter((d) => d.role !== "pipeline_test").length}</b> datasets</span>
@@ -136,13 +137,14 @@ const gpuIntro = gpu
 
 <section id="runs">
   <header><div class="label">Every countable run</div><h2>Results</h2></header>
-  <p class="intro">One row per model and evalset that has been scored in full. Wall time is how long the whole run took, including reading the audio from shared storage.</p>
+  <p class="intro">One row per model and evalset that has been scored in full. Wall time is how long the whole run took, including reading the audio from shared storage. What these numbers mean, with per-group findings and caveats, is in <a href={`${import.meta.env.BASE_URL}results/`}>Results</a>.</p>
   <div class="scroll"><RunsTable /></div>
   <ul class="rules">
     <li>The evaluation rules are <b>{D.eval_status}</b> until the team settles them (decision 5), so these numbers can still move.</li>
     <li><b>Below chance</b> (AUC under 0.5) on a reproduction set means a bug in how scores are read; on a South Asian set it is a real finding about the model.</li>
     <li><b>Source overlap</b>: the model's pretraining used a corpus that the evalset also draws on. Reported with a warning, kept out of headline numbers.</li>
     <li><b>Cross-corpus</b> evalsets take real and fake clips from different sources and never enter headline numbers.</li>
+    <li><b>No parity check</b>: the model's adapter hasn't yet been shown to score like its upstream code. <b>Score direction unchecked</b>: the model hasn't yet scored above chance on a reproduction set, so its scores could be read backwards. Treat both as provisional.</li>
   </ul>
 </section>
 

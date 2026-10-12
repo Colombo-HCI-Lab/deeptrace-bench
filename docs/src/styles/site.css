@@ -32,6 +32,7 @@ section > header { display: grid; gap: 6px; border-top: 1px solid var(--ink); pa
 /* Masthead and section index */
 .mast { display: grid; gap: 16px; }
 .lede { font-size: 1.2rem; line-height: 1.5; }
+.whatsnew { font: 400 13px/1.5 var(--mono); color: var(--muted); }
 .facts { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 400 13px/1.5 var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); }
 .facts b { font-weight: 500; color: var(--ink); }
 nav.index { min-width: 0; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-block: 1px solid var(--rule); margin-block: -28px; }

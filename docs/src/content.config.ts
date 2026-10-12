@@ -7,8 +7,9 @@ const docs = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    // "benchmark": what the benchmark is and what it found; "working": how to work on it.
-    group: z.enum(["benchmark", "working"]),
+    // "start": overview and progress; "findings": experiments and results; "benchmark": the
+    // reference on models, datasets and rules; "working": how to work on it.
+    group: z.enum(["start", "findings", "benchmark", "working"]),
     order: z.number(),
   }),
 });
