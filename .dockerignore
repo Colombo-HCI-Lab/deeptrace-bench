@@ -1,4 +1,0 @@
-# Only pyproject.toml and uv.lock go into the runtime image.
-*
-!pyproject.toml
-!uv.lock
