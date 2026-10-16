@@ -75,7 +75,7 @@ The DESI lab at HEC Lausanne runs its own GPU cluster, SPARK, and gave the team 
 
 The harness runs there from a separate private repo, [UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments). It pins a commit of this repo in `params.yaml`, builds this repo's own `uv.lock` environment on the worker and runs the scripts as DVC stages. Only aggregate summaries come back to git; per-item scores, crops and the store stay on the worker. Code changes always land here first, then the pin moves.
 
-Status on 2026-10-16: this repo's tests and smoke test (`pytest`, then `scripts/smoke.py` for GenD and AASIST) pass there, on the x86 worker, in this repo's own environment. No scoring run yet.
+Status on 2026-10-16: this repo's tests and smoke test (`pytest`, then `scripts/smoke.py` for GenD and AASIST) pass there, on the x86 worker, in this repo's own environment. The first scoring run, AASIST on Urdu CSALT, matched the 2026-10-12 round within 2e-4 on AUC and EER, with the same manifest and counts. Scoring took under two minutes there.
 
 | Worker | GPU | For us |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ Status on 2026-10-16: this repo's tests and smoke test (`pytest`, then `scripts/
 | `HEC45801`, `HEC45803` (ARM) | NVIDIA GB10, about 120 GB unified memory | not yet: our lock has no ARM Linux wheels |
 
 - **The cluster's default image** (`nvcr.io/nvidia/pytorch:26.05-py3`) brings torch for CUDA 13.2, which sees no GPU on `isipol09` because the driver there is too old. deeptrace-experiments gives that worker NGC `25.06-py3`, built for its driver. Our stages use this repo's own environment either way.
-- **Downloads need a Hugging Face token**: the cluster shares one public address, and Hugging Face rate-limits anonymous downloads from it after a few hundred files. The token goes in deeptrace-experiments' GitHub secrets as `HF_TOKEN`.
+- **Downloads need a Hugging Face token**: the cluster shares one public address, and Hugging Face rate-limits anonymous downloads from it after a few hundred files. The token is in deeptrace-experiments' GitHub secrets as `HF_TOKEN`. Even with it, Hugging Face allows 1,000 API requests per 5 minutes, about one per file, so a dataset of thousands of files downloads over several windows; the score stage waits them out and checks the manifest before scoring.
 - **Limits**: every job is capped at 24 hours, so long scoring must be sharded or resumed (`score.py` already resumes). A worker runs one job at a time, so a job can wait behind someone else's.
 - **More**: deeptrace-experiments' `CLAUDE.md` has how to run a stage, which worker each needs and the setup traps (a repo's `pyproject.toml` must list `dvc-viewer`, `REQUIRED_RAM` of at least 16 GB). Cluster-CI's own docs are at <https://unil-desi.github.io/cluster-ci/>.
 
