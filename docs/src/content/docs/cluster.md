@@ -82,9 +82,9 @@ Status on 2026-10-16: this repo's tests and smoke test (`pytest`, then `scripts/
 | `isipol09` (x86) | RTX 3090, 24 GB, driver for CUDA 12.9 at most | runs this repo: our lock's torch is built for CUDA 12.8 |
 | `HEC45801`, `HEC45803` (ARM) | NVIDIA GB10, about 120 GB unified memory | not yet: our lock has no ARM Linux wheels |
 
-- **The cluster's default image** (`nvcr.io/nvidia/pytorch:26.05-py3`) brings torch for CUDA 13.2. That torch sees no GPU on `isipol09`, because the driver there is too old for it, so stages there must use this repo's environment, never the image's torch.
+- **The cluster's default image** (`nvcr.io/nvidia/pytorch:26.05-py3`) brings torch for CUDA 13.2, which sees no GPU on `isipol09` because the driver there is too old. deeptrace-experiments gives that worker NGC `25.06-py3`, built for its driver. Our stages use this repo's own environment either way.
+- **Downloads need a Hugging Face token**: the cluster shares one public address, and Hugging Face rate-limits anonymous downloads from it after a few hundred files. The token goes in deeptrace-experiments' GitHub secrets as `HF_TOKEN`.
 - **Limits**: every job is capped at 24 hours, so long scoring must be sharded or resumed (`score.py` already resumes). A worker runs one job at a time, so a job can wait behind someone else's.
-- **Secrets**: a gated dataset's token (`HF_TOKEN`) goes into deeptrace-experiments' GitHub secrets, never into a file.
 - **More**: deeptrace-experiments' `CLAUDE.md` has how to run a stage, which worker each needs and the setup traps (a repo's `pyproject.toml` must list `dvc-viewer`, `REQUIRED_RAM` of at least 16 GB). Cluster-CI's own docs are at <https://unil-desi.github.io/cluster-ci/>.
 
 ## Elsewhere
