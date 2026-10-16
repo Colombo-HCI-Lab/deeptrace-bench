@@ -40,7 +40,7 @@ uv run scripts/smoke.py --model aasist         # an audio model, on a few Urdu c
 
 Adding a model or a dataset: [Adding a model](https://colombo-hci-lab.github.io/deeptrace-bench/docs/adding_a_model/), [Adding a dataset](https://colombo-hci-lab.github.io/deeptrace-bench/docs/adding_a_dataset/).
 
-On Curnagl the same steps run as SLURM jobs from `slurm/`; on the DESI lab's SPARK cluster they run as DVC stages from [UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (private). See [Running on the clusters](https://colombo-hci-lab.github.io/deeptrace-bench/docs/cluster/).
+On Curnagl the same steps run as SLURM jobs from `slurm/`; on the DESI lab's SPARK cluster they run as DVC stages from [UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (private). See [Running on the clusters](https://colombo-hci-lab.github.io/deeptrace-bench/docs/cluster/), and [Getting started on SPARK](https://colombo-hci-lab.github.io/deeptrace-bench/docs/spark/) for a first run there.
 
 ## What's in scope
 

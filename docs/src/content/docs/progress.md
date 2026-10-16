@@ -12,7 +12,7 @@ As of 2026-10-12:
 - **Models.** 25 detectors have adapters; 24 have weights (Effort's wait on Google Drive's download quota; AltFreezing's are unreachable). 17 pass parity against upstream code ([models.md](models.md#parity)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
 - **Runs.** Ten models have full runs, 48 model and evalset pairs in all ([all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
-- **Compute.** Since 2026-10-16 the harness also runs on the DESI lab's SPARK cluster: the tests, the smoke test and a full scoring run pass on its x86 worker, in this repo's own environment. The scoring run reproduces a published number, so SPARK can take new runs ([cluster.md](cluster.md#spark-desi-lab-cluster-ci)).
+- **Compute.** Since 2026-10-16 the harness also runs on the DESI lab's SPARK cluster: the tests, the smoke test and a full scoring run pass on its x86 worker, in this repo's own environment. The scoring run reproduces a published number, so SPARK can take new runs ([spark.md](spark.md)).
 - **Rules.** The evaluation setup in [`configs/eval/default.yaml`](/configs/eval/default.yaml) is still `proposed`: decision 5 was due 2026-10-09 and isn't settled. Every number can still move.
 
 ## Timeline

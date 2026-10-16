@@ -26,6 +26,7 @@ deeptrace-bench runs open deepfake detectors on South Asian audio and video unde
 | [Adding a model](adding_a_model.md) | Recipe: config, pinned weights, adapter, smoke test, parity (GenD as the worked example) |
 | [Adding a dataset](adding_a_dataset.md) | Recipe: config, builder, sampling, evalset (the two pipeline-test datasets as worked examples) |
 | [Running on Curnagl](cluster.md) | Running on UNIL's Curnagl cluster (or any Linux GPU machine): storage, environment, jobs |
+| [Getting started on SPARK](spark.md) | The DESI lab's GPU cluster: access, your first run, scoring a pair, moving the pin, failed runs |
 
 ## How the pieces fit
 
