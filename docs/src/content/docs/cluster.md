@@ -5,7 +5,7 @@ group: working
 order: 5
 ---
 
-The harness targets UNIL's Curnagl cluster, also runs on the DESI lab's SPARK cluster through a separate repo ([SPARK](#spark-desi-lab-cluster-ci)), and runs on any Linux machine with an NVIDIA GPU and CUDA 12 drivers. Laptops (Apple Silicon) run the tests and the smoke test ([smoke_test.md](smoke_test.md)).
+The harness runs on the DESI lab's SPARK cluster through a separate repo, since 2026-10-16 ([SPARK](#spark-desi-lab-cluster-ci)). It is set up for UNIL's Curnagl cluster, where the team has no project yet, and it runs on any Linux machine with an NVIDIA GPU and CUDA 12 drivers. Laptops (Apple Silicon) run the tests and the smoke test ([smoke_test.md](smoke_test.md)).
 
 ## Getting on Curnagl
 
@@ -71,9 +71,21 @@ Queue: `squeue -u $USER`; pending jobs on a partition: `squeue -p gpu-l40 -t PD`
 
 ## SPARK (DESI lab, Cluster-CI)
 
-The DESI lab at HEC Lausanne runs its own GPU cluster, SPARK, and gave the team access on 2026-10-14 through the [UNIL-DESI](https://github.com/UNIL-DESI) GitHub org. It has no SSH or SLURM: Cluster-CI runs a repo's `dvc.yaml` in a Docker container on a free worker, and it only runs repos inside that org. So the harness runs there from a separate private repo, [UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments), which pins a commit of this repo in `params.yaml`, builds this repo's own `uv.lock` environment on the worker and runs the scripts as DVC stages. Only aggregate summaries come back to git; per-item scores, crops and the store stay on the worker. Code changes always land here first, then the pin moves.
+The DESI lab at HEC Lausanne runs its own GPU cluster, SPARK, and gave the team access on 2026-10-14 through the [UNIL-DESI](https://github.com/UNIL-DESI) GitHub org. It has no SSH or SLURM. Instead, Cluster-CI runs a repo's `dvc.yaml` in a Docker container on a free worker, and it only runs repos inside that org.
 
-Things to know (as of 2026-10-16): the workers are two ARM machines with an NVIDIA GB10 (about 120 GB of unified memory) and one x86 machine with an RTX 3090 (24 GB), and our lock only has x86 Linux wheels, so stages that use this repo are restricted to the x86 worker. Every job is capped at 24 hours. This repo's smoke test (`pytest`, then `scripts/smoke.py` for GenD and AASIST) passed there on 2026-10-16 on the x86 worker, in this repo's own CUDA 12.8 venv. The worker's driver (CUDA 12.9) is too old for the default image's torch, but fits that venv. deeptrace-experiments' `CLAUDE.md` has the setup traps (a repo's `pyproject.toml` must list `dvc-viewer`). Cluster-CI's own docs: <https://unil-desi.github.io/cluster-ci/>.
+The harness runs there from a separate private repo, [UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments). It pins a commit of this repo in `params.yaml`, builds this repo's own `uv.lock` environment on the worker and runs the scripts as DVC stages. Only aggregate summaries come back to git; per-item scores, crops and the store stay on the worker. Code changes always land here first, then the pin moves.
+
+Status on 2026-10-16: this repo's tests and smoke test (`pytest`, then `scripts/smoke.py` for GenD and AASIST) pass there, on the x86 worker, in this repo's own environment. No scoring run yet.
+
+| Worker | GPU | For us |
+| --- | --- | --- |
+| `isipol09` (x86) | RTX 3090, 24 GB, driver for CUDA 12.9 at most | runs this repo: our lock's torch is built for CUDA 12.8 |
+| `HEC45801`, `HEC45803` (ARM) | NVIDIA GB10, about 120 GB unified memory | not yet: our lock has no ARM Linux wheels |
+
+- **The cluster's default image** (`nvcr.io/nvidia/pytorch:26.05-py3`) brings torch for CUDA 13.2. That torch sees no GPU on `isipol09`, because the driver there is too old for it, so stages there must use this repo's environment, never the image's torch.
+- **Limits**: every job is capped at 24 hours, so long scoring must be sharded or resumed (`score.py` already resumes). A worker runs one job at a time, so a job can wait behind someone else's.
+- **Secrets**: a gated dataset's token (`HF_TOKEN`) goes into deeptrace-experiments' GitHub secrets, never into a file.
+- **More**: deeptrace-experiments' `CLAUDE.md` has how to run a stage, which worker each needs and the setup traps (a repo's `pyproject.toml` must list `dvc-viewer`, `REQUIRED_RAM` of at least 16 GB). Cluster-CI's own docs are at <https://unil-desi.github.io/cluster-ci/>.
 
 ## Elsewhere
 
