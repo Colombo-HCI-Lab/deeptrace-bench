@@ -1,15 +1,15 @@
 ---
-title: "Running on Curnagl (or any Linux GPU machine)"
-description: "Running on UNIL's Curnagl cluster (or any Linux GPU machine): storage, environment, jobs"
+title: "Running on Curnagl, SPARK or any Linux GPU machine"
+description: "Running on UNIL's Curnagl cluster, the DESI lab's SPARK cluster or any Linux GPU machine: storage, environment, jobs"
 group: working
 order: 5
 ---
 
-The harness targets UNIL's Curnagl cluster but runs on any Linux machine with an NVIDIA GPU and CUDA 12 drivers. Laptops (Apple Silicon) run the tests and the smoke test ([smoke_test.md](smoke_test.md)).
+The harness targets UNIL's Curnagl cluster, also runs on the DESI lab's SPARK cluster through a separate repo ([SPARK](#spark-desi-lab-cluster-ci)), and runs on any Linux machine with an NVIDIA GPU and CUDA 12 drivers. Laptops (Apple Silicon) run the tests and the smoke test ([smoke_test.md](smoke_test.md)).
 
 ## Getting on Curnagl
 
-As of 2026-10-03 nobody on the team can run jobs: a compute project must be requested at <https://requests.dcsr.unil.ch>, and each member needs a UNIL account added to it. Connect through the UNIL VPN, then `ssh <unil-user>@curnagl.dcsr.unil.ch`. Get the project's account name from `Sproject` and put it in the `--account` line of the files in `slurm/`.
+As of 2026-10-16 the team's DCSR project is still unconfirmed, so nobody has run a job here yet: a compute project must be requested at <https://requests.dcsr.unil.ch>, and each member needs a UNIL account added to it. Connect through the UNIL VPN, then `ssh <unil-user>@curnagl.dcsr.unil.ch`. Get the project's account name from `Sproject` and put it in the `--account` line of the files in `slurm/`.
 
 ## Partitions
 
@@ -68,6 +68,12 @@ sbatch --dependency=afterok:<jobid> slurm/evaluate.sbatch aasist urdu_csalt
 ```
 
 Queue: `squeue -u $USER`; pending jobs on a partition: `squeue -p gpu-l40 -t PD`; a job's estimated start: `squeue --start -j <jobid>`.
+
+## SPARK (DESI lab, Cluster-CI)
+
+The DESI lab at HEC Lausanne runs its own GPU cluster, SPARK, and gave the team access on 2026-10-14 through the [UNIL-DESI](https://github.com/UNIL-DESI) GitHub org. It has no SSH or SLURM: Cluster-CI runs a repo's `dvc.yaml` in a Docker container on a free worker, and it only runs repos inside that org. So the harness runs there from a separate private repo, [UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments), which pins a commit of this repo in `params.yaml`, builds this repo's own `uv.lock` environment on the worker and runs the scripts as DVC stages. Only aggregate summaries come back to git; per-item scores, crops and the store stay on the worker. Code changes always land here first, then the pin moves.
+
+Things to know (as of 2026-10-16): the workers are two ARM machines with an NVIDIA GB10 (about 120 GB of unified memory) and one x86 machine with 24 GB of VRAM, and our lock only has x86 Linux wheels, so stages that use this repo are restricted to the x86 worker. Every job is capped at 24 hours. Not working yet: the first test runs on 2026-10-16 stopped in Cluster-CI's own setup before reaching our stages, and the x86 worker's default image didn't see its GPU; deeptrace-experiments' `CLAUDE.md` tracks it. Cluster-CI's own docs: <https://unil-desi.github.io/cluster-ci/>.
 
 ## Elsewhere
 
