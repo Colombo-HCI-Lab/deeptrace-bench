@@ -7,15 +7,23 @@ order: 3
 
 ## Where things stand
 
-As of 2026-10-16:
+As of 2026-10-19:
 
 - **Models.** 25 detectors have adapters; 24 have weights (Effort's wait on Google Drive's download quota; AltFreezing's are unreachable). 17 pass parity against upstream code ([models.md](models.md#parity)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
 - **Runs.** Ten models have full runs, 48 model and evalset pairs in all ([Results](results.md)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
-- **Compute.** The DESI lab's SPARK cluster runs the harness and can take new runs ([Where to run](spark.md)).
+- **Compute.** The DESI lab's SPARK cluster runs the harness and scores any model and evalset pair, ordered with one command ([Where to run](spark.md)).
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-10-19: any pair on SPARK, one command to order it
+
+The changes are in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (`abeac55` to `32d361c`); here, only [Where to run](spark.md) changed.
+
+- SPARK's `score` stage now takes any pair. It reads an evalset's datasets from this repo's registry, and it still refuses to score before a download is proved complete. A reference run is optional.
+- A helper, `scripts/exp.py`, places an order (it looks up the published reference itself), starts the run, waits for it and prints the report. It also lists every past run and repairs the reports a failed run leaves behind.
+- Two test runs passed. AASIST-L on Urdu CSALT matched the 2026-10-12 round within 1e-3. XLS-R + SLS on Urdu CSALT ran with no reference; its number waits on parity.
 
 ### 2026-10-16: running on SPARK
 
