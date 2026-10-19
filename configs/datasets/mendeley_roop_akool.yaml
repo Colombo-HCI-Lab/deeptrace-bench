@@ -21,8 +21,9 @@ size_gb: 4.1
 derived_from: []
 builder: deeptrace_bench.datasets.mendeley_roop_akool:build_manifest
 notes: >-
-  Pipeline test only, never reported. Face-crop frames (500 x 500 JPEG), not videos: 3,746
-  real frames from 30 videos and 106,948 fake frames from 450, made with Roop and Akool;
+  Pipeline test only, never reported. Face-crop frames (500 x 500 JPEG), not videos: the page
+  states 3,746 real frames from 30 videos and 106,948 fake frames from 450, made with Roop and
+  Akool, but the ZIP holds 3,744 real and 104,200 fake (its listing, checked 2026-10-19);
   Bangladeshi and Indian subjects; collected with ethical approval from Daffodil
   International University. One 4.1 GB ZIP64; the host (S3 behind a redirect) supports HTTP
   range requests, so --sample reads only the members it needs. Some source clips came from

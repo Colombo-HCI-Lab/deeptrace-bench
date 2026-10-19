@@ -19,4 +19,4 @@ input:
   detector: recce
   crop: {size: 256, margin: 1.3, align: five_point}
   frames_per_clip: 32
-notes: Learns to reconstruct real faces and flags what it can't reconstruct, a cue that doesn't depend on any one manipulation. Release v1.0.1 weights, added 2026-10-05; parity not run yet.
+notes: Learns to reconstruct real faces and flags what it can't reconstruct, a cue that doesn't depend on any one manipulation. Release v1.0.1 weights, added 2026-10-05. Parity passed 2026-10-05 (max difference 5.9e-6).

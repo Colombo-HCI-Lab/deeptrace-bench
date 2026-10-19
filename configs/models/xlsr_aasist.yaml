@@ -36,4 +36,4 @@ input:
   checkpoint: LA_model.pth
   backbone_config: xls-r-300m-config
   fake_index: 0                  # upstream labels bona fide 1 and scores batch_out[:, 1]
-notes: fairseq front end rebuilt in transformers (models/_fairseq.py renames the keys; adapter written 2026-10-05). Weights checked 2026-10-05; an MIT mirror with the same file size is at SpeechAntiSpoofingBenchmarks/W2V2-AASIST on Hugging Face. Parity needs upstream's fairseq in an old environment and isn't run yet.
+notes: fairseq front end rebuilt in transformers (models/_fairseq.py renames the keys; adapter written 2026-10-05). Weights checked 2026-10-05; an MIT mirror with the same file size is at SpeechAntiSpoofingBenchmarks/W2V2-AASIST on Hugging Face. Parity passed 2026-10-12 against upstream's model.py and its vendored fairseq on torch 1.8.1 (max difference 1.1e-4, results/parity/xlsr_aasist.json).

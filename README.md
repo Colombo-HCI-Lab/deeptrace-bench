@@ -44,7 +44,7 @@ Guides: [Smoke test](https://colombo-hci-lab.github.io/deeptrace-bench/docs/smok
 | Wave | Video | Audio | Audio-visual |
 | --- | --- | --- | --- |
 | 1 | Xception, EfficientNet-B4, SBI, GenD | AASIST, AASIST-L, XLS-R + AASIST | |
-| 2 | Effort, LipForensics | | HAVIC |
+| 2 (planned) | Effort, LipForensics | | HAVIC |
 | added, no wave yet | UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD, GenD (PE-L) | DF Arena 500M and 1B, XLS-R + SLS, XLSR-Mamba, AntiDeepfake (2), AASIST3 | |
 
 | Data | Datasets |

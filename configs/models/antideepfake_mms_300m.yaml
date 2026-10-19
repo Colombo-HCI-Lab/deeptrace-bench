@@ -56,4 +56,4 @@ input:
   sample_rate: 16000
   segment_samples: 64600
   fake_index: 0                   # upstream labels real 1, fake 0
-notes: Post-trained on 74k hours in over 100 languages, including FLEURS (Hindi, Bengali, Urdu, Tamil, Nepali and more; not Sinhala) and MLAAD, so it is refused on mlaad_* and on anything built from FLEURS. MMS pretraining covers about 1,400 languages. The card reports In-the-Wild EER 2.90%, its reproduction set. Checked 2026-10-05; adapter written that day, parity needs fairseq 0.12.2 in an old environment and isn't run yet.
+notes: Post-trained on 74k hours in over 100 languages, including FLEURS (Hindi, Bengali, Urdu, Tamil, Nepali and more; not Sinhala) and MLAAD, so it is refused on mlaad_* and on anything built from FLEURS. MMS pretraining covers about 1,400 languages. The card reports In-the-Wild EER 2.90%, its reproduction set. Checked 2026-10-05; adapter written that day. Parity passed 2026-10-12 against upstream's W2V.py on fairseq 0.12.2 (max difference 9.0e-5).

@@ -21,4 +21,4 @@ input:
   sample_rate: 16000
   segment_samples: 64600
   fake_index: 0      # upstream labels bona fide 1; confirmed on asvspoof2019_la_eval
-notes: Score direction settled 2026-10-05 on a seeded sample of ASVspoof 2019 LA eval (186 real, 187 fake) - AUC 0.999, EER 1.6% (paper 0.83%) with P(fake) at softmax index 0. Issue 17's inverted outputs come from reading upstream's bona fide logit as a fake score. Full-eval reproduction waits for the full download.
+notes: Score direction settled 2026-10-05 on a seeded sample of ASVspoof 2019 LA eval (186 real, 187 fake) - AUC 0.999, EER 1.6% (paper 0.83%) with P(fake) at softmax index 0. Issue 17's inverted outputs come from reading upstream's bona fide logit as a fake score. Reproduced 2026-10-05 on the full eval set (71,237 clips), EER 1.58%, AUC 0.999. Parity passed 2026-10-05 (max difference 2.6e-6).
