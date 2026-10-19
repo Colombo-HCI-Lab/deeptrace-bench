@@ -7,12 +7,27 @@ import { buildResults } from "../lib/guide";
 
 const base = import.meta.env.BASE_URL;
 const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
+// The page's sections: the sidebar lists them, and so does the bar above them on narrow screens.
+const sections = [
+  { href: "#read-this-first", text: "Read this first" },
+  { href: "#experiments", text: "Experiments" },
+  { href: "#the-datasets", text: "Datasets" },
+  { href: "#at-a-glance", text: "Every detector, every dataset" },
+  { href: "#insights", text: "Insights" },
+  { href: "#audio-south-asian-speech", text: "Detail: speech" },
+  { href: "#reproductions", text: "Reproductions" },
+  { href: "#video-hidf", text: "Faces" },
+  { href: "#all-runs", text: "All runs" },
+  { href: "#what-the-results-cant-say-yet", text: "Not covered yet" },
+  { href: `${base}docs/results/`, text: "Full write-up" },
+];
 ---
 
 <Base
   title="Results · deeptrace-bench"
   description="What the runs so far show: open deepfake detectors on South Asian speech and faces, with the numbers and their caveats."
   section="results"
+  sections={sections}
 >
   <div class="stack">
     <header class="mast">
@@ -40,18 +55,7 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
     </section>
 
     <nav class="index" aria-label="On this page">
-      <ol>
-        <li><a href="#experiments">Experiments</a></li>
-        <li><a href="#the-datasets">Datasets</a></li>
-        <li><a href="#at-a-glance">Every detector, every dataset</a></li>
-        <li><a href="#insights">Insights</a></li>
-        <li><a href="#audio-south-asian-speech">Detail: speech</a></li>
-        <li><a href="#reproductions">Reproductions</a></li>
-        <li><a href="#video-hidf">Faces</a></li>
-        <li><a href="#all-runs">All runs</a></li>
-        <li><a href="#what-the-results-cant-say-yet">Not covered yet</a></li>
-        <li><a href={`${base}docs/results/`}>Full write-up</a></li>
-      </ol>
+      <ol>{sections.map((x) => <li><a href={x.href}>{x.text}</a></li>)}</ol>
     </nav>
 
     <section id="experiments" class="block">

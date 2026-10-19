@@ -34,6 +34,7 @@ const gpuIntro = gpu
   title="Models and data · deeptrace-bench"
   description="Every detector and dataset in deeptrace-bench: what ran on what, where each comes from, and what a run costs."
   section="inventory"
+  sections={tabs.map(([id, label]) => ({ href: `#${id}`, text: label }))}
 >
   <div class="inventory">
     <header class="mast">

@@ -1,25 +1,26 @@
 ---
-// Every page: fonts, the shared styles, the site bar and the footer.
+// Every page: fonts, the shared styles, the site bar, the one sidebar and the footer.
+import Sidebar, { type Section } from "../components/Sidebar.astro";
 import "../styles/site.css";
 import { D } from "../lib/status";
 
 interface Props {
   title: string;
   description: string;
-  // Which site-bar link is the current page.
   section: "overview" | "results" | "progress" | "method" | "inventory" | "docs";
+  // The doc being shown, for doc pages; the guided pages map from section.
+  current?: string;
+  // The page's own sections, listed under it in the sidebar.
+  sections?: Section[];
 }
 
-const { title, description, section } = Astro.props;
+const { title, description, section, current, sections = [] } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const nav = [
-  { id: "overview", label: "Overview", href: base },
-  { id: "results", label: "Results", href: `${base}results/` },
-  { id: "progress", label: "Progress", href: `${base}progress/` },
-  { id: "method", label: "How it works", href: `${base}method/` },
-  { id: "inventory", label: "Models & data", href: `${base}inventory/` },
-  { id: "docs", label: "Docs", href: `${base}docs/` },
-];
+const here =
+  current ??
+  { overview: "home", results: "results", progress: "progress", method: "method", inventory: "inventory", docs: "docs-index" }[
+    section
+  ];
 ---
 
 <!doctype html>
@@ -42,22 +43,15 @@ const nav = [
     <header class="site">
       <div class="in">
         <a class="name" href={base}>deeptrace-bench</a>
-        <nav aria-label="Site">
-          <ol>
-            {
-              nav.map((n) => (
-                <li>
-                  <a href={n.href} aria-current={n.id === section ? "page" : undefined}>
-                    {n.label}
-                  </a>
-                </li>
-              ))
-            }
-            <li><a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench" target="_blank" rel="noopener">GitHub ↗</a></li>
-          </ol>
-        </nav>
+        <a class="gh" href="https://github.com/Colombo-HCI-Lab/deeptrace-bench" target="_blank" rel="noopener">GitHub ↗</a>
+        <details class="menu">
+          <summary>Menu</summary>
+          <nav aria-label="Site"><Sidebar current={here} sections={sections} /></nav>
+        </details>
       </div>
     </header>
+    <div class="shell">
+      <nav class="side" aria-label="Site"><Sidebar current={here} sections={sections} /></nav>
     <main class="wrap">
       <slot />
       <footer>
@@ -69,5 +63,27 @@ const nav = [
         <span>Colombo HCI Lab · <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench" target="_blank" rel="noopener">source</a></span>
       </footer>
     </main>
+    </div>
+    <script is:inline>
+      // Mark the section in view in the sidebar, and close the phone menu once a link is chosen.
+      (() => {
+        const links = [...document.querySelectorAll("a[data-sec]")];
+        const ids = [...new Set(links.map((a) => a.dataset.sec))];
+        const targets = ids.map((id) => document.getElementById(id)).filter(Boolean);
+        if (targets.length) {
+          let queued = false;
+          const mark = () => {
+            queued = false;
+            let cur = targets[0].id;
+            for (const t of targets) if (t.getBoundingClientRect().top < 140) cur = t.id;
+            for (const a of links) a.toggleAttribute("data-on", a.dataset.sec === cur);
+          };
+          addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(mark); } }, { passive: true });
+          mark();
+        }
+        const menu = document.querySelector("details.menu");
+        menu?.addEventListener("click", (e) => { if (e.target.closest("a")) menu.open = false; });
+      })();
+    </script>
   </body>
 </html>

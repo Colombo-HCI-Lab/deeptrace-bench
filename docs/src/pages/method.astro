@@ -10,12 +10,20 @@ const M = buildMethod((await getEntry("docs", "method"))!.body ?? "");
 // The checks sit under the step they guard: parity under set-up, the contamination guard under
 // scoring, the publish guard under publishing.
 const gateClass = ["g-parity", "g-guard", "g-pub"];
+// The page's sections: the sidebar lists them, and so does the bar above them on narrow screens.
+const sections = [
+  ...(M.plain ? [{ href: "#plain-words", text: "In plain words" }] : []),
+  { href: "#pipeline", text: "Pipeline" },
+  { href: "#key-terms", text: "Key terms" },
+  { href: "#repo", text: "The repo" },
+];
 ---
 
 <Base
   title="How it works · deeptrace-bench"
   description="From a published detector to one trusted number: the pipeline, the checks along it, and the terms this site uses."
   section="method"
+  sections={sections}
 >
   <div class="stack">
     <header class="mast">
@@ -24,14 +32,7 @@ const gateClass = ["g-parity", "g-guard", "g-pub"];
       <p class="lede" set:html={M.lede} />
     </header>
     <nav class="index" aria-label="On this page">
-      <ol>
-        {M.plain && <li><a href="#plain-words">In plain words</a></li>}
-        <li><a href="#pipeline">Pipeline</a></li>
-        <li><a href="#key-terms">Key terms</a></li>
-        <li><a href="#repo">The repo</a></li>
-        <li><a href={`${base}docs/getting_started/`}>Getting started</a></li>
-        <li><a href={`${base}docs/evaluation/`}>Evaluation in full</a></li>
-      </ol>
+      <ol>{sections.map((x) => <li><a href={x.href}>{x.text}</a></li>)}</ol>
     </nav>
     {
       M.plain && (

@@ -37,18 +37,35 @@ table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
    widening the page. */
 .wrap, .stack, .block, .panel, .inventory, .page, .mast { grid-template-columns: minmax(0, 1fr); }
 
-/* Site bar */
+/* Site bar: the name, GitHub, and on narrow screens the menu that holds the sidebar */
 .site { border-bottom: 1px solid var(--rule); }
-.site .in { max-width: 1120px; margin: 0 auto; padding: 0 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 28px; }
-.site .name { display: flex; align-items: center; gap: 10px; padding: 15px 0; text-decoration: none; font: 500 15px/1 var(--mono); }
+.site .in { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 24px; }
+.site .name { display: flex; align-items: center; gap: 10px; padding: 15px 0; margin-right: auto; text-decoration: none; font: 500 15px/1 var(--mono); }
 .site .name::before { content: ""; width: 9px; height: 9px; background: var(--ink); transform: rotate(45deg); }
-.site nav { min-width: 0; max-width: 100%; }
-.site ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 24px; overflow-x: auto; white-space: nowrap; }
-.site ol a { display: block; padding: 16px 0 13px; border-bottom: 2px solid transparent; font: 500 13px/1.4 var(--mono); color: var(--muted); text-decoration: none; }
-.site ol a:hover, .site ol a[aria-current] { color: var(--ink); }
-.site ol a[aria-current] { border-bottom-color: var(--ink); }
+.site .gh { padding: 15px 0; font: 500 13px/1.4 var(--mono); color: var(--muted); text-decoration: none; }
+.site .gh:hover { color: var(--ink); }
+.menu { display: none; }
+.menu summary { list-style: none; cursor: pointer; padding: 15px 0; font: 500 13px/1.4 var(--mono); color: var(--ink); }
+.menu summary::-webkit-details-marker { display: none; }
+.menu summary::after { content: " +"; color: var(--muted); }
+.menu[open] { flex-basis: 100%; order: 3; }
+.menu[open] summary::after { content: " –"; }
+.menu nav { max-height: 72vh; overflow-y: auto; padding: 4px 0 20px; }
 
-.wrap { max-width: 1120px; margin: 0 auto; padding: 44px 20px 72px; display: grid; gap: 64px; }
+/* The one sidebar: every page in its group, the current one opened to its sections */
+.shell { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: 228px minmax(0, 1fr); gap: 0 44px; }
+.side { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 36px 4px 40px 0; scrollbar-width: thin; }
+.side-tree { display: grid; gap: 22px; }
+.side-tree ol { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 1px; }
+.side-tree a { display: block; padding: 4px 0 4px 10px; border-left: 2px solid transparent; font-size: 0.92rem; line-height: 1.35; text-decoration: none; color: var(--muted); }
+.side-tree a:hover { color: var(--ink); }
+.side-tree a[aria-current] { color: var(--ink); font-weight: 600; border-left-color: var(--ink); }
+.side-tree .secs { margin: 3px 0 8px 10px; gap: 0; border-left: 1px solid var(--rule); }
+.side-tree .secs a { margin-left: -1px; padding: 3px 0 3px 12px; font-size: 0.85rem; }
+.side-tree .secs a[data-on] { color: var(--ink); border-left-color: var(--ink); }
+.side-tree a.side-all { padding-left: 0; border-left: 0; font: 500 12px/1.4 var(--mono); }
+
+.wrap { max-width: 1080px; min-width: 0; padding: 40px 0 72px; display: grid; gap: 64px; }
 .stack { display: grid; gap: 56px; min-width: 0; }
 footer { border-top: 1px solid var(--rule); padding-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.85rem; color: var(--muted); }
 footer code { font-size: 0.85em; }
@@ -365,22 +382,15 @@ pre.cmd i { color: var(--muted); }
 #panel-coverage[data-mode="time"] td.ht { color: var(--ink) !important; }
 
 /* Doc pages: the list of docs beside one doc */
-.doc { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 48px; align-items: start; }
-.rail { position: sticky; top: 24px; display: grid; gap: 22px; }
-.rail ol { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 2px; }
-.rail a { display: block; padding: 3px 0 3px 10px; border-left: 2px solid transparent; font-size: 0.93rem; line-height: 1.35; text-decoration: none; color: var(--muted); }
-.rail a:hover { color: var(--ink); }
-.rail a[aria-current] { color: var(--ink); font-weight: 600; border-left-color: var(--ink); }
-.rail-mobile { display: none; }
-.rail-mobile .rail-open { display: grid; position: static; }
-.rail-mobile summary { cursor: pointer; padding: 10px 0; border-block: 1px solid var(--rule); font: 500 12px/1.4 var(--mono); color: var(--muted); }
-.rail-mobile[open] summary { margin-bottom: 14px; }
 .page { display: grid; gap: 28px; min-width: 0; }
 .page .mast { gap: 16px; }
 .page .mast h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
 .page .mast h1 code { font-size: 0.75em; }
 .page .mast .lede { font-size: 1.2rem; color: var(--muted); max-width: 60ch; }
 .page nav.index { margin-block: 0; }
+
+/* On wide screens the sidebar lists a page's sections, so the bar above them is for narrow ones */
+@media (min-width: 901px) { nav.index { display: none; } }
 
 /* Markdown: whole docs (.prose) and the slices the guided pages show (.snip) */
 .prose { min-width: 0; }
@@ -416,9 +426,10 @@ pre.cmd i { color: var(--muted); }
 
 @media (max-width: 900px) {
   .cols-3, .terms, .prog { grid-template-columns: minmax(0, 1fr); }
-  .doc { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .rail { display: none; }
-  .rail-mobile { display: block; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .menu { display: block; }
+  .wrap { padding-top: 32px; }
 }
 @media (max-width: 760px) {
   .cols-2, .terms-dl, .insights { grid-template-columns: minmax(0, 1fr); }
@@ -432,6 +443,6 @@ pre.cmd i { color: var(--muted); }
   .gate { padding: 10px 0 0 14px; }
 }
 @media print {
-  .site, .rail, .rail-mobile, nav.index, .toggle, .filters, .tabs { display: none; }
+  .site, .side, nav.index, .toggle, .filters, .tabs { display: none; }
   .js .panel:not(.on) { display: grid; }
 }

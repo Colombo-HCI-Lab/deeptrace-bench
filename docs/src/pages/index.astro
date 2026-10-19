@@ -20,6 +20,10 @@ const lead = buildResults((await getEntry("docs", "results"))!.body ?? "")
   title="deeptrace-bench"
   description="Do deepfake detectors work on South Asian speech and faces? Open detectors run on South Asian audio and video under one evaluation setup."
   section="overview"
+  sections={[
+    { href: "#answer", text: "The short answer" },
+    { href: "#status", text: "Where the work stands" },
+  ]}
 >
   <header class="mast home">
     <div class="kicker">Colombo HCI Lab · Deepfake detection for South Asia · Phase 2</div>

@@ -1,9 +1,8 @@
 ---
-// One doc: the list of docs beside it, its title, a section index from its H2s, the Markdown.
+// One doc: its title, a section index from its H2s (in the sidebar, and above the text on narrow
+// screens), and the Markdown.
 import type { MarkdownHeading } from "astro";
-import DocList from "../components/DocList.astro";
 import { GROUPS } from "../lib/docs";
-import { GUIDED } from "../lib/links.mjs";
 import Base from "./Base.astro";
 
 interface Props {
@@ -15,10 +14,7 @@ interface Props {
 }
 
 const { id, title, description, group, headings } = Astro.props;
-// Docs with guided pages (Results, Progress, How it works) are indexed there, so their full
-// write-ups aren't.
-const guided = GUIDED.has(id);
-const sections = guided ? [] : headings.filter((h) => h.depth === 2);
+const sections = headings.filter((h) => h.depth === 2);
 // A title may carry a code span, as `DTB_ROOT` does.
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
 const titleHtml = esc(title).replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -28,33 +24,28 @@ const titleHtml = esc(title).replace(/`([^`]+)`/g, "<code>$1</code>");
   title={`${title.replaceAll("`", "")} · deeptrace-bench`}
   description={description}
   section="docs"
+  current={id}
+  sections={sections.map((h) => ({ href: `#${h.slug}`, text: h.text }))}
 >
-  <div class="doc">
-    <nav class="rail" aria-label="Docs"><DocList current={id} /></nav>
-    <div class="page">
-      <details class="rail-mobile">
-        <summary>All docs</summary>
-        <nav class="rail rail-open" aria-label="Docs"><DocList current={id} /></nav>
-      </details>
-      <header class="mast">
-        <div class="kicker">Docs · {GROUPS[group]}</div>
-        <h1 set:html={titleHtml} />
-        <p class="lede">{description}</p>
-      </header>
-      {
-        sections.length > 1 && (
-          <nav class="index" aria-label="Sections">
-            <ol>
-              {sections.map((h) => (
-                <li>
-                  <a href={`#${h.slug}`}>{h.text}</a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-        )
-      }
-      <article class="prose"><slot /></article>
-    </div>
+  <div class="page">
+    <header class="mast">
+      <div class="kicker">Docs · {GROUPS[group]}</div>
+      <h1 set:html={titleHtml} />
+      <p class="lede">{description}</p>
+    </header>
+    {
+      sections.length > 1 && (
+        <nav class="index" aria-label="Sections">
+          <ol>
+            {sections.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+    <article class="prose"><slot /></article>
   </div>
 </Base>

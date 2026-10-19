@@ -13,6 +13,12 @@ const P = buildProgress((await getEntry("docs", "progress"))!.body ?? "");
   title="Progress · deeptrace-bench"
   description="Where the benchmark stands, what each round of work added, and what comes next."
   section="progress"
+  sections={[
+    { href: "#where-things-stand", text: "Where things stand" },
+    { href: "#timeline", text: "Timeline" },
+    { href: "#next", text: "Next" },
+    { href: "#open-decisions-that-shape-the-results", text: "Open decisions" },
+  ]}
 >
   <div class="stack">
     <header class="mast">
