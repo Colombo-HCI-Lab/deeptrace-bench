@@ -1,6 +1,6 @@
 ---
 title: "Where to run"
-description: "Every machine the harness runs on, and how: the DESI lab's SPARK cluster step by step, any Linux GPU machine, and UNIL's Curnagl"
+description: "Every machine the harness runs on, and how: your first experiment on the DESI lab's SPARK cluster step by step, any Linux GPU machine, and UNIL's Curnagl"
 group: working
 order: 4
 ---
@@ -9,30 +9,28 @@ The scripts are the same everywhere; only storage and job submission differ. As 
 
 | Machine | Status | How |
 | --- | --- | --- |
-| The DESI lab's SPARK cluster | works; its first scoring run reproduced a published number | [SPARK](#spark) |
+| The DESI lab's SPARK cluster | works; its scoring runs reproduce published numbers | [SPARK](#spark), with [your first experiment](#your-first-experiment-step-by-step) step by step |
 | Any Linux machine with an NVIDIA GPU and CUDA 12 drivers | works | [below](#any-linux-gpu-machine) |
 | UNIL's Curnagl cluster | set up, never run: the team has no compute project yet | [Curnagl](#curnagl) |
 | An Apple Silicon laptop | tests and the smoke test only | [Getting started](getting_started.md) |
 
 ## SPARK
 
-
-SPARK is the DESI lab's GPU cluster at HEC Lausanne. You don't log in to it or queue jobs by hand. You edit two files in a git repo and push a tag; a worker runs the job in a Docker container and commits a summary of the results back. Checked on 2026-10-16, the day the first runs passed.
+SPARK is the DESI lab's GPU cluster at HEC Lausanne. Checked on 2026-10-19.
 
 ### How it works
 
-Two repos are involved:
+Think of SPARK as a restaurant kitchen you never walk into.
 
-- **deeptrace-bench** (this repo, public) holds the benchmark code. Code changes always land here first.
-- **[UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments)** (private) holds what SPARK runs. SPARK only runs repos in the [UNIL-DESI](https://github.com/UNIL-DESI) org, so the runs live there. It holds no benchmark code: it pins a deeptrace-bench commit and names a stage to run.
+| In the restaurant | In our setup |
+| --- | --- |
+| The cookbook | **deeptrace-bench** (this repo, public): all the benchmark code. Code changes always land here first |
+| The order slip | **[UNIL-DESI/deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments)** (private): two small files saying which stage to run, with which settings, on which machine, against a pinned deeptrace-bench commit. It lives in the [UNIL-DESI](https://github.com/UNIL-DESI) org because SPARK only runs repos there |
+| Ringing the bell | pushing a git tag called `cluster-run` |
+| The kitchen | a GPU machine (a worker) that checks out deeptrace-bench at the pinned commit, builds its locked environment and runs the stage in a Docker container |
+| The waiter bringing the plate | a bot that commits `reports/` (aggregates only) back to deeptrace-experiments' `main` |
 
-```
-you      edit .cluster-ci and params.yaml in deeptrace-experiments, push, push the cluster-run tag
-worker   checks out deeptrace-bench at the pinned commit, builds its locked environment, runs the stage
-bot      commits reports/ (aggregates only) back to deeptrace-experiments' main
-```
-
-Datasets, weights and per-item scores stay on the worker's disk (the job volume) between runs, so a second run on the same dataset skips the download.
+You never log in or queue jobs by hand: you fill in the slip, ring the bell and wait for the plate. The kitchen keeps its pantry: datasets, weights and per-item scores stay on the worker's disk between runs, so the second run on a dataset skips the download.
 
 ### One-time setup
 
@@ -48,20 +46,115 @@ gh repo clone UNIL-DESI/deeptrace-experiments
 
 That's all. You don't need SSH, a UNIL account, a GPU or a Hugging Face token (the repo's `HF_TOKEN` secret covers downloads). The UNIL VPN only matters for Cluster-CI's dashboard; logs reach you through GitHub. Cluster-CI's own guide tells you to run its `install.sh`: skip it, because it overwrites files this repo has already fixed.
 
-### The run loop
+### Your first experiment, step by step
 
-Every run is the same five steps, from inside `deeptrace-experiments`:
+An experiment here is one model scored on one evalset: "how well does AASIST-L tell real from fake Urdu speech?" You get back AUC, EER, the item and failure counts, and a check that they make sense.
+
+#### 1. Pick a model and an evalset
+
+Today the `score` stage runs, with no code changes, a pair that already has a published run (scored on another machine on 2026-10-12) on an evalset with a manifest committed under [`results/manifests/`](/results/manifests). That is 35 pairs:
+
+| Models | Evalsets |
+| --- | --- |
+| `aasist`, `aasist_l`, `xlsr_aasist`, `antideepfake_w2v_small`, `antideepfake_mms_300m`, `df_arena_500m`, `df_arena_1b` | `urdu_csalt`, `bangla_voices`, `banglafake`, `in_the_wild`, `indictts_challenge` |
+
+Each run checks that it gets the published numbers, so these runs teach the loop and prove the cluster's results can be trusted. Anything else needs code first: see [Bigger experiments](#bigger-experiments).
+
+#### 2. Look up the reference numbers
+
+On `main` a run must name the published run it is checked against. This prints that run's four numbers from the site's data (change the two names in `want`):
 
 ```bash
-git pull --rebase                                           # 1. the bot commits after every run
-# 2. edit .cluster-ci (where and what) and params.yaml (settings); see the recipes below
-git commit -am "score aasist on urdu csalt" && git push     # 3. commit your change
-git tag -f cluster-run && git push -f origin cluster-run    # 4. pushing the tag starts the run
-gh run list -R UNIL-DESI/deeptrace-experiments --limit 3    # 5. find the run, follow it,
-gh run watch <run id> -R UNIL-DESI/deeptrace-experiments    #    then git pull --rebase and read reports/
+curl -fsSL https://raw.githubusercontent.com/Colombo-HCI-Lab/deeptrace-bench/main/docs/src/reference/status.json | python3 -c "
+import json, sys
+want = ('aasist_l', 'urdu_csalt')
+for r in json.load(sys.stdin)['runs']:
+    if (r['model'], r['evalset']) == want:
+        print(f\"auc: {r['auc']}\neer: {r['eer']}\nn: {r['n']}\nn_failed: {r['n_failed']}\")"
 ```
 
-In `.cluster-ci`, two lines change from run to run, and always together: `ALLOWED_WORKERS` (which machine) and `STAGES` (what to run). `MAX_RUNTIME_HOURS` sets the time limit (24 at most). Leave the rest alone. The file on `main` holds whatever the last person ran, so read it before you edit.
+#### 3. Get the latest slip and check the kitchen is free
+
+```bash
+cd deeptrace-experiments
+git pull --rebase                                    # the bot commits after every run
+gh run list -R UNIL-DESI/deeptrace-experiments --limit 3
+```
+
+If the top run is `in_progress` or `queued`, someone else has the worker: wait, or ask the team.
+
+#### 4. Fill in the slip
+
+Both files hold whatever the last person ran, so read them before you edit. `.cluster-ci` says where and which stage; leave its other lines alone:
+
+```ini
+ALLOWED_WORKERS=isipol09   # the RTX 3090, the only worker that runs our code today
+STAGES=score
+MAX_RUNTIME_HOURS=3        # the job stops after this; 24 at most
+```
+
+`params.yaml` says what to score. Change the `score:` block and leave `bench.commit`, the pinned deeptrace-bench version, alone:
+
+```yaml
+score:
+  model: aasist_l
+  evalset: urdu_csalt
+  reference:                  # from step 2
+    auc: 0.8608831720587438
+    eer: 0.23101824602707474
+    n: 6794
+    n_failed: 19
+  tolerance: 0.001            # how far AUC and EER may drift and still count as the same
+```
+
+**A stage only reruns when its inputs change.** DVC skips a stage whose settings and pinned commit match the last run, so the run "passes" in seconds and `reports/` doesn't move. Change what you meant to run. (`gpu_check` is the exception: it reruns every time.)
+
+#### 5. Ring the bell
+
+```bash
+git commit -am "score aasist_l on urdu csalt" && git push   # save the order
+git tag -f cluster-run && git push -f origin cluster-run    # pushing the tag starts the run
+```
+
+#### 6. Watch it cook
+
+```bash
+gh run list -R UNIL-DESI/deeptrace-experiments --limit 1     # copy the run's id
+gh run watch <run id> -R UNIL-DESI/deeptrace-experiments
+```
+
+| Dataset | How long |
+| --- | --- |
+| already on the worker | minutes: AntiDeepfake w2v2 small on Urdu CSALT took 3 min 44 s from tag push to the bot's commit, 169 s of it the stage (scoring 120 s, evaluation 32 s) |
+| first use | Hugging Face lets the cluster fetch about 1,000 files per 5 minutes, and one run tries 12 rounds, so at most about 12,000 files. Urdu CSALT (6,800 clips) took about 20 minutes. BanglaFake, In-the-Wild and IndicTTS (25,000 to 31,000 clips) need two or three runs: each ends with `manifest_matches_repo: false` until the download is complete, and the next resumes it |
+
+#### 7. Read the result
+
+```bash
+git pull --rebase && cat reports/score.json
+```
+
+| Field | Want | Means |
+| --- | --- | --- |
+| `passed` | `true` | scoring and evaluation both finished |
+| `manifest_matches_repo` | `true` | the downloaded dataset is exactly the one committed in deeptrace-bench, not a half-finished download |
+| `matches_reference` | `true` | same item and failure counts, and AUC and EER within `tolerance` |
+| `overall` | | the run's `auc`, `eer`, `n` and `n_failed`, with intervals (`_lo`, `_hi`) |
+| `diff` | close to 0 | the distance from the reference |
+| `steps` | every `ok: true` | each phase (environment, weights, dataset, score, evaluate) with its time; the first `ok: false` shows where it broke |
+| `hf_token` | `true` | the Hugging Face secret reached the job (never its value) |
+
+`reports/score_by_method.csv` breaks the result down by how the fakes were made.
+
+#### 8. If it failed
+
+See [When a run fails](#when-a-run-fails).
+
+#### 9. Share what you found
+
+Post the run link and the `overall` numbers to the team. Only aggregates leave the cluster ([Rules](#rules)). Numbers reach the [Results](results.md) page when they are added after a round of runs.
+
+### Other stages
 
 | Stage | `ALLOWED_WORKERS` | Settings in `params.yaml` | Report |
 | --- | --- | --- | --- |
@@ -70,13 +163,11 @@ In `.cluster-ci`, two lines change from run to run, and always together: `ALLOWE
 | `score` | `isipol09` | `bench.commit`, `score.*` | `reports/score.json`, `reports/score_by_method.csv` |
 | `hello` | any | none | `reports/hello.json` |
 
-**A stage only reruns when its inputs change.** DVC skips a stage whose settings and pinned commit are the same as last time, so the run passes in seconds and `reports/` doesn't move. Change what you meant to change. `gpu_check` is the exception: it reruns every time.
-
-### Recipes
+Every stage follows steps 3 to 7 above; only `ALLOWED_WORKERS`, `STAGES` and the stage's settings change, always together.
 
 #### Check that a run works at all
 
-Your first run. It takes a few minutes when a worker is free.
+A quick test of the plumbing, a few minutes when a worker is free.
 
 ```ini
 ALLOWED_WORKERS=HEC45801,HEC45803
@@ -103,42 +194,6 @@ bench:
 
 `reports/bench_smoke.json` has `passed`, the GPU the environment saw, and each step's time.
 
-#### Score a model on an evalset
-
-Runs the same scripts as any other machine (`setup_models.py`, `setup_datasets.py --manifest`, `score.py --device cuda`, `evaluate.py`), then compares the result with a run already published.
-
-```ini
-ALLOWED_WORKERS=isipol09
-STAGES=score
-MAX_RUNTIME_HOURS=6
-```
-
-```yaml
-score:
-  model: aasist
-  evalset: urdu_csalt
-  reference:                    # the published run to compare with (from results.md or its summary)
-    auc: 0.8632242084258313
-    eer: 0.22218952324896998
-    n: 6794
-    n_failed: 19
-  tolerance: 0.001
-```
-
-Read `reports/score.json`:
-
-| Field | Means |
-| --- | --- |
-| `passed` | scoring and evaluation both finished |
-| `matches_reference` | same item and failure counts, and AUC and EER within `tolerance` |
-| `overall`, `diff` | the run's metrics, and their distance from the reference |
-| `manifest_matches_repo` | the downloaded dataset is exactly the one committed in deeptrace-bench |
-| `hf_token` | whether the Hugging Face secret reached the job (never its value) |
-
-**What it can score today.** A pair that already has a published run, on an evalset made from one dataset with a manifest committed under [`results/manifests/`](/results/manifests): `urdu_csalt`, `banglafake`, `bangla_voices`, `in_the_wild` and `indictts_challenge`. A new pair, or an evalset like `indicsynth_bn`, needs the stage extended first; ask Oshan.
-
-**How long it takes.** The first download of a dataset is the slow part: Hugging Face lets the cluster fetch about 1,000 files per 5 minutes, so the stage downloads in rounds. Urdu CSALT (6,800 clips) took about 20 minutes to download and 88 seconds to score on the 3090. Later runs on the same worker skip the download.
-
 #### Run code you just changed
 
 SPARK runs deeptrace-bench at the commit pinned in `params.yaml`, never your working copy. So:
@@ -148,6 +203,19 @@ SPARK runs deeptrace-bench at the commit pinned in `params.yaml`, never your wor
 3. Set `bench.commit` in deeptrace-experiments' `params.yaml` to it, then run `bench_smoke` first. Every stage that uses the pin reruns.
 
 The worker builds the environment from `uv.lock`: about a minute when the lock changed, seconds when it didn't.
+
+### Bigger experiments
+
+These need deeptrace-bench changed before the slip can order them, so talk to Oshan first. The order is always: code into deeptrace-bench, then move `bench.commit` to that commit ([Run code you just changed](#run-code-you-just-changed)).
+
+| You want to | What's needed |
+| --- | --- |
+| score a pair with no published run | the `score` stage has to accept a missing reference: written on deeptrace-experiments' `score-any-evalset` branch, not merged or tested |
+| use an evalset outside the five above (IndicSynth, HiDF, MAVOS-DD) | the stage has to support evalsets built from more than one dataset, and some datasets need access requests first ([Datasets](datasets.md)) |
+| run a video model (GenD, SBI, Xception) | it runs on the cluster (the smoke test runs GenD), but needs a video evalset the stage supports |
+| add a model or a dataset | an adapter or builder in deeptrace-bench, and a parity check before any number counts ([Adding a model](adding_a_model.md), [Adding a dataset](adding_a_dataset.md)) |
+| fine-tune a model | not built yet; planned after the evaluation setup is settled ([Progress](progress.md#next)) |
+| use the ARM workers' larger memory | not yet: `uv.lock` has no ARM Linux wheels ([Workers and limits](#workers-and-limits)) |
 
 ### Rules
 
@@ -171,11 +239,12 @@ gh run view <run id> --log -R UNIL-DESI/deeptrace-experiments > run.log
 | Passes in seconds, `reports/` unchanged | nothing changed, so DVC skipped the stage; change the setting you meant to |
 | You pushed the tag and no run starts | you tagged one of the bot's commits (they carry `[skip ci]`); make a commit of your own and tag that |
 | Queued for hours | the worker is running someone else's job (up to 24 hours); wait, or `gh run cancel <run id> -R UNIL-DESI/deeptrace-experiments` |
-| "Workspace Sanitizer" aborts over `dvc.lock` hashes | a failed run's reports were committed without the lock; `git checkout <last good commit> -- reports/<file>`, commit, run again |
+| `CUDA driver initialization failed`, though Cluster-CI's GPU check passed | a one-off GPU glitch (once, on 2026-10-19; the identical retry passed and matched exactly). Fix the next row, then run again |
+| "Workspace Sanitizer" aborts over `dvc.lock` hashes | the bot committed a failed run's reports without the lock. Put the good ones back with `git checkout <last good commit> -- reports/score.json reports/score_by_method.csv` (or whichever report changed), commit, run again |
 | `dvc-viewer: command not found` before any stage | the worker's job volume lost a launcher (a Cluster-CI bug); ask Oshan |
 | "The NVIDIA driver on your system is too old" | keep `DOCKER_IMAGE_AMD64=nvcr.io/nvidia/pytorch:25.06-py3`; it's the only image that fits `isipol09`'s driver |
-| `manifest_matches_repo: false` | the download didn't finish in its 12 rounds, or `hf_token` is false; check the token, then run again (it resumes) |
-| Killed by the memory guard | keep `REQUIRED_RAM` at 16GB or more; it also covers Cluster-CI's own install |
+| `manifest_matches_repo: false` | the download didn't finish in one run's 12 rounds ([step 6](#6-watch-it-cook)), or `hf_token` is false; check the token, then run again (it resumes) |
+| Killed by the memory guard, or out of GPU memory | keep `REQUIRED_RAM` at 16GB or more (it also covers Cluster-CI's own install); `REQUIRED_VRAM` can go up to the 3090's 24 GB |
 | Stopped at the time limit | raise `MAX_RUNTIME_HOURS` (24 at most) and run again; scoring resumes from the saved parts |
 
 ### Workers and limits
