@@ -7,6 +7,12 @@ order: 1
 
 deeptrace-bench runs published, open deepfake detectors on South Asian audio and video under one evaluation setup, and reports each result overall and per group (language, generator, gender, race). Each step below is one script; three checks decide whether a number counts.
 
+## In plain words
+
+Many groups have published deepfake detectors: programs that take a clip and say how likely it is to be fake. Nearly all were trained and tested on Western, mostly English data. This benchmark asks whether they still work on South Asian faces, voices and languages, and whether they work equally well for everyone. That is only a fair question if every detector is tested the same way, so the harness works like a conveyor belt: each detector and each test set is described once in a config, and every run passes through the same stations below, from download to a published summary.
+
+A result counts only once it gets past three guards. Parity asks whether our wrapper scores exactly like the authors' own code, so a weak number means a weak model and not a bug of ours. The contamination guard stops a model being tested on data it saw in training. The publish guard keeps test runs and per-clip data out of the repo. Everything large (datasets, weights, per-clip scores) lives in a store outside git ([Data policy](data_policy.md)). The two numbers every run reports, AUC and EER, are explained under [Metrics](evaluation.md#metrics).
+
 ## The pipeline
 
 | Step | Script | What it does | Writes, under `DTB_ROOT` |

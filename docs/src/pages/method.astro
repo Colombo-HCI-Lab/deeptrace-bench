@@ -25,6 +25,7 @@ const gateClass = ["g-parity", "g-guard", "g-pub"];
     </header>
     <nav class="index" aria-label="On this page">
       <ol>
+        {M.plain && <li><a href="#plain-words">In plain words</a></li>}
         <li><a href="#pipeline">Pipeline</a></li>
         <li><a href="#key-terms">Key terms</a></li>
         <li><a href="#repo">The repo</a></li>
@@ -32,6 +33,16 @@ const gateClass = ["g-parity", "g-guard", "g-pub"];
         <li><a href={`${base}docs/evaluation/`}>Evaluation in full</a></li>
       </ol>
     </nav>
+    {
+      M.plain && (
+        <section id="plain-words" class="block">
+          <header>
+            <h2>In plain words</h2>
+          </header>
+          <div class="snip" style="max-width: 72ch" set:html={M.plain} />
+        </section>
+      )
+    }
     <section id="pipeline" class="block">
       <header>
         <h2>The pipeline</h2>

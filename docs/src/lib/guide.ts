@@ -488,6 +488,7 @@ export function buildMethod(body: string) {
   };
   return {
     lede: mdi(prose(first > 0 ? body.slice(0, first) : body)),
+    plain: md(section(secs, /^In plain words/).text),
     steps: rows(/^The pipeline/).map((r, i) => ({
       kicker: `${i + 1} · ${plain(r[1])}`,
       title: plain(r[0]),

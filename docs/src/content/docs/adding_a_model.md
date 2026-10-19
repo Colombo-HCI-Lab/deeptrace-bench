@@ -5,6 +5,8 @@ group: working
 order: 2
 ---
 
+In plain words: adding a model means teaching the harness to run someone else's detector exactly as its authors did. You never rewrite the model. You write down where its code and weights come from and everything it was trained on ([step 1](#1-config)), lock those exact files ([step 2](#2-fetch-and-pin)), write a thin adapter that loads the authors' code and turns our prepared inputs into one fake probability per window or frame ([step 3](#3-adapter)), check the plumbing on a few clips ([step 4](#4-prove-it-runs)), and then prove the adapter scores like the original before any of its numbers count ([step 5](#5-before-any-result-counts)).
+
 A model is a config, a pinned upstream checkout, pinned weights and an adapter. Worked example: GenD (`configs/models/gend.yaml`, `src/deeptrace_bench/models/gend.py`). Other upstream shapes: `aasist.py` (one plain PyTorch file), `df_arena.py` (code inside a Hugging Face model repo), `deepfakebench.py` (one detector out of a training framework).
 
 ## How adapters work
