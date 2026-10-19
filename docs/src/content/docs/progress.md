@@ -7,12 +7,12 @@ order: 2
 
 ## Where things stand
 
-As of 2026-10-12:
+As of 2026-10-16:
 
 - **Models.** 25 detectors have adapters; 24 have weights (Effort's wait on Google Drive's download quota; AltFreezing's are unreachable). 17 pass parity against upstream code ([models.md](models.md#parity)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
 - **Runs.** Ten models have full runs, 48 model and evalset pairs in all ([all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
-- **Compute.** Since 2026-10-16 the harness also runs on the DESI lab's SPARK cluster: the tests, the smoke test and a full scoring run pass on its x86 worker, in this repo's own environment. The scoring run reproduces a published number, so SPARK can take new runs ([spark.md](spark.md)).
+- **Compute.** The DESI lab's SPARK cluster runs the harness: tests, smoke test and a scoring run that reproduced a published number all pass on its RTX 3090 worker. It can take new runs ([how to run there](spark.md)).
 - **Rules.** The evaluation setup in [`configs/eval/default.yaml`](/configs/eval/default.yaml) is still `proposed`: decision 5 was due 2026-10-09 and isn't settled. Every number can still move.
 
 ## Timeline
@@ -23,7 +23,7 @@ Commits `6ae9dd1` to `5327e2f` here; the runs themselves are in [deeptrace-exper
 
 - The DESI lab's SPARK cluster only runs repos in its own GitHub org, so a private repo there, `UNIL-DESI/deeptrace-experiments`, pins a commit of this repo and runs its scripts as DVC stages.
 - On the x86 worker (an RTX 3090), the full test suite and the GenD and AASIST smoke tests passed, in this repo's locked environment (torch 2.8, CUDA 12.8).
-- The cluster's default image can't use that worker's GPU: its torch needs CUDA 13.2, and the driver supports 12.9. Our own environment doesn't have that problem. The two ARM workers (NVIDIA GB10) work with the image, but our lock has no ARM wheels.
+- That worker needs an older NVIDIA image than the cluster's default (its driver stops at CUDA 12.9). The two ARM workers (NVIDIA GB10) can't run this repo yet: our lock has no ARM wheels.
 - The first scoring run there repeated AASIST on Urdu CSALT and matched the 2026-10-12 round: same manifest, same 6,794 items and 19 failures, AUC 0.8632 (+1.2e-5) and EER 0.2224 (+2.0e-4). The small EER shift fits the eval config's move from TF32 to fp32 on CUDA since then.
 - Nine setup failures came before that, all fixed on our side; deeptrace-experiments' `CLAUDE.md` lists them.
 

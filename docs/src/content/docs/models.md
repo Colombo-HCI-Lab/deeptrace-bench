@@ -1,118 +1,132 @@
 ---
 title: "Models"
-description: "Every detector: status, wave, code and weight sources, training data, porting notes, parity"
+description: "Every detector: what it is, whether its scores can be trusted yet, why any is missing, and porting notes per adapter"
 group: benchmark
 order: 2
 ---
 
-Availability checked against the live repos on 2026-10-03, and for every video model again on 2026-10-04 (pinned commits current, every weight file public); models added or wired on 2026-10-05 were checked that day. Source of truth: `configs/models/<id>.yaml`; `uv run scripts/setup_models.py --list` prints the current table, including which adapters exist. As of 2026-10-05 every model has an adapter except AltFreezing, and every adapter passes the pipeline check on a few items except Effort, whose weights Google Drive won't serve. Seventeen adapters pass parity ([Parity](#parity)): nine of the first ten written (all but GenD), four written 2026-10-05 (RECCE, SRM, CORE, FFD), and since 2026-10-12 XLS-R + AASIST, both AntiDeepfake models and SBI. The other eight (GenD and seven written 2026-10-05) haven't been checked yet.
+Which detectors exist, whether their scores can be trusted yet and why any is missing, then porting notes for adapter maintainers. The configs (`configs/models/<id>.yaml`) are the source of truth; `uv run scripts/setup_models.py --list` prints the table, and the [catalog](catalog.md#models) has licences and full training data.
 
-| Model                   | Modality    | Status   | Wave | Weights                         | Trained on (released weights)                    | Licence             |
-| ----------------------- | ----------- | -------- | ---- | ------------------------------- | ------------------------------------------------ | ------------------- |
-| Xception                | video       | ready    | 1    | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| EfficientNet-B4         | video       | ready    | 1    | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| SBI                     | video       | ready    | 1    | Google Drive                    | FF++ real, self-blended                          | research only       |
-| GenD (CLIP L/14)        | video       | ready    | 1    | Hugging Face                    | FF++                                             | MIT                 |
-| GenD (PE L/14)          | video       | workable |      | Hugging Face                    | FF++                                             | MIT                 |
-| UCF                     | video       | workable |      | DeepfakeBench release v1.0.1    | FF++ c23, all four methods                       | CC BY-NC 4.0        |
-| F3Net                   | video       | workable |      | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| SPSL                    | video       | workable |      | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| RECCE                   | video       | workable |      | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| SRM                     | video       | workable |      | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| CORE                    | video       | workable |      | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| FFD                     | video       | workable |      | DeepfakeBench release v1.0.1    | FF++ c23                                         | CC BY-NC 4.0        |
-| Effort                  | video       | workable |      | Google Drive (quota-blocked)    | FF++ c23                                         | none published      |
-| LipForensics            | video       | workable |      | Google Drive                    | FF++ c23 (LRW pretraining)                       | MIT                 |
-| AltFreezing             | video       | blocked  |      | RecDrive / Baidu only           | FF++                                             | MIT                 |
-| AASIST                  | audio       | ready    | 1    | in the upstream repo            | ASVspoof 2019 LA                                 | MIT                 |
-| AASIST-L                | audio       | ready    | 1    | in the upstream repo            | ASVspoof 2019 LA                                 | MIT                 |
-| XLS-R + AASIST          | audio       | workable | 1    | Google Drive                    | ASVspoof 2019 LA                                 | MIT                 |
-| XLS-R + SLS             | audio       | workable |      | Google Drive                    | ASVspoof 2019 LA                                 | none declared       |
-| XLSR-Mamba              | audio       | workable |      | Hugging Face                    | ASVspoof 2019 LA                                 | MIT                 |
-| AASIST3                 | audio       | workable |      | Hugging Face                    | ASVspoof 2019 + 5, MLAAD, M-AILABS               | CC BY-NC-ND 4.0     |
-| AntiDeepfake MMS-300M   | audio       | workable |      | Hugging Face                    | 74k h in 100+ languages, 29 corpora              | CC BY-NC-SA 4.0     |
-| AntiDeepfake w2v2 small | audio       | workable |      | Hugging Face                    | the same 29 corpora                              | CC BY-NC-SA 4.0     |
-| DF Arena 500M           | audio       | workable |      | Hugging Face                    | ASVspoof 2019 + 5, MLAAD, six more               | non-commercial      |
-| DF Arena 1B             | audio       | workable |      | Hugging Face                    | ASVspoof 2019 + 5, MLAAD, six more               | non-commercial      |
-| HAVIC                   | audio-video | workable |      | Hugging Face                    | LRS2, then 70% of FakeAVCeleb                    | MIT                 |
+## Status
 
-Each modality pairs classic detectors with foundation-model ones (video: GenD on two backbones; audio: the XLS-R family, AntiDeepfake, DF Arena). DeepfakeBench's classic detectors cover different cues: plain texture (Xception, EfficientNet-B4), forgery features separated from content (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics (mouth movement) and HAVIC (audio and video together) target lip-sync fakes, v1's focus. On audio, multilingual pretraining varies by design: AntiDeepfake's MMS-300M and wav2vec 2.0 small share post-training data, and the XLS-R models share ASVspoof 2019 LA training with different back ends (AASIST, SLS, Mamba). If both kinds fail on the same attribute, the cause is likely the data, not one model.
+Checked on 2026-10-12. Every model has an **adapter** (the wrapper that runs upstream code in this repo's environment) except AltFreezing. A model's numbers count only after two checks; a run missing either is flagged provisional ([evaluation.md](evaluation.md)):
 
-## One environment, ported adapters
+- **Parity:** the adapter scores like the upstream code on about 200 items ([Parity](#parity)).
+- **Score direction:** AUC above 0.5 on the model's reproduction evalset (FF++ test, ASVspoof 2019 LA eval, or In-the-Wild where the guard refuses ASVspoof 2019), so its output isn't read backwards.
 
-Everything runs in one environment (Python 3.12, torch 2.8, transformers 4.56). Upstream repos pin older stacks (DeepfakeBench: Python 3.7, torch 1.12; XLS-R + AASIST: torch 1.8 and fairseq) that don't run on H100s, so they aren't used for results. Instead:
+| Model                                   | Modality    | Status           | Parity     | Direction | Trained on (released weights)       |
+| --------------------------------------- | ----------- | ---------------- | ---------- | --------- | ----------------------------------- |
+| Xception, EfficientNet-B4               | video       | ready, wave 1    | yes        | not yet   | FF++ c23                            |
+| SBI                                     | video       | ready, wave 1    | yes        | not yet   | FF++ real, self-blended             |
+| GenD (CLIP L/14)                        | video       | ready, wave 1    | not yet    | not yet   | FF++                                |
+| GenD (PE L/14)                          | video       | workable         | not yet    | not yet   | FF++                                |
+| UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD | video       | workable         | yes        | not yet   | FF++ c23 (UCF: all four methods)    |
+| Effort                                  | video       | workable         | no weights | not yet   | FF++ c23                            |
+| LipForensics                            | video       | workable         | not yet    | not yet   | FF++ c23 (LRW pretraining)          |
+| AltFreezing                             | video       | blocked          | no adapter |           | FF++                                |
+| AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   | ASVspoof 2019 LA                    |
+| XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   | ASVspoof 2019 LA                    |
+| XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    | ASVspoof 2019 LA                    |
+| AASIST3                                 | audio       | workable         | not yet    | sanity    | ASVspoof 2019 + 5, MLAAD, M-AILABS  |
+| AntiDeepfake MMS-300M, w2v2 small       | audio       | workable         | yes        | settled   | 74k h in 100+ languages, 29 corpora |
+| DF Arena 500M, 1B                       | audio       | workable         | yes        | settled   | ASVspoof 2019 + 5, MLAAD, six more  |
+| HAVIC                                   | audio-video | workable         | not yet    | not yet   | LRS2, then 70% of FakeAVCeleb       |
 
-1. `setup_models.py` clones upstream at its pinned commit into `third_party/` and archives it to `DTB_ROOT/upstream/`. Code from Effort (no licence), SBI (research only), DeepfakeBench (CC BY-NC) and XLS-R + SLS (no licence) is never copied into the repo; MIT code (AASIST, GenD, HAVIC, LipForensics, XLSR-Mamba) may be.
-2. The adapter (`src/deeptrace_bench/models/<module>.py`) loads the one model file it needs from the checkout with `importlib`. Small compatibility fixes go in `patches/<repo>/` (`patches/README.md`). Libraries the environment can't have are stood in for during upstream imports: fairseq by transformers' wav2vec 2.0 (`models/_fairseq.py`), mamba-ssm's CUDA kernels by pure PyTorch (`models/_mamba.py`).
-3. `convert_checkpoint` turns the download into `model.safetensors` with normalised keys, once, so adapters never unpickle Google Drive files.
-4. **Parity check** before any result counts: the upstream code in its original environment (an Apptainer image or a throwaway old-torch venv, on CPU or an A100) and the adapter score the same ~200 items, and scores must agree within about 1e-3. `scripts/parity.py` does this with a reference script per upstream ([adding_a_model.md](adding_a_model.md)) and writes `results/parity/<id>.json`. This is what licenses every patch.
-5. **Score direction**: AUC above 0.5 on the reproduction evalset (FF++ test, ASVspoof 2019 LA eval). An inverted logit otherwise flips every result silently.
+Wave 1 is the first set scored. "Sanity": bona fide ASVspoof 2019 LA eval clips score near 0 and spoofed ones near 1, short of the formal check. What is missing:
 
-Expected breakages on Python 3.12 and torch 2.x: `torch.load` defaults to `weights_only=True`; `np.float` and `np.int` are gone; `distutils` and `imp` are gone.
+- **Video score direction** waits on FF++ test or Celeb-DF v2, both on request.
+- **AltFreezing** (`blocked`): weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them.
+- **Effort**: Google Drive refuses its weights over quota ([Effort](#effort)).
+- **Parity** for eight adapters; [Parity](#parity) says what each needs.
 
-## Per model
-
-**DeepfakeBench: Xception, EfficientNet-B4, UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD.** Commit `f188b1c`, release v1.0.1 weights: 13 frame-level checkpoints (also Capsule, CNN-Aug, MesoNet and MesoInception, which the same adapter could load; no release ships LSDA, CLIP, SBI or Effort weights). **Adapter written 2026-10-05** (`models/deepfakebench.py`, one class; `input.detector` picks the yaml). It imports the one detector file and its backbone from the checkout, with stand-ins for DeepfakeBench's training losses, metrics and tensorboard, builds the network with upstream's class and yaml, and loads the converted checkpoint with every key matching. All five load strictly; the EfficientNet-B4 mismatch in #79 doesn't occur with `efficientnet-pytorch` 0.7.1. Input follows DeepfakeBench's test transform: RGB 256 px crops, cubic resize, mean and std 0.5 (not ImageNet's, as the configs said before); label 1 is fake for all five. UCF scores with its common-forgery head; its inference path also runs the unused content encoder. Known issues: published weights don't reproduce the README table for some users (#109, #159). #151 asks whether every checkpoint is FF++ c23 (unanswered), and the detector yamls name single FF++ manipulations for F3Net (NeuralTextures) and SPSL (FaceSwap), which may not describe the released checkpoints; the guard treats all five as trained on FF++ train either way. **Score direction isn't checked yet** for any of the five: it needs FF++ test or Celeb-DF v2, both on request. Parity fixes P(fake) at upstream's label 1, which the direction check would confirm. RECCE, SRM, CORE and FFD were added 2026-10-05 through the same adapter. RECCE builds its encoder with timm's `xception(pretrained=True)`, switched to `pretrained=False` during the build since the checkpoint replaces every weight. FFD's constructor reads ten template images through `imageio` that only its other map types use, so blank 19 x 19 templates stand in. All nine load strictly and pass parity.
-
-**SBI.** `FFc23.tar` (used) and `FFraw.tar` from Google Drive, 141 MB each, `torch.save` dicts whose `"model"` entry is the state dict. **Adapter written 2026-10-05** (`models/sbi.py`): upstream's `Detector` from `src/inference/model.py`, built with `EfficientNet.from_pretrained` pointed at `from_name` so no ImageNet download happens (the checkpoint replaces every weight). Input as in `inference_video.py`: the face box widened by an eighth of its width and height per side and stretched to 380 x 380 (`box` crop mode, with SBI's rounding), RGB / 255, no mean or std; P(fake) is softmax index 1. Upstream keeps every face at least half the largest one's area and takes the max per frame; the shared pipeline keeps the largest face, the same on single-face videos. Boxes come from SCRFD where upstream uses RetinaFace, so parity compares the network on identical crops. Passes parity (2026-10-12) against upstream's `Detector` and the original `FFc23.tar` in torch 1.13. Research-only licence: the code stays in `third_party/`.
-
-**GenD.** `yermandy/GenD_CLIP_L_14` on Hugging Face, revision `891ce01`. Already modern. Trained on FF++ only; the paper's 14 benchmarks (FakeAVCeleb among them) are test sets. **Adapter written 2026-10-04** (`models/gend.py`): loads upstream's `src/hf/modeling_gend.py` from the pinned checkout and points it at a pinned local copy of its CLIP backbone (`openai/clip-vit-large-patch14` at `32bd642`), which upstream would fetch unpinned; all ten weight files are hash-pinned. Logit index 1 is fake; a video scores the mean of its frames' P(fake). Face crops come from the shared pipeline, a port of `detector.py`'s SCRFD detection and five-point alignment ([evaluation.md](evaluation.md)); its `det_10g.onnx` comes from insightface's official v0.7 `buffalo_l` pack (non-commercial research only) and hashes identical to the third-party mirror upstream downloads. Runs end to end in the smoke test on a laptop (MPS and CPU agree to 2e-6). **Parity with upstream not checked yet.**
-
-**AASIST, AASIST-L.** Weights committed in the upstream repo; `models/AASIST.py` needs no patch (only `main.py` imports `torchcontrib`). **Adapter written 2026-10-05** (`models/aasist.py`). Upstream labels bona fide 1 and scores the bona fide logit, so P(fake) is softmax index 0. Reproduced 2026-10-05 on the full ASVspoof 2019 LA eval set (7,355 bona fide, 63,882 spoofed): AASIST AUC 0.999, EER 1.58% (95% interval 1.41 to 1.75%; paper 0.83%); AASIST-L AUC 0.999, EER 1.49% (1.32 to 1.66%; paper 0.99%). Run with cuDNN's TF32 convolutions, before `compute.tf32` turned them off; TF32 moves single scores by up to 2.5e-2 but left DF Arena 500M's In-the-Wild EER unchanged. The direction is settled: the inverted outputs in #17 come from reading the bona fide logit as a fake score. A18 is AASIST's hardest attack (11% of its clips missed at the EER threshold, under 3% for every other). The EERs aren't strictly like for like: upstream scores only each utterance's first four seconds where we average every window, and we refuse the 1,059 eval clips shorter than a second (see DF Arena below). Zero-shot on In-the-Wild both sit near chance: AASIST EER 44.0% (AUC 0.578), AASIST-L 44.9% (AUC 0.583).
-
-**The XLS-R family: XLS-R + AASIST, XLS-R + SLS, XLSR-Mamba.** All three fine-tune fairseq's XLS-R 300M inside Tak et al.'s `SSLModel` wrapper and were trained on ASVspoof 2019 LA alone, so they are clean zero-shot probes on every South Asian set. **Adapters written 2026-10-05** (`models/ssl_xlsr.py`, one class, and `models/xlsr_mamba.py`), without fairseq: each upstream `model.py` is imported with stand-in `fairseq` modules (`models/_fairseq.py`) that hand `SSLModel` transformers' `Wav2Vec2Model`, built from the pinned `facebook/wav2vec2-xls-r-300m` config and answering fairseq's `features_only` call, including the per-layer outputs SLS pools over. `convert_checkpoint` renames fairseq's keys (conv layers, positional convolution, attention, feed-forward, norms; the quantiser and other pretraining-only parts are dropped), and every converted key then loads strictly. XLS-R + AASIST: `LA_model.pth` from the authors' Drive folder, byte-identical to the MIT mirror `SpeechAntiSpoofingBenchmarks/W2V2-AASIST`. XLS-R + SLS (ACM MM 2024): `MMpaper_model.pth` from the authors' Drive, saved from `DataParallel` (`module.` prefix stripped); the repo declares no licence, so its code is only imported. XLSR-Mamba: `AustinXiao/XLSR-Mamba-LA` safetensors. mamba-ssm's CUDA kernels are replaced by pure-PyTorch stand-ins with the same names (`models/_mamba.py`: the selective scan step by step, the block, RMSNorm, the fused add-norm functions), checked against transformers' Mamba mixer, so upstream's `MixerModel` runs unchanged, including its fused ending that normalises the back end's input plus each direction's residual stream. All three use 64,600-sample windows and read P(fake) at index 0 (upstream scores the bona fide logit). Sanity check, not a result: each scores bona fide ASVspoof 2019 LA eval clips near 0 and spoofed ones near 1. XLS-R + AASIST passes parity (2026-10-12) against upstream's own stack, torch 1.8.1 and the fairseq commit its checkout vendors (fairseq 0.12.2 rejects the config inside `xlsr2_300m.pt`). Reproduced the same day: EER 0.30% (95% interval 0.26 to 0.34%) on ASVspoof 2019 LA eval and 10.8% (10.4 to 11.2%) on In-the-Wild, about what later papers report for this checkpoint. XLS-R + SLS and XLSR-Mamba have no parity run yet ([Parity](#parity)).
-
-**DF Arena 500M and 1B.** `Speech-Arena-2025/DF_Arena_*_V_1` on Hugging Face, code and weights in one repo, non-commercial licence; the top open models on the Speech DF Arena leaderboard (5.9% average EER for 1B). An XLS-R (300M for the 500M model, 1B for the 1B) with attention pooling over every hidden layer and a conformer head. **Adapter written 2026-10-05** (`models/df_arena.py`): the code is pinned like any upstream (`host: hf`) and loaded as a package from the checkout, never with `trust_remote_code`; the XLS-R config that `backbone.py` fetches unpinned comes from a pinned snapshot, so loading works offline. Windows go through one at a time (upstream's `forward` unsqueezes a 1-D waveform); P(fake) is the `spoof` softmax. Trained on ASVspoof 2019 (partitions not named, so the guard refuses ASVspoof 2019 LA eval) and 2024, MLAAD (refused on `mlaad_*`), Codecfake, LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb and EnvSDD; In-the-Wild is its reproduction set. Reproduced 2026-10-05 on the full set (TF32, as for AASIST above): 500M EER 1.51% (95% interval 1.35 to 1.66%) and AUC 0.999, card 1.76%; 1B EER 0.67% (0.58 to 0.77%) and AUC 0.999, card 0.91%. Two protocol differences that decision 5 should settle for reproduction evalsets: upstream scores only a clip's first four seconds (as does AASIST's evaluation loader) where we average every window, and we refuse the 865 In-the-Wild clips under a second (`min_seconds`) where the card's pipeline tiles them. Parity compares window by window, so it can't see either; the reproduced EERs include both. On a four-clip Urdu smoke sample it scored both real clips as fake (0.9996 and 0.75): noise at that size, but the kind of gap this benchmark measures.
-
-**Effort.** DeepfakeBench carries Effort's detector (`training/detectors/effort_detector.py`), so it runs through the DeepfakeBench adapter (**written 2026-10-05**): `loralib` (imported, never used) is stubbed, and the hard-coded `CLIPModel.from_pretrained` path is replaced by a CLIP built from the pinned `openai/clip-vit-large-patch14` config. The checkpoint supplies every weight, including the SVD split of all 96 attention projections, and the network builds offline. The FF++ checkpoint `effort_clip_L14_trainOn_FaceForensic.pth` is in Effort's Google Drive folder (`19kQwGDjF18uk78EnnypxxOLaG4Aa4v1h`), which refused every file with "Quota exceeded" on 2026-10-05; retry `setup_models.py effort` later. Known issues: a reported reproduction gap (CDF-v2 AUC 0.885 vs 0.956, #19) and keys reported missing from the checkpoint (#18), which the strict load will settle. No licence file (#3).
-
-**HAVIC.** The only open audio-visual detector, `JielunPeng/HAVIC` (`best_ft_model.pth`, 859 MB, MIT). **Adapter written 2026-10-05** (`models/havic.py`), with two patches (`patches/HAVIC/`): timm 1.x's `Attention` no longer takes `qk_scale` (always None here, so the scale is unchanged), and `HAVIC_FT.forward` passes `use_mask=False` to encoders that don't accept it, which breaks upstream's own inference at this commit (masking is already off). Inputs from the audio-visual loader (`preprocess/av.py`): frames at 5 per second from the start, at most 50; each frame's raw face box resized to 224 and scaled to [0, 1]; windows of 16 frames, stride 2; the audio under them cut with upstream's arithmetic into 128-bin Kaldi filterbanks (torchaudio) stretched to 1,024 frames. Output: a logit per window, P(fake) its sigmoid. Fine-tuned on a random 70% of FakeAVCeleb with no published item list, so the guard refuses it on FakeAVCeleb. Needs videos of at least 3.2 s with a face in 16 sampled frames, so HiDF's 3 s clips are too short; MAVOS-DD Hindi is its South Asian set once its terms are accepted. Upstream's boxes come from FaceX-Zoo's RetinaFace, and a frame without a face skips the whole video there; here the frame drops out.
-
-**LipForensics.** `lipforensics_ff.pth` from Google Drive (144 MB, `{"model": state_dict}`), MIT. **Adapter written 2026-10-05** (`models/lipforensics.py` and `preprocess/mouths.py`): upstream's `Lipreading` (ResNet-18 with a 3D stem, multi-scale TCN) built from the checkout's config with one output. Mouth crops follow upstream's preprocessing, with its `warp_img`, `apply_transform` and `cut_patch` imported from the checkout: the first 100 consecutive frames; 68 landmarks per frame from FAN (2DFAN4, the `face-alignment` package's TorchScript weights, pinned) on the shared detector's boxes, cropped and decoded with the package's functions as its `get_landmarks_from_image` does for a given box; landmarks smoothed over 12 frames; each frame warped to the LRW mean face on five stable points; a 96 x 96 grayscale mouth patch. Then non-overlapping 25-frame clips, centre-cropped to 88 and normalised (0.421, 0.165); P(fake) is a clip's sigmoid. Upstream suggests RetinaFace boxes for FAN. Users report its FF++ numbers don't reproduce (#9). `face-alignment` asks for `opencv-python`, which `pyproject.toml` overrides away so headless OpenCV 4 stays the only `cv2`.
-
-**AltFreezing (blocked).** Weights only on RecDrive and Baidu (password `altf`). Rechecked 2026-10-05: the RecDrive share page still answers, but issues #7 and #8 report the file gone, with no maintainer reply; no Hugging Face or release mirror exists. DeepfakeBench carries `altfreezing_detector.py` but not its weights. Someone with a working session has to fetch them first.
-
-**AASIST3.** `lab260/AASIST3` (safetensors, transformers-native, KAN layers in the repo). **Adapter written 2026-10-05** (`models/aasist3.py`), kept as a weak multilingual baseline, not a strong one: the repo says the released weights aren't the paper's, and the Speech DF Arena measures them at 28 to 32% EER on In-the-Wild and ASVspoof 2021. The front end's config (`facebook/wav2vec2-large-xlsr-53`) is pinned, not fetched; input is pre-emphasised (0.97) per window. The README example reads index 0 as bona fide, but the training and validation code score index 1 as bona fide; a sanity check on ASVspoof 2019 LA eval (bona fide low, spoofed high) confirms the code, so P(fake) is index 0. Trained on MLAAD, so refused on `mlaad_*`.
-
-**AntiDeepfake MMS-300M and wav2vec 2.0 small.** NII Yamagishi Lab (`nii-yamagishilab/*-anti-deepfake`; checkpoints CC BY-NC-SA 4.0, code BSD-3): speech SSL models post-trained on 74k hours of real and fake speech from 29 corpora in over 100 languages. MMS-300M is pretrained on about 1,400 languages; the small one is wav2vec 2.0 base (English LibriSpeech), so the pair isolates multilingual pretraining under the same post-training. **Adapters written 2026-10-05** (`models/antideepfake.py`): upstream's `models/W2V.py` imported with the fairseq stand-ins, its front end built from `W2V_configs.py`'s fairseq settings translated to a transformers config (`_fairseq.hf_config_from_fairseq`). Each window is normalised to zero mean and unit variance, as upstream's loader does to a whole utterance; P(fake) is index 0. The post-training data includes FLEURS (Hindi, Bengali, Urdu, Tamil, Nepali and more, not Sinhala), MLAAD, all of ASVspoof 2019 LA, LJSpeech, LibriTTS, VoxCeleb2 and SpoofCeleb, all listed for the guard; In-the-Wild is a test set on the cards (EER 2.90% for MMS-300M, 4.24% for the small one). Both pass parity (2026-10-12) against upstream's `W2V.py` and the Hub checkpoints with fairseq 0.12.2. Reproduced the same day on In-the-Wild: small 4.23% EER (card 4.24%), MMS-300M 4.29% (card 2.90%). Both are scored the same way, so MMS-300M's gap lies in the protocol (windows vs whole utterances) or the card, not the adapter; it goes to decision 5. The Hub files are called `model.safetensors`, the converted file's name, so they are saved under their own names; `save_converted` refuses a source called `model.safetensors`.
-
-**GenD (Perception Encoder L/14).** GenD's second released backbone (`yermandy/GenD_PE_L`): same adapter and same FF++-only training as the CLIP one. timm builds `vit_pe_core_large_patch14_336` from its built-in config with `pretrained` forced off (the checkpoint supplies every weight). On Apple's MPS backend one video tripped a Metal assertion; CPU and CUDA run it. The DINOv3 variant (`yermandy/GenD_DINOv3_L`) builds its backbone from Meta's gated `facebook/dinov3-vitl16-pretrain-lvd1689m`, so it waits for someone to accept Meta's terms.
-
-**Candidates, not yet configured** (checked 2026-10-05):
-
-- Nes2Net-X (`SpeechAntiSpoofingBenchmarks/Nes2Net`): another back end on the same fine-tuned XLS-R, so the fairseq stand-ins should serve it; repo licence undeclared.
-- Forensics Adapter (CVPR 2025): CLIP ViT-L with adapters, weights on Google Drive, CC BY-NC 4.0; no inference script, only `test.py`.
-- LipFD (NeurIPS 2024): the lip-sync detector closest to v1's focus; no licence stated.
-- AI-Face fairness checkpoints (PG-FDD, DAW-FDD, DAG-FDD): in a login-walled SharePoint folder, and saw Celeb-DF v2; PG-FDD's own repo ships no trained weights.
-- MAVOS-DD baselines: fine-tuned on MAVOS-DD itself.
-- Community classifiers on Hugging Face (wav2vec2 and ViT fine-tunes with undisclosed training data): left out.
+**Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus.
 
 ## Parity
 
-Checked with `scripts/parity.py` on 2026-10-05, and on 2026-10-12 for the last four rows; summaries in `results/parity/<id>.json`. Every input score agrees with upstream's within the 1e-3 tolerance. For RECCE, SRM, CORE and FFD (checked later on 2026-10-05) the reference script got the adapter's two stand-ins (FFD's blank templates, RECCE's encoder built without its download).
+Seventeen adapters pass: every score within 1e-3 of upstream's, run in its original environment (`scripts/parity.py`; summaries in `results/parity/<id>.json`). Audio uses 521 windows of 200 Urdu (CSALT) clips, video 199 face crops from the Mendeley pipeline-test set.
 
-| Model           | Inputs                        | Max difference | Upstream side                                                       |
-| --------------- | ----------------------------- | -------------: | ------------------------------------------------------------------- |
-| AASIST          | 521 windows of 200 Urdu clips |         2.6e-6 | upstream `Model` and `.pth`, built as `main.py` does (torch 2.8)    |
-| AASIST-L        | 521 windows of 200 Urdu clips |         3.3e-6 | same                                                                |
-| DF Arena 500M   | 521 windows of 200 Urdu clips |              0 | the model card's `trust_remote_code` pipeline (torch 2.8)           |
-| DF Arena 1B     | 521 windows of 200 Urdu clips |              0 | same                                                                |
-| Xception        | 199 Mendeley face crops       |         2.1e-6 | upstream detector, release `.pth`, its test transform (torch 1.13) |
-| EfficientNet-B4 | 199 Mendeley face crops       |         3.5e-6 | same                                                                |
-| UCF             | 199 Mendeley face crops       |         4.9e-6 | same                                                                |
-| F3Net           | 199 Mendeley face crops       |         3.4e-6 | same                                                                |
-| SPSL            | 199 Mendeley face crops       |         2.0e-6 | same                                                                |
-| RECCE           | 199 Mendeley face crops       |         5.9e-6 | same, with timm 0.6.13 for its encoder                              |
-| SRM             | 199 Mendeley face crops       |         1.7e-6 | same                                                                |
-| CORE            | 199 Mendeley face crops       |         3.4e-6 | same                                                                |
-| FFD             | 199 Mendeley face crops       |         4.2e-6 | same                                                                |
-| SBI             | 199 Mendeley face crops       |         3.6e-6 | upstream `Detector`, original `FFc23.tar` (torch 1.13)              |
-| XLS-R + AASIST  | 521 windows of 200 Urdu clips |         1.1e-4 | upstream `model.py`, its vendored fairseq, `LA_model.pth` (torch 1.8.1) |
-| AntiDeepfake MMS-300M | 521 windows of 200 Urdu clips | 9.0e-5 | upstream `W2V.py`, the Hub checkpoint, fairseq 0.12.2 (torch 1.13) |
-| AntiDeepfake w2v2 small | 521 windows of 200 Urdu clips | 3.2e-5 | same                                                            |
+| Models (max difference)                                                                                                            | Checked    | Upstream side                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------- |
+| AASIST 2.6e-6, AASIST-L 3.3e-6                                                                                                     | 2026-10-05 | upstream `Model` and `.pth`, built as `main.py` does (torch 2.8)    |
+| DF Arena 500M 0, 1B 0                                                                                                              | 2026-10-05 | the model card's `trust_remote_code` pipeline (torch 2.8)           |
+| Xception 2.1e-6, EfficientNet-B4 3.5e-6, UCF 4.9e-6, F3Net 3.4e-6, SPSL 2.0e-6, RECCE 5.9e-6, SRM 1.7e-6, CORE 3.4e-6, FFD 4.2e-6 | 2026-10-05 | upstream detector, release `.pth`, test transform (torch 1.13; timm 0.6.13 for RECCE) |
+| SBI 3.6e-6                                                                                                                         | 2026-10-12 | upstream `Detector`, `FFc23.tar` (torch 1.13)                       |
+| XLS-R + AASIST 1.1e-4                                                                                                              | 2026-10-12 | upstream `model.py`, its vendored fairseq (torch 1.8.1)             |
+| AntiDeepfake MMS-300M 9.0e-5, w2v2 small 3.2e-5                                                                                    | 2026-10-12 | upstream `W2V.py`, the Hub checkpoint, fairseq 0.12.2 (torch 1.13)  |
 
-Not checked yet: GenD (its native-size crops differ in shape, which `parity.py export` doesn't handle) and seven adapters written 2026-10-05, which so far pass only strict loads, their tests and the pipeline check. Cheapest next: AASIST3 and GenD PE-L, whose upstream code runs in our environment. XLS-R + SLS needs the patched fairseq its checkout ships as a zip, since the vendored commit returns no per-layer outputs for SLS to pool (`ssl_xlsr.py` already covers it); XLSR-Mamba needs mamba-ssm's kernels on a GPU; HAVIC and LipForensics need upstream's face and landmark pipelines. DeepfakeBench's reference shares the adapter's import stand-ins, so parity there covers the weights, an old torch's numerics and the transform, not upstream's package imports; the strict load covers the architecture.
+DeepfakeBench's reference shares the adapter's import stand-ins (and RECCE's and FFD's build stand-ins), so a pass there covers weights, numerics and transform, not upstream's imports; the strict load covers the architecture.
 
-## Adding a model
+**Not checked yet** (strict loads, tests and the pipeline check only):
 
-See [adding_a_model.md](adding_a_model.md): config, pinned weights, adapter, smoke test, then parity and score direction before any result counts.
+- **AASIST3, GenD PE-L:** cheapest next; upstream runs in our environment.
+- **GenD (CLIP):** `parity.py export` can't handle its native-size crops, which differ in shape.
+- **XLS-R + SLS:** needs the patched fairseq zip in its checkout; the vendored commit returns no per-layer outputs.
+- **XLSR-Mamba:** needs mamba-ssm's CUDA kernels on a GPU.
+- **HAVIC, LipForensics:** need upstream's face and landmark pipelines.
+- **Effort:** needs its weights.
+
+## How adapters work
+
+One environment runs everything (Python 3.12, torch 2.8, transformers 4.56). Upstream stacks (DeepfakeBench: Python 3.7, torch 1.12; XLS-R + AASIST: torch 1.8, fairseq) don't run on H100s, so they serve only as parity references.
+
+1. `setup_models.py` clones upstream at its pinned commit into `third_party/` and archives it to `DTB_ROOT/upstream/`. Code from Effort (no licence), SBI (research only), DeepfakeBench (CC BY-NC) and XLS-R + SLS (no licence) is never copied into the repo; MIT code (AASIST, GenD, HAVIC, LipForensics, XLSR-Mamba) may be.
+2. The adapter (`src/deeptrace_bench/models/<module>.py`) imports the one model file it needs from the checkout; fixes go in `patches/<repo>/`. Missing libraries get stand-ins: fairseq becomes transformers' wav2vec 2.0 (`models/_fairseq.py`), mamba-ssm's kernels pure PyTorch (`models/_mamba.py`).
+3. `convert_checkpoint` turns the download into `model.safetensors` with normalised keys, once, so adapters never unpickle Google Drive files.
+
+Expected breakages on Python 3.12 and torch 2.x: `torch.load` defaults to `weights_only=True`; `np.float`, `np.int`, `distutils` and `imp` are gone. To add a model, follow [adding_a_model.md](adding_a_model.md).
+
+## Per model
+
+Adapters date from 2026-10-04 (GenD) and 2026-10-05 (the rest). P(fake) is the output read as the probability of fake. Reproduced numbers are in [results.md](results.md); the protocol gaps behind them are here.
+
+### DeepfakeBench detectors
+
+Xception, EfficientNet-B4, UCF, F3Net, SPSL, RECCE, SRM, CORE and FFD share `models/deepfakebench.py` (`input.detector` picks the upstream yaml): commit `f188b1c`, release v1.0.1 weights. The release's Capsule, CNN-Aug, MesoNet and MesoInception weights would load too. All nine load strictly (the EfficientNet-B4 mismatch in #79 doesn't occur with `efficientnet-pytorch` 0.7.1).
+
+- **Input:** RGB 256 px crops, cubic resize, mean and std 0.5 (not ImageNet's). Label 1 is fake. UCF scores with its common-forgery head.
+- **Build stand-ins:** RECCE's timm encoder is built with `pretrained=False` (the checkpoint replaces every weight); FFD's template images, unused by its map type, are blank 19 x 19 images.
+- **Known issues:** published weights don't reproduce the README for some users (#109, #159); #151 asks whether every checkpoint is FF++ c23 (unanswered); the yamls name one manipulation for F3Net (NeuralTextures) and SPSL (FaceSwap), which may not match the checkpoints. The guard treats all nine as trained on FF++ train.
+
+### SBI
+
+`FFc23.tar` from Google Drive. Input as in `inference_video.py`: the face box widened by an eighth per side, stretched to 380 x 380, RGB / 255, no normalisation; P(fake) is softmax index 1. We keep the largest face (upstream takes the max over every face at least half its area) and use SCRFD boxes, not RetinaFace, so parity compares the network on identical crops. Research-only licence: the code stays in `third_party/`.
+
+### GenD (CLIP and PE)
+
+`yermandy/GenD_CLIP_L_14` and `yermandy/GenD_PE_L`, trained on FF++ only (the paper's 14 benchmarks, FakeAVCeleb among them, are test sets). Crops come from the shared SCRFD pipeline with five-point alignment ([evaluation.md](evaluation.md)); its `det_10g.onnx` is insightface's `buffalo_l` (non-commercial research only). Logit index 1 is fake; a video scores the mean of its frames. PE fails on Apple MPS for one video; use CPU or CUDA. The DINOv3 variant waits for someone to accept Meta's terms on its gated backbone.
+
+### AASIST, AASIST-L
+
+Weights ship in the upstream repo. Upstream scores the bona fide logit, so P(fake) is softmax index 0; reading it the other way explains the inverted outputs in #17. **Protocol:** upstream scores each utterance's first four seconds; we average every window and refuse the 1,059 eval clips under a second. The reproductions used TF32 convolutions (since turned off by `compute.tf32`), which move single scores by up to 2.5e-2 but left DF Arena 500M's In-the-Wild EER unchanged.
+
+### XLS-R + AASIST, XLS-R + SLS, XLSR-Mamba
+
+All three fine-tune XLS-R 300M inside Tak et al.'s `SSLModel` on ASVspoof 2019 LA alone, so they are clean zero-shot probes on every South Asian set. They run without fairseq (transformers' `Wav2Vec2Model` stands in, with the per-layer outputs SLS pools) and XLSR-Mamba without mamba-ssm (pure-PyTorch kernels checked against transformers' Mamba mixer). Windows are 64,600 samples; P(fake) is index 0. Weights: `LA_model.pth` (byte-identical to the MIT mirror `SpeechAntiSpoofingBenchmarks/W2V2-AASIST`) and `MMpaper_model.pth` from the authors' Drive, and `AustinXiao/XLSR-Mamba-LA`. SLS declares no licence, so its code is only imported. XLS-R + AASIST's parity used the fairseq commit its checkout vendors, since fairseq 0.12.2 rejects the config inside `xlsr2_300m.pt`.
+
+### DF Arena 500M and 1B
+
+`Speech-Arena-2025/DF_Arena_*_V_1`, code and weights in one Hugging Face repo, non-commercial; the top open models on the Speech DF Arena leaderboard (5.9% average EER for 1B). XLS-R (300M or 1B) with layer-wise attention pooling and a conformer head; the code is pinned, never run with `trust_remote_code`. P(fake) is the `spoof` softmax. The guard refuses it on ASVspoof 2019 LA eval (training partitions not named) and `mlaad_*`, so In-the-Wild is its reproduction set. **Protocol:** upstream scores a clip's first four seconds where we average every window, and we refuse the 865 In-the-Wild clips under a second where the card tiles them. Parity compares windows, so it can't see either; decision 5 (the evaluation setup, still open) should settle both.
+
+### AntiDeepfake MMS-300M and wav2vec 2.0 small
+
+NII Yamagishi Lab (`nii-yamagishilab/*-anti-deepfake`), post-trained on 74k hours of real and fake speech in over 100 languages. MMS-300M is pretrained on about 1,400 languages, the small one on English only, isolating multilingual pretraining. Each window is normalised to zero mean and unit variance (upstream normalises the whole utterance); P(fake) is index 0. The post-training data includes FLEURS (Hindi, Bengali, Urdu, Tamil, Nepali and more, not Sinhala), MLAAD and all of ASVspoof 2019 LA. Small matches its card's In-the-Wild EER (4.24%) and MMS-300M doesn't (card 2.90%); scored the same way, that gap lies in the protocol or the card, not the adapter (decision 5).
+
+### AASIST3
+
+`lab260/AASIST3`, a weak multilingual baseline: the released weights aren't the paper's, and the Speech DF Arena measures them at 28 to 32% EER on In-the-Wild and ASVspoof 2021. Input is pre-emphasised (0.97) per window. The README reads index 0 as bona fide but the training code reads index 1; the sanity check sides with the code, so P(fake) is index 0. Refused on `mlaad_*`.
+
+### Effort
+
+Runs through the DeepfakeBench adapter, with `loralib` stubbed and CLIP built from a pinned config. Its Google Drive folder answered "Quota exceeded" on 2026-10-05; retry `setup_models.py effort`. Upstream reports a reproduction gap (CDF-v2 AUC 0.885 against 0.956, #19) and missing checkpoint keys (#18), which the strict load will settle. No licence file (#3).
+
+### HAVIC
+
+The only open audio-visual detector (`JielunPeng/HAVIC`). Two patches (`patches/HAVIC/`) fix timm 1.x and a `use_mask` bug in upstream's own inference. Input: up to 50 frames at 5 per second, raw face boxes resized to 224, in 16-frame windows at stride 2, with the audio under each window as 128-bin Kaldi filterbanks; P(fake) is each window's sigmoid. A frame without a face drops out (upstream skips the video). It needs at least 3.2 s with a face in 16 sampled frames, so HiDF's 3 s clips are too short; MAVOS-DD Hindi is its South Asian set once its terms are accepted. Fine-tuned on an unpublished 70% of FakeAVCeleb, so refused there.
+
+### LipForensics
+
+`lipforensics_ff.pth` from Google Drive. Mouth crops reuse upstream's warp and crop code on 68 FAN landmarks per frame, from the shared detector's boxes (upstream suggests RetinaFace): the first 100 consecutive frames, landmarks smoothed over 12 frames, 96 x 96 grayscale mouth patches, then non-overlapping 25-frame clips centre-cropped to 88. P(fake) is a clip's sigmoid. Users report its FF++ numbers don't reproduce (#9).
+
+### Candidates, not yet configured
+
+Checked 2026-10-05: **Nes2Net-X** (another back end on the same XLS-R; licence undeclared), **Forensics Adapter** (CVPR 2025; CC BY-NC 4.0; no inference script), **LipFD** (NeurIPS 2024; closest to v1's lip-sync focus; no licence), the **AI-Face fairness checkpoints** (login-walled, and they saw Celeb-DF v2) and the **MAVOS-DD baselines** (fine-tuned on MAVOS-DD). Hugging Face community classifiers with undisclosed training data are left out.

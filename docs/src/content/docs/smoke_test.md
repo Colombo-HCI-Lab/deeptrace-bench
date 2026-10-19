@@ -5,7 +5,7 @@ group: working
 order: 1
 ---
 
-One command runs the whole pipeline (setup, sampling, face detection, scoring, evaluation) on a handful of items per dataset and writes a readable report. Run it after any pipeline change, and to prove a new model or dataset is wired up before a real run.
+One command runs the whole pipeline (setup, sampling, face detection, scoring, evaluation) on a handful of items per dataset and writes a readable report. Run it after any pipeline change, and before a real run of a new model or dataset. It proves the code works, not that the model is good: nothing it produces is ever reported.
 
 ```bash
 uv run scripts/smoke.py                         # GenD on every pipeline-test evalset
@@ -56,7 +56,7 @@ Look at the crops. Faces should be centred and upright with level eyes, with bla
 - each evalset has at least one `ok` item;
 - every score is a probability in [0, 1].
 
-This proves the plumbing, not the model. With four items AUC and EER are noise; they only show the metrics code ran. Never reported.
+With four items, AUC and EER are noise: they only show the metrics code ran.
 
 ## Checks worth repeating by hand
 

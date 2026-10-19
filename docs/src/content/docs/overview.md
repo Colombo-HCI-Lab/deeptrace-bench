@@ -5,28 +5,20 @@ group: start
 order: 1
 ---
 
-deeptrace-bench runs open deepfake detectors on South Asian audio and video under one evaluation setup and reports results overall and per group. [Models and data](https://colombo-hci-lab.github.io/deeptrace-bench/inventory/) lists every model, dataset and run; [Results](results.md) says what the runs show.
+deeptrace-bench runs open deepfake detectors on South Asian audio and video under one evaluation setup and reports results overall and per group. New here? Read [Progress](progress.md) for where things stand, then [Results](results.md) for what the runs show. [How it works](https://colombo-hci-lab.github.io/deeptrace-bench/method/) explains the key terms.
 
-| Doc | What it covers |
+| I want to | Read |
 | --- | --- |
-| **Start here** | |
-| [Progress](progress.md) | Where the benchmark stands, what each round of work added, and what comes next |
-| **Experiments and results** | |
-| [Experiments](experiments.md) | What has been run, the question each run answers, and how to run it again |
-| [Results](results.md) | What the runs so far show, with numbers and caveats |
-| **Reference** | |
-| [Models](models.md) | Every detector: status, wave, where code and weights come from, training data, porting notes, parity check |
-| [Datasets](datasets.md) | Every dataset: how to get it, who requests or signs, licence terms, what's in it |
-| [Models and datasets](catalog.md) | Every detector and dataset in plain language: paper, size, cost, what each records (generated) |
-| [Evaluation](evaluation.md) | Evalsets, preprocessing, metrics, failure accounting, contamination verdicts, the shortcut probe |
-| [Data policy](data_policy.md) | What may enter git, licence clauses that bind us, sharing data across institutions |
-| **Working on it** | |
-| [Smoke test](smoke_test.md) | One command that runs the whole pipeline on a few items per dataset, and how to read its report |
-| [The store](store_layout.md) | The `DTB_ROOT` tree: what each folder holds, naming rules, the smoke namespace, what's safe to delete |
-| [Adding a model](adding_a_model.md) | Recipe: config, pinned weights, adapter, smoke test, parity (GenD as the worked example) |
-| [Adding a dataset](adding_a_dataset.md) | Recipe: config, builder, sampling, evalset (the two pipeline-test datasets as worked examples) |
-| [Running on Curnagl](cluster.md) | Running on UNIL's Curnagl cluster (or any Linux GPU machine): storage, environment, jobs |
-| [Getting started on SPARK](spark.md) | The DESI lab's GPU cluster: access, your first run, scoring a pair, moving the pin, failed runs |
+| know where the benchmark stands and what's next | [Progress](progress.md) |
+| see what the runs show | [Results](results.md), then [Experiments](experiments.md) for what each run asked |
+| look up a model or a dataset | [Models](models.md), [Datasets](datasets.md), or the plain-language [Models and datasets](catalog.md) |
+| understand how a number is made | [Evaluation](evaluation.md) |
+| know what may go into git or be shared | [Data policy](data_policy.md) |
+| check the pipeline works after a change | [Smoke test](smoke_test.md) |
+| find a file the scripts wrote | [The store](store_layout.md) |
+| add a model or a dataset | [Adding a model](adding_a_model.md), [Adding a dataset](adding_a_dataset.md) |
+| run on the GPU cluster | [Running on SPARK](spark.md) |
+| run on Curnagl or another GPU machine | [Curnagl or any GPU machine](cluster.md) |
 
 ## How the pieces fit
 
@@ -44,8 +36,8 @@ contamination guard ─────┘            └───▶ scores/<run_id
 
 Paths on the right are under `DTB_ROOT`; [store_layout.md](store_layout.md) has the full tree.
 
-1. **Configs** declare models, datasets, evalsets, tools (the face detector) and the one evaluation setup.
-2. **Setup** fetches code, weights and data and writes each dataset's manifest. `--sample N` fetches only N real and N fake items, for pipeline tests.
-3. **Scoring** runs one model over one evalset, resumably, once the model's modality matches the evalset and the contamination guard has checked the pair. Video and image items go through the shared face pipeline; audio is cut into windows.
-4. **Evaluation** computes overall and per-group metrics with intervals and publishes the aggregates (never for pipeline tests).
-5. **Smoke test** runs 2 to 4 on a few items per dataset and writes a report.
+1. **Configs** declare everything: models, datasets, evalsets (the exact slice of data a model is scored on), the face detector, and the one evaluation setup.
+2. **Setup** fetches code, weights and data, and writes a manifest per dataset (one row per item). `--sample N` fetches only N real and N fake items, for pipeline tests.
+3. **Scoring** runs one model over one evalset. It first checks the model reads that modality and wasn't trained on that data (the contamination guard). Faces are detected once and cached; audio is cut into windows. Scoring resumes after a kill.
+4. **Evaluation** computes overall and per-group metrics with intervals, and publishes only the aggregates.
+5. **Smoke test** runs steps 2 to 4 on a few items per dataset and writes a report.

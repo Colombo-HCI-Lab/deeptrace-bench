@@ -1,49 +1,54 @@
 ---
 title: "Datasets"
-description: "Every dataset: access route, who requests or signs, licence terms, contents"
+description: "Every dataset: what we have, what waits on a request, who has to ask or sign, and the licence catch"
 group: benchmark
 order: 3
 ---
 
-Access checked against the live pages on 2026-10-03, and all again on 2026-10-05, along with the datasets added that day. Source of truth: `configs/datasets/<id>.yaml`; `uv run scripts/setup_datasets.py --list` prints the current table. Terms change, so recheck a page before depending on it.
+Which datasets exist, which we hold, which wait on a request and who must send it, and each licence's catch. Read it before planning a run or sending a request.
+
+Access checked on the live pages 2026-10-05; "In hand" as of 2026-10-12. Terms change, so recheck before depending on one. Source of truth: `configs/datasets/<id>.yaml`; `uv run scripts/setup_datasets.py --list` prints the current state. Licence clauses that bind us are in [data_policy.md](data_policy.md#licence-clauses-that-bind-us). To add a dataset, follow [adding_a_dataset.md](adding_a_dataset.md).
 
 ## At a glance
 
-| Dataset                 | Modality    | Access today                          | Real + fake | Size                  | Use                                                  |
-| ----------------------- | ----------- | ------------------------------------- | ----------- | --------------------- | ---------------------------------------------------- |
-| Urdu (CSALT)            | audio       | open (Hugging Face)                   | both        | 2 GB                  | first South Asian run                                |
-| BanglaFake              | audio       | open (Hugging Face)                   | both        | 5.6 GB                | first; licence undeclared                            |
-| BD-GRF6                 | audio       | open (Zenodo)                         | both        | 3 GB                  | Bangla by gender, including third gender             |
-| Bangla voices           | audio       | open (Mendeley Data)                  | both        | 0.5 GB                | Bangla, 75 speakers, paired real and fake            |
-| IndicTTS challenge      | audio       | open (Hugging Face)                   | both        | 17.4 GB               | 16 Indian languages, Nepali among them               |
-| IndicSynth              | audio       | open, per language                    | fake only   | 128 GB (hi+bn+ur)     | paired with IndicSUPERB                              |
-| IndicSUPERB             | audio       | open (object store)                   | real only   | 5.8 GB (test splits)  | real side of IndicSynth                              |
-| OpenSLR Sinhala         | audio       | open (OpenSLR SLR52)                  | real only   | 0.9 GB (1 of 16 zips) | real side of MLAAD's Sinhala                         |
-| HiDF                    | video       | open (Zenodo)                         | both        | 1.6 GB (videos)       | per-face race labels; "Indian" is the South Asian group |
-| In-the-Wild             | audio       | open (Hugging Face)                   | both        | 8.2 GB                | reproduction for DF Arena, AntiDeepfake; English     |
-| ASVspoof 2019 LA        | audio       | open (Edinburgh DataShare)            | both        | 7.6 GB                | reproduction, score direction                        |
-| MAVOS-DD (Hindi)        | audio-video | accept terms on Hugging Face          | both        | 35.7 GB               | the only open South Asian video                      |
-| MLAAD                   | audio       | accept terms on Hugging Face, instant | fake only   | 9.5 GB (South Asian)  | needs a real source; cross-corpus                    |
-| Svarah                  | audio       | accept terms on Hugging Face          | real only   | 1.1 GB                | real Indian-accented English by state and language   |
-| SEA-Spoof               | audio       | email the authors + manual approval   | both        | 81.5 GB               | the largest labelled Hindi and Tamil spoof set       |
-| FF++                    | video       | request form                          | both        | ~40 GB (c23)          | reproduction                                         |
-| InDeepFake              | audio-video | emailed form naming the PI            | both        | 31 GB                 | request first: lightest                              |
-| FakeAVCeleb             | audio-video | form + ethics approval, slow          | both        | ?                     | request now; 100 real South Asian videos             |
-| DeePhy                  | video       | institution-signed licence            | both        | 30 GB                 | one signing round with DF-Platter                    |
-| DF-Platter              | video       | institution-signed licence            | both        | 500 GB                | stratified sample                                    |
-| Deepfake-Eval-2024      | mixed       | manual approval, often rejected       | both        | 20 GB                 | evaluation only; ~5% South Asian                     |
-| Celeb-DF v2             | video       | request form                          | both        | ~10 GB                | reproduction for video models                        |
-| Casual Conversations v2 | video       | form + Meta licence                   | real only   | ?                     | false positives on real Indian faces                 |
-| IndieFake               | audio       | request form                          | both        | ?                     | low priority: English                                |
-| SpeechFake              | audio       | open, ModelScope                      | both        | 143 GB, a split zip   | Hindi TTS and VC, Bengali, Tamil, Marathi, Malayalam |
-| LRLspoof                | audio       | open (Hugging Face)                   | fake        | 462 GB, one tarball   | deferred; Nepali                                     |
-| IAV-DF                  | audio-video | sample link dead                      |             |                       | dropped                                              |
-| Indic-CodecFake         | audio       | no download anywhere                  |             |                       | dropped                                              |
+Rows hold real and fake unless marked. "In hand": a full copy is downloaded and has a manifest. "Sample": only the few items the pipeline check uses. Models are scored on evalsets built from these ([evaluation.md](evaluation.md#evalsets-not-datasets)).
 
-- **South Asian video:** only MAVOS-DD's Hindi subset needs no institutional request (accept its terms on Hugging Face); every other South Asian video set is Indian and needs a request.
-- **Sinhala:** the only deepfake audio is MLAAD's 1,000 Edge-TTS clips, paired with real Sinhala speech from OpenSLR (cross-corpus, so diagnostic only).
-- **Nepali:** the only labelled real and fake is in the IndicTTS challenge set; LRLspoof has more Nepali spoofs but in one 462 GB tarball.
-- **HiDF** isn't South Asian: each face carries a race label, so "Indian" (90 base videos) can be compared with the other groups.
+| Dataset                 | Modality    | Content, size                                      | In hand    | To get it (who)                               | Licence, catch                            |
+| ----------------------- | ----------- | -------------------------------------------------- | ---------- | --------------------------------------------- | ----------------------------------------- |
+| Urdu (CSALT)            | audio       | Urdu, 2 GB                                         | yes        | open                                          | CC BY-NC 4.0                              |
+| BanglaFake              | audio       | Bangla, 5.6 GB                                     | yes        | open                                          | none declared: ask before publishing      |
+| Bangla voices           | audio       | Bangla, 75 speakers, paired, 0.5 GB                | yes        | open                                          | CC BY 4.0                                 |
+| IndicTTS challenge      | audio       | 16 Indian languages incl. Nepali, 17.4 GB          | yes        | open                                          | CC BY 4.0                                 |
+| IndicSynth              | audio       | 12 Indic languages, fake only, 128 GB for hi+bn+ur | Hindi only | open                                          | CC BY-NC 4.0                              |
+| IndicSUPERB             | audio       | real only, the real side of IndicSynth, 5.8 GB     | yes        | open                                          | CC BY 4.0                                 |
+| OpenSLR Sinhala         | audio       | Sinhala, real only, 0.9 GB (1 of 16 zips)          | yes        | open                                          | CC BY-SA 4.0                              |
+| HiDF                    | video       | per-face race labels incl. "Indian", 1.6 GB        | yes        | open                                          | CC BY-NC 4.0                              |
+| In-the-Wild             | audio       | English, reproduction, 8.2 GB                      | yes        | open                                          | CC BY-SA 4.0                              |
+| ASVspoof 2019 LA        | audio       | English, reproduction, 7.6 GB                      | yes        | open (slow server)                            | DataShare licence text                    |
+| BD-GRF6                 | audio       | Bangla by gender incl. third gender, 3 GB          | sample     | open                                          | CC BY 4.0                                 |
+| SpeechFake              | audio       | Hindi, Bengali, Tamil, Marathi, Malayalam, 143 GB  | sample     | open (ModelScope)                             | CC BY 4.0                                 |
+| LRLspoof                | audio       | fake only, Nepali among 66 languages, 462 GB       | deferred   | open, one tarball                             | MIT                                       |
+| MAVOS-DD (Hindi)        | audio-video | Hindi, the only open South Asian video, 35.7 GB    | no         | accept Hugging Face terms (anyone)            | CC BY-NC-SA 4.0                           |
+| MLAAD                   | audio       | fake only, 8 South Asian languages, 9.5 GB         | no         | accept Hugging Face terms (anyone)            | CC BY-NC 4.0                              |
+| Svarah                  | audio       | real Indian-accented English, 1.1 GB               | no         | accept Hugging Face terms (anyone)            | none declared: nothing derived published  |
+| SEA-Spoof               | audio       | Hindi and Tamil, 81.5 GB                           | no         | email authors, then a form (academic)         | non-commercial academic only              |
+| InDeepFake              | audio-video | 7 Indian languages, 31 GB                          | no         | emailed form naming the PI                    | no sharing of data or derived data        |
+| FakeAVCeleb             | audio-video | 100 real South Asian videos, size unknown          | no         | form, needs ethics approval                   | non-commercial; two versions of the terms |
+| DeePhy                  | video       | Indian subjects, 30 GB                             | no         | signed by UCSC Director or Registrar          | assume DF-Platter's terms                 |
+| DF-Platter              | video       | Indian subjects, 133,260 videos, 500 GB            | no         | signed by UCSC Director or Registrar          | signing institution only                  |
+| Deepfake-Eval-2024      | audio-video | in the wild, about 5% South Asian, 20.3 GB         | no         | Hugging Face request (anyone), often rejected | evaluation only, no training              |
+| Casual Conversations v2 | video       | real only, India the largest group, size unknown   | no         | form + Meta licence (anyone)                  | some labels evaluation only               |
+| IndieFake               | audio       | Indian-accented English, size unknown              | no         | form (anyone)                                 | CC BY 4.0                                 |
+| FF++                    | video       | reproduction, about 40 GB (c23)                    | no         | form (anyone)                                 | research only                             |
+| Celeb-DF v2             | video       | reproduction, about 10 GB                          | no         | form (anyone)                                 | research only                             |
+
+Dropped: IAV-DF (its only sample link is dead) and Indic-CodecFake (no download anywhere), both rechecked 2026-10-05.
+
+Gaps worth knowing:
+
+- **South Asian video:** only MAVOS-DD's Hindi subset needs no institutional request. Every other South Asian video set is Indian and needs one.
+- **Sinhala:** the only deepfake audio is MLAAD's 1,000 Edge-TTS clips, paired with OpenSLR's real speech: cross-corpus, so diagnostic only (see below).
+- **Nepali:** the only labelled real and fake is in the IndicTTS challenge set. LRLspoof has more Nepali fakes, but only inside one 462 GB tarball.
 
 ## Getting the open ones
 
@@ -52,26 +57,30 @@ uv run scripts/setup_datasets.py urdu_csalt banglafake bd_grf6 bangla_voices ind
 uv run scripts/setup_datasets.py indicsynth --languages hi bn ur
 ```
 
-- **MLAAD, MAVOS-DD, Svarah:** accept the terms at <https://huggingface.co/datasets/mueller91/MLAAD>, <https://huggingface.co/datasets/unibuc-cs/MAVOS-DD> and <https://huggingface.co/datasets/ai4bharat/Svarah>, put `HF_TOKEN` in `.env`, then `uv run scripts/setup_datasets.py mlaad` (or `mavos_dd_hi`; Svarah's builder is a stub until its schema can be read).
-- **ASVspoof 2019 LA** comes from Edinburgh DataShare, which is slow (about 0.3 MB/s on 2026-10-05: hours for 7.6 GB). A resumable `curl -C -` into `datasets/asvspoof2019_la/LA.zip` survives interruptions; the setup script then checks and extracts it.
-
-To try a dataset before a full download, `--sample N` fetches N real and N fake items into the smoke namespace ([adding_a_dataset.md](adding_a_dataset.md)); it needs the builder written. Hugging Face parquet rows (IndicSynth, IndicTTS challenge) are sampled by reading a few shards' label columns and one row group of audio each; zips inside zips (BD-GRF6) by fetching the smallest inner zip per label; tar-only sets (IndicSUPERB) only from a full local copy.
+- **MLAAD, MAVOS-DD, Svarah:** accept the terms at <https://huggingface.co/datasets/mueller91/MLAAD>, <https://huggingface.co/datasets/unibuc-cs/MAVOS-DD> and <https://huggingface.co/datasets/ai4bharat/Svarah>, put `HF_TOKEN` in `.env`, then run `uv run scripts/setup_datasets.py mlaad` (or `mavos_dd_hi`). Svarah's builder is a stub until its schema can be read.
+- **ASVspoof 2019 LA:** DataShare is slow (about 0.3 MB/s on 2026-10-05). Fetch with a resumable `curl -C -` into `datasets/asvspoof2019_la/LA.zip`; the setup script then checks and extracts it.
+- **SpeechFake:** only samples are practical; a full copy is the whole 143 GB.
+- **Try before downloading:** `--sample N` fetches N real and N fake items into the smoke namespace, kept apart and never reported ([adding_a_dataset.md](adding_a_dataset.md)). IndicSUPERB can only be sampled from a full copy.
 
 ## Requests to send
 
-These need a person; send them early, replies take days to months. Rechecked 2026-10-04: the FF++, InDeepFake and FakeAVCeleb request forms and both IAB Rubric pages are live. A FakeAVCeleb maintainer wrote (GitHub issue 13, 2024-12-18) that requests missing IRB approval are rejected and complete ones get access within days; other applicants report waiting months. An FF++ issue from 2025-10-05 says its download server was down; it answered again on 2026-10-04, but a download wasn't tested.
+These need a person. Send them early: replies take days to months. On 2026-10-04 the FF++, InDeepFake and FakeAVCeleb forms and both IAB Rubric pages were live.
 
-| Dataset            | What to do                                                                                                          | Who                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| FF++               | Google Form linked from <https://github.com/ondyari/FaceForensics>; they email a download script                    | any team member                                            |
-| InDeepFake         | Fill in the access request form (PDF in the repo README) and email it                                               | applicant, naming the PI                                   |
-| FakeAVCeleb        | Request form on <https://sites.google.com/view/fakeavcelebdash-lab/>; requests without ethics approval are rejected | applicant with ethics approval or a faculty sponsor        |
-| DeePhy, DF-Platter | Sign the IAB Rubric licence and email it to databases@iab-rubric.org, one email per dataset                         | someone with legal authority: UCSC's Director or Registrar |
-| Deepfake-Eval-2024 | Request on its Hugging Face page with a link to prior deepfake-detection work                                       | any team member                                            |
-| IndieFake          | Form on <https://indie-fake-dataset.netlify.app/>                                                                   | any team member                                            |
-| Celeb-DF v2        | Request form linked from <https://github.com/yuezunli/celeb-deepfakeforensics>                                      | any team member                                            |
-| Casual Conversations v2 | Request on <https://ai.meta.com/datasets/casual-conversations-v2-dataset/> and accept Meta's licence           | any team member                                            |
-| SEA-Spoof          | Email the authors (wu_jinyang@a-star.edu.sg, imcc.sg@gmail.com), then submit the form on <https://huggingface.co/datasets/Jack-ppkdczgx/SEA-Spoof> | an applicant at an academic institution |
+| Dataset                 | What to do                                                                                                       | Who                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| FF++                    | Google Form linked from <https://github.com/ondyari/FaceForensics>; they email a download script                 | any team member                                             |
+| InDeepFake              | Fill in the access request form (PDF in the repo README) and email it; academic institutions only               | applicant, naming the PI                                    |
+| FakeAVCeleb             | Request form on <https://sites.google.com/view/fakeavcelebdash-lab/>                                             | applicant with ethics approval or a faculty sponsor         |
+| DeePhy, DF-Platter      | Sign the IAB Rubric licence and email it to databases@iab-rubric.org, one email per dataset                     | someone with legal authority: UCSC's Director or Registrar  |
+| Deepfake-Eval-2024      | Request on its Hugging Face page with a link to prior deepfake-detection work                                    | any team member                                             |
+| IndieFake               | Form on <https://indie-fake-dataset.netlify.app/>                                                                | any team member                                             |
+| Celeb-DF v2             | Request form linked from <https://github.com/yuezunli/celeb-deepfakeforensics>                                   | any team member                                             |
+| Casual Conversations v2 | Request on <https://ai.meta.com/datasets/casual-conversations-v2-dataset/> and accept Meta's licence             | any team member                                             |
+| SEA-Spoof               | Email the authors (wu_jinyang@a-star.edu.sg, imcc.sg@gmail.com), then submit the form on <https://huggingface.co/datasets/Jack-ppkdczgx/SEA-Spoof> | an applicant at an academic institution |
+
+- **FakeAVCeleb:** requests without ethics (IRB) approval are rejected; complete ones got access within days, says a maintainer (GitHub issue 13, 2024-12-18), though others report months. Don't use the unofficial Hugging Face mirrors.
+- **FF++:** an issue from 2025-10-05 said its download server was down. It answered again on 2026-10-04, but no download was tested.
+- **DF-Platter and DeePhy:** read [data_policy.md](data_policy.md#sharing-across-institutions) first. The licence limits use to research colleagues at the signing institution, and the team spans more than one.
 
 When a copy arrives, put it in the shared store and link it in:
 
@@ -79,56 +88,34 @@ When a copy arrives, put it in the shared store and link it in:
 uv run scripts/setup_datasets.py fakeavceleb --from /path/to/FakeAVCeleb_v1.2
 ```
 
-**Before requesting DF-Platter**, read [data_policy.md](data_policy.md): its licence limits use to research colleagues at the signing institution, and the team spans more than one institution.
-
 ## Notes per dataset
 
-- **Urdu (CSALT).** `Bonafide/`, `Spoofed_TTS/` (VITS) and `Spoofed_Tacotron/`, 17 speakers each, 6,794 WAV files. Our Doc says 35k clips; check the count on download.
-- **BanglaFake.** One `final_data.zip`, three sub-corpora (checked 2026-10-05): sust (9,999 real, 9,999 fake), mozilla (2,797 real-fake pairs of five Common Voice speakers), news (1,000 real, no fakes). 13,796 real and 12,796 VITS fakes, not the README's numbers. The evalset keeps sust and mozilla, where every fake has a real counterpart. Common Voice makes XLS-R-based models `source_overlap` on it. No official split, no declared licence.
-- **BD-GRF6** (Zenodo 18656689, 2026, CC BY 4.0). Bangla speech of Bangladeshi speakers in six classes: real and fake for male, female and third gender; 13,566 clips. `Real and Fake.zip` holds one zip per class (`Femail Fake.zip`, sic). No generator or speakers named. Third-gender real clips are MP3 and female fakes WAV, so file format may give labels away: check every class on the full download before trusting a score. Taken as cross-corpus for that reason.
-- **Bangla voices** (Mendeley Data 10.17632/4ftmwt86vr.1, University of Asia Pacific, 2024, CC BY 4.0). 75 speakers (`S<set><F|M><nn>`) in 15 sets, each reading 30 sentences once real and once faked: 4,500 clips of 2 to 5 s. Every fake has a real twin (same speaker and sentence). Fetched as Mendeley's whole-dataset zip, whose signed S3 link serves range requests.
-- **IndicTTS challenge** (`SherryT997/IndicTTS-Deepfake-Challenge-Data`, CC BY 4.0). 31,102 labelled clips (`is_tts`) in 16 Indian languages including Nepali, Assamese, Bodo, Dogri and Manipuri; test labels hidden. Generator and real source unnamed; ids carry a language code, gender and emotion (one female and one male voice per language), and the English rows include LJSpeech and LibriSpeech utterances. Audio embedded in parquet.
-- **In-the-Wild.** 31,779 clips of 54 public figures (19,963 bona fide, 11,816 spoof), labels in `meta.csv`. Not South Asian: the reproduction set for models the guard refuses on ASVspoof 2019 LA eval, such as DF Arena.
-- **OpenSLR Sinhala (SLR52).** Crowd-sourced read Sinhala, 185k utterances in 16 zips; only the first (11,550 clips, anonymised speaker ids) is fetched. The real side of `mlaad_si`.
-- **MAVOS-DD (Hindi).** 3,632 real and 3,881 fake videos from eight generators: face swaps (inswapper, hififace, roop), audio-driven talking heads (echomimic, sonic, memo), reenactment (liveportrait), voice conversion (knnvc, video untouched). Per-track labels drive two evalsets, `mavos_dd_hi_video` and `mavos_dd_hi_audio`; the audio of non-VC fakes stays unlabelled until the dataset's metadata can be read. No speaker or demographic labels.
-- **Celeb-DF v2.** 890 real and 5,639 fake videos of 59 celebrities, mostly Caucasian; reproduction only.
-- **Casual Conversations v2.** Real only: 5,567 consenting participants in seven countries, India the largest, with Fitzpatrick and Monk skin tone, age, gender and language labels.
-- **IndicSynth.** Parquet shards per language (Hindi: 107 shards, 205,938 rows), audio embedded, 100 rows per row group, shards sorted by generator; generators XTTS-v2, VITS and FreeVC24, with target and source speaker and gender columns. Fake only, generated from IndicSUPERB speakers, whose Kathbath numbering the speaker ids share. Fakes outnumber IndicSUPERB's test clips about 40 to 1 (Hindi: 205,938 vs 5,059), so since 2026-10-12 the builder marks a seeded sample of 5,000 per language and generator with `split: sample`, and the `indicsynth_*` evalsets score only those.
-- **IndicSUPERB (Kathbath).** m4a audio in plain tars (`kb_data_clean_m4a/<language>/<split>/audio/<utt>-<speaker>-<m|f>.m4a`), decoded by the audio loader. Also the real side of SpeechFake's and MLAAD's Bengali, Hindi, Tamil, Marathi and Malayalam evalsets. Tars can't be read in place, so it is downloaded in full (5.8 GB, about 1.5 h at 1 MB/s) and sampled from that copy. CC BY 4.0 per the Hugging Face card of `ai4bharat/Kathbath` (gated there, and without the test splits).
-- **MLAAD.** `fake/<lang>/<generator>/` with a `meta.csv` each, 1,000 clips per folder. Hindi (9 generators), Bengali (4), Kannada (2), one each for Tamil, Marathi, Urdu, Sinhala and Malayalam. Its real counterpart, M-AILABS, has no South Asian language, so `mlaad_hi` and `mlaad_bn` take real speech from IndicSUPERB and `mlaad_si` from OpenSLR Sinhala (all cross-corpus).
-- **HiDF** (KDD 2025, Zenodo 16140829, CC BY-NC 4.0). 4,361 real and 4,361 fake videos of about 3 s, each fake a real video with another face swapped in by a commercial tool. `metadata.csv` gives race, gender and age per face (image and video ids are separate namespaces; a fake's donor face is an image row). The videos are 512 px face crops (chin cut off), found by the detector only with the padded retry (`video_pad_retry`). Too short for HAVIC's 3.2 s windows.
-- **Svarah** (AI4Bharat). Real Indian-accented English, 117 speakers with native state, district and first language; gated, so its builder waits for the schema. No licence on the card.
-- **SEA-Spoof** (A*STAR, 2025). Hindi 71,171 and Tamil 49,640 utterances among seven languages, ten named generators including commercial ones, speakers per row. Manual approval after emailing the authors; academic, non-commercial.
-- **FakeAVCeleb.** 500 real and 19,500 fake videos over five ethnic groups (English-speaking celebrities); 100 real South Asian videos. Unofficial Hugging Face mirrors exist; don't use them.
-- **DF-Platter.** 133,260 videos of Indian subjects, labelled for gender, age, Fitzpatrick skin tone and occlusion. Sets A (one face), B and C (several faces), c23 and c40.
-- **DeePhy.** 100 real and 5,040 fake videos (FaceShifter, FaceSwap, FSGAN), 10 attributes per video including gender, age group and skin tone.
-- **InDeepFake.** 389 real and 4,680 fake videos in seven Indian languages; face swaps and TTS plus Wav2Lip. Also on IEEE DataPort (subscription).
-- **Deepfake-Eval-2024.** In the wild, 52 languages, no country field. Evaluation only.
-- **SpeechFake** (ACL 2025, ModelScope, CC BY 4.0). The multilingual part is one 123 GB split zip (`MD.z01`, `MD.z02`, `MD.zip`), read as one archive by range requests (`remote_zip.SplitZip`, which scans the 179 MB central directory, about 3 min). South Asian content: Hindi Edge-TTS (15,382) and SeedVC voice conversion (14,633, LibriTTS speech into Common Voice Hindi voices); Edge-TTS Bengali, Tamil (Singapore voices), Marathi (20,000 each) and Malayalam (3,726); 4,630 real Common Voice Hindi clips in its real part. Hindi pairs within the dataset; the other languages take IndicSUPERB's real speech. Cross-corpus either way.
-- **LRLspoof, IAV-DF, Indic-CodecFake** (rechecked 2026-10-05). LRLspoof (MIT): spoof-only, 66 languages including Nepali, one 462 GB tarball. IAV-DF's sample link is still dead. Indic-CodecFake's download buttons still say coming soon; its GitHub repo has a few demo clips and no licence.
+Only what changes how a number should be read; configs hold the rest.
+
+- **Urdu (CSALT).** 6,794 WAV files of 17 speakers (3,398 real, 3,396 VITS and Tacotron fakes). The team Doc's 35k clips is wrong for this release.
+- **BanglaFake.** 13,796 real and 12,796 VITS fakes, not the README's numbers. The evalset keeps the sust (9,999 real, 9,999 fake) and mozilla (2,797 pairs) sub-corpora, where every fake has a real twin, and drops news (1,000 real, no fakes). Mozilla is Common Voice, which XLS-R saw in pretraining, so those models get `source_overlap` ([evaluation.md](evaluation.md#contamination-verdicts)).
+- **BD-GRF6.** 13,566 clips; no generator or speakers named. Third-gender real clips are MP3 and female fakes WAV, so file format may give the label away. Treated as cross-corpus until every class is checked on the full download.
+- **IndicTTS challenge.** 31,102 labelled clips, one female and one male voice per language, generator unnamed. Its English rows include LJSpeech and LibriSpeech.
+- **IndicSynth** (XTTS-v2, VITS, FreeVC24) was made from IndicSUPERB speakers, so its evalsets pair the two by speaker as same-corpus. Fakes outnumber the reals about 40 to 1 (Hindi: 205,938 against 5,059), so since 2026-10-12 the evalsets score a seeded sample of 5,000 per language and generator.
+- **Cross-corpus pairs.** MLAAD (fake only) takes its real speech from IndicSUPERB, or OpenSLR Sinhala for `mlaad_si`; SpeechFake's Bengali, Tamil, Marathi and Malayalam do the same, and its Hindi fakes share no recordings with its Common Voice reals. A detector can score well on these by telling the recordings apart, so they wait on the [shortcut probe](evaluation.md#shortcut-probe-planned) and never feed headline numbers.
+- **HiDF.** 4,361 real and 4,361 face-swapped videos of about 3 s, too short for HAVIC's 3.2 s windows; "Indian" covers 90 base videos. They are 512 px face crops, found only with the detector's padded retry ([evaluation.md](evaluation.md#preprocessing)).
+- **MAVOS-DD (Hindi).** 3,632 real and 3,881 fake videos from eight generators (face swaps, audio-driven talking heads, reenactment, and knnvc voice conversion with the video untouched). Labels are per track: `mavos_dd_hi_audio` scores only real and knnvc items until the metadata says whether the other fakes keep their audio.
+- **What the requests add.** FakeAVCeleb: South Asian against four other ethnic groups. DF-Platter and DeePhy: skin tone, gender and age labels (DF-Platter scored as a stratified sample). SEA-Spoof: ten named generators, commercial ones included. Casual Conversations v2 and Svarah: false-positive rates on real Indian faces and voices.
 
 ## Checked but not added
 
-Searched 2026-10-05 for South Asian sets beyond the Doc's; left out for now:
+Searched 2026-10-05:
 
-- **Indian-language fake speech** (`satwc-reddy/indian-language-deepfake-speech`, CC BY 4.0): Telugu, Tamil, Malayalam and Konkani fakes (MMS-TTS, SIGVC, RVC), fake only, an unreviewed community upload; no real side. Worth adding with IndicSUPERB reals if Telugu or Konkani voice conversion matters.
-- **Nepali audio deepfake** (two identical Hugging Face copies, 2,064 real and 2,064 fake): no README, no licence, unknown provenance.
-- **MLADDC** (20 languages from VoxLingua107, seven South Asian): not released. **IndicFake** (TMLR 2025, 17 Indian languages): no download link. **HAV-DF** (Hindi audio-video): Kaggle page gone.
-- **Real references:** FairFace (real faces labelled "Indian", CC BY 4.0), FLEURS (South Asian read speech, no Sinhala; AntiDeepfake trained on it), IndicVoices-R (15 South Asian languages, gated, about 1 TB).
-- **Demographic labels without a South Asian class:** AI-Face (Asian, White, Black, Others), DeepSpeak (gated; ethnicity labels unverified).
+- **Fake only or unknown provenance:** `satwc-reddy/indian-language-deepfake-speech` (Telugu, Tamil, Malayalam, Konkani; worth adding with IndicSUPERB reals if Telugu or Konkani voice conversion matters) and a Nepali set with no README or licence.
+- **Not downloadable:** MLADDC and IndicFake (TMLR 2025) aren't released; HAV-DF's Kaggle page is gone.
+- **Real references:** FairFace ("Indian" faces), FLEURS (AntiDeepfake trained on it), IndicVoices-R (gated, about 1 TB).
+- **No South Asian class:** AI-Face, DeepSpeak.
 
 ## Pipeline-test datasets
 
-Open data that only proves the code works, used by the smoke test ([smoke_test.md](smoke_test.md)). Role `pipeline_test`: the registry keeps them out of real evalsets, and their numbers are never published or reported. Checked 2026-10-04.
+Two small open sets prove the code works and are never reported ([smoke_test.md](smoke_test.md)). Checked 2026-10-04.
 
-| Dataset               | Modality | Access                                | Licence         | What's in it                                                                   |
-| --------------------- | -------- | ------------------------------------- | --------------- | ------------------------------------------------------------------------------ |
-| `mendeley_roop_akool` | image    | one 4.1 GB zip, sampled by HTTP range | CC BY 4.0       | face-crop frames; 30 real and 450 fake videos; Bangladeshi and Indian subjects |
-| `unidatapro_videos`   | audio-video | Hugging Face, pinned revision      | CC BY-NC-ND 4.0 | 5 real phone videos and 5 face-swap fakes made from them, with sound           |
-
-- **Mendeley Roop/Akool** (<https://data.mendeley.com/datasets/pdcp9mjy3z/3>, Daffodil International University, collected with ethical approval). 500 x 500 JPEG face crops, not videos as earlier notes said. The zip holds 3,744 real and 104,200 fake frames (49,997 `Tech-1`, 54,203 `Tech-2`; the page says 106,948). The page names Roop and Akool but not which is which, so `method` stays `tech_1` / `tech_2`. The crops are so tight the detector misses them until the image is padded ([evaluation.md](evaluation.md)). Fake file names carry the name of the person swapped in.
-- **UniDataPro deepfake videos** (<https://huggingface.co/datasets/UniDataPro/deepfake-videos-dataset>). Free preview of a commercial set: real phone videos paired with fakes made from them with an AI-generated face by one of three online services. 480p to 1080p, about 68 MB. The only open, licensed source of paired real and fake videos small enough to fetch on the fly. Every file has audio: `unidatapro_videos` tests the video path and `unidatapro_av` the audio-visual one (HAVIC).
-
-## Adding a dataset
-
-See [adding_a_dataset.md](adding_a_dataset.md): config, builder (with `label_from_path`, so it can be sampled), evalset, smoke test.
+| Dataset               | Source                                                                  | Licence         | Contents                                                       |
+| --------------------- | ----------------------------------------------------------------------- | --------------- | -------------------------------------------------------------- |
+| `mendeley_roop_akool` | <https://data.mendeley.com/datasets/pdcp9mjy3z/3>, one 4.1 GB zip       | CC BY 4.0       | face-crop frames (not videos), Bangladeshi and Indian subjects |
+| `unidatapro_videos`   | <https://huggingface.co/datasets/UniDataPro/deepfake-videos-dataset>    | CC BY-NC-ND 4.0 | 5 real phone videos and 5 face-swap fakes made from them, with sound |
