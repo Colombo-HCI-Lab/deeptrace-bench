@@ -8,8 +8,8 @@ import { D, dur, int, type Run } from "./status";
 const base = import.meta.env.BASE_URL;
 
 // Paper at 0.5, deepening to GOOD toward 1 and to BAD toward 0. Kept in step with site.css.
-export const PAPER = "#f4f5f2";
-export const TINT = "#e7e9e3";
+export const PAPER = "#f6f7f9";
+export const TINT = "#edf0f3";
 export const GOOD = "oklch(0.5 0.1 165)";
 export const BAD = "oklch(0.5 0.1 35)";
 

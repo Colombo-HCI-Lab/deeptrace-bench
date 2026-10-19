@@ -1,26 +1,28 @@
-/* The site's report-sheet design, shared by every page. Ink does the work; one diverging scale
-   (--good toward a perfect AUC, --bad below chance) colours scores, and nothing else is coloured.
-   Light only: the pages are projected and printed, so they never follow a dark OS. */
+/* The site's design ("Plate", chosen 2026-10-19), shared by every page: one type family, IBM Plex
+   Sans for prose and headings and IBM Plex Mono for data and labels, on a cool grey ground. Ink does
+   the work; one diverging scale (--good toward a perfect AUC, --bad below chance) colours scores, and
+   nothing else is coloured. Hairline rules only: no shadows, no rounded corners, no gradients beyond
+   the scale itself. Light only: the pages are projected and printed, so they never follow a dark OS. */
 :root {
-  --paper: #f4f5f2;
-  --card: #fafaf7;
-  --ink: #1b1d1a;
-  --ink-2: #3b3e38;
-  --muted: #5e625b;
-  --rule: #d3d6ce;
-  --tint: #e7e9e3;
-  --tint-2: #dfe2da;
+  --paper: #f6f7f9;
+  --card: #ffffff;
+  --ink: #121619;
+  --ink-2: #343a3f;
+  --muted: #5a6270;
+  --rule: #dde1e6;
+  --tint: #edf0f3;
+  --tint-2: #e3e7eb;
   --flag: #b93c12;
   --good: oklch(0.5 0.1 165);
   --bad: oklch(0.5 0.1 35);
-  --serif: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 56px; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.55 var(--serif); -webkit-font-smoothing: antialiased; }
-a { color: inherit; text-underline-offset: 3px; text-decoration-color: #9a9e95; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-color: #9aa3ad; }
 a:hover { color: var(--ink); text-decoration-color: var(--ink); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 code, .mono { font-family: var(--mono); font-size: 0.8em; }
@@ -53,10 +55,10 @@ footer code { font-size: 0.85em; }
 
 /* Mastheads */
 .mast { display: grid; gap: 18px; }
-.mast h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -0.01em; text-wrap: balance; }
+.mast h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -0.022em; text-wrap: balance; }
 .mast .lede { max-width: 62ch; font-size: 1.15rem; line-height: 1.5; text-wrap: pretty; }
 .mast.home { gap: 20px; }
-.mast.home h1 { font-size: clamp(2.2rem, 5.4vw, 3.7rem); line-height: 1.04; letter-spacing: -0.015em; max-width: 19ch; }
+.mast.home h1 { font-size: clamp(2.2rem, 5.4vw, 3.7rem); line-height: 1.04; letter-spacing: -0.028em; max-width: 19ch; }
 .mast.home .lede { font-size: 1.2rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid var(--rule); font: 400 12.5px/1.3 var(--mono); text-decoration: none; }
@@ -72,7 +74,7 @@ a.chip:hover { border-color: var(--ink); }
 /* Sections */
 .block { display: grid; gap: 20px; min-width: 0; }
 .block > header { display: grid; gap: 8px; border-top: 1px solid var(--ink); padding-top: 16px; }
-.block > header h2 { font-size: 1.7rem; line-height: 1.2; text-wrap: balance; }
+.block > header h2 { font-size: 1.7rem; line-height: 1.2; letter-spacing: -0.015em; text-wrap: balance; }
 .block > header p { max-width: 66ch; color: var(--muted); text-wrap: pretty; }
 .block > header p.small { font-size: 0.95rem; }
 .block h3.sub { margin-top: 20px; font-size: 1.2rem; }
@@ -346,7 +348,7 @@ pre.cmd i { color: var(--muted); }
 .grid th.v span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; display: inline-block; margin: 0 auto; }
 .grid th.v.pending { font-style: italic; }
 .grid th.v.first, .grid td.first { border-left: 1px solid var(--rule); }
-.grid tbody th { text-align: left; font: 400 15px/1.2 var(--serif); padding: 0 12px 0 0; white-space: nowrap; height: 34px; border-top: 1px solid var(--rule); }
+.grid tbody th { text-align: left; font: 400 14.5px/1.2 var(--sans); padding: 0 12px 0 0; white-space: nowrap; height: 34px; border-top: 1px solid var(--rule); }
 .grid tbody th small { font: 400 10px/1 var(--mono); color: var(--muted); margin-left: 6px; }
 .grid td { border-top: 1px solid var(--rule); text-align: center; font: 400 12px/1 var(--mono); height: 34px; width: 50px; }
 .grid th.lad, .grid td.lad { width: 30px; min-width: 30px; color: var(--muted); }
@@ -385,7 +387,7 @@ pre.cmd i { color: var(--muted); }
 .prose h2, .prose h3, .prose h4 { max-width: 72ch; text-wrap: balance; }
 .prose > * + * { margin-top: 1em; }
 .prose p, .prose li, .prose blockquote { max-width: 72ch; }
-.prose h2 { font-size: 1.5rem; line-height: 1.2; border-top: 1px solid var(--ink); padding-top: 14px; margin-top: 56px; }
+.prose h2 { font-size: 1.5rem; line-height: 1.2; letter-spacing: -0.012em; border-top: 1px solid var(--ink); padding-top: 14px; margin-top: 56px; }
 .prose h3 { font-size: 1.15rem; margin-top: 36px; }
 .prose h4 { font-size: 1.05rem; margin-top: 30px; }
 .prose > :first-child { margin-top: 0; }
