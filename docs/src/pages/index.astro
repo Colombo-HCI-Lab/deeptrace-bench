@@ -3,12 +3,17 @@
 // into the rest of the site. Numbers come from status.json, the plan from progress.md.
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
-import { buildOverview, buildProgress } from "../lib/guide";
+import { buildOverview, buildProgress, buildResults } from "../lib/guide";
 import { LEGACY } from "../lib/links.mjs";
 import { D } from "../lib/status";
 
 const base = import.meta.env.BASE_URL;
 const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body ?? ""));
+// The first three insights in results.md are the headline findings. Each card is a link, so the
+// links inside an insight become plain text.
+const lead = buildResults((await getEntry("docs", "results"))!.body ?? "")
+  .insights.slice(0, 3)
+  .map((it) => ({ ...it, body: it.body.replace(/<\/?a\b[^>]*>/g, "") }));
 ---
 
 <Base
@@ -68,21 +73,15 @@ const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body
       </div>
     </div>
     <div class="cols-3">
-      <a class="card" href={`${base}results/#audio-south-asian-speech`}>
-        <span class="kicker">Audio</span>
-        <strong>Multilingual pretraining helps</strong>
-        <span>Same post-training data, different SSL pretraining: the MMS-300M AntiDeepfake model (about 1,400 languages) gets 15 to 45 times closer to AUC 1 than its wav2vec 2.0 small sibling.</span>
-      </a>
-      <a class="card" href={`${base}results/#audio-south-asian-speech`}>
-        <span class="kicker">Audio</span>
-        <strong>Language matters only for ASVspoof-trained detectors</strong>
-        <span>Across 16 Indic languages, XLS-R + AASIST ranges from 0.49 to 0.86 AUC. MMS-300M stays at 0.996 or above in every one.</span>
-      </a>
-      <a class="card" href={`${base}results/#video-hidf`}>
-        <span class="kicker">Faces</span>
-        <strong>Even ranking, uneven false alarms</strong>
-        <span>AUC barely moves by race, but at its global threshold GenD flags 28% of real Indian faces as fake, against 6 to 13% for other groups.</span>
-      </a>
+      {
+        lead.map((it) => (
+          <a class="card" href={`${base}results/#insights`}>
+            <span class="kicker">Finding {it.n}</span>
+            <strong>{it.label}</strong>
+            <span class="snip" set:html={it.body} />
+          </a>
+        ))
+      }
     </div>
     <a class="more" href={`${base}results/`}>All results and caveats →</a>
   </section>

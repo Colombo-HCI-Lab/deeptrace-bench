@@ -3,7 +3,7 @@ import { docPath } from "./links.mjs";
 
 export const GROUPS = {
   start: "Start here",
-  findings: "Experiments and results",
+  findings: "Findings",
   benchmark: "Reference",
   working: "Working on it",
 } as const;

@@ -2,10 +2,10 @@
 title: "The store (`DTB_ROOT`)"
 description: "The DTB_ROOT tree: what each folder holds, naming rules, the smoke namespace, what's safe to delete"
 group: working
-order: 2
+order: 1
 ---
 
-Everything large or item-level lives outside git, in the folder `DTB_ROOT` names in `.env`.
+Everything large or item-level lives outside git, in the folder `DTB_ROOT` names in `.env`. Which script writes which folder: [the pipeline](method.md#the-pipeline).
 
 ## The tree
 
@@ -68,4 +68,4 @@ $DTB_ROOT/
 | `datasets/`, `weights/` | care  | re-download; for request-only datasets, someone has to supply them again |
 | `upstream/`             | no    | the archive is the copy that survives a deleted or rewritten upstream    |
 
-On a cluster, give each restricted dataset its own Unix group on `datasets/<id>/` and the matching `scores/` and `results/` folders ([data_policy.md](data_policy.md)).
+Restricted datasets on a shared machine need their own permissions ([Data policy](data_policy.md#sharing-across-institutions)).

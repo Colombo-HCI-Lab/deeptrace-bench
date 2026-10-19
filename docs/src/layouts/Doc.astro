@@ -3,6 +3,7 @@
 import type { MarkdownHeading } from "astro";
 import DocList from "../components/DocList.astro";
 import { GROUPS } from "../lib/docs";
+import { GUIDED } from "../lib/links.mjs";
 import Base from "./Base.astro";
 
 interface Props {
@@ -14,8 +15,9 @@ interface Props {
 }
 
 const { id, title, description, group, headings } = Astro.props;
-// Results and Progress have guided pages that already index them, so their full write-ups don't.
-const guided = id === "results" || id === "progress";
+// Docs with guided pages (Results, Progress, How it works) are indexed there, so their full
+// write-ups aren't.
+const guided = GUIDED.has(id);
 const sections = guided ? [] : headings.filter((h) => h.depth === 2);
 // A title may carry a code span, as `DTB_ROOT` does.
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);

@@ -2,10 +2,8 @@
 title: "Data policy"
 description: "What may enter git, licence clauses that bind us, sharing data across institutions"
 group: benchmark
-order: 6
+order: 5
 ---
-
-Almost every dataset here is non-commercial research only, several forbid passing on derived data, and one restricts use to a single institution. Below: what the repo enforces, and what it can't.
 
 ## What may enter git
 
@@ -18,7 +16,7 @@ Almost every dataset here is non-commercial research only, several forbid passin
 
 The pre-commit hook (`git config core.hooksPath scripts/hooks`) refuses data, media, archive and weight files, anything over 5 MB, and any CSV or JSON with an `item_id` or `rel_path` column. `evaluate.py --publish` copies only aggregate tables, never per-subject ones.
 
-Pipeline tests are item-level too: sampled datasets, face crops and smoke reports (which name items and embed crops) stay in `DTB_ROOT/smoke/`, and `--publish` refuses pipeline-test evalsets and anything in the smoke namespace. Test fixtures use invented file names, since some datasets' file names carry real people's names.
+Pipeline tests are item-level too: sampled datasets, face crops and smoke reports (which name items and embed crops) stay in `DTB_ROOT/smoke/`, where the [publish guard](method.md#why-a-number-counts) keeps them. Test fixtures use invented file names, since some datasets' file names carry real people's names.
 
 ## Licence clauses that bind us
 
@@ -30,11 +28,22 @@ Pipeline tests are item-level too: sampled datasets, face crops and smoke report
 | Deepfake-Eval-2024  | evaluation only: never train or fine-tune on it                                                         |
 | FakeAVCeleb         | non-commercial research and education; the site and the GitHub README describe the terms differently    |
 | BanglaFake          | no licence declared: ask the authors before publishing results                                          |
+| Svarah              | no licence declared: publish nothing derived from it                                                    |
+| SEA-Spoof           | non-commercial academic use only                                                                        |
+| Casual Conversations v2 | some labels are for evaluation only                                                                 |
 | UniDataPro preview  | CC BY-NC-ND 4.0: non-commercial, and no derivatives may be shared (crops and scores stay in DTB_ROOT)   |
 | Mendeley Roop/Akool | CC BY 4.0 with attribution; the page warns third-party content in the source videos may need permission |
 | most others         | CC BY-NC 4.0: non-commercial, with attribution                                                          |
 
-Model licences: insightface's pretrained models, including the shared face detector (`det_10g.onnx`), are non-commercial research only; the detection code we port is MIT. SBI is research only, DeepfakeBench CC BY-NC; their code is never copied into the repo.
+Upstream code and weights:
+
+| Upstream | Licence | So |
+| --- | --- | --- |
+| AASIST, GenD, HAVIC, LipForensics, XLSR-Mamba | MIT | may be copied into the repo |
+| SBI | research only | imported from `third_party/`, never copied |
+| DeepfakeBench | CC BY-NC | imported, never copied |
+| Effort, XLS-R + SLS | none declared | imported, never copied |
+| insightface's pretrained models, including the shared face detector (`det_10g.onnx`, from `buffalo_l`) | non-commercial research only | the detection code we port is MIT |
 
 Every dataset whose terms we've read allows publishing aggregate results, with the required citation.
 

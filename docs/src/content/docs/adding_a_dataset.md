@@ -2,10 +2,10 @@
 title: "Adding a dataset"
 description: "Recipe: config, builder, sampling, evalset (the two pipeline-test datasets as worked examples)"
 group: working
-order: 4
+order: 3
 ---
 
-A dataset is a config, a builder that turns its files into a manifest, and at least one evalset saying how it is scored. Worked examples: the pipeline-test datasets `mendeley_roop_akool` (a zip at a URL, image items) and `unidatapro_videos` (Hugging Face, video items).
+A dataset is a config, a builder that turns its files into a manifest, and at least one evalset saying how it is scored. Worked examples: the [pipeline-test datasets](getting_started.md#the-pipeline-test-datasets) `mendeley_roop_akool` (a zip at a URL, image items) and `unidatapro_videos` (Hugging Face, video items).
 
 ## 1. Config
 
@@ -14,7 +14,7 @@ Add `configs/datasets/<id>.yaml`:
 - `access`: `hf` / `hf_gated` with `repo` and a pinned `revision` (and `allow_patterns`); `url` with `urls` (and `sha256` per archive); `manual` with `request` instructions and `expect` paths for `--from`. One zip inside a Hugging Face repo (BanglaFake, In-the-Wild) is `url` access to the zip's pinned `resolve/<revision>/` URL with the Hub's LFS sha256: the full fetch is hash-checked, and a sample reads members by range requests.
 - `licence` and `licence_terms`, `contains` (`real`, `fake`), `languages`, `size_gb`.
 - `derived_from`: every dataset or corpus its items came from, for the contamination guard.
-- `role`: `reproduction`, `south_asian`, `real_reference`, `in_the_wild`, or `pipeline_test` (only proves the code works; never reported, never mixed into a real evalset).
+- `role`: `reproduction`, `south_asian`, `real_reference`, `in_the_wild`, or `pipeline_test` (never mixed into a real evalset).
 - `notes`: facts, each with the date checked.
 
 ## 2. Builder
@@ -60,4 +60,4 @@ uv run pytest
 uv run scripts/smoke.py --model <model> --evalsets <evalset>   # samples it, scores, reports
 ```
 
-Add a builder test with an invented tree (no real file names; they can contain people's names), like `tests/test_builders.py`. Access routes and licences: [datasets.md](datasets.md).
+Add a builder test with an invented tree (no real file names; they can contain people's names), like `tests/test_builders.py`. Then add the dataset's access row to [Datasets](datasets.md#at-a-glance).

@@ -5,45 +5,44 @@ group: benchmark
 order: 2
 ---
 
-Which detectors exist, whether their scores can be trusted yet and why any is missing, then porting notes for adapter maintainers. The configs (`configs/models/<id>.yaml`) are the source of truth; `uv run scripts/setup_models.py --list` prints the table, and the [catalog](catalog.md#models) has licences and full training data.
+The configs (`configs/models/<id>.yaml`) are the source of truth, and `uv run scripts/setup_models.py --list` prints the current state. Each model's architecture, training data and paper are in the [catalog](catalog.md#models); terms such as parity and score direction are defined in [How it works](method.md#key-terms).
 
 ## Status
 
-Checked on 2026-10-12. Every model has an **adapter** (the wrapper that runs upstream code in this repo's environment) except AltFreezing. A model's numbers count only after two checks; a run missing either is flagged provisional ([evaluation.md](evaluation.md)):
+Checked on 2026-10-12.
 
-- **Parity:** the adapter scores like the upstream code on about 200 items ([Parity](#parity)).
-- **Score direction:** AUC above 0.5 on the model's reproduction evalset (FF++ test, ASVspoof 2019 LA eval, or In-the-Wild where the guard refuses ASVspoof 2019), so its output isn't read backwards.
+| Model                                   | Modality    | Status           | Parity     | Direction |
+| --------------------------------------- | ----------- | ---------------- | ---------- | --------- |
+| Xception, EfficientNet-B4               | video       | ready, wave 1    | yes        | not yet   |
+| SBI                                     | video       | ready, wave 1    | yes        | not yet   |
+| GenD (CLIP L/14)                        | video       | ready, wave 1    | not yet    | not yet   |
+| GenD (PE L/14)                          | video       | workable         | not yet    | not yet   |
+| UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD | video       | workable         | yes        | not yet   |
+| Effort                                  | video       | workable         | no weights | not yet   |
+| LipForensics                            | video       | workable         | not yet    | not yet   |
+| AltFreezing                             | video       | blocked          | no adapter |           |
+| AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   |
+| XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   |
+| XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    |
+| AASIST3                                 | audio       | workable         | not yet    | sanity    |
+| AntiDeepfake MMS-300M, w2v2 small       | audio       | workable         | yes        | settled   |
+| DF Arena 500M, 1B                       | audio       | workable         | yes        | settled   |
+| HAVIC                                   | audio-video | workable         | not yet    | not yet   |
 
-| Model                                   | Modality    | Status           | Parity     | Direction | Trained on (released weights)       |
-| --------------------------------------- | ----------- | ---------------- | ---------- | --------- | ----------------------------------- |
-| Xception, EfficientNet-B4               | video       | ready, wave 1    | yes        | not yet   | FF++ c23                            |
-| SBI                                     | video       | ready, wave 1    | yes        | not yet   | FF++ real, self-blended             |
-| GenD (CLIP L/14)                        | video       | ready, wave 1    | not yet    | not yet   | FF++                                |
-| GenD (PE L/14)                          | video       | workable         | not yet    | not yet   | FF++                                |
-| UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD | video       | workable         | yes        | not yet   | FF++ c23 (UCF: all four methods)    |
-| Effort                                  | video       | workable         | no weights | not yet   | FF++ c23                            |
-| LipForensics                            | video       | workable         | not yet    | not yet   | FF++ c23 (LRW pretraining)          |
-| AltFreezing                             | video       | blocked          | no adapter |           | FF++                                |
-| AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   | ASVspoof 2019 LA                    |
-| XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   | ASVspoof 2019 LA                    |
-| XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    | ASVspoof 2019 LA                    |
-| AASIST3                                 | audio       | workable         | not yet    | sanity    | ASVspoof 2019 + 5, MLAAD, M-AILABS  |
-| AntiDeepfake MMS-300M, w2v2 small       | audio       | workable         | yes        | settled   | 74k h in 100+ languages, 29 corpora |
-| DF Arena 500M, 1B                       | audio       | workable         | yes        | settled   | ASVspoof 2019 + 5, MLAAD, six more  |
-| HAVIC                                   | audio-video | workable         | not yet    | not yet   | LRS2, then 70% of FakeAVCeleb       |
+"Sanity": bona fide ASVspoof 2019 LA eval clips score near 0 and spoofed ones near 1, short of the formal check.
 
-Wave 1 is the first set scored. "Sanity": bona fide ASVspoof 2019 LA eval clips score near 0 and spoofed ones near 1, short of the formal check. What is missing:
-
-- **Video score direction** waits on FF++ test or Celeb-DF v2, both on request.
-- **AltFreezing** (`blocked`): weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them.
-- **Effort**: Google Drive refuses its weights over quota ([Effort](#effort)).
-- **Parity** for eight adapters; [Parity](#parity) says what each needs.
+| Missing | Why |
+| --- | --- |
+| Video score direction | waits on FF++ test or Celeb-DF v2, both on request ([Datasets](datasets.md#requests-to-send)) |
+| AltFreezing (`blocked`) | weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them |
+| Effort's weights | Google Drive refuses them over quota ([Effort](#effort)) |
+| Parity for eight adapters | [Parity](#parity) says what each needs |
 
 **Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus.
 
 ## Parity
 
-Seventeen adapters pass: every score within 1e-3 of upstream's, run in its original environment (`scripts/parity.py`; summaries in `results/parity/<id>.json`). Audio uses 521 windows of 200 Urdu (CSALT) clips, video 199 face crops from the Mendeley pipeline-test set.
+Passed, each against upstream run in its original environment (`scripts/parity.py`; summaries in `results/parity/<id>.json`). Audio uses 521 windows of 200 Urdu (CSALT) clips, video 199 face crops from the Mendeley pipeline-test set.
 
 | Models (max difference)                                                                                                            | Checked    | Upstream side                                                       |
 | ---------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------- |
@@ -56,28 +55,20 @@ Seventeen adapters pass: every score within 1e-3 of upstream's, run in its origi
 
 DeepfakeBench's reference shares the adapter's import stand-ins (and RECCE's and FFD's build stand-ins), so a pass there covers weights, numerics and transform, not upstream's imports; the strict load covers the architecture.
 
-**Not checked yet** (strict loads, tests and the pipeline check only):
+Not checked yet (strict loads, tests and the pipeline check only):
 
-- **AASIST3, GenD PE-L:** cheapest next; upstream runs in our environment.
-- **GenD (CLIP):** `parity.py export` can't handle its native-size crops, which differ in shape.
-- **XLS-R + SLS:** needs the patched fairseq zip in its checkout; the vendored commit returns no per-layer outputs.
-- **XLSR-Mamba:** needs mamba-ssm's CUDA kernels on a GPU.
-- **HAVIC, LipForensics:** need upstream's face and landmark pipelines.
-- **Effort:** needs its weights.
-
-## How adapters work
-
-One environment runs everything (Python 3.12, torch 2.8, transformers 4.56). Upstream stacks (DeepfakeBench: Python 3.7, torch 1.12; XLS-R + AASIST: torch 1.8, fairseq) don't run on H100s, so they serve only as parity references.
-
-1. `setup_models.py` clones upstream at its pinned commit into `third_party/` and archives it to `DTB_ROOT/upstream/`. Code from Effort (no licence), SBI (research only), DeepfakeBench (CC BY-NC) and XLS-R + SLS (no licence) is never copied into the repo; MIT code (AASIST, GenD, HAVIC, LipForensics, XLSR-Mamba) may be.
-2. The adapter (`src/deeptrace_bench/models/<module>.py`) imports the one model file it needs from the checkout; fixes go in `patches/<repo>/`. Missing libraries get stand-ins: fairseq becomes transformers' wav2vec 2.0 (`models/_fairseq.py`), mamba-ssm's kernels pure PyTorch (`models/_mamba.py`).
-3. `convert_checkpoint` turns the download into `model.safetensors` with normalised keys, once, so adapters never unpickle Google Drive files.
-
-Expected breakages on Python 3.12 and torch 2.x: `torch.load` defaults to `weights_only=True`; `np.float`, `np.int`, `distutils` and `imp` are gone. To add a model, follow [adding_a_model.md](adding_a_model.md).
+| Model | What parity needs |
+| --- | --- |
+| AASIST3, GenD PE-L | nothing special; upstream runs in our environment, so these are the cheapest next |
+| GenD (CLIP) | `parity.py export` to handle its native-size crops, which differ in shape |
+| XLS-R + SLS | the patched fairseq zip in its checkout; the vendored commit returns no per-layer outputs |
+| XLSR-Mamba | mamba-ssm's CUDA kernels on a GPU |
+| HAVIC, LipForensics | upstream's face and landmark pipelines |
+| Effort | its weights |
 
 ## Per model
 
-Adapters date from 2026-10-04 (GenD) and 2026-10-05 (the rest). P(fake) is the output read as the probability of fake. Reproduced numbers are in [results.md](results.md); the protocol gaps behind them are here.
+Adapters date from 2026-10-04 (GenD) and 2026-10-05 (the rest). Reproduced numbers are in [Results](results.md#reproductions); the protocol differences behind their gaps are here. How adapters work in general: [Adding a model](adding_a_model.md#how-adapters-work).
 
 ### DeepfakeBench detectors
 
@@ -89,11 +80,11 @@ Xception, EfficientNet-B4, UCF, F3Net, SPSL, RECCE, SRM, CORE and FFD share `mod
 
 ### SBI
 
-`FFc23.tar` from Google Drive. Input as in `inference_video.py`: the face box widened by an eighth per side, stretched to 380 x 380, RGB / 255, no normalisation; P(fake) is softmax index 1. We keep the largest face (upstream takes the max over every face at least half its area) and use SCRFD boxes, not RetinaFace, so parity compares the network on identical crops. Research-only licence: the code stays in `third_party/`.
+`FFc23.tar` from Google Drive. Input as in `inference_video.py`: the face box widened by an eighth per side, stretched to 380 x 380, RGB / 255, no normalisation; P(fake) is softmax index 1. We keep the largest face (upstream takes the max over every face at least half its area) and use SCRFD boxes, not RetinaFace, so parity compares the network on identical crops.
 
 ### GenD (CLIP and PE)
 
-`yermandy/GenD_CLIP_L_14` and `yermandy/GenD_PE_L`, trained on FF++ only (the paper's 14 benchmarks, FakeAVCeleb among them, are test sets). Crops come from the shared SCRFD pipeline with five-point alignment ([evaluation.md](evaluation.md)); its `det_10g.onnx` is insightface's `buffalo_l` (non-commercial research only). Logit index 1 is fake; a video scores the mean of its frames. PE fails on Apple MPS for one video; use CPU or CUDA. The DINOv3 variant waits for someone to accept Meta's terms on its gated backbone.
+`yermandy/GenD_CLIP_L_14` and `yermandy/GenD_PE_L`, trained on FF++ only (the paper's 14 benchmarks, FakeAVCeleb among them, are test sets). Crops come from the shared SCRFD pipeline with five-point alignment ([Evaluation](evaluation.md#preprocessing)); its `det_10g.onnx` is insightface's `buffalo_l`. Logit index 1 is fake; a video scores the mean of its frames. PE fails on Apple MPS for one video; use CPU or CUDA. The DINOv3 variant waits for someone to accept Meta's terms on its gated backbone.
 
 ### AASIST, AASIST-L
 
@@ -101,7 +92,7 @@ Weights ship in the upstream repo. Upstream scores the bona fide logit, so P(fak
 
 ### XLS-R + AASIST, XLS-R + SLS, XLSR-Mamba
 
-All three fine-tune XLS-R 300M inside Tak et al.'s `SSLModel` on ASVspoof 2019 LA alone, so they are clean zero-shot probes on every South Asian set. They run without fairseq (transformers' `Wav2Vec2Model` stands in, with the per-layer outputs SLS pools) and XLSR-Mamba without mamba-ssm (pure-PyTorch kernels checked against transformers' Mamba mixer). Windows are 64,600 samples; P(fake) is index 0. Weights: `LA_model.pth` (byte-identical to the MIT mirror `SpeechAntiSpoofingBenchmarks/W2V2-AASIST`) and `MMpaper_model.pth` from the authors' Drive, and `AustinXiao/XLSR-Mamba-LA`. SLS declares no licence, so its code is only imported. XLS-R + AASIST's parity used the fairseq commit its checkout vendors, since fairseq 0.12.2 rejects the config inside `xlsr2_300m.pt`.
+All three fine-tune XLS-R 300M inside Tak et al.'s `SSLModel` on ASVspoof 2019 LA alone, so they are clean zero-shot probes on every South Asian set. They run without fairseq (transformers' `Wav2Vec2Model` stands in, with the per-layer outputs SLS pools) and XLSR-Mamba without mamba-ssm (pure-PyTorch kernels checked against transformers' Mamba mixer). P(fake) is index 0. Weights: `LA_model.pth` (byte-identical to the MIT mirror `SpeechAntiSpoofingBenchmarks/W2V2-AASIST`) and `MMpaper_model.pth` from the authors' Drive, and `AustinXiao/XLSR-Mamba-LA`. XLS-R + AASIST's parity used the fairseq commit its checkout vendors, since fairseq 0.12.2 rejects the config inside `xlsr2_300m.pt`.
 
 ### DF Arena 500M and 1B
 
@@ -109,7 +100,7 @@ All three fine-tune XLS-R 300M inside Tak et al.'s `SSLModel` on ASVspoof 2019 L
 
 ### AntiDeepfake MMS-300M and wav2vec 2.0 small
 
-NII Yamagishi Lab (`nii-yamagishilab/*-anti-deepfake`), post-trained on 74k hours of real and fake speech in over 100 languages. MMS-300M is pretrained on about 1,400 languages, the small one on English only, isolating multilingual pretraining. Each window is normalised to zero mean and unit variance (upstream normalises the whole utterance); P(fake) is index 0. The post-training data includes FLEURS (Hindi, Bengali, Urdu, Tamil, Nepali and more, not Sinhala), MLAAD and all of ASVspoof 2019 LA. Small matches its card's In-the-Wild EER (4.24%) and MMS-300M doesn't (card 2.90%); scored the same way, that gap lies in the protocol or the card, not the adapter (decision 5).
+NII Yamagishi Lab (`nii-yamagishilab/*-anti-deepfake`), post-trained on 74k hours of real and fake speech in over 100 languages. MMS-300M is pretrained on about 1,400 languages, the small one on English only, isolating multilingual pretraining. Each window is normalised to zero mean and unit variance (upstream normalises the whole utterance); P(fake) is index 0. The post-training data includes FLEURS (Hindi, Bengali, Urdu, Tamil, Nepali and more, not Sinhala), MLAAD and all of ASVspoof 2019 LA. On In-the-Wild, small matches its card's EER and MMS-300M misses its card by 1.4 points ([Results](results.md#reproductions)). Both are scored the same way and parity passed window by window, so that gap lies in the protocol or the card, not the adapter: a concrete case for decision 5.
 
 ### AASIST3
 

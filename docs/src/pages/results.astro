@@ -41,6 +41,7 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
 
     <nav class="index" aria-label="On this page">
       <ol>
+        <li><a href="#experiments">Experiments</a></li>
         <li><a href="#the-datasets">Datasets</a></li>
         <li><a href="#at-a-glance">Every detector, every dataset</a></li>
         <li><a href="#insights">Insights</a></li>
@@ -52,6 +53,14 @@ const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
         <li><a href={`${base}docs/results/`}>Full write-up</a></li>
       </ol>
     </nav>
+
+    <section id="experiments" class="block">
+      <header>
+        <div class="kicker">The questions</div>
+        <h2>Experiments</h2>
+      </header>
+      <div class="prose" set:html={R.experiments} />
+    </section>
 
     <section id="the-datasets" class="block">
       <header>

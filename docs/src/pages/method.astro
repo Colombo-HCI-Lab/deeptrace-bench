@@ -1,20 +1,15 @@
 ---
-// How a score is made: the pipeline and its checks, the terms the site uses, the repo's layout
-// and the first commands to run.
+// How a score is made: the pipeline and its checks, the terms the site uses and the repo's
+// layout, all laid out from method.md (lib/guide.ts slices it by heading).
+import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
-
+import { buildMethod } from "../lib/guide";
 const base = import.meta.env.BASE_URL;
 const repo = "https://github.com/Colombo-HCI-Lab/deeptrace-bench";
-const dirs = [
-  ["configs", "configs/", "One YAML per model, dataset and evalset; the evaluation rules; weight hashes."],
-  ["src/deeptrace_bench", "src/deeptrace_bench/", "The harness: manifests, preprocessing, model adapters, scoring, metrics and the guards."],
-  ["scripts", "scripts/", "The commands: setup, score, evaluate, smoke, parity, profile and build_site."],
-  ["results", "results/", "Published aggregates, parity summaries and compute profiles. No per-clip data."],
-  ["slurm", "slurm/", "The same steps as job templates for the Curnagl cluster."],
-  ["patches", "third_party/ · patches/", "Upstream detector code pinned by commit, and the patches it needs."],
-  ["docs", "docs/", "This site: the status data and every doc."],
-  ["tests", "tests/", "Unit tests on synthetic fixtures only."],
-];
+const M = buildMethod((await getEntry("docs", "method"))!.body ?? "");
+// The checks sit under the step they guard: parity under set-up, the contamination guard under
+// scoring, the publish guard under publishing.
+const gateClass = ["g-parity", "g-guard", "g-pub"];
 ---
 
 <Base
@@ -26,18 +21,17 @@ const dirs = [
     <header class="mast">
       <div class="kicker">How it works</div>
       <h1>From a published detector to one trusted number</h1>
-      <p class="lede">Five steps, one evaluation setup for every detector and dataset, three checks that decide whether a number counts.</p>
+      <p class="lede" set:html={M.lede} />
     </header>
     <nav class="index" aria-label="On this page">
       <ol>
         <li><a href="#pipeline">Pipeline</a></li>
-        <li><a href="#terms">Key terms</a></li>
+        <li><a href="#key-terms">Key terms</a></li>
         <li><a href="#repo">The repo</a></li>
-        <li><a href="#run">Run it yourself</a></li>
+        <li><a href={`${base}docs/getting_started/`}>Getting started</a></li>
         <li><a href={`${base}docs/evaluation/`}>Evaluation in full</a></li>
       </ol>
     </nav>
-
     <section id="pipeline" class="block">
       <header>
         <h2>The pipeline</h2>
@@ -45,49 +39,59 @@ const dirs = [
       </header>
       <div>
         <div class="flow">
-          <div class="stage"><div class="kicker">1 · configs/</div><h3>Configure</h3><p>YAML per model (code, weights, training data), dataset (source, licence) and evalset (what gets scored), plus one shared evaluation setup.</p></div>
-          <div class="stage"><div class="kicker">2 · setup_*.py</div><h3>Set up</h3><p>Fetch pinned weights and verify hashes. Fetch datasets and build a manifest: label, language, generator per clip.</p></div>
-          <div class="stage"><div class="kicker">3 · score.py</div><h3>Score</h3><p>Shared preprocessing (4&nbsp;s audio windows; detected, aligned face crops), one fake score per clip. Resumable.</p></div>
-          <div class="stage"><div class="kicker">4 · evaluate.py</div><h3>Evaluate</h3><p>AUC and EER with 95% bootstrap intervals, overall and per group (language, generator, gender, race). Failures counted, not dropped.</p></div>
-          <div class="stage"><div class="kicker">5 · --publish</div><h3>Publish</h3><p>Aggregate tables only, each row with its pairing and contamination verdict.</p></div>
+          {
+            M.steps.map((s) => (
+              <div class="stage">
+                <div class="kicker">{s.kicker}</div>
+                <h3>{s.title}</h3>
+                <p set:html={s.body} />
+                <p style="color: var(--muted)">Writes: <span set:html={s.writes} /></p>
+              </div>
+            ))
+          }
         </div>
         <div class="gates">
-          <div class="gate g-parity"><strong>Parity check</strong>Our adapter matches the authors' code within 1e-3 on about 200 clips.</div>
-          <div class="gate g-guard"><strong>Contamination guard</strong>No model is scored on a dataset it trained on (⊘).</div>
-          <div class="gate g-pub"><strong>Publish guard</strong>Pipeline tests, smoke runs and per-clip data never reach the repo.</div>
+          {
+            M.checks.map((c, i) => (
+              <div class={`gate ${gateClass[i] ?? ""}`}>
+                <strong>{c.title}</strong>
+                <span set:html={c.body} />
+              </div>
+            ))
+          }
         </div>
       </div>
-      <div class="cols-2" style="margin-top: 8px">
-        <div class="where"><strong>In the public repo</strong>Code, configs, docs, weight hashes, aggregate results.</div>
-        <div class="where">
-          <strong>In private storage only (DTB_ROOT)</strong>
-          <span>Datasets, weights, manifests, per-clip scores; licences forbid redistribution. <a href={`${base}docs/data_policy/`}>Data policy</a></span>
-        </div>
-      </div>
+      <dl class="terms-dl" style="margin-top: 8px">
+        {
+          M.scripts.map((s) => (
+            <div>
+              <dt set:html={s.name} />
+              <dd set:html={s.body} />
+            </div>
+          ))
+        }
+      </dl>
     </section>
-
-    <section id="terms" class="block">
+    <section id="key-terms" class="block">
       <header>
         <h2>Key terms</h2>
       </header>
       <div class="terms">
-        <dl>
-          <div>What's scored</div>
-          <div><dt>Dataset and evalset</dt><dd>A dataset is a published corpus. An evalset is the exact slice we score: which clips, languages and labels. Everything is scored through evalsets.</dd></div>
-          <div><dt>Zero-shot</dt><dd>Released weights on data outside their training distribution, no fine-tuning.</dd></div>
-          <div><dt>Same or cross corpus</dt><dd>Same corpus: real and fake clips share recordings. Cross corpus: they come from different sources, so channel cues can leak the label. Cross-corpus numbers never headline.</dd></div>
-          <div><dt>False-positive rate</dt><dd>Share of real clips flagged fake at the model's global (overall EER) threshold, reported per group.</dd></div>
-        </dl>
-        <dl>
-          <div>Why a number counts</div>
-          <div><dt>Reproduction</dt><dd>A detector on its own paper's test set, checked against the published number.</dd></div>
-          <div><dt>Parity check</dt><dd>Our adapter and the authors' code score the same ~200 clips; scores must agree within 1e-3.</dd></div>
-          <div><dt>Score direction</dt><dd>Settled once a reproduction run lands above chance, so the sign of the score is known.</dd></div>
-          <div><dt>Contamination guard</dt><dd>Refuses pairs where the model's training data overlaps the evalset (⊘). It compares datasets, not the TTS systems behind them.</dd></div>
-        </dl>
+        {
+          M.terms.map((g) => (
+            <dl>
+              <div>{g.title}</div>
+              {g.rows.map((t) => (
+                <div>
+                  <dt>{t.term}</dt>
+                  <dd set:html={t.body} />
+                </div>
+              ))}
+            </dl>
+          ))
+        }
       </div>
     </section>
-
     <section id="repo" class="block">
       <header>
         <h2>The repo at a glance</h2>
@@ -95,37 +99,26 @@ const dirs = [
       </header>
       <div class="cards small">
         {
-          dirs.map(([path, label, text]) => (
-            <a class="card repo" href={`${repo}/tree/main/${path}`} target="_blank" rel="noopener">
-              <code>{label}</code>
-              <span>{text}</span>
-            </a>
-          ))
+          M.repo.map((r) =>
+            r.path ? (
+              <a class="card repo" href={`${repo}/tree/main/${r.path}`} target="_blank" rel="noopener">
+                <code>{r.label}</code>
+                <span set:html={r.body} />
+              </a>
+            ) : (
+              <div class="card repo">
+                <code>{r.label}</code>
+                <span set:html={r.body} />
+              </div>
+            ),
+          )
         }
       </div>
-    </section>
-
-    <section id="run" class="block">
-      <header>
-        <h2>Run it yourself</h2>
-        <p>
-          Needs <a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a>; Linux with CUDA 12 for real
-          runs, Apple Silicon for tests. The smoke test runs a few clips through every step.
-        </p>
-      </header>
-      <pre class="cmd" tabindex="0"><code>git config core.hooksPath scripts/hooks   <i># refuse commits that contain data</i>
-cp .env.example .env                      <i># point DTB_ROOT at the store</i>
-uv sync
-uv run pytest
-
-uv run scripts/setup_models.py gend --record   <i># GenD and the face detector (~3 GB)</i>
-uv run scripts/smoke.py                        <i># the whole pipeline on a few items</i></code></pre>
       <div class="links">
-        <a href={`${base}docs/smoke_test/`}>Smoke test →</a>
+        <a href={`${base}docs/getting_started/`}>Getting started →</a>
         <a href={`${base}docs/adding_a_model/`}>Adding a model →</a>
         <a href={`${base}docs/adding_a_dataset/`}>Adding a dataset →</a>
-        <a href={`${base}docs/spark/`}>Running on SPARK →</a>
-        <a href={`${base}docs/cluster/`}>Curnagl or any GPU machine →</a>
+        <a href={`${base}docs/spark/`}>Where to run →</a>
       </div>
     </section>
   </div>

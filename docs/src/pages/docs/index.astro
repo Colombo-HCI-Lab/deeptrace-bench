@@ -1,6 +1,40 @@
 ---
-// The Docs link opens the overview doc.
-import Redirect from "../../components/Redirect.astro";
+// Every doc by group, with its description, from the docs' front matter.
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { GROUPS, docHref } from "../../lib/docs";
+
+const docs = (await getCollection("docs")).sort((a, b) => a.data.order - b.data.order);
+const plain = (s: string) => s.replaceAll("`", "");
 ---
 
-<Redirect to={`${import.meta.env.BASE_URL}docs/overview/`} title="Docs" />
+<Base title="Docs · deeptrace-bench" description="Every doc, by group, with what each covers." section="docs">
+  <div class="stack">
+    <header class="mast">
+      <div class="kicker">Docs</div>
+      <h1>Every doc</h1>
+      <p class="lede">New here? Start with <a href={docHref("method")}>How it works</a>, then <a href={docHref("getting_started")}>Getting started</a>.</p>
+    </header>
+    <article class="prose">
+      {
+        Object.entries(GROUPS).map(([group, label]) => (
+          <section>
+            <h2>{label}</h2>
+            <table>
+              <tbody>
+                {docs
+                  .filter((d) => d.data.group === group)
+                  .map((d) => (
+                    <tr>
+                      <td><a href={docHref(d.id)}>{plain(d.data.title)}</a></td>
+                      <td>{d.data.description}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </section>
+        ))
+      }
+    </article>
+  </div>
+</Base>

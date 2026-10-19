@@ -1,5 +1,5 @@
-// The guided pages (overview, Results, Progress): findings sliced out of results.md and
-// progress.md by heading, joined with status.json, and the diverging AUC colour scale. The
+// The guided pages (overview, Results, Progress, How it works): findings sliced out of
+// results.md, progress.md and method.md by heading, joined with status.json, and the diverging AUC colour scale. The
 // Markdown stays the source; these pages only lay it out.
 import { markdownToHtml } from "satteri";
 import { links } from "./links.mjs";
@@ -66,6 +66,8 @@ export function tone(v: number): Tone {
 
 // Snippets of a doc, rendered with the docs' own link rules.
 const md = (text: string) => (text.trim() ? markdownToHtml(text, { mdastPlugins: [links({ base })] }).html : "");
+// The same, for a table cell or a phrase: no paragraph around it.
+const mdi = (text: string) => md(text).replace(/^\s*<p>([\s\S]*)<\/p>\s*$/, "$1");
 
 // ---------- Markdown slicing ----------
 interface Part {
@@ -437,6 +439,7 @@ export function buildResults(body: string) {
   ).map(([id, label]) => ({ id, label, n: id === "all" ? all.length : all.filter((r) => grp(r) === id).length }));
 
   return {
+    experiments: md(get(/^Experiments/)),
     asOf: firstT.match(/as of (\d{4}-\d{2}-\d{2})/)?.[1] ?? D.built,
     first,
     datasets,
@@ -471,5 +474,33 @@ export function buildResults(body: string) {
       }),
     },
     gaps: md(get(/^What the results can/)),
+  };
+}
+
+// ---------- How it works ----------
+export function buildMethod(body: string) {
+  const secs = split(body, 2);
+  const first = body.search(/^## /m);
+  const rows = (re: RegExp, i = 0) => tables(section(secs, re).text)[i]?.rows ?? [];
+  const repoLink = (cell: string) => {
+    const path = (cell.match(/`([^`]+)`/)?.[1] ?? "").replace(/\/$/, "");
+    return /^[\w./-]+$/.test(path) && path !== "DTB_ROOT" ? path : "";
+  };
+  return {
+    lede: mdi(prose(first > 0 ? body.slice(0, first) : body)),
+    steps: rows(/^The pipeline/).map((r, i) => ({
+      kicker: `${i + 1} · ${plain(r[1])}`,
+      title: plain(r[0]),
+      body: mdi(r[2]),
+      writes: mdi(r[3]),
+    })),
+    scripts: rows(/^The pipeline/, 1).map((r) => ({ name: mdi(r[0]), body: mdi(r[1]) })),
+    after: md(prose(section(secs, /^The pipeline/).text)),
+    checks: rows(/^The checks/).map((r) => ({ title: plain(r[0]), body: mdi(r[1]) })),
+    terms: split(section(secs, /^Key terms/).text, 3).map((g) => ({
+      title: plain(g.title),
+      rows: (tables(g.text)[0]?.rows ?? []).map((r) => ({ term: plain(r[0]), body: mdi(r[1]) })),
+    })),
+    repo: rows(/^The repo/).map((r) => ({ label: plain(r[0]), path: repoLink(r[0]), body: mdi(r[1]) })),
   };
 }

@@ -2,10 +2,14 @@
 title: "Adding a model"
 description: "Recipe: config, pinned weights, adapter, smoke test, parity (GenD as the worked example)"
 group: working
-order: 3
+order: 2
 ---
 
 A model is a config, a pinned upstream checkout, pinned weights and an adapter. Worked example: GenD (`configs/models/gend.yaml`, `src/deeptrace_bench/models/gend.py`). Other upstream shapes: `aasist.py` (one plain PyTorch file), `df_arena.py` (code inside a Hugging Face model repo), `deepfakebench.py` (one detector out of a training framework).
+
+## How adapters work
+
+One environment runs everything (Python 3.12, torch 2.8, transformers 4.56). Upstream stacks (DeepfakeBench: Python 3.7, torch 1.12; XLS-R + AASIST: torch 1.8, fairseq) don't run on H100s, so they serve only as parity references. An adapter imports the upstream code it needs from a pinned checkout (steps 2 and 3); only MIT code may be copied into the repo ([Data policy](data_policy.md#licence-clauses-that-bind-us)). Expected breakages on Python 3.12 and torch 2.x: `torch.load` defaults to `weights_only=True`; `np.float`, `np.int`, `distutils` and `imp` are gone.
 
 ## 1. Config
 
@@ -47,7 +51,7 @@ uv run pytest                                          # registry cross-checks i
 uv run scripts/smoke.py --model <id>                   # every pipeline-test evalset it accepts
 ```
 
-Audio models have no pipeline-test set, so they smoke-test on a sample of `urdu_csalt` (still the smoke namespace, never reported). Open the report and its crops ([smoke_test.md](smoke_test.md)). Then add a skip-unless-weights test like `tests/test_gend.py` or `tests/test_aasist.py`.
+Open the report and its crops ([reading the report](getting_started.md#reading-the-report)). Then add a skip-unless-weights test like `tests/test_gend.py` or `tests/test_aasist.py`.
 
 ## 5. Before any result counts
 
@@ -90,4 +94,4 @@ Audio models have no pipeline-test set, so they smoke-test on a sample of `urdu_
 - **Score direction**: AUC above 0.5 on the reproduction evalset (FF++ test, ASVspoof 2019 LA eval, or In-the-Wild for models the guard refuses on ASVspoof 2019); an inverted logit flips every result silently. A seeded sample settles direction (`setup_datasets.py <id> --sample 300 --manifest`, then `score.py --smoke` and `evaluate.py --smoke`); the full set reproduces the published number.
 - Then give the model a `wave:`.
 
-Per-model porting notes and expected Python 3.12 / torch 2.x breakages: [models.md](models.md).
+Per-model porting notes: [Models](models.md#per-model).

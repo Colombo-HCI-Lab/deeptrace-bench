@@ -1,49 +1,69 @@
 ---
 title: "Evaluation"
-description: "Evalsets, preprocessing, metrics, failure accounting, contamination verdicts, the shortcut probe"
+description: "How a score becomes a number: evalsets, preprocessing, the settings still open, metrics, contamination verdicts, the shortcut probe, run flags"
 group: benchmark
-order: 5
+order: 1
 ---
 
-How a score becomes a number: what gets scored, how inputs are prepared, which metrics are reported, and which checks a result must pass. Every setting lives in [`configs/eval/default.yaml`](/configs/eval/default.yaml). It is marked `proposed` until the team settles decision 5 (due 2026-10-09, still open as of 2026-10-19), so every number can still move. Changing a setting changes every run id, so results from different settings never mix.
+Every setting lives in [`configs/eval/default.yaml`](/configs/eval/default.yaml), still `proposed` until the team settles [decision 5](progress.md#open-decisions-that-shape-the-results). A changed setting changes every run id ([naming rules](store_layout.md#naming-rules)), so results from different settings never mix. Terms such as evalset, parity and score direction are defined in [How it works](method.md#key-terms).
 
 ## Evalsets, not datasets
 
-Models are scored only on evalsets (`configs/evalsets/<id>.yaml`), never on raw datasets. An evalset is an exact slice of data: one or more datasets, a filter, optionally a forced label, and a pairing:
+An evalset (`configs/evalsets/<id>.yaml`) combines one or more datasets, a filter, optionally a forced label, and a pairing:
 
-- **same_corpus**: real and fake come from the same recordings or speakers (Urdu CSALT, BanglaFake, FakeAVCeleb, IndicSynth with its source IndicSUPERB). Only these give headline numbers.
-- **cross_corpus**: real and fake come from different corpora (MLAAD fakes with real speech from elsewhere). A detector can win here by telling the corpora apart (microphone, noise, loudness, sample rate) instead of spotting synthesis, so these are never averaged into headlines, and each gets a shortcut probe (below).
+| Pairing | Real and fake come from | Examples | In headline numbers |
+| --- | --- | --- | --- |
+| `same_corpus` | the same recordings or speakers | Urdu CSALT, BanglaFake, FakeAVCeleb, IndicSynth with its source IndicSUPERB | yes |
+| `cross_corpus` | different corpora, so microphone, noise, loudness or sample rate can give the label away | MLAAD fakes with real speech from elsewhere | never; each gets a [shortcut probe](#shortcut-probe-planned) |
 
 ## Preprocessing
 
-- **Audio:** 16 kHz mono, 64,600-sample windows (about 4 s). Clips under 1 s get status `too_short`; clips shorter than a window are tiled up to one, as AASIST does. Clip score is the mean of window scores.
-- **Video and images:** one shared face detector (insightface's SCRFD-10GF, `det_10g.onnx`, the one GenD's code uses) runs on 32 evenly spaced frames per video, keeps the largest face per frame, and caches its box and five landmarks. An image is a one-frame video. Each model then cuts its own crop from the cache (size, margin and alignment from its config), because models do worse on crops unlike the ones they trained on. Fewer than 8 frames with a face (video), or none (image), gives `no_face`. Clip score is the mean of frame scores. Code: `preprocess/faces.py`, `preprocess/scrfd.py`.
-- **Crop modes** (`input.crop`, per model): `five_point` (GenD's landmark alignment), `none` (a square around the box), `box` (the box widened per side and stretched; SBI's test crop and HAVIC's raw box).
-- **Frame-run models** override the shared sampling in their config and get their own detection cache. HAVIC: frames at 5 per second from the start (at most 50) plus the audio under them (`preprocess/av.py`). LipForensics: the first 100 consecutive frames, cut into mouth crops from FAN's 68 landmarks with upstream's warp (`preprocess/mouths.py`). Written 2026-10-05.
-- **Tight face crops:** the detector needs some context around a face, so datasets of ready-made face crops defeat it. A frame or image with no face is retried once with a black border (`image_pad_retry`, `video_pad_retry`). On HiDF's 512 px face-crop videos, this took detection from 6 of 32 frames to 32 of 32 on half the sampled videos. The cache records which frames needed it.
-- **Native mode:** reproducing a paper uses the model's own preprocessing (`score.py --preprocessing native`), with a different run id. Not built for video and image models; `score.py` refuses it.
+| Input | Preprocessing | Item score | Failure status |
+| --- | --- | --- | --- |
+| Audio | 16 kHz mono, 64,600-sample windows (about 4 s); a clip shorter than a window is tiled up to one, as AASIST does | mean of window scores | `too_short` under 1 s |
+| Video, images | one shared face detector (insightface's SCRFD-10GF, `det_10g.onnx`) on 32 evenly spaced frames, keeping the largest face per frame and caching its box and five landmarks; an image is a one-frame video. Each model then cuts its own crop from the cache | mean of frame scores | `no_face`: fewer than 8 frames with a face (video), or none (image) |
+| Frame-run models | their own sampling and detection cache. HAVIC: frames at 5 per second from the start (at most 50) with the audio under them (`preprocess/av.py`). LipForensics: the first 100 consecutive frames, cut into mouth crops from FAN's 68 landmarks with upstream's warp (`preprocess/mouths.py`). Written 2026-10-05 | per model ([Models](models.md#per-model)) | as for video |
 
-Open choices for decision 5, all in `configs/eval/default.yaml`:
+Each model crops the cached faces its own way (size, margin and alignment from its config), because detectors do worse on crops unlike the ones they trained on. Code: `preprocess/faces.py`, `preprocess/scrfd.py`.
 
-- Detection threshold: 0.4 is `detector.py`'s default; GenD's README preprocesses FF++ at 0.1.
-- Frame sampling: uniform 32 (ours) vs `detector.py`'s "at least 32 frames with a face, spreading out from the middle".
-- Native crop size vs a fixed size per model, and the padding retry for tight crops.
-- Video decoding: OpenCV applies the rotation stored in phone videos; PyAV, used by GenD's preprocessing, doesn't. Settle at parity time; decoding is one function (`read_video_frames`).
+| `input.crop.align` | Crop | Used by |
+| --- | --- | --- |
+| `five_point` | landmark alignment | GenD, the DeepfakeBench detectors, Effort |
+| `none` | a square around the box | no model yet |
+| `box` | the box widened per side and stretched | SBI's test crop, HAVIC's raw box |
+
+- **Tight face crops.** The detector needs some context around a face, so datasets of ready-made face crops defeat it. A frame or image with no face is retried once with a black border (`image_pad_retry`, `video_pad_retry`). On HiDF's 512 px face-crop videos this took detection from 6 of 32 frames to 32 of 32 on half the sampled videos. The cache records which frames needed it.
+- **Native mode.** Reproducing a paper with the model's own preprocessing (`score.py --preprocessing native`) gets a different run id. Not built for video and image models; `score.py` refuses it.
+
+## Settings still open
+
+Decision 5 settles these:
+
+| Setting | Ours now | Alternative |
+| --- | --- | --- |
+| Audio clip score | the mean over every 4 s window, refusing clips under 1 s | the first 4 s only, or the whole utterance, as some upstreams do ([Models](models.md#per-model)) |
+| Face detection threshold | 0.4, `detector.py`'s default | 0.1, as GenD's README preprocesses FF++ |
+| Frame sampling | 32 evenly spaced frames | `detector.py`'s "at least 32 frames with a face, spreading out from the middle" |
+| Crop size | each model's config; `size: null` keeps native size (GenD, HAVIC) | one rule for every model |
+| Padding retry for tight crops | on | off |
+| Video decoding | OpenCV, which applies the rotation stored in phone videos | PyAV, used by GenD's preprocessing, which doesn't. Settle at parity time; decoding is one function, `read_video_frames` |
 
 ## Metrics
 
-- **AUC and EER**, fake as positive, overall and per group, each with a 95% stratified bootstrap interval (1,000 resamples).
-- **Per-group FPR and FNR at one global threshold** (the overall EER point), plus fake detection rate at 5% FPR. These catch a group that ranks well but is miscalibrated, which an AUC gap misses.
-- **Small groups** (under 30 real or fake items) are reported and flagged, not dropped; their gaps aren't interpreted.
-- **Failures** (`no_face`, `too_short`, `unreadable`) are counted per group. Face detectors fail more often on darker skin, so dropping failures would bias the gaps we measure.
-- **Group gap:** the headline fairness number. Definition (`eval.metrics.group_gap`) still open: max minus min, worst group vs the rest, or the largest pair with non-overlapping intervals.
-- **Score direction:** AUC must exceed 0.5 on each reproduction evalset before an adapter is trusted.
+| Metric | How |
+| --- | --- |
+| AUC and EER | fake as positive, overall and per group, each with a 95% stratified bootstrap interval (1,000 resamples) |
+| Per-group FPR and FNR | at one global threshold, the overall EER point; they catch a group that ranks well but is miscalibrated, which an AUC gap misses |
+| Fake detection rate at 5% FPR | overall and per group |
+| Failures | `no_face`, `too_short` and `unreadable` counted per group. Face detectors fail more often on darker skin, so dropping failures would bias the gaps |
+| Small groups | under 30 real or fake items: reported and flagged, their gaps not interpreted |
+| Group gap | the headline fairness number. Its definition (`eval.metrics.group_gap`) is still open: max minus min, worst group against the rest, or the largest pair with non-overlapping intervals |
 
-Decision 4 (proposed): an attribute becomes a required data dictionary field if both models in a modality shift by 5 or more AUC points across its values. Recorded under `reporting.attribute_rule` so it is fixed before results arrive. The first video runs suggest a second clause is needed: on HiDF, one group's AUC barely moves while its false-positive rate at the global threshold doubles ([Results](results.md#video-hidf)).
+Decision 4 (proposed, `reporting.attribute_rule`): an attribute becomes a required field of the data dictionary if both models in a modality shift by 5 or more AUC points across its values. It is recorded before results arrive so it can't be fitted to them.
 
 ## Contamination verdicts
 
-A model scored on data it trained on looks better than it is. Before scoring, the contamination guard (`eval.contamination.check`) compares the model's `training_data` with the evalset's datasets and everything they derive from. Every result carries the verdict:
+Before scoring, the contamination guard (`eval.contamination.check`) compares the model's `training_data` with the evalset's datasets and everything they derive from. Every result carries the verdict:
 
 | Verdict            | Meaning                                                                                        | Effect                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------- |
@@ -54,7 +74,7 @@ A model scored on data it trained on looks better than it is. Before scoring, th
 
 It currently refuses HAVIC on FakeAVCeleb, AASIST3 and DF Arena on MLAAD, and DF Arena and both AntiDeepfake models on ASVspoof 2019 LA eval.
 
-**Its blind spot:** it compares datasets, not generators. A model that trained (through some other dataset) on the TTS system that made an evalset's fakes still gets `clean`. That may partly explain the multilingual audio models' near-perfect scores on the open South Asian sets ([Results](results.md#three-tiers)). Our own fine-tuned checkpoints list their training items (`items_file`), so the guard covers them too.
+Its blind spot: it compares datasets, not generators, so a model that trained (through some other dataset) on the TTS system behind an evalset's fakes still gets `clean`. Our own fine-tuned checkpoints list their training items (`items_file`), so the guard covers them exactly.
 
 ## Shortcut probe (planned)
 
@@ -66,4 +86,11 @@ For every cross-corpus evalset: a cross-validated logistic regression on trivial
 
 ## Flags on each run
 
-Beside the verdict, the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) flags: `cross-corpus`; `below chance`; `no parity check` (the adapter hasn't been shown to score like upstream); `score direction unchecked` (the model hasn't scored above chance on a reproduction evalset, so its scores could be read backwards). Runs with either of the last two are provisional.
+Beside the verdict, the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) flags:
+
+| Flag | Means |
+| --- | --- |
+| `cross-corpus` | the evalset pairs different corpora |
+| `below chance` | AUC under 0.5 |
+| `no parity check` | the adapter hasn't been shown to score like upstream; the run is provisional |
+| `score direction unchecked` | the model hasn't scored above chance on a reproduction evalset, so its scores could be read backwards; the run is provisional |

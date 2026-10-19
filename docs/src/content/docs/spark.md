@@ -1,13 +1,25 @@
 ---
-title: "Running on SPARK"
-description: "How to run the benchmark on the DESI lab's GPU cluster: one-time setup, the run loop, recipes for each kind of run, and fixes for failed runs"
+title: "Where to run"
+description: "Every machine the harness runs on, and how: the DESI lab's SPARK cluster step by step, any Linux GPU machine, and UNIL's Curnagl"
 group: working
-order: 6
+order: 4
 ---
 
-SPARK is the DESI lab's GPU cluster at HEC Lausanne. You don't log in to it or queue jobs by hand. You edit two files in a git repo and push a tag; a worker runs the job in a Docker container and commits a summary of the results back. This page is the how-to. Other machines are in [cluster.md](cluster.md). Checked on 2026-10-16, the day the first runs passed.
+The scripts are the same everywhere; only storage and job submission differ. As of 2026-10-16:
 
-## How it works
+| Machine | Status | How |
+| --- | --- | --- |
+| The DESI lab's SPARK cluster | works; its first scoring run reproduced a published number | [SPARK](#spark) |
+| Any Linux machine with an NVIDIA GPU and CUDA 12 drivers | works | [below](#any-linux-gpu-machine) |
+| UNIL's Curnagl cluster | set up, never run: the team has no compute project yet | [Curnagl](#curnagl) |
+| An Apple Silicon laptop | tests and the smoke test only | [Getting started](getting_started.md) |
+
+## SPARK
+
+
+SPARK is the DESI lab's GPU cluster at HEC Lausanne. You don't log in to it or queue jobs by hand. You edit two files in a git repo and push a tag; a worker runs the job in a Docker container and commits a summary of the results back. Checked on 2026-10-16, the day the first runs passed.
+
+### How it works
 
 Two repos are involved:
 
@@ -22,7 +34,7 @@ bot      commits reports/ (aggregates only) back to deeptrace-experiments' main
 
 Datasets, weights and per-item scores stay on the worker's disk (the job volume) between runs, so a second run on the same dataset skips the download.
 
-## One-time setup
+### One-time setup
 
 | You need | Check with | If it's missing |
 | --- | --- | --- |
@@ -36,7 +48,7 @@ gh repo clone UNIL-DESI/deeptrace-experiments
 
 That's all. You don't need SSH, a UNIL account, a GPU or a Hugging Face token (the repo's `HF_TOKEN` secret covers downloads). The UNIL VPN only matters for Cluster-CI's dashboard; logs reach you through GitHub. Cluster-CI's own guide tells you to run its `install.sh`: skip it, because it overwrites files this repo has already fixed.
 
-## The run loop
+### The run loop
 
 Every run is the same five steps, from inside `deeptrace-experiments`:
 
@@ -60,9 +72,9 @@ In `.cluster-ci`, two lines change from run to run, and always together: `ALLOWE
 
 **A stage only reruns when its inputs change.** DVC skips a stage whose settings and pinned commit are the same as last time, so the run passes in seconds and `reports/` doesn't move. Change what you meant to change. `gpu_check` is the exception: it reruns every time.
 
-## Recipes
+### Recipes
 
-### Check that a run works at all
+#### Check that a run works at all
 
 Your first run. It takes a few minutes when a worker is free.
 
@@ -73,9 +85,9 @@ STAGES=gpu_check
 
 `reports/gpu_check.json` should name an NVIDIA GB10 at about 90 TFLOP/s in bf16.
 
-### Run the tests and the smoke test at a commit
+#### Run the tests and the smoke test at a commit
 
-Proves a deeptrace-bench commit works on the cluster's GPU: `pytest`, then the [smoke test](smoke_test.md) for each model in `bench.smoke_models`.
+Proves a deeptrace-bench commit works on the cluster's GPU: `pytest`, then the [smoke test](getting_started.md#first-run-the-smoke-test) for each model in `bench.smoke_models`.
 
 ```ini
 ALLOWED_WORKERS=isipol09
@@ -91,7 +103,7 @@ bench:
 
 `reports/bench_smoke.json` has `passed`, the GPU the environment saw, and each step's time.
 
-### Score a model on an evalset
+#### Score a model on an evalset
 
 Runs the same scripts as any other machine (`setup_models.py`, `setup_datasets.py --manifest`, `score.py --device cuda`, `evaluate.py`), then compares the result with a run already published.
 
@@ -127,7 +139,7 @@ Read `reports/score.json`:
 
 **How long it takes.** The first download of a dataset is the slow part: Hugging Face lets the cluster fetch about 1,000 files per 5 minutes, so the stage downloads in rounds. Urdu CSALT (6,800 clips) took about 20 minutes to download and 88 seconds to score on the 3090. Later runs on the same worker skip the download.
 
-### Run code you just changed
+#### Run code you just changed
 
 SPARK runs deeptrace-bench at the commit pinned in `params.yaml`, never your working copy. So:
 
@@ -137,7 +149,7 @@ SPARK runs deeptrace-bench at the commit pinned in `params.yaml`, never your wor
 
 The worker builds the environment from `uv.lock`: about a minute when the lock changed, seconds when it didn't.
 
-## Rules
+### Rules
 
 - **Aggregates only.** `reports/` gets pass or fail, counts, timings and metric tables, never per-item scores, crops or anything from a licensed dataset ([data_policy.md](data_policy.md)). Don't declare those as DVC `outs` either: Cluster-CI backs outputs up to Google Drive.
 - **Pull with `--rebase` before every edit.** The bot commits after each run and rewrites `dvc.yaml`.
@@ -146,7 +158,7 @@ The worker builds the environment from `uv.lock`: about a minute when the lock c
 - **Secrets** live in the repo's GitHub secrets and reach stages as environment variables. Never write one to a file or print it.
 - **Don't edit Cluster-CI's files:** `.github/workflows/cluster-ci.yml`, `.cluster-ci-tools/`, `.dvc-viewer/`, and the managed block in `AGENTS.md`.
 
-## When a run fails
+### When a run fails
 
 Get the full log first:
 
@@ -166,7 +178,7 @@ gh run view <run id> --log -R UNIL-DESI/deeptrace-experiments > run.log
 | Killed by the memory guard | keep `REQUIRED_RAM` at 16GB or more; it also covers Cluster-CI's own install |
 | Stopped at the time limit | raise `MAX_RUNTIME_HOURS` (24 at most) and run again; scoring resumes from the saved parts |
 
-## Workers and limits
+### Workers and limits
 
 | Worker | GPU | Runs deeptrace-bench |
 | --- | --- | --- |
@@ -177,3 +189,43 @@ gh run view <run id> --log -R UNIL-DESI/deeptrace-experiments > run.log
 - **The GB10s have more memory, not more speed.** They matter for models that don't fit in 24 GB, once the lock supports ARM.
 
 deeptrace-experiments' own `CLAUDE.md` covers how a run works inside and every trap from the first runs. Cluster-CI's documentation, with every `.cluster-ci` key, is at <https://unil-desi.github.io/cluster-ci/>.
+
+## Any Linux GPU machine
+
+Install as in [Getting started](getting_started.md#install), then score on the GPU. Sharding and throughput are in [Results](results.md#experiments).
+
+```bash
+uv run scripts/score.py --model aasist --evalset urdu_csalt --device cuda
+```
+
+## Curnagl
+
+**Access.** A DCSR compute project must be requested at <https://requests.dcsr.unil.ch>, and each member needs a UNIL account added to it. Then connect through the UNIL VPN, `ssh <unil-user>@curnagl.dcsr.unil.ch`, and put the project's account name (from `Sproject`) in the `--account` line of the files in [`slurm/`](/slurm).
+
+**Partitions.** Jobs run at most 3 days. Ask for one GPU and a realistic `--time`: small, short jobs start sooner.
+
+| Partition | GPUs | Use for |
+| --- | --- | --- |
+| `gpu-l40` | 8 x L40S 48 GB | inference; the default |
+| `gpu` | 14 x A100 40 GB | inference, fine-tuning |
+| `gpu-h100` | 8 x H100 94 GB | anything bigger |
+| `interactive` | 20 GB A100 slices, 8 h | setup and debugging only |
+| `gpu-gh` | GH200 (ARM) | not supported: `uv.lock` has no ARM wheels |
+
+**Storage.** Put `DTB_ROOT` at `/work/<project>/deeptrace-bench/` (no backup) and use `$TMPDIR/dtb-cache/` (fast node-local disk, wiped after each job) as `DTB_CACHE`. The tree is in [store_layout.md](store_layout.md).
+
+- `/users` holds only 50 GB: the repo clone fits there, the venv and uv cache don't. Set `UV_CACHE_DIR` and `UV_PROJECT_ENVIRONMENT` to folders under `/work`, and `UV_LINK_MODE=copy`.
+- `/scratch` is purged when it fills, so nothing that must survive goes there.
+- Don't write millions of small files (frames, crops) to `/work`; keep them in `$TMPDIR` during a job.
+
+**Setup.** As for [any Linux GPU machine](#any-linux-gpu-machine), plus `mkdir -p logs` for SLURM's logs. Downloads need internet, which compute nodes may not have, so run `setup_models.py` and `setup_datasets.py` on the login node; jobs set `HF_HUB_OFFLINE=1`.
+
+**Jobs.** Scoring is sharded and resumable: resubmit a job that times out.
+
+```bash
+sbatch slurm/prepare.sbatch urdu_csalt banglafake           # build manifests (CPU)
+sbatch --array=0-7 slurm/score.sbatch aasist urdu_csalt     # 8 shards on gpu-l40
+sbatch --dependency=afterok:<jobid> slurm/evaluate.sbatch aasist urdu_csalt
+squeue -u $USER                                             # your jobs
+squeue --start -j <jobid>                                   # a job's estimated start
+```

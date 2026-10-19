@@ -1,16 +1,23 @@
 ---
 // Docs used to live at the site root; they moved under docs/ when the guided pages arrived.
-// Results and Progress kept their root URLs as guided pages, so they need no stub.
+// Results, Progress and How it works kept their root URLs as guided pages, so they need no stub.
+// Docs merged into others (MOVED) send their old root URL to the new place.
 import { getCollection } from "astro:content";
 import Redirect from "../components/Redirect.astro";
-import { GUIDED } from "../lib/links.mjs";
+import { GUIDED, MOVED } from "../lib/links.mjs";
 
 export async function getStaticPaths() {
+  const base = import.meta.env.BASE_URL;
   const docs = await getCollection("docs");
-  return docs.filter((d) => !GUIDED.has(d.id)).map((d) => ({ params: { slug: d.id }, props: { title: d.data.title } }));
+  return [
+    ...docs
+      .filter((d) => !GUIDED.has(d.id))
+      .map((d) => ({ params: { slug: d.id }, props: { to: `${base}docs/${d.id}/`, title: d.data.title } })),
+    ...Object.entries(MOVED).map(([slug, to]) => ({ params: { slug }, props: { to: base + to, title: slug } })),
+  ];
 }
 
-const { slug } = Astro.params;
+const { to, title } = Astro.props;
 ---
 
-<Redirect to={`${import.meta.env.BASE_URL}docs/${slug}/`} title={Astro.props.title.replaceAll("`", "")} />
+<Redirect to={to} title={title.replaceAll("`", "")} />

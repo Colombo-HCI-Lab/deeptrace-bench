@@ -22,8 +22,19 @@ const LIVE = "https://colombo-hci-lab.github.io/deeptrace-bench/";
 
 // Results and Progress have guided pages of their own, built from their docs; links to those
 // docs land there. Every other doc lives under docs/.
-export const GUIDED = new Set(["results", "progress"]);
+export const GUIDED = new Set(["results", "progress", "method"]);
 export const docPath = (slug) => (GUIDED.has(slug) ? `${slug}/` : `docs/${slug}/`);
+
+// Docs merged into others on 2026-10-19, and where their content went. Old links, old URLs and
+// a stub page at each old address land there.
+export const MOVED = {
+  overview: "method/",
+  smoke_test: "docs/getting_started/",
+  experiments: "results/#experiments",
+  cluster: "docs/spark/#curnagl",
+};
+// An old doc's new address, keeping the #anchor unless the move names its own.
+const movedTo = (slug, frag) => MOVED[slug] + (MOVED[slug].includes("#") ? "" : frag);
 
 // Anchors of the old single status page, and where each now lives.
 export const LEGACY = {
@@ -33,7 +44,7 @@ export const LEGACY = {
   datasets: "inventory/#datasets",
   compute: "inventory/#compute",
   pipeline: "method/#pipeline",
-  start: "method/#terms",
+  start: "method/#key-terms",
 };
 
 export function rewrite(url, base) {
@@ -44,12 +55,15 @@ export function rewrite(url, base) {
     const [page, hash] = rest.split("#", 2);
     const slug = page.replace(/\/+$/, "");
     if (!slug) return base + (hash && LEGACY[hash] ? LEGACY[hash] : rest);
+    const old = slug.replace(/^docs\//, "");
+    if (MOVED[old]) return base + movedTo(old, hash === undefined ? "" : `#${hash}`);
     if (existsSync(`${DOCS}${slug}.md`)) return base + docPath(slug) + (hash === undefined ? "" : `#${hash}`);
     return base + rest;
   }
   const [path, hash] = url.split("#", 2);
   const frag = hash === undefined ? "" : `#${hash}`;
   if (/^[\w-]+\.md$/.test(path)) {
+    if (MOVED[path.slice(0, -3)]) throw new Error(`${path} moved to ${MOVED[path.slice(0, -3)]}; link the new doc`);
     if (!existsSync(DOCS + path)) throw new Error(`no doc ${path}`);
     return base + docPath(path.slice(0, -3)) + frag;
   }
