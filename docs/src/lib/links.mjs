@@ -2,7 +2,8 @@
 //
 // The docs are written so the same Markdown also reads on GitHub:
 //   models.md#parity                  another doc       -> <base>docs/models/#parity
-//   results.md, progress.md           a guided page     -> <base>results/, <base>progress/
+//   results.md, progress.md           a guided page     -> <base>results/, <base> (the Timeline)
+//   catalog.md#dataset-<id>           a dataset entry   -> <base>docs/datasets/#dataset-<id>
 //   /configs/eval/default.yaml        a file in the repo -> its page on GitHub
 //   https://colombo-hci-lab.github.io/deeptrace-bench/...  the live site -> the same page here
 // Anything else relative (../x) is refused: it would break once the doc moves. Astro only logs
@@ -20,10 +21,14 @@ const DOCS = resolve(process.cwd(), "src/content/docs") + sep;
 const GITHUB = "https://github.com/Colombo-HCI-Lab/deeptrace-bench";
 const LIVE = "https://colombo-hci-lab.github.io/deeptrace-bench/";
 
-// Results and Progress have guided pages of their own, built from their docs; links to those
-// docs land there. Every other doc lives under docs/.
-export const GUIDED = new Set(["results", "progress", "method"]);
-export const docPath = (slug) => (GUIDED.has(slug) ? `${slug}/` : `docs/${slug}/`);
+// Results, Progress and How it works have guided pages of their own, built from their docs;
+// links to those docs land there. Progress is the Timeline, the home page. Every other doc lives
+// under docs/.
+export const GUIDED = { results: "results/", progress: "", method: "method/" };
+export const docPath = (slug) => (slug in GUIDED ? GUIDED[slug] : `docs/${slug}/`);
+// catalog.md holds the dataset entries too, but they show on the Dataset catalog page.
+const catalogFrag = (frag) => /^#datasets?\b|^#dataset-/.test(frag);
+const target = (slug, frag) => (slug === "catalog" && catalogFrag(frag) ? docPath("datasets") : docPath(slug)) + frag;
 
 // Docs merged into others on 2026-10-19, and where their content went. Old links, old URLs and
 // a stub page at each old address land there.
@@ -39,13 +44,15 @@ const movedTo = (slug, frag) => MOVED[slug] + (MOVED[slug].includes("#") ? "" : 
 // Anchors of the old single status page, and where each now lives.
 export const LEGACY = {
   runs: "results/#all-runs",
-  coverage: "inventory/#coverage",
-  models: "inventory/#models",
-  datasets: "inventory/#datasets",
-  compute: "inventory/#compute",
+  coverage: "coverage/",
+  models: "docs/catalog/#all-models",
+  datasets: "docs/datasets/#all-datasets",
+  compute: "compute/",
   pipeline: "method/#pipeline",
   start: "method/#key-terms",
 };
+// The tabs of the old Models & data page (inventory/#<tab>), and where each now lives.
+export const INVENTORY = { coverage: "coverage/", models: LEGACY.models, datasets: LEGACY.datasets, compute: "compute/" };
 
 export function rewrite(url, base) {
   if (/^(https?:|mailto:|#)/.test(url) && !url.startsWith(LIVE)) return url;
@@ -57,7 +64,7 @@ export function rewrite(url, base) {
     if (!slug) return base + (hash && LEGACY[hash] ? LEGACY[hash] : rest);
     const old = slug.replace(/^docs\//, "");
     if (MOVED[old]) return base + movedTo(old, hash === undefined ? "" : `#${hash}`);
-    if (existsSync(`${DOCS}${slug}.md`)) return base + docPath(slug) + (hash === undefined ? "" : `#${hash}`);
+    if (existsSync(`${DOCS}${slug}.md`)) return base + target(slug, hash === undefined ? "" : `#${hash}`);
     return base + rest;
   }
   const [path, hash] = url.split("#", 2);
@@ -65,7 +72,7 @@ export function rewrite(url, base) {
   if (/^[\w-]+\.md$/.test(path)) {
     if (MOVED[path.slice(0, -3)]) throw new Error(`${path} moved to ${MOVED[path.slice(0, -3)]}; link the new doc`);
     if (!existsSync(DOCS + path)) throw new Error(`no doc ${path}`);
-    return base + docPath(path.slice(0, -3)) + frag;
+    return base + target(path.slice(0, -3), frag);
   }
   if (path.startsWith("/")) {
     const target = REPO + path.slice(1);

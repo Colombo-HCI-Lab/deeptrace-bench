@@ -4,30 +4,38 @@
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { buildMethod } from "../lib/guide";
-const base = import.meta.env.BASE_URL;
+import { NAV, href, leaves } from "../lib/nav";
 const repo = "https://github.com/Colombo-HCI-Lab/deeptrace-bench";
 const M = buildMethod((await getEntry("docs", "method"))!.body ?? "");
 // The checks sit under the step they guard: parity under set-up, the contamination guard under
 // scoring, the publish guard under publishing.
 const gateClass = ["g-parity", "g-guard", "g-pub"];
-// The page's sections: the sidebar lists them, and so does the bar above them on narrow screens.
+// The page's sections, in the bar above them.
 const sections = [
   ...(M.plain ? [{ href: "#plain-words", text: "In plain words" }] : []),
   { href: "#pipeline", text: "Pipeline" },
   { href: "#key-terms", text: "Key terms" },
   { href: "#repo", text: "The repo" },
+  { href: "#run", text: "Run it yourself" },
 ];
+// The docs for running it, each with what it covers.
+const runDocs = await Promise.all(
+  leaves(NAV.find((g) => g.label === "Run it yourself")!.items).map(async (l) => ({
+    label: l.label,
+    href: href(l.id),
+    body: (await getEntry("docs", l.id))?.data.description ?? "",
+  })),
+);
 ---
 
 <Base
   title="How it works · deeptrace-bench"
   description="From a published detector to one trusted number: the pipeline, the checks along it, and the terms this site uses."
-  section="method"
-  sections={sections}
+  current="method"
 >
   <div class="stack">
     <header class="mast">
-      <div class="kicker">How it works</div>
+      <div class="kicker">Method</div>
       <h1>From a published detector to one trusted number</h1>
       <p class="lede" set:html={M.lede} />
     </header>
@@ -109,7 +117,7 @@ const sections = [
         <h2>The repo at a glance</h2>
         <p>Where each part of the pipeline lives in <a href={repo} target="_blank" rel="noopener">Colombo-HCI-Lab/deeptrace-bench</a>.</p>
       </header>
-      <div class="cards small">
+      <div class="cards">
         {
           M.repo.map((r) =>
             r.path ? (
@@ -126,11 +134,21 @@ const sections = [
           )
         }
       </div>
-      <div class="links">
-        <a href={`${base}docs/getting_started/`}>Getting started →</a>
-        <a href={`${base}docs/adding_a_model/`}>Adding a model →</a>
-        <a href={`${base}docs/adding_a_dataset/`}>Adding a dataset →</a>
-        <a href={`${base}docs/spark/`}>Where to run →</a>
+    </section>
+    <section id="run" class="block">
+      <header>
+        <h2>Run it yourself</h2>
+        <p>Install and the smoke test first; then add a model or a dataset, or run on a GPU machine.</p>
+      </header>
+      <div class="cards">
+        {
+          runDocs.map((d) => (
+            <a class="card doc" href={d.href}>
+              <strong>{d.label} →</strong>
+              <span>{d.body}</span>
+            </a>
+          ))
+        }
       </div>
     </section>
   </div>

@@ -1,8 +1,6 @@
 ---
 title: "Data policy"
 description: "What may enter git, licence clauses that bind us, sharing data across institutions"
-group: benchmark
-order: 5
 ---
 
 ## What may enter git

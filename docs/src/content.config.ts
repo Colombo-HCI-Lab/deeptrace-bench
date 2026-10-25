@@ -6,11 +6,8 @@ const docs = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/docs" }),
   schema: z.object({
     title: z.string(),
+    // Where a doc sits in the nav, and its group, live in src/lib/nav.ts.
     description: z.string(),
-    // "start": how it works, getting started, progress; "findings": results; "benchmark": the
-    // reference on models, datasets and rules; "working": how to work on it.
-    group: z.enum(["start", "findings", "benchmark", "working"]),
-    order: z.number(),
   }),
 });
 

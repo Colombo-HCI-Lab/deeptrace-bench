@@ -1,8 +1,6 @@
 ---
 title: "Progress"
 description: "Where the benchmark stands, what each round of work added, and what comes next"
-group: start
-order: 3
 ---
 
 ## Where things stand

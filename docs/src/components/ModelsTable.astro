@@ -1,11 +1,9 @@
 ---
 // Models, grouped by modality, most cited first: what each trained on, what its authors report
-// and what it scored here.
+// and what it scored here. It opens the Model catalog, so each name links to its entry below.
 import { evName } from "../lib/guide";
 import { D, MOD, params, pct, type Model, type Run } from "../lib/status";
 
-const base = import.meta.env.BASE_URL;
-const ref = `${base}docs/catalog/`;
 const cites = (m: Model) => m.paper?.citations ?? 0;
 const groups = (["audio", "video", "audio_video"] as const)
   .map((mod) => ({
@@ -47,7 +45,7 @@ const trained = (m: Model) =>
             return (
               <tr>
                 <td class="wide">
-                  <a class="name" href={`${ref}#model-${m.id}`}>
+                  <a class="name" href={`#model-${m.id}`}>
                     {m.name}
                   </a>
                   {m.paper && (

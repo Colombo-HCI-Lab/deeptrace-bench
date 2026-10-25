@@ -3,13 +3,14 @@
 // status.json. The full write-up stays at docs/results/.
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
+import { panels } from "../lib/figures";
 import { buildResults } from "../lib/guide";
 
 const base = import.meta.env.BASE_URL;
 const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
-// The page's sections: the sidebar lists them, and so does the bar above them on narrow screens.
+// The page's sections, in the bar above them.
 const sections = [
-  { href: "#read-this-first", text: "Read this first" },
+  { href: "#reading-the-numbers", text: "Reading AUC" },
   { href: "#experiments", text: "Experiments" },
   { href: "#the-datasets", text: "Datasets" },
   { href: "#at-a-glance", text: "Every detector, every dataset" },
@@ -26,12 +27,11 @@ const sections = [
 <Base
   title="Results · deeptrace-bench"
   description="What the runs so far show: open deepfake detectors on South Asian speech and faces, with the numbers and their caveats."
-  section="results"
-  sections={sections}
+  current="results"
 >
   <div class="stack">
     <header class="mast">
-      <div class="kicker">Results · snapshot of {R.asOf}</div>
+      <div class="kicker">Findings</div>
       <h1>What the runs show</h1>
       <p class="lede">Zero-shot throughout: released weights, no retraining. AUC unless noted.</p>
       <div class="scale" aria-label="Colour scale">
@@ -58,12 +58,62 @@ const sections = [
       <ol>{sections.map((x) => <li><a href={x.href}>{x.text}</a></li>)}</ol>
     </nav>
 
+    <section id="reading-the-numbers" class="block">
+      <header>
+        <div class="kicker">Primer</div>
+        <h2>Reading AUC and EER</h2>
+        <p>A detector gives every clip a fake score from 0 to 1. AUC is the chance that a random fake scores above a random real clip. EER is the error rate at the threshold where false alarms and missed fakes are equal.</p>
+      </header>
+      <figure class="fig" style="margin: 0; max-width: none">
+        <div class="frame">
+          <div class="panels">
+            {
+              panels.map((p) => (
+                <div>
+                  <div class="head"><span style={`background: ${p.bg}; color: ${p.fg}`}>AUC {p.auc}</span><span>EER {p.eer}</span></div>
+                  <div class="hist" aria-hidden="true">
+                    <div class="bars">
+                      {p.bars.map((b) => <span><span style={`height: ${b.r}; background: ${b.rbg}`} /><span /><span style={`height: ${b.f}; background: ${b.fbg}`} /></span>)}
+                      <span class="axis0" />
+                      <span class="thr" style={`left: ${p.thr}`} />
+                    </div>
+                    <div class="ends"><span>0</span><span>fake score</span><span>1</span></div>
+                  </div>
+                  <div class="note2"><strong>{p.label}.</strong> {p.note}</div>
+                </div>
+              ))
+            }
+          </div>
+          <div class="swatches">
+            <span><i style="background: var(--real)"></i>Real clips, above the axis</span>
+            <span><i style="background: var(--fake)"></i>Fake clips, below</span>
+            <span><i style="background: var(--muted)"></i><i style="margin-left: -6px; background: var(--bad)"></i>Wrong side of the threshold: false alarms and missed fakes</span>
+            <span><i style="width: 0; height: 14px; border-left: 1.5px dashed var(--ink)"></i>Threshold at the EER point</span>
+          </div>
+        </div>
+        <figcaption><strong>Four detectors, four AUCs.</strong> The more the two piles overlap, the closer AUC falls to 0.5 and the more clips land on the wrong side of any threshold. Illustrative distributions; each badge uses the colour scale of the tables below.</figcaption>
+      </figure>
+    </section>
+
     <section id="experiments" class="block">
       <header>
         <div class="kicker">The questions</div>
         <h2>Experiments</h2>
+        <div class="snip" style="max-width: 66ch; color: var(--muted)" set:html={R.experiments.intro} />
       </header>
-      <div class="prose" set:html={R.experiments} />
+      <div class="exps">
+        {
+          R.experiments.cards.map((e) => (
+            <div class={`exp ${e.kind}`}>
+              <div class="top"><span>{e.id}</span><span>{e.chip}</span></div>
+              <strong>{e.title}</strong>
+              <span class="q">{e.q}</span>
+              <span class="st">{e.status}</span>
+            </div>
+          ))
+        }
+      </div>
+      <div class="snip prose text" set:html={R.experiments.after} />
     </section>
 
     <section id="the-datasets" class="block">
@@ -96,8 +146,12 @@ const sections = [
       <header>
         <div class="kicker">2 · The results</div>
         <h2>Every detector on every dataset</h2>
-        <p>AUC: 0.5 is a coin flip, 1 is perfect, below 0.5 means the detector has real and fake backwards. Rows are grouped by what each detector was trained on. Hover a cell for its EER, interval and clip count.</p>
+        <p>AUC: 0.5 is a coin flip, 1 is perfect, below 0.5 means the detector has real and fake backwards. Rows are grouped by what each detector was trained on. Hover a cell for its interval and clip count. <sup>so</sup>: source overlap.</p>
       </header>
+      <div class="toggle" role="group" aria-label="Metric">
+        <button type="button" data-metric="auc" aria-pressed="true">AUC · higher is better</button>
+        <button type="button" data-metric="eer" aria-pressed="false">EER · lower is better</button>
+      </div>
       <div class="scroll">
         <table class="heat grid">
           <thead>
@@ -125,7 +179,7 @@ const sections = [
                       </th>
                       {m.cells.map((c) => (
                         <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>
-                          {c.text}
+                          {c.eer ? <Fragment><span class="auc">{c.text}</span><span class="eer">{c.eer}</span></Fragment> : c.text}
                           {c.overlap && <sup>so</sup>}
                         </td>
                       ))}
@@ -388,6 +442,15 @@ const sections = [
 </Base>
 
 <script>
+  // AUC or EER in the grid. Both are in the page; this only switches.
+  const glance = document.getElementById("at-a-glance")!;
+  for (const b of glance.querySelectorAll<HTMLButtonElement>(".toggle button")) {
+    b.addEventListener("click", () => {
+      glance.dataset.metric = b.dataset.metric;
+      for (const o of glance.querySelectorAll(".toggle button")) o.setAttribute("aria-pressed", String(o === b));
+    });
+  }
+
   // Which runs the table at the bottom shows. Every row is in the page; this only switches.
   const runs = document.getElementById("all-runs")!;
   for (const b of runs.querySelectorAll<HTMLButtonElement>(".filters button")) {

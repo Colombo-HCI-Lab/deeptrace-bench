@@ -1,8 +1,6 @@
 ---
 title: "Where to run"
 description: "Every machine the harness runs on, and how: your first experiment on the DESI lab's SPARK cluster step by step, any Linux GPU machine, and UNIL's Curnagl"
-group: working
-order: 4
 ---
 
 The scripts are the same everywhere; only storage and job submission differ. As of 2026-10-19:

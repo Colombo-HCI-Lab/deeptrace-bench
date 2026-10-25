@@ -1,69 +1,61 @@
 ---
-// The one sidebar every page shares: each doc in its group and order, with the overview and the
-// Models & data page slotted in, and the current page opened up to its sections. The guided pages
-// for Results, Progress and How it works stand in for their docs (docHref sends them there).
-import { getCollection } from "astro:content";
-import { GROUPS, docHref } from "../lib/docs";
-
-export interface Section {
-  href: string;
-  text: string;
-}
+// The one nav every page shares (lib/nav.ts): each page in its group, subsections under their
+// heading, and the docs of the Models and datasets group always open to their sections. The rail
+// on wide screens and the menu on narrow ones both render it.
+import { railSections, type Section } from "../lib/docs";
+import { NAV, RAIL_GROUP, STANDS_IN, href, isLeaf, type Leaf } from "../lib/nav";
 
 interface Props {
-  // The current page: a doc id, or "home", "inventory" or "docs-index".
+  // The current page: a nav id, or a doc a guided page stands in for.
   current: string;
-  sections?: Section[];
 }
 
-const { current, sections = [] } = Astro.props;
-const base = import.meta.env.BASE_URL;
-const docs = (await getCollection("docs")).sort((a, b) => a.data.order - b.data.order);
-const extra: Record<string, { key: string; label: string; href: string; after?: string }[]> = {
-  start: [{ key: "home", label: "Overview", href: base }],
-  findings: [{ key: "inventory", label: "Models & data", href: `${base}inventory/`, after: "results" }],
-};
-const groups = Object.entries(GROUPS).map(([group, label]) => {
-  const items = docs
-    .filter((d) => d.data.group === group)
-    .map((d) => ({ key: d.id, label: d.data.title.replaceAll("`", ""), href: docHref(d.id) }));
-  for (const x of extra[group] ?? []) {
-    const at = x.after ? items.findIndex((i) => i.key === x.after) + 1 : 0;
-    items.splice(at, 0, x);
-  }
-  return { label, items };
-});
-// A section link that points into this page carries the id the scroll tracker watches.
-const secId = (href: string) => (href.startsWith("#") ? href.slice(1) : undefined);
+const here = STANDS_IN[Astro.props.current] ?? Astro.props.current;
+const secs: Record<string, Section[]> = {};
+for (const g of NAV.filter((g) => g.label === RAIL_GROUP))
+  for (const it of g.items) for (const l of isLeaf(it) ? [it] : it.items) secs[l.id] = await railSections(l.id);
+// A section link into this page carries the id the scroll tracker watches.
+const link = (l: Leaf) => ({ ...l, href: href(l.id), secs: (secs[l.id] ?? []).length > 1 ? secs[l.id] : [] });
+const at = (l: Leaf, s: Section) => (l.id === here ? s.href : href(l.id) + s.href);
 ---
 
-<div class="side-tree">
+<div class="tree">
   {
-    groups.map((g) => (
+    NAV.map((g) => (
       <div>
-        <div class="kicker">{g.label}</div>
+        <div class="group">{g.label}</div>
         <ol>
-          {g.items.map((i) => (
-            <li>
-              <a href={i.href} aria-current={i.key === current ? "page" : undefined}>
-                {i.label}
-              </a>
-              {i.key === current && sections.length > 0 && (
-                <ol class="secs">
-                  {sections.map((s) => (
-                    <li>
-                      <a href={s.href} data-sec={secId(s.href)}>
-                        {s.text}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </li>
-          ))}
+          {g.items.map((it) => {
+            const ls = isLeaf(it) ? [link(it)] : it.items.map(link);
+            const list = ls.map((l) => (
+              <li>
+                <a href={l.href} aria-current={l.id === here ? "page" : undefined}>
+                  {l.label}
+                </a>
+                {l.secs.length > 0 && (
+                  <ol class="secs" aria-label="On this page">
+                    {l.secs.map((s) => (
+                      <li>
+                        <a href={at(l, s)} data-sec={l.id === here ? s.href.slice(1) : undefined}>
+                          {s.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </li>
+            ));
+            return isLeaf(it) ? (
+              list
+            ) : (
+              <li>
+                <div class="sub">{it.heading}</div>
+                <ol>{list}</ol>
+              </li>
+            );
+          })}
         </ol>
       </div>
     ))
   }
-  <a class="side-all" href={`${base}docs/`} aria-current={current === "docs-index" ? "page" : undefined}>All docs, with descriptions</a>
 </div>

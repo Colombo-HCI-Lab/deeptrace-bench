@@ -1,9 +1,8 @@
 ---
-// Datasets, grouped by role.
+// Datasets, grouped by role. It opens the Dataset catalog, so each name links to its entry below.
 import { ACCESS, D, LANG, MOD, ROLE } from "../lib/status";
 import PaperCells from "./PaperCells.astro";
 
-const ref = `${import.meta.env.BASE_URL}docs/catalog/`;
 const groups = ["south_asian", "reproduction", "real_reference", "in_the_wild"]
   .map((role) => ({ role, rows: D.datasets.filter((d) => d.role === role).sort((a, b) => a.name.localeCompare(b.name)) }))
   .filter((g) => g.rows.length);
@@ -32,7 +31,7 @@ const groups = ["south_asian", "reproduction", "real_reference", "in_the_wild"]
             return (
               <tr>
                 <td class="wide">
-                  <a class="name" href={`${ref}#dataset-${d.id}`}>
+                  <a class="name" href={`#dataset-${d.id}`}>
                     {d.name}
                   </a>
                   <span class="sum">

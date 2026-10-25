@@ -1,154 +1,85 @@
 ---
-// The overview: the question, the short answer as one chart, where the work stands and the way
-// into the rest of the site. Numbers come from status.json, the plan from progress.md.
+// The home page, the Timeline: progress.md laid out as one line through time. Open decisions and
+// the plan sit ahead of today in grey, the rounds of work below it, newest first. The full doc,
+// with where things stand, stays at docs/progress/.
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
-import { buildOverview, buildProgress, buildResults } from "../lib/guide";
-import { LEGACY } from "../lib/links.mjs";
-import { D } from "../lib/status";
+import { buildProgress } from "../lib/guide";
 
 const base = import.meta.env.BASE_URL;
-const O = buildOverview(buildProgress((await getEntry("docs", "progress"))!.body ?? ""));
-// The first three insights in results.md are the headline findings. Each card is a link, so the
-// links inside an insight become plain text.
-const lead = buildResults((await getEntry("docs", "results"))!.body ?? "")
-  .insights.slice(0, 3)
-  .map((it) => ({ ...it, body: it.body.replace(/<\/?a\b[^>]*>/g, "") }));
+const P = buildProgress((await getEntry("docs", "progress"))!.body ?? "");
+// The plan reads upward to today: the next step sits just above the line.
+const ahead = P.next.slice().reverse();
 ---
 
 <Base
   title="deeptrace-bench"
-  description="Do deepfake detectors work on South Asian speech and faces? Open detectors run on South Asian audio and video under one evaluation setup."
-  section="overview"
-  sections={[
-    { href: "#answer", text: "The short answer" },
-    { href: "#status", text: "Where the work stands" },
-  ]}
+  description="Open deepfake detectors on South Asian audio and video under one evaluation setup: what each round of work did, and what comes next."
+  current="timeline"
 >
-  <header class="mast home">
-    <div class="kicker">Colombo HCI Lab · Deepfake detection for South Asia · Phase 2</div>
-    <h1>Do deepfake detectors work on South Asian speech and faces?</h1>
-    <p class="lede">
-      Published open detectors, trained mostly on English speech and Western faces, scored zero-shot on South Asian
-      audio and video under one evaluation setup.
-    </p>
-    <div class="chips">
-      <a class="chip" href={`${base}results/#read-this-first`}><span class="dot" aria-hidden="true"></span>Evaluation rules {D.eval_status}: numbers can still move</a>
-      <span class="chip dim">Updated {D.built}</span>
-    </div>
-  </header>
-
-  <section id="answer" class="block">
-    <header>
-      <div class="kicker">The short answer</div>
-      <h2>It depends on what the detector learned from</h2>
-      <p>
-        AUC per detector on each open set: Urdu, two Bengali, IndicTTS (16 languages) and Hindi for audio; HiDF for
-        faces. Left of the dashed line is below chance.
+  <div class="stack">
+    <header class="mast">
+      <div class="kicker">Findings · as of {P.asOf}</div>
+      <h1>What's done, and what's next</h1>
+      <p class="lede">
+        Each round of work, newest first, and the plan. Numbers are on <a href={`${base}results/`}>Results</a>; where
+        things stand is in the <a href={`${base}docs/progress/#where-things-stand`}>full write-up</a>.
       </p>
     </header>
-    <div class="chart">
-      <div class="row colhead"><span>Detector</span><span>AUC on each set</span><span>Range</span></div>
-      {
-        O.tiers.map((t) => (
-          <div class="tier">
-            <div class="tierhead">
-              <span class={t.badge}>{t.label}</span>
-              <span>{t.title}</span>
-            </div>
-            {t.rows.map((r) => (
-              <div class="row">
-                <span class="name">{r.name}</span>
-                <div class="strip">
-                  {r.dots.map((d) => (
-                    <span class="dot" title={d.title} style={`left: ${d.left}; background: ${d.bg}`} />
-                  ))}
-                </div>
-                <span class="range">{r.range}</span>
-              </div>
-            ))}
-          </div>
-        ))
-      }
-      <div class="row axisrow">
-        <span></span>
-        <div class="axis"><span>0</span><span>0.5 coin flip</span><span>1 perfect</span></div>
-        <span></span>
-      </div>
-    </div>
-    <div class="cols-3">
-      {
-        lead.map((it) => (
-          <a class="card" href={`${base}results/#insights`}>
-            <span class="kicker">Finding {it.n}</span>
-            <strong>{it.label}</strong>
-            <span class="snip" set:html={it.body} />
-          </a>
-        ))
-      }
-    </div>
-    <a class="more" href={`${base}results/`}>All results and caveats →</a>
-  </section>
-
-  <section id="status" class="block">
-    <header>
-      <div class="kicker">As of {O.asOf}</div>
-      <h2>Where the work stands</h2>
-      <p>A detector counts once its adapter passes parity with the authors' code. Most unscored evalsets wait on access requests.</p>
-    </header>
-    <div class="cols-2">
-      <div class="bars">
-        <h3>Detectors</h3>
+    <section id="timeline">
+      <header>
+        <h2>Timeline</h2>
+        <p>Open decisions and planned work in grey, then completed rounds newest first, with commit ranges.</p>
+      </header>
+      <div id="open-decisions-that-shape-the-results">
         {
-          O.detectors.map((s) => (
-            <div class="bar">
-              <div class="top">
-                <span><span>{s.label}</span><span>{s.note}</span></span>
-                <b>{s.n}</b>
+          P.decisions.map((d) => (
+            <article class="tl ahead decision">
+              <span class="mark" aria-hidden="true" />
+              <div class="when"><span>Open decision</span></div>
+              <div>
+                {d.code ? <code>{d.label}</code> : <h3>{d.label}</h3>}
+                <div class="snip" set:html={d.body} />
               </div>
-              <div class="track"><div style={`width: ${s.w}`} /></div>
-            </div>
+            </article>
           ))
         }
       </div>
-      <div class="bars">
-        <h3>Evalsets</h3>
+      <div id="next">
         {
-          O.evalsets.map((s) => (
-            <div class="bar">
-              <div class="top">
-                <span><span>{s.label}</span><span>{s.note}</span></span>
-                <b>{s.n}</b>
+          ahead.map((n) => (
+            <article class={`tl ahead${n.now ? " now" : ""}`}>
+              <span class="mark" aria-hidden="true" />
+              <div class="when">{n.now ? <span class="chip">Now</span> : <span>Planned</span>}</div>
+              <div>
+                <h3>{n.label}</h3>
+                <div class="snip" set:html={n.body} />
               </div>
-              <div class="track"><div style={`width: ${s.w}`} /></div>
-            </div>
+            </article>
           ))
         }
-        <div class="foot">{O.runs} detector–evalset pairs scored in total.</div>
       </div>
-    </div>
-    <div class="cols-2">
+      <div class="tl today">
+        <span class="mark" aria-hidden="true" />
+        <span>Today</span>
+        <span>As of {P.asOf}</span>
+      </div>
       {
-        O.latest && (
-          <a class="card tint" href={`${base}progress/#timeline`}>
-            <span class="kicker">Latest round · {O.latest.date}</span>
-            <strong>{O.latest.title}</strong>
-            <span class="more">Timeline →</span>
-          </a>
-        )
+        P.timeline.map((t) => (
+          <article class="tl">
+            <span class="mark" aria-hidden="true" />
+            <div class="when">
+              <time datetime={t.date}>{t.date}</time>
+              {t.latest && <span class="tag">Latest</span>}
+            </div>
+            <div>
+              <h3>{t.title}</h3>
+              {t.commits && <div class="snip commits" set:html={t.commits} />}
+              <div class="snip" set:html={t.body} />
+            </div>
+          </article>
+        ))
       }
-      <a class="card tint" href={`${base}progress/#next`}>
-        <span class="kicker">Up next</span>
-        <ol>{O.next.map((x) => <li>{x.label}</li>)}</ol>
-        <span class="more">The full plan →</span>
-      </a>
-    </div>
-  </section>
-
+    </section>
+  </div>
 </Base>
-
-<script is:inline define:vars={{ base, legacy: LEGACY }}>
-  // Links to the old single status page (#runs, #coverage ...) land where that section now lives.
-  const to = legacy[location.hash.slice(1)];
-  if (to) location.replace(base + to);
-</script>

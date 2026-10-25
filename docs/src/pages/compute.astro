@@ -1,0 +1,35 @@
+---
+// What a run costs: parameters, FLOPs, GPU time and memory per model, and the estimated time for
+// a full evalset, from the measured profiles in src/reference/status.json.
+import ComputeTable from "../components/ComputeTable.astro";
+import EstimateTable from "../components/EstimateTable.astro";
+import Base from "../layouts/Base.astro";
+import { D } from "../lib/status";
+
+const gpu = D.models.find((m) => m.profile?.gpu)?.profile;
+const gpuIntro = gpu
+  ? `Forward pass only, model loaded, one ${gpu.gpu}, ${gpu.precision}. Audio per 4 s window; video per face crop, 32 frames per video for most models.`
+  : "Forward pass only, model loaded. Audio per 4 s window; video per face crop, 32 frames per video for most models.";
+---
+
+<Base
+  title="Compute cost · deeptrace-bench"
+  description="What each detector in deeptrace-bench costs to run: parameters, FLOPs, GPU time and memory, and the time for a full evalset."
+  current="compute"
+>
+  <div class="page">
+    <header class="mast">
+      <div class="kicker">Models and datasets</div>
+      <h1>Compute cost</h1>
+      <p class="lede">{gpuIntro}</p>
+    </header>
+    <section class="panel">
+      <div class="scroll"><ComputeTable /></div>
+      <h3>Estimated time for a full evalset</h3>
+      <p class="note" style="font-size: 0.92rem">
+        Model time only, from the measured time per window. Grey: wall time of a real run, usually I/O-bound.
+      </p>
+      <div class="scroll"><EstimateTable /></div>
+    </section>
+  </div>
+</Base>

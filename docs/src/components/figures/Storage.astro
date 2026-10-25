@@ -1,0 +1,22 @@
+---
+// Where things live on Curnagl, by how long they last.
+import { FG } from "../../lib/figures";
+---
+
+<figure class="fig">
+            <div style="border: 1px solid var(--rule); background: var(--card); padding: 20px; display: grid; grid-template-columns: var(--f-three); gap: 20px; min-width: 0">
+              {FG.storage.map((g) => (<Fragment>
+                <div style="display: grid; gap: 10px; align-content: start; min-width: 0">
+                  <div style={`border-bottom: 2px ${g.bs} ${g.rule}; padding-bottom: 6px; font: 500 12px/1.4 var(--mono)`}>{g.label}</div>
+                  {g.items.map((s) => (<Fragment>
+                    <div style={`border: 1px ${g.bs} var(--rule-2); background: var(--paper); padding: 10px 12px; display: grid; gap: 4px; min-width: 0`}>
+                      <code style="font: 500 12.5px/1.35 var(--mono); overflow-wrap: anywhere">{s.path}</code>
+                      <span style="font: 400 11.5px/1.4 var(--mono); color: var(--muted)">{s.meta}</span>
+                      <span style="font-size: 0.86rem; line-height: 1.4">{s.body}</span>
+                    </div>
+                  </Fragment>))}
+                </div>
+              </Fragment>))}
+            </div>
+            <figcaption><strong>Where things live on Curnagl, by how long they last.</strong> Point <code>UV_CACHE_DIR</code> and <code>UV_PROJECT_ENVIRONMENT</code> at <code>/work</code>, with <code>UV_LINK_MODE=copy</code>.</figcaption>
+          </figure>

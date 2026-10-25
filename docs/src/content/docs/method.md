@@ -1,8 +1,6 @@
 ---
 title: "How it works"
 description: "From a published detector to one trusted number: the pipeline, the checks along it, the terms every doc uses, and the repo's layout"
-group: start
-order: 1
 ---
 
 deeptrace-bench runs published, open deepfake detectors on South Asian audio and video under one evaluation setup, and reports each result overall and per group (language, generator, gender, race). Each step below is one script; three checks decide whether a number counts.

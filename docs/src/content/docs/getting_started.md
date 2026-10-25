@@ -1,8 +1,6 @@
 ---
 title: "Getting started"
 description: "Install the harness, run the smoke test, and read its report"
-group: start
-order: 2
 ---
 
 ## What you need

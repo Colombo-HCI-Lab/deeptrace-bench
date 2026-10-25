@@ -1,0 +1,34 @@
+---
+// The largest score difference per checked model, on a log scale.
+import { FG, type parityDots } from "../../lib/figures";
+interface Props {
+  dots: ReturnType<typeof parityDots>;
+}
+const { dots } = Astro.props;
+---
+
+<figure class="fig">
+            <div style="border: 1px solid var(--rule); background: var(--card); padding: 20px; display: grid; gap: 14px; min-width: 0">
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font: 500 11.5px/1.4 var(--mono)"><span style="color: var(--muted)">Largest score difference, adapter vs upstream · log scale</span><span style="color: var(--accent-ink)">| tolerance 1e-3</span></div>
+              <div style="display: grid; gap: 0; min-width: 0">
+                {dots.map((d) => (<Fragment>
+                  <div title={d.title} style="display: grid; grid-template-columns: var(--f-pd); gap: 0 14px; align-items: center; height: 24px">
+                    <span style="font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{d.name}</span>
+                    <div style="position: relative; height: 100%; margin: 0 6px">
+                      <span style={`position: absolute; left: ${FG.ptol}; right: -6px; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, transparent 0 4px, var(--tol) 4px 5px)`}></span>
+                      <span style="position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--rule)"></span>
+                      <span style={`position: absolute; left: ${FG.ptol}; top: 0; bottom: 0; border-left: 1.5px solid var(--accent)`}></span>
+                      <span style={`position: absolute; top: 50%; left: ${d.left}; width: 10px; height: 10px; border-radius: 50%; background: ${d.bg}; border: 1.5px solid var(--good); transform: translate(-50%, -50%)`}></span>
+                    </div>
+                    <span style="font: 400 12px/1 var(--mono); text-align: right">{d.val}</span>
+                  </div>
+                </Fragment>))}
+                <div style="display: grid; grid-template-columns: var(--f-pd); gap: 0 14px; padding-top: 8px">
+                  <span></span>
+                  <div style="position: relative; height: 14px; margin: 0 6px; font: 400 11px/1 var(--mono); color: var(--muted)">{FG.pticks.map((t) => (<Fragment><span style={`position: absolute; left: ${t.left}; transform: ${t.tf}; white-space: nowrap`}>{t.t}</span></Fragment>))}</div>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+            <figcaption><strong>Every checked model sits well inside the tolerance.</strong> The fairseq-based audio models differ most; DF Arena's scores match exactly. Hover a row for its inputs.</figcaption>
+          </figure>

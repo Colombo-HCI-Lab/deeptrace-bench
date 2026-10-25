@@ -1,8 +1,6 @@
 ---
 title: "The store (`DTB_ROOT`)"
 description: "The DTB_ROOT tree: what each folder holds, naming rules, the smoke namespace, what's safe to delete"
-group: working
-order: 1
 ---
 
 Everything large or item-level lives outside git, in the folder `DTB_ROOT` names in `.env`. Which script writes which folder: [the pipeline](method.md#the-pipeline).

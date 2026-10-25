@@ -1,51 +1,145 @@
 ---
-// One doc: its title, a section index from its H2s (in the sidebar, and above the text on narrow
-// screens), and the Markdown.
-import type { MarkdownHeading } from "astro";
-import { GROUPS } from "../lib/docs";
+// One doc: its group, title and description, a bar of its sections (unless the nav lists them),
+// and the Markdown, with the doc's figures (lib/figures.ts) set between its blocks.
+import { getEntry } from "astro:content";
+import DatasetsTable from "../components/DatasetsTable.astro";
+import ModelsTable from "../components/ModelsTable.astro";
+import Crops from "../components/figures/Crops.astro";
+import Faces from "../components/figures/Faces.astro";
+import Jobs from "../components/figures/Jobs.astro";
+import Namespaces from "../components/figures/Namespaces.astro";
+import Pairing from "../components/figures/Pairing.astro";
+import Parity from "../components/figures/Parity.astro";
+import ParityDots from "../components/figures/ParityDots.astro";
+import Recipe from "../components/figures/Recipe.astro";
+import RunId from "../components/figures/RunId.astro";
+import Sampler from "../components/figures/Sampler.astro";
+import SmokeFlow from "../components/figures/SmokeFlow.astro";
+import Storage from "../components/figures/Storage.astro";
+import Threshold from "../components/figures/Threshold.astro";
+import Verdicts from "../components/figures/Verdicts.astro";
+import Windows from "../components/figures/Windows.astro";
+import { docView } from "../lib/docs";
+import { FIGS, parityDots, recipe } from "../lib/figures";
+import { RAIL_GROUP } from "../lib/nav";
 import Base from "./Base.astro";
 
 interface Props {
-  id: string;
-  title: string;
-  description: string;
-  group: keyof typeof GROUPS;
-  headings: MarkdownHeading[];
+  slug: string;
 }
 
-const { id, title, description, group, headings } = Astro.props;
-const sections = headings.filter((h) => h.depth === 2);
+const base = import.meta.env.BASE_URL;
+const v = await docView(Astro.props.slug);
 // A title may carry a code span, as `DTB_ROOT` does.
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
-const titleHtml = esc(title).replace(/`([^`]+)`/g, "<code>$1</code>");
+const titleHtml = esc(v.title).replace(/`([^`]+)`/g, "<code>$1</code>");
+const showSections = v.sections.length > 1 && v.group !== RAIL_GROUP;
+
+// Cut the blocks wherever a figure goes; each piece carries the figures that follow it.
+const at = new Map<number, string[]>();
+for (const [h, off, key] of FIGS[v.slug] ?? []) {
+  const i = h ? v.blocks.findIndex((b) => b.id === h) : -1;
+  if (h && i < 0) continue;
+  const p = Math.min(v.blocks.length, (h ? i + 1 : 0) + off);
+  at.set(p, [...(at.get(p) ?? []), key]);
+}
+const cuts = [...at.keys()].sort((a, b) => a - b);
+let s = 0;
+const chunks = [...cuts, v.blocks.length].map((p, j) => {
+  const html = v.blocks
+    .slice(s, p)
+    .map((b) => b.html)
+    .join("\n");
+  s = p;
+  return { html, figs: j < cuts.length ? at.get(p)! : [] };
+});
+// The figures that need nothing from the doc.
+const FIGURE: Record<string, typeof Pairing> = {
+  pairing: Pairing,
+  windows: Windows,
+  faces: Faces,
+  threshold: Threshold,
+  verdicts: Verdicts,
+  runid: RunId,
+  namespaces: Namespaces,
+  smokeflow: SmokeFlow,
+  crops: Crops,
+  parity: Parity,
+  sampler: Sampler,
+  storage: Storage,
+  jobs: Jobs,
+};
+const R = recipe(v.slug, v.sections);
+const dots = v.slug === "models" ? parityDots((await getEntry("docs", "models"))!.body ?? "") : [];
 ---
 
-<Base
-  title={`${title.replaceAll("`", "")} · deeptrace-bench`}
-  description={description}
-  section="docs"
-  current={id}
-  sections={sections.map((h) => ({ href: `#${h.slug}`, text: h.text }))}
->
+<Base title={`${v.title.replaceAll("`", "")} · deeptrace-bench`} description={v.description} current={v.slug}>
   <div class="page">
     <header class="mast">
-      <div class="kicker">Docs · {GROUPS[group]}</div>
+      <div class="kicker">{v.group || "Docs"}</div>
       <h1 set:html={titleHtml} />
-      <p class="lede">{description}</p>
+      <p class="lede">{v.description}</p>
     </header>
     {
-      sections.length > 1 && (
-        <nav class="index" aria-label="Sections">
+      showSections && (
+        <nav class="index" aria-label="On this page">
           <ol>
-            {sections.map((h) => (
+            {v.sections.map((h) => (
               <li>
-                <a href={`#${h.slug}`}>{h.text}</a>
+                <a href={h.href}>{h.text}</a>
               </li>
             ))}
           </ol>
         </nav>
       )
     }
-    <article class="prose"><slot /></article>
+    <article class="prose">
+      {
+        chunks.map((c) => (
+          <Fragment>
+            <Fragment set:html={c.html} />
+            {c.figs.map((k) =>
+              k === "modeltable" ? (
+                <section id="all-models" class="table-sec">
+                  <h2>All models</h2>
+                  <p>
+                    Training data of the released weights, the authors' headline numbers (hover for the table cited)
+                    and our zero-shot runs. * marks a run with a caveat; see <a href={`${base}results/#all-runs`}>all runs</a>.
+                  </p>
+                  <div class="scroll">
+                    <ModelsTable />
+                  </div>
+                  <p class="note">
+                    Published numbers are as reported, under each paper's protocol (frame- or video-level, its own
+                    preprocessing), so they aren't directly comparable with ours. DeepfakeBench rows are from its
+                    benchmark (frame-level, FF++ c23 training), since those are the weights we run. Checked 2026-10-12.
+                  </p>
+                </section>
+              ) : k === "datatable" ? (
+                <section id="all-datasets" class="table-sec">
+                  <h2>All datasets</h2>
+                  <p>
+                    South Asian sets are the target; reproduction sets check our numbers against published ones;
+                    real-reference sets supply bona fide speech for fake-only datasets.
+                  </p>
+                  <div class="scroll">
+                    <DatasetsTable />
+                  </div>
+                </section>
+              ) : k === "recipe" ? (
+                R && <Recipe recipe={R} />
+              ) : k === "paritydots" ? (
+                dots.length > 0 && <ParityDots dots={dots} />
+              ) : (
+                (() => {
+                  const Fig = FIGURE[k];
+                  return Fig ? <Fig /> : null;
+                })()
+              ),
+            )}
+          </Fragment>
+        ))
+      }
+    </article>
   </div>
 </Base>

@@ -1,8 +1,6 @@
 ---
 title: "Evaluation"
 description: "How a score becomes a number: evalsets, preprocessing, the settings still open, metrics, contamination verdicts, the shortcut probe, run flags"
-group: benchmark
-order: 1
 ---
 
 Every setting lives in [`configs/eval/default.yaml`](/configs/eval/default.yaml), still `proposed` until the team settles [decision 5](progress.md#open-decisions-that-shape-the-results). A changed setting changes every run id ([naming rules](store_layout.md#naming-rules)), so results from different settings never mix. Terms such as evalset, parity and score direction are defined in [How it works](method.md#key-terms).

@@ -1,0 +1,38 @@
+---
+// From clip to score for audio: windows, tiling and too_short.
+import { FG } from "../../lib/figures";
+---
+
+<figure class="fig">
+            <div style="border: 1px solid var(--rule); background: var(--card); padding: 20px; display: grid; gap: 18px; min-width: 0">
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font: 500 11.5px/1.4 var(--mono); color: var(--muted)"><span>Audio · 16 kHz mono · windows of 64,600 samples, about 4 s</span><span>example scores</span></div>
+              <div style="display: grid; grid-template-columns: var(--f-win); gap: 16px 20px; align-items: center">
+                <div style="display: grid; gap: 2px"><strong style="font-weight: 600; font-size: 0.95rem">12 s clip</strong><span style="font-size: 0.84rem; color: var(--muted)">cut into 3 windows</span></div>
+                <div style="display: grid; gap: 6px; min-width: 0">
+                  <div aria-hidden="true" style="position: relative; height: 42px">
+                    <div style="position: absolute; top: 5px; bottom: 5px; left: 2px; right: 6px; display: flex; align-items: center; gap: 1px">{FG.wLong.map((b) => (<Fragment><span style={`flex: 1 1 0; height: ${b.h}; background: var(--stone)`}></span></Fragment>))}</div>
+                    {FG.wins.map((w) => (<Fragment><span style={`position: absolute; top: 0; bottom: 0; left: ${w.l}; width: ${w.w}; border: 1.5px solid var(--ink)`}></span></Fragment>))}
+                  </div>
+                  <div style="position: relative; height: 16px; font: 500 12px/16px var(--mono)">{FG.wins.map((w) => (<Fragment><span style={`position: absolute; left: ${w.l}; width: ${w.w}; text-align: center`}>{w.s}</span></Fragment>))}</div>
+                </div>
+                <div style="display: grid; gap: 2px; font-size: 0.86rem; line-height: 1.4"><span><span style="font: 500 11.5px/1.4 var(--mono); color: var(--muted)">clip score</span> <b style="font: 500 15px/1 var(--mono)">{FG.wMean}</b></span><span style="color: var(--muted)">the mean of its windows</span></div>
+
+                <div style="display: grid; gap: 2px"><strong style="font-weight: 600; font-size: 0.95rem">2.5 s clip</strong><span style="font-size: 0.84rem; color: var(--muted)">shorter than a window</span></div>
+                <div style="display: grid; gap: 6px; min-width: 0">
+                  <div aria-hidden="true" style="position: relative; height: 42px; width: 33.333%; min-width: 96px">
+                    <div style="position: absolute; top: 5px; bottom: 5px; left: 2px; right: 6px; display: flex; align-items: center; gap: 1px">{FG.wShort.map((b) => (<Fragment><span style={`flex: 1 1 0; height: ${b.h}; background: ${b.c}`}></span></Fragment>))}</div>
+                    <span style="position: absolute; top: 0; bottom: 0; left: 0; width: calc(100% - 4px); border: 1.5px solid var(--ink)"></span>
+                  </div>
+                  <div style="width: 33.333%; min-width: 96px; text-align: center; font: 500 12px/16px var(--mono)">0.71</div>
+                </div>
+                <div style="display: grid; gap: 2px; font-size: 0.86rem; line-height: 1.4"><span><span style="font: 500 11.5px/1.4 var(--mono); color: var(--muted)">clip score</span> <b style="font: 500 15px/1 var(--mono)">0.71</b></span><span style="color: var(--muted)">tiled up to one window, as AASIST does (light: the repeat)</span></div>
+
+                <div style="display: grid; gap: 2px"><strong style="font-weight: 600; font-size: 0.95rem">0.6 s clip</strong><span style="font-size: 0.84rem; color: var(--muted)">under 1 s</span></div>
+                <div aria-hidden="true" style="position: relative; height: 42px; width: 5%; min-width: 16px">
+                  <div style="position: absolute; top: 5px; bottom: 5px; left: 0; right: 0; display: flex; align-items: center; gap: 1px">{FG.wTiny.map((b) => (<Fragment><span style={`flex: 1 1 0; height: ${b.h}; background: var(--stone)`}></span></Fragment>))}</div>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: 0.86rem; line-height: 1.4"><code style="font: 500 12px/1 var(--mono); padding: 4px 6px; background: var(--bad); color: var(--paper)">too_short</code><span style="color: var(--muted)">counted, not scored</span></div>
+              </div>
+            </div>
+            <figcaption><strong>From clip to score, for audio.</strong> Every audio model sees the same windows, scores each one, and the clip gets their mean.</figcaption>
+          </figure>

@@ -1,8 +1,6 @@
 ---
 title: "Adding a model"
 description: "Recipe: config, pinned weights, adapter, smoke test, parity (GenD as the worked example)"
-group: working
-order: 2
 ---
 
 In plain words: adding a model means teaching the harness to run someone else's detector exactly as its authors did. You never rewrite the model. You write down where its code and weights come from and everything it was trained on ([step 1](#1-config)), lock those exact files ([step 2](#2-fetch-and-pin)), write a thin adapter that loads the authors' code and turns our prepared inputs into one fake probability per window or frame ([step 3](#3-adapter)), check the plumbing on a few clips ([step 4](#4-prove-it-runs)), and then prove the adapter scores like the original before any of its numbers count ([step 5](#5-before-any-result-counts)).

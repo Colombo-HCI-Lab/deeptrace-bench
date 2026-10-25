@@ -1,8 +1,6 @@
 ---
 title: "Results"
 description: "What each experiment asked, what the zero-shot runs so far show, and how far to trust each number"
-group: findings
-order: 1
 ---
 
 ## Read this first

@@ -1,0 +1,26 @@
+---
+// Curnagl's login node fetches; compute nodes compute.
+---
+
+<figure class="fig">
+            <div style="border: 1px solid var(--rule); background: var(--card); padding: 20px; display: grid; grid-template-columns: var(--f-job); gap: 14px; align-items: stretch; min-width: 0">
+              <div style="border: 1px solid var(--ink); background: var(--paper); padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; font-size: 0.86rem; line-height: 1.4">
+                <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px"><strong style="font-weight: 600; font-size: 0.98rem">Login node</strong><span style="font: 500 11px/1 var(--mono); padding: 4px 6px; background: var(--ink); color: var(--paper)">internet</span></div>
+                <div style="display: grid; gap: 4px; font: 400 12px/1.4 var(--mono)"><code>uv sync</code><code>setup_models.py</code><code>setup_datasets.py</code><code>sbatch …</code></div>
+                <span style="color: var(--muted)">Moving files is allowed here; computing is not.</span>
+              </div>
+              <span aria-hidden="true" style="align-self: center; justify-self: center; display: grid; gap: 4px; justify-items: center; font: 500 11px/1 var(--mono); color: var(--muted)"><span>sbatch</span><span style="font-size: 15px"><i class="arr arr3"></i></span></span>
+              <div style="border: 1px solid var(--ink); background: var(--paper); padding: 14px; display: grid; gap: 12px; align-content: start; min-width: 0; font-size: 0.86rem; line-height: 1.4">
+                <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px"><strong style="font-weight: 600; font-size: 0.98rem">Compute nodes</strong><span style="font: 500 11px/1 var(--mono); padding: 3px 5px; border: 1px dashed var(--muted); color: var(--muted)">no internet assumed · HF_HUB_OFFLINE=1</span></div>
+                <div style="display: flex; flex-direction: var(--f-dir); gap: 8px; align-items: stretch">
+                  <div style="flex: var(--f-item); border: 1px solid var(--rule); background: var(--card); padding: 10px; display: grid; gap: 4px; align-content: start; min-width: 0"><code style="font: 500 12px/1.4 var(--mono); overflow-wrap: anywhere">prepare.sbatch</code><span style="color: var(--muted)">CPU · builds manifests</span></div>
+                  <span aria-hidden="true" style="flex: none; align-self: center; font: 500 15px/1 var(--mono); color: var(--muted)"><i class="arr"></i></span>
+                  <div style="flex: var(--f-item-w); border: 1px solid var(--rule); background: var(--card); padding: 10px; display: grid; gap: 6px; align-content: start; min-width: 0"><code style="font: 500 12px/1.4 var(--mono); overflow-wrap: anywhere">score.sbatch --array=0-7</code><div aria-hidden="true" style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; font: 500 11px/1 var(--mono); text-align: center"><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">0</span><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">1</span><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">2</span><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">3</span><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">4</span><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">5</span><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">6</span><span style="padding: 5px 0; background: var(--ink); color: var(--paper)">7</span></div><span style="color: var(--muted)">8 shards on gpu-l40, one GPU each</span></div>
+                  <span aria-hidden="true" style="flex: none; align-self: center; font: 500 15px/1 var(--mono); color: var(--muted)"><i class="arr"></i></span>
+                  <div style="flex: var(--f-item); border: 1px solid var(--rule); background: var(--card); padding: 10px; display: grid; gap: 4px; align-content: start; min-width: 0"><code style="font: 500 12px/1.4 var(--mono); overflow-wrap: anywhere">evaluate.sbatch</code><span style="color: var(--muted)">Waits until every shard succeeds (afterok)</span></div>
+                </div>
+              </div>
+              <div style="grid-column: 1 / -1; background: var(--tint); padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; font-size: 0.86rem; line-height: 1.4"><code style="font: 500 12px/1.4 var(--mono); overflow-wrap: anywhere">/work/&lt;project&gt;/deeptrace-bench</code><span>DTB_ROOT: both sides read and write the same store.</span></div>
+            </div>
+            <figcaption><strong>The login node fetches; compute nodes compute.</strong> Scoring is sharded and resumable, so a shard that hits the time limit can simply be resubmitted. Jobs run at most 3 days.</figcaption>
+          </figure>

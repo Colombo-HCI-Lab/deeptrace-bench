@@ -1,35 +1,56 @@
 ---
-// Every doc by group, with its description, from the docs' front matter.
-import { getCollection } from "astro:content";
+// Every doc in nav order, with its description from the doc's front matter, and the guided pages
+// that stand in for three of them.
+import { getEntry } from "astro:content";
 import Base from "../../layouts/Base.astro";
-import { GROUPS, docHref } from "../../lib/docs";
+import { NAV, PAGES, href, leaves } from "../../lib/nav";
 
-const docs = (await getCollection("docs")).sort((a, b) => a.data.order - b.data.order);
-const plain = (s: string) => s.replaceAll("`", "");
+const base = import.meta.env.BASE_URL;
+const PAGE_ABOUT: Record<string, string> = {
+  timeline: "What each round of work did, and what comes next (progress.md laid out)",
+  results: "What the runs show, with the numbers and their caveats (results.md laid out)",
+  method: "The pipeline, the checks along it and the terms the site uses (method.md laid out)",
+  coverage: "Every detector against every evalset: AUC, or the estimated GPU time",
+  compute: "What each detector costs to run",
+};
+const groups = await Promise.all(
+  NAV.map(async (g) => ({
+    label: g.label,
+    rows: await Promise.all(
+      leaves(g.items).map(async (l) => ({
+        label: l.label,
+        href: href(l.id),
+        about: PAGES.includes(l.id) ? PAGE_ABOUT[l.id] : ((await getEntry("docs", l.id))?.data.description ?? ""),
+      })),
+    ),
+  })),
+);
 ---
 
-<Base title="Docs · deeptrace-bench" description="Every doc, by group, with what each covers." section="docs">
-  <div class="stack">
+<Base title="Every doc · deeptrace-bench" description="Every page and doc, by group, with what each covers." current="docs">
+  <div class="page">
     <header class="mast">
       <div class="kicker">Docs</div>
       <h1>Every doc</h1>
-      <p class="lede">New here? Start with <a href={docHref("method")}>How it works</a>, then <a href={docHref("getting_started")}>Getting started</a>.</p>
+      <p class="lede">
+        New here? Start with <a href={href("method")}>How it works</a>, then <a href={href("getting_started")}>Getting started</a>.
+        The full write-ups behind the guided pages are <a href={`${base}docs/progress/`}>Progress</a>,
+        <a href={`${base}docs/results/`}>Results</a> and <a href={`${base}docs/method/`}>How it works</a>.
+      </p>
     </header>
     <article class="prose">
       {
-        Object.entries(GROUPS).map(([group, label]) => (
+        groups.map((g) => (
           <section>
-            <h2>{label}</h2>
+            <h2>{g.label}</h2>
             <table>
               <tbody>
-                {docs
-                  .filter((d) => d.data.group === group)
-                  .map((d) => (
-                    <tr>
-                      <td><a href={docHref(d.id)}>{plain(d.data.title)}</a></td>
-                      <td>{d.data.description}</td>
-                    </tr>
-                  ))}
+                {g.rows.map((r) => (
+                  <tr>
+                    <td><a href={r.href}>{r.label}</a></td>
+                    <td>{r.about}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </section>

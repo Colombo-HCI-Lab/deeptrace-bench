@@ -1,26 +1,21 @@
 ---
-// Every page: fonts, the shared styles, the site bar, the one sidebar and the footer.
-import Sidebar, { type Section } from "../components/Sidebar.astro";
+// Every page: fonts, the shared styles, the site bar, the one nav, the previous and next pages
+// and the footer.
+import Sidebar from "../components/Sidebar.astro";
 import "../styles/site.css";
+import { pager } from "../lib/nav";
 import { D } from "../lib/status";
 
 interface Props {
   title: string;
   description: string;
-  section: "overview" | "results" | "progress" | "method" | "inventory" | "docs";
-  // The doc being shown, for doc pages; the guided pages map from section.
-  current?: string;
-  // The page's own sections, listed under it in the sidebar.
-  sections?: Section[];
+  // The page's nav id (lib/nav.ts), or the doc it shows.
+  current: string;
 }
 
-const { title, description, section, current, sections = [] } = Astro.props;
+const { title, description, current } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const here =
-  current ??
-  { overview: "home", results: "results", progress: "progress", method: "method", inventory: "inventory", docs: "docs-index" }[
-    section
-  ];
+const { prev, next } = pager(current);
 ---
 
 <!doctype html>
@@ -35,37 +30,44 @@ const here =
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
     />
-    <script is:inline>document.documentElement.classList.add("js");</script>
   </head>
   <body>
     <header class="site">
       <div class="in">
         <a class="name" href={base}>deeptrace-bench</a>
-        <a class="gh" href="https://github.com/Colombo-HCI-Lab/deeptrace-bench" target="_blank" rel="noopener">GitHub ↗</a>
-        <details class="menu">
-          <summary>Menu</summary>
-          <nav aria-label="Site"><Sidebar current={here} sections={sections} /></nav>
-        </details>
+        <div class="right">
+          <a class="gh" href="https://github.com/Colombo-HCI-Lab/deeptrace-bench" target="_blank" rel="noopener">GitHub ↗</a>
+          <details class="menu">
+            <summary><span class="open">Menu</span><span class="close">Close</span></summary>
+            <nav aria-label="Site"><Sidebar current={current} /></nav>
+          </details>
+        </div>
       </div>
     </header>
     <div class="shell">
-      <nav class="side" aria-label="Site"><Sidebar current={here} sections={sections} /></nav>
-    <main class="wrap">
-      <slot />
-      <footer>
-        <span>Updated {D.built}.</span>
-        <span>
-          Rebuild the data with <code>uv run scripts/build_site.py</code> where DTB_ROOT is set; every push to main
-          redeploys the site.
-        </span>
-        <span>Colombo HCI Lab · <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench" target="_blank" rel="noopener">source</a></span>
-      </footer>
-    </main>
+      <aside class="side">
+        <nav aria-label="Site"><Sidebar current={current} /></nav>
+      </aside>
+      <main class="wrap">
+        <slot />
+        <nav class="pager" aria-label="Previous and next page">
+          <div>{prev && <a href={prev.href}><span>← Previous</span><span>{prev.label}</span></a>}</div>
+          <div>{next && <a class="next" href={next.href}><span>Next →</span><span>{next.label}</span></a>}</div>
+        </nav>
+        <footer>
+          <span>Updated {D.built} · Colombo HCI Lab</span>
+          <span>
+            Rebuild the data with <code>uv run scripts/build_site.py</code> where DTB_ROOT is set; every push to main
+            redeploys the site.
+          </span>
+          <span><a href={`${base}docs/`}>Every doc</a> · <a href="https://github.com/Colombo-HCI-Lab/deeptrace-bench" target="_blank" rel="noopener">source</a></span>
+        </footer>
+      </main>
     </div>
     <script is:inline>
-      // Mark the section in view in the sidebar, and close the phone menu once a link is chosen.
+      // Mark the section in view in the nav, and close the menu once a link is chosen.
       (() => {
         const links = [...document.querySelectorAll("a[data-sec]")];
         const ids = [...new Set(links.map((a) => a.dataset.sec))];
@@ -82,7 +84,7 @@ const here =
           mark();
         }
         const menu = document.querySelector("details.menu");
-        menu?.addEventListener("click", (e) => { if (e.target.closest("a")) menu.open = false; });
+        menu?.addEventListener("click", (e) => { if (e.target.closest("nav a")) menu.open = false; });
       })();
     </script>
   </body>

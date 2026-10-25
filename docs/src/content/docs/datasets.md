@@ -1,8 +1,6 @@
 ---
 title: "Datasets"
 description: "Every dataset: what we hold, how to get the rest and who has to ask, and what changes how its numbers read"
-group: benchmark
-order: 3
 ---
 
 Access checked on the live pages 2026-10-05; "In hand" as of 2026-10-12. Terms change, so recheck before depending on one. The configs (`configs/datasets/<id>.yaml`) are the source of truth, and `uv run scripts/setup_datasets.py --list` prints the current state. Contents, languages and sizes are in the [catalog](catalog.md#datasets); licence clauses that bind us beyond the licence name are in [Data policy](data_policy.md#licence-clauses-that-bind-us). Models are scored on evalsets built from these ([Evaluation](evaluation.md#evalsets-not-datasets)).

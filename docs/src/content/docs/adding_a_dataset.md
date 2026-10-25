@@ -1,8 +1,6 @@
 ---
 title: "Adding a dataset"
 description: "Recipe: config, builder, sampling, evalset (the two pipeline-test datasets as worked examples)"
-group: working
-order: 3
 ---
 
 In plain words: adding a dataset means teaching the harness to find every clip and know whether it is real or fake, with nobody labelling anything by hand. You describe where the data comes from, its licence and what it was made from ([step 1](#1-config)), write a builder that reads each clip's label from its path or the dataset's metadata and lists every clip in a manifest ([step 2](#2-builder)), try it on a few clips before downloading the lot ([step 3](#3-sample-it-then-build-the-manifest)), say exactly which clips get scored and how real and fake pair up in an evalset ([step 4](#4-evalset)), and run the smoke test ([step 5](#5-prove-it-runs)). Reading a label from a path before anything is downloaded is what makes sampling possible, so a new dataset can be tried in minutes.

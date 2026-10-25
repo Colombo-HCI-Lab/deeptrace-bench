@@ -1,0 +1,30 @@
+---
+// The steps of an adding doc at a glance, each linking to its section.
+interface Props {
+  recipe: NonNullable<ReturnType<typeof import("../../lib/figures").recipe>>;
+}
+const { recipe: R } = Astro.props;
+---
+
+<figure class="fig">
+            <div style="border: 1px solid var(--rule); background: var(--card); padding: 20px; min-width: 0">
+              <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: var(--f-rec); gap: 8px">
+                {R.steps.map((s) => (<Fragment>
+                  <li style="display: grid; min-width: 0">
+                    <a href={s.href} style="min-width: 0; display: grid; gap: 5px; align-content: start; padding: 12px; border: 1px solid var(--rule); border-top: 2px solid var(--accent); background: var(--paper); text-decoration: none; color: var(--ink)" class="h-bd">
+                      <span style="font: 500 12px/1 var(--mono); color: var(--accent-ink)">{s.n}</span>
+                      <strong style="font-weight: 600; font-size: 0.95rem; line-height: 1.25">{s.title}</strong>
+                      <code style="font: 400 11.5px/1.45 var(--mono); color: var(--ink-2); overflow-wrap: anywhere">{s.file}</code>
+                      <span style="font-size: 0.84rem; line-height: 1.4; color: var(--muted)">{s.note}</span>
+                    </a>
+                  </li>
+                </Fragment>))}
+                <li style="min-width: 0; display: grid; gap: 5px; align-content: start; padding: 12px; border-top: 2px solid var(--ink); background: var(--ink); color: var(--paper)">
+                  <span style="font: 500 12px/1 var(--mono); color: var(--rule-3)">Then</span>
+                  <strong style="font-weight: 600; font-size: 0.95rem; line-height: 1.25">{R.endTitle}</strong>
+                  <span style="font-size: 0.84rem; line-height: 1.4; color: var(--rule-2)">{R.endNote}</span>
+                </li>
+              </ol>
+            </div>
+            <figcaption><strong>The recipe at a glance.</strong> Each step links to its section below.</figcaption>
+          </figure>

@@ -11,7 +11,7 @@ export async function getStaticPaths() {
   const docs = await getCollection("docs");
   return [
     ...docs
-      .filter((d) => !GUIDED.has(d.id))
+      .filter((d) => !(d.id in GUIDED))
       .map((d) => ({ params: { slug: d.id }, props: { to: `${base}docs/${d.id}/`, title: d.data.title } })),
     ...Object.entries(MOVED).map(([slug, to]) => ({ params: { slug }, props: { to: base + to, title: slug } })),
   ];

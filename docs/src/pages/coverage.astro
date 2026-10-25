@@ -1,0 +1,58 @@
+---
+// Every detector against every evalset: the AUC of each run, or the estimated single-GPU time for
+// a full one, from src/reference/status.json (scripts/build_site.py writes it).
+import CoverageGrid from "../components/CoverageGrid.astro";
+import Base from "../layouts/Base.astro";
+import { D } from "../lib/status";
+
+const videoModels = D.models.filter((m) => m.modality === "video" || m.modality === "audio_video");
+const open = D.evalsets.filter((e) => e.modality !== "audio" && e.status === "ready").map((e) => e.id);
+const videoNote = D.runs.some((r) => videoModels.some((m) => m.id === r.model))
+  ? null
+  : `No video model has a full run yet. Open video evalsets: ${open.join(", ") || "none"}; the rest are waiting for access requests to be approved.`;
+---
+
+<Base
+  title="Coverage · deeptrace-bench"
+  description="Every detector against every evalset in deeptrace-bench: the AUC of each run, or the estimated GPU time for a full one."
+  current="coverage"
+>
+  <div class="page">
+    <header class="mast">
+      <div class="kicker">Models and datasets</div>
+      <h1>Coverage</h1>
+      <p class="lede">Every detector against every evalset: AUC, or the estimated single-GPU time for a full run.</p>
+    </header>
+    <section id="coverage" class="panel" data-mode="auc">
+      <div class="toggle" role="group" aria-label="Show in cells">
+        <button type="button" data-mode="auc" aria-pressed="true">AUC</button>
+        <button type="button" data-mode="time" aria-pressed="false">Estimated GPU time</button>
+      </div>
+      <div class="legend">
+        <span><i class="cell" style="background: var(--good)">0.99</i><i class="cell" style="background: color-mix(in oklab, var(--bad) 80%, var(--paper))">0.10</i>AUC: blue high, sienna below chance</span>
+        <span><i>*</i>has a caveat (hover)</span>
+        <span><i class="guard">⊘</i>refused: trained on this data</span>
+        <span><i>·</i>not run yet</span>
+        <span><i class="hatch"></i>waiting for data access</span>
+        <span><i class="na"></i>can't read this kind of input</span>
+      </div>
+      <h3>Audio</h3>
+      <div class="scroll"><CoverageGrid models={["audio"]} evalsets={["audio"]} /></div>
+      <h3>Video and audio-visual</h3>
+      <div class="scroll"><CoverageGrid models={["video", "audio_video"]} evalsets={["video", "image", "audio_video"]} /></div>
+      <p class="note">● adapter written / parity passed · ○ not yet. Italic column names are evalsets waiting for data access.</p>
+      {videoNote && <p class="note" style="font-size: 0.9rem">{videoNote}</p>}
+    </section>
+  </div>
+</Base>
+
+<script>
+  // AUC or estimated GPU time in the grids. Both are in the page; this only switches.
+  const coverage = document.getElementById("coverage")!;
+  for (const b of coverage.querySelectorAll<HTMLButtonElement>(".toggle button")) {
+    b.addEventListener("click", () => {
+      coverage.dataset.mode = b.dataset.mode;
+      for (const o of coverage.querySelectorAll(".toggle button")) o.setAttribute("aria-pressed", String(o === b));
+    });
+  }
+</script>

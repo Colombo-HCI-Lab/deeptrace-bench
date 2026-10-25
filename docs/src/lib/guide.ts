@@ -1,17 +1,24 @@
-// The guided pages (overview, Results, Progress, How it works): findings sliced out of
-// results.md, progress.md and method.md by heading, joined with status.json, and the diverging AUC colour scale. The
-// Markdown stays the source; these pages only lay it out.
+// The guided pages (the Timeline, Results, How it works): findings sliced out of progress.md,
+// results.md and method.md by heading, joined with status.json, and the diverging AUC colour
+// scale. The Markdown stays the source; these pages only lay it out.
 import { markdownToHtml } from "satteri";
 import { links } from "./links.mjs";
+import { mdLabels } from "./nav";
 import { D, dur, int, type Run } from "./status";
 
 const base = import.meta.env.BASE_URL;
 
-// Paper at 0.5, deepening to GOOD toward 1 and to BAD toward 0. Kept in step with site.css.
-export const PAPER = "#f6f7f9";
-export const TINT = "#edf0f3";
-export const GOOD = "oklch(0.5 0.1 165)";
-export const BAD = "oklch(0.5 0.1 35)";
+// Kept in step with site.css (--paper, --tint, --good, --bad).
+export const PAPER = "#fdfcfa";
+export const TINT = "#f5f1ec";
+export const GOOD = "oklch(0.47 0.07 220)";
+export const BAD = "oklch(0.47 0.14 45)";
+// The stepped scale: neutral tint near 0.5, then four bins each way, petrol above chance and
+// sienna below. Lightness and chroma per bin.
+const BIN_L = [0, 0.9, 0.79, 0.57, 0.47];
+const BIN_C = [0, 0.35, 0.6, 0.9, 1];
+const POS = [0.07, 220];
+const NEG = [0.14, 45];
 
 // Short names for the evalsets the findings talk about, with what each holds.
 export const EV: Record<string, [string, string]> = {
@@ -60,12 +67,16 @@ export interface Tone {
 
 export function tone(v: number): Tone {
   const d = Math.max(-1, Math.min(1, (v - 0.5) / 0.5));
-  const p = Math.round(Math.abs(d) * 100);
-  return { bg: `color-mix(in oklab, ${d >= 0 ? GOOD : BAD} ${p}%, ${PAPER})`, fg: p > 74 ? PAPER : "var(--ink)", solid: d >= 0 ? GOOD : BAD };
+  const k = Math.abs(d);
+  const b = k < 0.2 ? 0 : k < 0.5 ? 1 : k < 0.8 ? 2 : k < 0.94 ? 3 : 4;
+  const solid = d >= 0 ? GOOD : BAD;
+  if (!b) return { bg: TINT, fg: "var(--ink)", solid };
+  const [c, h] = d >= 0 ? POS : NEG;
+  return { bg: `oklch(${BIN_L[b]} ${(c * BIN_C[b]).toFixed(3)} ${h})`, fg: b >= 3 ? PAPER : "var(--ink)", solid };
 }
 
 // Snippets of a doc, rendered with the docs' own link rules.
-const md = (text: string) => (text.trim() ? markdownToHtml(text, { mdastPlugins: [links({ base })] }).html : "");
+const md = (text: string) => (text.trim() ? mdLabels(markdownToHtml(text, { mdastPlugins: [links({ base })] }).html) : "");
 // The same, for a table cell or a phrase: no paragraph around it.
 const mdi = (text: string) => md(text).replace(/^\s*<p>([\s\S]*)<\/p>\s*$/, "$1");
 
@@ -214,61 +225,6 @@ export function buildProgress(body: string) {
 }
 export type Progress = ReturnType<typeof buildProgress>;
 
-// ---------- Overview ----------
-export function buildOverview(P: Progress) {
-  const strip = (id: string, evs: string[]) => {
-    const rs = evs.map((e) => runs.get(`${id}|${e}`)).filter((r): r is Run => !!r);
-    if (!rs.length) return null;
-    const a = rs.map((r) => r.auc);
-    const lo = Math.min(...a);
-    const hi = Math.max(...a);
-    return {
-      name: name(id),
-      range: rs.length > 1 ? `${fmt3(lo)}–${fmt3(hi)}` : fmt3(lo),
-      dots: rs.map((r) => ({ left: pos(r.auc), bg: tone(r.auc).solid, title: `${evName(r.evalset)}: AUC ${fmt3(r.auc)}` })),
-    };
-  };
-  type Strip = NonNullable<ReturnType<typeof strip>>;
-  const tiers = TIERS.map((t) => ({
-    label: t.label,
-    title: t.title,
-    badge: badge(t.kind),
-    rows: t.models.map((id) => strip(id, SA)).filter((r): r is Strip => !!r),
-  })).filter((t) => t.rows.length);
-  const vid = D.runs
-    .filter((r) => r.evalset === "hidf_video")
-    .sort((a, b) => b.auc - a.auc)
-    .map((r) => strip(r.model, ["hidf_video"]))
-    .filter((r): r is Strip => !!r);
-  if (vid.length)
-    tiers.push({
-      label: "Faces · HiDF",
-      title: "Video detectors on commercial face swaps (not South Asian; provisional)",
-      badge: badge("mid"),
-      rows: vid,
-    });
-  const steps = (arr: [string, number, string][]) => arr.map(([label, n, note]) => ({ label, n, note, w: pos(n, 0, arr[0][1] || 1) }));
-  const last = P.timeline[0];
-  return {
-    tiers,
-    detectors: steps([
-      ["Configured", D.models.length, "paper, code and weights pinned"],
-      ["Adapter written", D.models.filter((m) => m.adapter).length, "runs under the shared interface"],
-      ["Parity passed", D.models.filter((m) => m.parity).length, "matches the authors' code"],
-      ["Scored in full", new Set(D.runs.map((r) => r.model)).size, "on at least one evalset"],
-    ]),
-    evalsets: steps([
-      ["Defined", D.evalsets.length, "exact slices of a dataset"],
-      ["Data in hand", D.evalsets.filter((e) => e.status === "ready").length, "the rest wait on access requests"],
-      ["Scored", new Set(D.runs.map((r) => r.evalset)).size, "by at least one detector"],
-    ]),
-    runs: D.runs.length,
-    next: P.next.slice(0, 3),
-    asOf: P.asOf || D.built,
-    latest: last ? { date: last.date, title: last.title } : null,
-  };
-}
-
 // ---------- At a glance: every detector on every dataset ----------
 // The grid's columns: reproduction sets, the South Asian sets, then video, ending with FF++,
 // which every video detector trained on and nobody has scored yet.
@@ -279,6 +235,7 @@ const VIDEO_GROUP = { label: "Faces", title: "Video detectors, all trained on FF
 export interface GridCell {
   kind: "run" | "trained" | "na" | "todo";
   text: string;
+  eer?: string;
   style?: string;
   title: string;
   overlap?: boolean;
@@ -299,10 +256,13 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) 
     const trained = trainedOn(id, ev);
     if (r) {
       const t = tone(r.auc);
+      // EER on the same scale, lower is better: 0 colours like a perfect AUC.
+      const e = tone(1 - r.eer);
       return {
         kind: "run",
         text: fmt3(r.auc),
-        style: `background: ${t.bg}; color: ${t.fg}`,
+        eer: pct(r.eer),
+        style: `--bg-auc: ${t.bg}; --fg-auc: ${t.fg}; --bg-eer: ${e.bg}; --fg-eer: ${e.fg}`,
         overlap: r.flags.includes("source overlap"),
         home: trained,
         title:
@@ -438,8 +398,23 @@ export function buildResults(body: string) {
     ] as const
   ).map(([id, label]) => ({ id, label, n: id === "all" ? all.length : all.filter((r) => grp(r) === id).length }));
 
+  // Each row of the experiments table becomes a card: solid once it has runs, dashed while planned.
+  const expT = get(/^Experiments/);
+  const expRows = tables(expT)[0]?.rows ?? [];
+  const experiments = {
+    intro: md(paras(expT)[0] ?? ""),
+    cards: expRows.map((r) => {
+      const [id, title = ""] = plain(r[0]).split(/:\s*/);
+      const status = plain(r[4]);
+      const kind = /provisional/i.test(status) ? "prov" : /\bdone\b/i.test(status) ? "run" : "plan";
+      const chip = kind === "prov" ? "Provisional" : kind === "plan" ? "Planned" : /^done\b/i.test(status) ? "Done" : "Partly done";
+      return { id, title: cap(title), q: plain(r[1]), status, kind, chip };
+    }),
+    after: md(paras(expT).slice(1).filter((p) => !p.startsWith("|")).join("\n\n")),
+  };
+
   return {
-    experiments: md(get(/^Experiments/)),
+    experiments,
     asOf: firstT.match(/as of (\d{4}-\d{2}-\d{2})/)?.[1] ?? D.built,
     first,
     datasets,

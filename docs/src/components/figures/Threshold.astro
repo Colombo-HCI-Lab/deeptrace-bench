@@ -1,0 +1,34 @@
+---
+// One global threshold for every group, and the per-group error rates it reveals.
+import { FG } from "../../lib/figures";
+---
+
+<figure class="fig">
+            <div style="border: 1px solid var(--rule); background: var(--card); padding: 20px; display: grid; gap: 20px; min-width: 0">
+              {FG.groups.map((g) => (<Fragment>
+                <div style="display: grid; grid-template-columns: var(--f-thr); gap: 8px 20px; align-items: center">
+                  <strong style="font-weight: 600; font-size: 0.95rem">{g.name}</strong>
+                  <div aria-hidden="true" style="display: grid; gap: 6px; min-width: 0">
+                    <div style="position: relative; height: 92px; display: flex; gap: 1px">
+                      {g.bars.map((b) => (<Fragment><span style="flex: 1 1 0; display: grid; grid-template-rows: 45px 2px 45px"><span style={`align-self: end; height: ${b.r}; background: ${b.rbg}`}></span><span></span><span style={`height: ${b.f}; background: ${b.fbg}`}></span></span></Fragment>))}
+                      <span style="position: absolute; left: 0; right: 0; top: 45px; border-top: 1px solid var(--ink)"></span>
+                      <span style={`position: absolute; top: -5px; bottom: -5px; left: ${g.thr}; border-left: 1.5px dashed var(--ink)`}></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font: 400 11px/1 var(--mono); color: var(--muted)"><span>0</span><span>fake score</span><span>1</span></div>
+                  </div>
+                  <div style="display: grid; gap: 4px; font: 400 12.5px/1.4 var(--mono)">
+                    <span>AUC <b style="font-weight: 500">{g.auc}</b></span>
+                    <span style={`color: ${g.fprFg}`}>false alarms <b style="font-weight: 600">{g.fpr}</b></span>
+                    <span style="color: var(--muted)">missed fakes {g.fnr}</span>
+                  </div>
+                </div>
+              </Fragment>))}
+              <div style="display: flex; flex-wrap: wrap; gap: 8px 22px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 0.85rem; color: var(--ink-2)">
+                <span style="display: inline-flex; gap: 8px; align-items: center"><i style="width: 14px; height: 10px; background: var(--real)"></i>Real clips, above the axis</span>
+                <span style="display: inline-flex; gap: 8px; align-items: center"><i style="width: 14px; height: 10px; background: var(--fake)"></i>Fake clips, below</span>
+                <span style="display: inline-flex; gap: 8px; align-items: center"><i style="width: 14px; height: 10px; background: var(--muted)"></i><i style="width: 14px; height: 10px; margin-left: -6px; background: var(--bad)"></i>Wrong side of the threshold</span>
+                <span style="display: inline-flex; gap: 8px; align-items: center"><i style="width: 0; height: 14px; border-left: 1.5px dashed var(--ink)"></i>One global threshold, the overall EER point</span>
+              </div>
+            </div>
+            <figcaption><strong>One threshold for every group.</strong> Both groups separate real from fake equally well, so their AUCs match. But group B's real clips score higher overall, so at the shared threshold far more of them are flagged fake. Per-group error rates catch this; an AUC gap doesn't. Illustrative distributions.</figcaption>
+          </figure>

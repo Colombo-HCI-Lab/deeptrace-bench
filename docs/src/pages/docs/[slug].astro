@@ -1,5 +1,5 @@
 ---
-import { getCollection, render } from "astro:content";
+import { getCollection } from "astro:content";
 import Redirect from "../../components/Redirect.astro";
 import Doc from "../../layouts/Doc.astro";
 import { MOVED } from "../../lib/links.mjs";
@@ -7,29 +7,13 @@ import { MOVED } from "../../lib/links.mjs";
 export async function getStaticPaths() {
   const docs = await getCollection("docs");
   return [
-    ...docs.map((entry) => ({ params: { slug: entry.id }, props: { entry } })),
+    ...docs.map((entry) => ({ params: { slug: entry.id }, props: { slug: entry.id } })),
     // Docs merged into others: their old address forwards to the new place.
     ...Object.entries(MOVED).map(([slug, to]) => ({ params: { slug }, props: { moved: to } })),
   ];
 }
 
-const { entry, moved } = Astro.props;
-const rendered = entry ? await render(entry) : null;
-const Content = rendered?.Content;
+const { slug, moved } = Astro.props;
 ---
 
-{
-  moved ? (
-    <Redirect to={import.meta.env.BASE_URL + moved} title="Moved" />
-  ) : (
-    <Doc
-      id={entry.id}
-      title={entry.data.title}
-      description={entry.data.description}
-      group={entry.data.group}
-      headings={rendered!.headings}
-    >
-      {Content && <Content />}
-    </Doc>
-  )
-}
+{moved ? <Redirect to={import.meta.env.BASE_URL + moved} title="Moved" /> : <Doc slug={slug!} />}

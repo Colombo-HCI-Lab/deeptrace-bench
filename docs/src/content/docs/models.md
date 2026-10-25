@@ -1,8 +1,6 @@
 ---
 title: "Models"
 description: "Every detector: what it is, whether its scores can be trusted yet, why any is missing, and porting notes per adapter"
-group: benchmark
-order: 2
 ---
 
 The configs (`configs/models/<id>.yaml`) are the source of truth, and `uv run scripts/setup_models.py --list` prints the current state. Each model's architecture, training data and paper are in the [catalog](catalog.md#models); terms such as parity and score direction are defined in [How it works](method.md#key-terms).

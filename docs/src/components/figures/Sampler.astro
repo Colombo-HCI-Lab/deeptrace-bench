@@ -1,0 +1,26 @@
+---
+// How --sample picks items before anything downloads.
+import { FG } from "../../lib/figures";
+---
+
+<figure class="fig">
+            <div style="border: 1px solid var(--rule); background: var(--card); padding: 20px; display: grid; grid-template-columns: var(--f-smp); gap: 16px 18px; align-items: start; min-width: 0">
+              <div style="display: grid; gap: 8px; min-width: 0">
+                <span style="font: 500 11.5px/1.4 var(--mono); color: var(--muted)">The remote file list, before anything downloads</span>
+                <div style="overflow-x: auto; min-width: 0">
+                  <table style="border-collapse: collapse; width: 100%; font: 400 12px/1.4 var(--mono)">
+                    <thead><tr><th style="text-align: left; font-weight: 500; color: var(--muted); padding: 0 10px 6px 6px; border-bottom: 1px solid var(--ink)">path</th><th style="text-align: left; font-weight: 500; color: var(--muted); padding: 0 10px 6px 0; border-bottom: 1px solid var(--ink); white-space: nowrap">label_from_path</th><th style="text-align: center; font-weight: 500; color: var(--muted); padding: 0 6px 6px 0; border-bottom: 1px solid var(--ink)">picked</th></tr></thead>
+                    <tbody>{FG.sample.map((r) => (<Fragment><tr style={`background: ${r.bg}`}><td style="padding: 5px 10px 5px 6px; border-bottom: 1px solid var(--rule); white-space: nowrap">{r.path}</td><td style={`padding: 5px 10px 5px 0; border-bottom: 1px solid var(--rule); color: ${r.fg}`}>{r.label}</td><td style="padding: 5px 6px 5px 0; border-bottom: 1px solid var(--rule); text-align: center; color: var(--accent-ink)">{r.pick}</td></tr></Fragment>))}</tbody>
+                  </table>
+                </div>
+              </div>
+              <span aria-hidden="true" style="align-self: center; justify-self: center; font: 500 15px/1 var(--mono); color: var(--muted)"><i class="arr arr3"></i></span>
+              <div style="display: grid; gap: 10px; min-width: 0">
+                <div style="border: 1px solid var(--rule); background: var(--paper); padding: 10px 12px; display: grid; gap: 4px; min-width: 0; font-size: 0.86rem; line-height: 1.4"><span style="font: 500 11.5px/1.4 var(--mono); color: var(--accent-ink)">fetch</span><strong style="font-weight: 600; font-size: 0.95rem">Only the picked items</strong><span style="color: var(--muted)">Single Hugging Face files, zip members by HTTP range, or symlinks into a --from copy. The choice is saved in .sample.json.</span></div>
+                <span aria-hidden="true" style="justify-self: center; font: 500 15px/1 var(--mono); color: var(--muted)">↓</span>
+                <div style="border: 1px solid var(--ink); background: var(--paper); padding: 10px 12px; display: grid; gap: 4px; min-width: 0; font-size: 0.86rem; line-height: 1.4"><span style="font: 500 11.5px/1.4 var(--mono); color: var(--accent-ink)">build_manifest</span><strong style="font-weight: 600; font-size: 0.95rem">The same labels, on the local files</strong><span style="color: var(--muted)">It calls label_from_path too, so a sample and the full copy can't disagree.</span></div>
+                <code style="justify-self: start; font: 500 12px/1 var(--mono); padding: 6px 8px; background: var(--tint); overflow-wrap: anywhere">smoke/manifests/&lt;id&gt;.parquet</code>
+              </div>
+            </div>
+            <figcaption><strong>How <code>--sample 2</code> picks.</strong> Two items per label, chosen by a seeded hash of each path; anything that isn't an item returns None and is never fetched. Paths invented for the example.</figcaption>
+          </figure>
