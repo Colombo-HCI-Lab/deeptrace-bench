@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from deeptrace_bench.reference import model_input, recorded_features, render
+from deeptrace_bench.reference import held_languages, model_input, recorded_features, render
 
 
 def test_inputs_in_words(registry):
@@ -24,6 +24,17 @@ def test_features_come_from_the_full_manifest_first(tmp_path, monkeypatch):
         )
     assert recorded_features("x") == ("full", ["language", "gender"])
     assert recorded_features("missing") is None
+
+
+def test_held_languages_read_the_full_manifest(tmp_path, monkeypatch):
+    monkeypatch.setenv("DTB_ROOT", str(tmp_path))
+    (tmp_path / "manifests").mkdir()
+    pd.DataFrame({"label": ["fake", "fake"], "language": ["hi", "hi"]}).to_parquet(
+        tmp_path / "manifests" / "x.parquet"
+    )
+    pd.DataFrame({"label": ["real"]}).to_parquet(tmp_path / "manifests" / "y.parquet")
+    assert held_languages("x") == ["hi"]
+    assert held_languages("y") is None and held_languages("missing") is None
 
 
 def test_render_anchors_every_model_and_dataset():

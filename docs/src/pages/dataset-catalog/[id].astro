@@ -1,0 +1,113 @@
+---
+// One dataset: why it is here, the facts in a table, and every model scored on it as AUC bars.
+import AucBars from "../../components/AucBars.astro";
+import Base from "../../layouts/Base.astro";
+import { DATASETS, ROLE_LABEL, datasetHref, datasetRuns, holding, modelHref, siblings } from "../../lib/catalog";
+import { evName } from "../../lib/guide";
+import { ACCESS, LANG, MOD, int, models, type Dataset } from "../../lib/status";
+
+export function getStaticPaths() {
+  return DATASETS.map((d) => ({ params: { id: d.id }, props: { d } }));
+}
+
+const { d } = Astro.props as { d: Dataset };
+const base = import.meta.env.BASE_URL;
+const runs = datasetRuns(d);
+const many = new Set(runs.map((r) => r.evalset)).size > 1;
+const generators = d.generators == null ? null : d.generators.length ? d.generators : ["none: real clips only"];
+// The languages a partial download holds, named; nothing when it holds them all.
+const held = d.languages.filter((l) => d.languages_held?.includes(l));
+const partial = d.languages_held && held.length < d.languages.length ? held.map((l) => LANG[l] || l).join(", ") : "";
+const recorded = d.recorded
+  ? `real or fake, ${d.recorded[1].join(", ")}${d.recorded[0] === "sample" ? " (from a sampled build)" : ""}`
+  : "not built yet";
+const facts: [string, string | string[] | null][] = [
+  ["Kind", `${MOD[d.modality] || d.modality}, ${d.contains.join(" and ")}`],
+  ["Languages", d.languages.map((l) => LANG[l] || l).join(", ") + (partial ? `; in hand: ${partial}` : "") || null],
+  ["Size", d.scale],
+  ["How fakes were made", generators],
+  ["Labels it ships", d.annotations],
+  ["Format", d.format],
+  ["In our manifest", recorded],
+  ["Licence", d.licence],
+  ["Access", `${ACCESS[d.status] || d.status}; we hold: ${holding(d).label}`],
+  ["Evalsets", d.evalsets.length ? d.evalsets : null],
+];
+---
+
+<Base
+  title={`${d.name} · Dataset catalog · deeptrace-bench`}
+  description={d.summary ?? `${d.name} in deeptrace-bench`}
+  current="dataset-catalog"
+  siblings={siblings(DATASETS, d.id, datasetHref)}
+>
+  <div class="page entry">
+    <header class="mast">
+      <div class="kicker"><a href={`${base}dataset-catalog/`}>Dataset catalog</a> · {ROLE_LABEL[d.role]}</div>
+      <h1>{d.name}</h1>
+      {d.summary && <p class="lede">{d.summary}</p>}
+    </header>
+    {
+      d.why && (
+        <section class={d.cut ? "why cut" : "why"}>
+          <div class="kicker">{d.cut ? "Why it's here · cut candidate" : "Why it's here"}</div>
+          <p>{d.why}</p>
+        </section>
+      )
+    }
+    <section class="table-sec">
+      <h2>At a glance</h2>
+      <table class="facts">
+        <tbody>
+          {
+            facts
+              .filter(([, v]) => v && v.length)
+              .map(([k, v]) => (
+                <tr>
+                  <th>{k}</th>
+                  <td>{Array.isArray(v) ? v.map((x) => <span class="li">{x}</span>) : v}</td>
+                </tr>
+              ))
+          }
+          {
+            d.paper && (
+              <tr>
+                <th>Paper</th>
+                <td>
+                  <a href={d.paper.url} target="_blank" rel="noopener">{d.paper.title}</a>
+                  <span class="dim">
+                    {" "}· {d.paper.venue || d.paper.year}
+                    {d.paper.citations != null && ` · ${int(d.paper.citations)} citations`}
+                  </span>
+                </td>
+              </tr>
+            )
+          }
+        </tbody>
+      </table>
+      {d.notes && <p class="note">Note: {d.notes}</p>}
+    </section>
+    <section class="table-sec">
+      <h2>Models scored on it</h2>
+      {
+        runs.length ? (
+          <Fragment>
+            <p>Zero-shot AUC, best first; * marks a run with a caveat (hover a bar).</p>
+            <AucBars
+              rows={runs.map((r) => ({
+                label: models.get(r.model)?.name ?? r.model,
+                href: modelHref(r.model),
+                group: many ? evName(r.evalset) : undefined,
+                run: r,
+              }))}
+            />
+          </Fragment>
+        ) : (
+          <p class="dim">
+            No model scored on it yet. How to get it: <a href={`${base}docs/datasets/`}>Access and requests</a>.
+          </p>
+        )
+      }
+    </section>
+  </div>
+</Base>

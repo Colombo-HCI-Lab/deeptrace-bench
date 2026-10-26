@@ -19,8 +19,8 @@ export const NAV: Group[] = [
     label: "Models and datasets",
     items: [
       leaf("coverage", "Coverage"),
-      { heading: "Models", items: [leaf("catalog", "Model catalog"), leaf("compute", "Compute cost"), leaf("models", "Porting and parity")] },
-      { heading: "Datasets", items: [leaf("datasets", "Dataset catalog")] },
+      { heading: "Models", items: [leaf("model-catalog", "Model catalog"), leaf("compute", "Compute cost"), leaf("models", "Porting and parity")] },
+      { heading: "Datasets", items: [leaf("dataset-catalog", "Dataset catalog"), leaf("datasets", "Access and requests")] },
     ],
   },
   {
@@ -36,19 +36,20 @@ export const NAV: Group[] = [
 ];
 
 // Pages built by hand rather than from one doc. Results, Progress (the Timeline) and How it works
-// are laid out from their docs; the full write-ups stay under docs/.
-export const PAGES = ["timeline", "results", "method", "coverage", "compute"];
-// The docs a guided page stands in for.
-export const STANDS_IN: Record<string, string> = { progress: "timeline", results: "results", method: "method" };
+// are laid out from their docs; the full write-ups stay under docs/. The two catalogs are built
+// from status.json, with a page per model and per dataset under each.
+export const PAGES = ["timeline", "results", "method", "coverage", "compute", "model-catalog", "dataset-catalog"];
+// The docs a guided page stands in for. catalog.md, generated for reading on GitHub, is the two
+// catalogs' source text there.
+export const STANDS_IN: Record<string, string> = { progress: "timeline", results: "results", method: "method", catalog: "model-catalog" };
 // Docs in this group list their headings in the sidebar, always open; the rest show them in a bar
 // above the text.
 export const RAIL_GROUP = "Models and datasets";
 // Docs whose nav label differs from their title: the page heading follows the nav.
 export const RENAME: Record<string, string> = {
   evaluation: "Evaluation rules",
-  catalog: "Model catalog",
   models: "Porting and parity",
-  datasets: "Dataset catalog",
+  datasets: "Access and requests",
 };
 
 const isLeaf = (i: Item): i is Leaf => "id" in i;

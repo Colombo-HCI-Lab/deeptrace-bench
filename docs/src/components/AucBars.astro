@@ -1,0 +1,51 @@
+---
+// AUC as horizontal bars on a 0 to 1 axis, with chance marked, coloured by the site's diverging
+// scale. A catalog entry's runs: a model's per evalset, a dataset's per model.
+import { TINT, tone } from "../lib/guide";
+import { pct, type Run } from "../lib/status";
+
+interface Row {
+  label: string;
+  href?: string;
+  // A group heading, shown when it changes from the row before.
+  group?: string;
+  run: Run;
+}
+interface Props {
+  rows: Row[];
+}
+
+const { rows } = Astro.props;
+const fill = (auc: number) => {
+  const t = tone(auc);
+  return t.bg === TINT ? "var(--stone-2)" : t.bg;
+};
+---
+
+<div class="bars" role="table" aria-label="AUC per run">
+  <div class="bars-axis" aria-hidden="true">
+    <span></span>
+    <span class="ticks"><i style="left: 0">0</i><i style="left: 50%">0.5 chance</i><i style="left: 100%">1</i></span>
+    <span></span>
+  </div>
+  {
+    rows.map((r, i) => (
+      <Fragment>
+        {r.group && r.group !== rows[i - 1]?.group && <div class="bars-group">{r.group}</div>}
+        <div class="bar-row" role="row" title={`${r.run.n_real.toLocaleString("en-US")} real / ${r.run.n_fake.toLocaleString("en-US")} fake${r.run.flags.length ? " · " + r.run.flags.join(", ") : ""}`}>
+          <span class="bl" role="cell">
+            {r.href ? <a href={r.href}>{r.label}</a> : r.label}
+          </span>
+          <span class="track" role="cell">
+            <i style={`width: ${(100 * r.run.auc).toFixed(1)}%; background: ${fill(r.run.auc)}`} />
+            <b />
+          </span>
+          <span class="bv" role="cell">
+            <strong>{r.run.auc.toFixed(3)}</strong> EER {pct(r.run.eer)}
+            {r.run.flags.length > 0 && "*"}
+          </span>
+        </div>
+      </Fragment>
+    ))
+  }
+</div>

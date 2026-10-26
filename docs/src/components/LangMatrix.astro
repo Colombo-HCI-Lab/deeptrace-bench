@@ -1,0 +1,52 @@
+---
+// Which South Asian languages each dataset covers, and what we hold of it, with a last row
+// counting the datasets of fakes in hand per language: where the gaps are.
+import { DATASETS, SA_LANGS, datasetHref, holdingIn } from "../lib/catalog";
+import { LANG } from "../lib/status";
+
+const rows = DATASETS.filter((d) => d.role !== "pipeline_test" && d.languages.some((l) => SA_LANGS.includes(l)));
+const cols = SA_LANGS.filter((l) => rows.some((d) => d.languages.includes(l)));
+const fakesInHand = (l: string) =>
+  rows.filter((d) => d.languages.includes(l) && d.contains.includes("fake") && holdingIn(d, l).key === "full").length;
+---
+
+<table class="matrix">
+  <thead>
+    <tr>
+      <th class="mh">Dataset</th>
+      {
+        cols.map((l) => (
+          <th class="v">
+            <span>{LANG[l] || l}</span>
+          </th>
+        ))
+      }
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((d) => (
+        <tr>
+          <th>
+            <a href={datasetHref(d.id)}>{d.name}</a>
+            {!d.contains.includes("fake") && <small>real only</small>}
+          </th>
+          {cols.map((l) => {
+            if (!d.languages.includes(l)) return <td />;
+            const h = holdingIn(d, l);
+            return <td class={`on ${h.key}`} title={`${d.name}: ${LANG[l]}, ${h.label}`} />;
+          })}
+        </tr>
+      ))
+    }
+    <tr class="total">
+      <th>Datasets of fakes in hand</th>
+      {
+        cols.map((l) => {
+          const n = fakesInHand(l);
+          return <td class={n ? "" : "zero"}>{n}</td>;
+        })
+      }
+    </tr>
+  </tbody>
+</table>

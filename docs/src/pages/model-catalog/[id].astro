@@ -1,0 +1,161 @@
+---
+// One detector: why it is here, the facts in a table, our runs as AUC bars beside what its
+// authors report, then the longer description.
+import AucBars from "../../components/AucBars.astro";
+import Base from "../../layouts/Base.astro";
+import { DATASETS, LEVEL, MODELS, datasetHref, modelHref, modelRuns, siblings } from "../../lib/catalog";
+import { evName } from "../../lib/guide";
+import { MOD, evalsets, int, ms, params, type Model } from "../../lib/status";
+
+export function getStaticPaths() {
+  return MODELS.map((m) => ({ params: { id: m.id }, props: { m } }));
+}
+
+const { m } = Astro.props as { m: Model };
+const base = import.meta.env.BASE_URL;
+const runs = modelRuns(m.id);
+const datasetOf = (evalset: string) => DATASETS.find((d) => d.evalsets.includes(evalset));
+const ROLE_GROUP: Record<string, string> = { reproduction: "Reproduction", south_asian: "South Asian" };
+// One line per level: pretraining corpora run long.
+const training = Object.keys(LEVEL).flatMap((lv) => {
+  const names = m.training.filter((t) => t.level === lv).map((t) => t.name + (t.split ? ` (${t.split} split)` : ""));
+  return names.length ? [`${LEVEL[lv]} ${names.join(", ")}`] : [];
+});
+const p = m.profile;
+const unit = p ? (m.modality === "audio" ? "4 s window" : p.unit.replace("face ", "")) : "";
+const facts: [string, string | string[] | null][] = [
+  ["How it works", m.architecture],
+  ["Input", m.input],
+  ["Training", training],
+  ["Size", p ? `${params(p.params)} parameters` : null],
+  ["Cost", p ? `${p.gflops_per_unit ? `${p.gflops_per_unit.toFixed(1)} GFLOPs and ` : ""}${ms(p.ms_per_unit)} per ${unit} on a ${p.gpu} (${p.precision})` : null],
+  ["Licence", m.licence],
+  [
+    "Parity",
+    m.blocked
+      ? "weights unreachable"
+      : m.parity
+        ? `passed on ${int(m.parity.items)} items, largest difference ${m.parity.max_abs_diff.toExponential(1)}`
+        : "not checked yet",
+  ],
+];
+---
+
+<Base
+  title={`${m.name} · Model catalog · deeptrace-bench`}
+  description={m.summary ?? `${m.name} in deeptrace-bench`}
+  current="model-catalog"
+  siblings={siblings(MODELS, m.id, modelHref)}
+>
+  <div class="page entry">
+    <header class="mast">
+      <div class="kicker"><a href={`${base}model-catalog/`}>Model catalog</a> · {MOD[m.modality]}</div>
+      <h1>{m.name}</h1>
+      {m.summary && <p class="lede">{m.summary}</p>}
+    </header>
+    {
+      m.why && (
+        <section class={m.cut ? "why cut" : "why"}>
+          <div class="kicker">{m.cut ? "Why it's here · cut candidate" : "Why it's here"}</div>
+          <p>{m.why}</p>
+        </section>
+      )
+    }
+    <section class="table-sec">
+      <h2>At a glance</h2>
+      <table class="facts">
+        <tbody>
+          {
+            facts
+              .filter(([, v]) => v && v.length)
+              .map(([k, v]) => (
+                <tr>
+                  <th>{k}</th>
+                  <td>{Array.isArray(v) ? v.map((x) => <span class="li">{x}</span>) : v}</td>
+                </tr>
+              ))
+          }
+          {
+            m.paper && (
+              <tr>
+                <th>Paper</th>
+                <td>
+                  <a href={m.paper.url} target="_blank" rel="noopener">{m.paper.title}</a>
+                  <span class="dim">
+                    {" "}· {m.paper.venue || m.paper.year}
+                    {m.paper.citations != null && ` · ${int(m.paper.citations)} citations`}
+                  </span>
+                </td>
+              </tr>
+            )
+          }
+        </tbody>
+      </table>
+    </section>
+    <section class="table-sec">
+      <h2>Our runs</h2>
+      {
+        runs.length ? (
+          <Fragment>
+            <p>
+              Zero-shot AUC per evalset; * marks a run with a caveat (hover a bar). The full table is in{" "}
+              <a href={`${base}results/#all-runs`}>all runs</a>.
+            </p>
+            <AucBars
+              rows={runs.map((r) => {
+                const d = datasetOf(r.evalset);
+                return { label: evName(r.evalset), href: d && datasetHref(d.id), group: ROLE_GROUP[evalsets.get(r.evalset)?.role ?? ""] ?? "Other", run: r };
+              })}
+            />
+          </Fragment>
+        ) : (
+          <p class="dim">Not scored yet. <a href={`${base}coverage/`}>Coverage</a> shows which evalsets it can run on.</p>
+        )
+      }
+    </section>
+    {
+      m.published.length > 0 && (
+        <section class="table-sec">
+          <h2>Reported by the authors</h2>
+          <div class="scroll">
+            <table class="tbl pub">
+              <thead>
+                <tr>
+                  <th>Test set</th>
+                  <th>Metric</th>
+                  <th class="num">Value</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                {m.published.map((x) => (
+                  <tr>
+                    <td>{x.test}</td>
+                    <td>{x.metric}</td>
+                    <td class="num">{x.value}</td>
+                    <td>
+                      {x.source}
+                      <span class="sum">{x.cite}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="note">As reported, under each paper's protocol, so not directly comparable with ours. Checked 2026-10-12.</p>
+        </section>
+      )
+    }
+    {
+      m.description && (
+        <section class="table-sec">
+          <h2>About</h2>
+          <p class="text">{m.description}</p>
+          <p class="note">
+            Porting notes and the parity check: <a href={`${base}docs/models/#per-model`}>Porting and parity</a>.
+          </p>
+        </section>
+      )
+    }
+  </div>
+</Base>

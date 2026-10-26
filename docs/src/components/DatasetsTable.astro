@@ -1,19 +1,20 @@
 ---
-// Datasets, grouped by role. It opens the Dataset catalog, so each name links to its entry below.
-import { ACCESS, D, LANG, MOD, ROLE } from "../lib/status";
-import PaperCells from "./PaperCells.astro";
+// The Dataset catalog's index: every dataset by role, why it is here, its languages and size,
+// what we hold and how many runs scored it. Each name opens its own page.
+import { DATASETS, ROLES, ROLE_ABOUT, ROLE_LABEL, datasetHref, datasetRuns, holding } from "../lib/catalog";
+import { LANG, MOD } from "../lib/status";
 
-const groups = ["south_asian", "reproduction", "real_reference", "in_the_wild"]
-  .map((role) => ({ role, rows: D.datasets.filter((d) => d.role === role).sort((a, b) => a.name.localeCompare(b.name)) }))
-  .filter((g) => g.rows.length);
+const groups = ROLES.map((role) => ({ role, rows: DATASETS.filter((d) => d.role === role) })).filter((g) => g.rows.length);
+const langs = (codes: string[]) => {
+  const names = codes.map((l) => LANG[l] || l);
+  return names.length > 3 ? `${names.slice(0, 2).join(", ")} and ${names.length - 2} more` : names.join(", ");
+};
 ---
 
-<table class="tbl datasets">
+<table class="tbl cat datasets">
   <thead>
     <tr>
-      <th>Dataset</th><th>Languages</th><th>Size</th><th>Paper</th><th class="num">Citations</th><th>Access</th><th
-        >Used in evalsets</th
-      >
+      <th>Dataset and why it's here</th><th>Kind</th><th>Languages</th><th>Size</th><th>We hold</th><th class="num">Runs</th>
     </tr>
   </thead>
   <tbody>
@@ -21,41 +22,32 @@ const groups = ["south_asian", "reproduction", "real_reference", "in_the_wild"]
       groups.map(({ role, rows }) => (
         <Fragment>
           <tr class="group">
-            <td colspan="7">
-              {ROLE[role]} · {rows.length}
+            <td colspan="6">
+              {ROLE_LABEL[role]} · {rows.length}
+              <span class="about">{ROLE_ABOUT[role]}</span>
             </td>
           </tr>
           {rows.map((d) => {
-            const langs = d.languages.map((l) => LANG[l] || l);
-            const langText = langs.length > 4 ? `${langs.slice(0, 3).join(", ")} and ${langs.length - 3} more` : langs.join(", ");
+            const h = holding(d);
+            const n = datasetRuns(d).length;
             return (
               <tr>
                 <td class="wide">
-                  <a class="name" href={`#dataset-${d.id}`}>
+                  <a class="name" href={datasetHref(d.id)}>
                     {d.name}
                   </a>
-                  {d.cut && <span class="flagtag cut" title={d.why ?? undefined}>cut candidate</span>}
-                  <span class="sum">
-                    {MOD[d.modality] || d.modality}
-                    {d.summary ? `. ${d.summary}` : ""}
-                  </span>
+                  {d.cut && <span class="flagtag cut">cut candidate</span>}
+                  {d.why && <span class="sum">{d.why}</span>}
                 </td>
-                <td title={langs.join(", ")}>{langText || <span class="dim">·</span>}</td>
+                <td class="nowrap">{MOD[d.modality] || d.modality}</td>
+                <td title={d.languages.map((l) => LANG[l] || l).join(", ")}>
+                  {d.languages.length ? langs(d.languages) : <span class="dim">·</span>}
+                </td>
                 <td>{d.scale || <span class="dim">·</span>}</td>
-                <PaperCells paper={d.paper} />
-                <td class={d.status === "open" ? "nowrap" : "nowrap dim"}>{ACCESS[d.status] || d.status}</td>
-                <td class="evs">
-                  {d.evalsets.length ? (
-                    d.evalsets.map((e, i) => (
-                      <Fragment>
-                        {i > 0 && <br />}
-                        {e}
-                      </Fragment>
-                    ))
-                  ) : (
-                    <span class="dim">·</span>
-                  )}
+                <td class="nowrap">
+                  <span class={`hold ${h.key}`}>{h.label}</span>
                 </td>
+                <td class="num">{n || <span class="dim">·</span>}</td>
               </tr>
             );
           })}

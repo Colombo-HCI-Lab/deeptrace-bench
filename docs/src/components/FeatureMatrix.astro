@@ -1,0 +1,35 @@
+---
+// Which features each built dataset records per clip, read from its manifest: the groups results
+// can be split by today. Every dataset also records real or fake.
+import { DATASETS, FEATURES, datasetHref } from "../lib/catalog";
+
+const rows = DATASETS.filter((d) => d.recorded && d.role !== "pipeline_test");
+---
+
+<table class="matrix feats">
+  <thead>
+    <tr>
+      <th class="mh">Dataset</th>
+      {
+        FEATURES.map((f) => (
+          <th class="v">
+            <span>{f}</span>
+          </th>
+        ))
+      }
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((d) => (
+        <tr>
+          <th>
+            <a href={datasetHref(d.id)}>{d.name}</a>
+            {d.recorded![0] === "sample" && <small>sample</small>}
+          </th>
+          {FEATURES.map((f) => (d.recorded![1].includes(f) ? <td class="tick">✓</td> : <td />))}
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

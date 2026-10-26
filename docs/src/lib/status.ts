@@ -48,6 +48,11 @@ export interface Model {
   trained_on: string[];
   parity: { evalset: string; items: number; max_abs_diff: number } | null;
   profile: Profile | null;
+  licence: string;
+  architecture: string | null;
+  description: string | null;
+  input: string | null;
+  training: { name: string; level: "pretrain" | "train" | "finetune"; split: string | null }[];
 }
 
 export interface Dataset {
@@ -60,6 +65,16 @@ export interface Dataset {
   summary: string | null;
   why: string | null;
   cut: boolean;
+  licence: string;
+  contains: string[];
+  generators: string[] | null;
+  annotations: string[] | null;
+  format: string | null;
+  notes: string | null;
+  // Features the manifest fills in, from the full build or a sample; null before any build.
+  recorded: ["full" | "sample", string[]] | null;
+  // Languages the full build holds, when it records them: a partial download shows here.
+  languages_held: string[] | null;
   scale: string | null;
   paper: Paper | null;
   evalsets: string[];

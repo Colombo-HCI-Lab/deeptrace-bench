@@ -1,0 +1,73 @@
+---
+// The Dataset catalog: every dataset on one table, the South Asian languages they cover, and the
+// features the built ones record; each name opens a page of its own.
+import DatasetsTable from "../../components/DatasetsTable.astro";
+import FeatureMatrix from "../../components/FeatureMatrix.astro";
+import LangMatrix from "../../components/LangMatrix.astro";
+import Stats from "../../components/Stats.astro";
+import Base from "../../layouts/Base.astro";
+import { DATASETS, datasetHref, holding } from "../../lib/catalog";
+
+const base = import.meta.env.BASE_URL;
+const real = DATASETS.filter((d) => d.role !== "pipeline_test");
+const held = (key: string) => real.filter((d) => holding(d).key === key).length;
+---
+
+<Base
+  title="Dataset catalog · deeptrace-bench"
+  description="Every dataset in deeptrace-bench: why it was picked, what we hold, the South Asian languages it covers and the features it records."
+  current="dataset-catalog"
+>
+  <div class="page">
+    <header class="mast">
+      <div class="kicker">Models and datasets</div>
+      <h1>Dataset catalog</h1>
+      <p class="lede">
+        Every dataset, why it's here and what we hold of it. Each name opens its own page; how to get the rest is
+        in <a href={`${base}docs/datasets/`}>Access and requests</a>.
+      </p>
+    </header>
+    <Stats
+      items={[
+        { n: real.length, label: "datasets" },
+        { n: real.filter((d) => d.role === "south_asian").length, label: "South Asian" },
+        { n: held("full"), label: "in hand" },
+        { n: held("request"), label: "on request" },
+        { n: real.filter((d) => d.cut).length, label: "cut candidates", tone: "bad" },
+      ]}
+    />
+    <section class="panel">
+      <div class="scroll"><DatasetsTable /></div>
+    </section>
+    <section class="table-sec" id="languages">
+      <h2>South Asian languages</h2>
+      <p>
+        Which languages each dataset covers, shaded by what we hold of that language. The last row counts the datasets
+        whose fakes we hold in that language: a 0 is a gap, and a 1 rests on a single corpus. Video sets carry no
+        language and aren't shown.
+      </p>
+      <div class="legend">
+        <span><i class="sq full"></i>in hand</span>
+        <span><i class="sq sample"></i>sample only</span>
+        <span><i class="sq open"></i>open, not downloaded</span>
+        <span><i class="sq request"></i>on request</span>
+        <span><i class="sq dead"></i>unavailable</span>
+      </div>
+      <div class="scroll"><LangMatrix /></div>
+    </section>
+    <section class="table-sec" id="features">
+      <h2>What each built dataset records</h2>
+      <p>
+        Read from each manifest, so these are the groups results can be split by today. Every dataset also records real
+        or fake.
+      </p>
+      <div class="scroll"><FeatureMatrix /></div>
+    </section>
+  </div>
+</Base>
+
+<script is:inline define:vars={{ to: Object.fromEntries(DATASETS.map((d) => [d.id, datasetHref(d.id)])) }}>
+  // Old links to an entry on the single catalog page (#dataset-<id>) open its own page now.
+  const id = location.hash.match(/^#dataset-(.+)$/)?.[1];
+  if (id && to[id]) location.replace(to[id]);
+</script>

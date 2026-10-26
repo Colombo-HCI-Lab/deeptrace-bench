@@ -1,0 +1,29 @@
+---
+// A row's runs as dots on a 0 to 1 AUC axis, chance marked: the spread of a model at a glance.
+import { evName, tone } from "../lib/guide";
+import type { Run } from "../lib/status";
+
+interface Props {
+  runs: Run[];
+}
+
+const { runs } = Astro.props;
+const lo = Math.min(...runs.map((r) => r.auc));
+const hi = Math.max(...runs.map((r) => r.auc));
+---
+
+{
+  runs.length ? (
+    <span class="strip">
+      <span class="strip-track">
+        <b />
+        {runs.map((r) => (
+          <i style={`left: ${(100 * r.auc).toFixed(1)}%; background: ${tone(r.auc).solid}`} title={`${evName(r.evalset)}: AUC ${r.auc.toFixed(3)}`} />
+        ))}
+      </span>
+      <span class="strip-v">{runs.length > 1 ? `${lo.toFixed(3)} to ${hi.toFixed(3)}` : lo.toFixed(3)}</span>
+    </span>
+  ) : (
+    <span class="dim">not run yet</span>
+  )
+}

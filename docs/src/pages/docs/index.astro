@@ -12,6 +12,8 @@ const PAGE_ABOUT: Record<string, string> = {
   method: "The pipeline, the checks along it and the terms the site uses (method.md laid out)",
   coverage: "Every detector against every evalset: AUC, or the estimated GPU time",
   compute: "What each detector costs to run",
+  "model-catalog": "Every detector: why it's here, parity and its South Asian results, with a page per model",
+  "dataset-catalog": "Every dataset: why it's here, what we hold and the languages it covers, with a page per dataset",
 };
 const groups = await Promise.all(
   NAV.map(async (g) => ({

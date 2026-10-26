@@ -2,8 +2,6 @@
 // One doc: its group, title and description, a bar of its sections (unless the nav lists them),
 // and the Markdown, with the doc's figures (lib/figures.ts) set between its blocks.
 import { getEntry } from "astro:content";
-import DatasetsTable from "../components/DatasetsTable.astro";
-import ModelsTable from "../components/ModelsTable.astro";
 import Crops from "../components/figures/Crops.astro";
 import Faces from "../components/figures/Faces.astro";
 import Jobs from "../components/figures/Jobs.astro";
@@ -30,6 +28,9 @@ interface Props {
 
 const base = import.meta.env.BASE_URL;
 const v = await docView(Astro.props.slug);
+// The Dataset catalog used to be this doc with every entry below it: its old anchors open the
+// catalog's own pages now.
+const oldEntries = v.slug === "datasets" ? { entry: `${base}dataset-catalog/`, all: `${base}dataset-catalog/` } : null;
 // A title may carry a code span, as `DTB_ROOT` does.
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
 const titleHtml = esc(v.title).replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -99,34 +100,7 @@ const dots = v.slug === "models" ? parityDots((await getEntry("docs", "models"))
           <Fragment>
             <Fragment set:html={c.html} />
             {c.figs.map((k) =>
-              k === "modeltable" ? (
-                <section id="all-models" class="table-sec">
-                  <h2>All models</h2>
-                  <p>
-                    Training data of the released weights, the authors' headline numbers (hover for the table cited)
-                    and our zero-shot runs. * marks a run with a caveat; see <a href={`${base}results/#all-runs`}>all runs</a>.
-                  </p>
-                  <div class="scroll">
-                    <ModelsTable />
-                  </div>
-                  <p class="note">
-                    Published numbers are as reported, under each paper's protocol (frame- or video-level, its own
-                    preprocessing), so they aren't directly comparable with ours. DeepfakeBench rows are from its
-                    benchmark (frame-level, FF++ c23 training), since those are the weights we run. Checked 2026-10-12.
-                  </p>
-                </section>
-              ) : k === "datatable" ? (
-                <section id="all-datasets" class="table-sec">
-                  <h2>All datasets</h2>
-                  <p>
-                    South Asian sets are the target; reproduction sets check our numbers against published ones;
-                    real-reference sets supply bona fide speech for fake-only datasets.
-                  </p>
-                  <div class="scroll">
-                    <DatasetsTable />
-                  </div>
-                </section>
-              ) : k === "recipe" ? (
+              k === "recipe" ? (
                 R && <Recipe recipe={R} />
               ) : k === "paritydots" ? (
                 dots.length > 0 && <ParityDots dots={dots} />
@@ -142,4 +116,13 @@ const dots = v.slug === "models" ? parityDots((await getEntry("docs", "models"))
       }
     </article>
   </div>
+  {
+    oldEntries && (
+      <script is:inline define:vars={oldEntries}>
+        const id = location.hash.match(/^#dataset-(.+)$/)?.[1];
+        if (id) location.replace(`${entry}${id}/`);
+        else if (location.hash === "#all-datasets") location.replace(all);
+      </script>
+    )
+  }
 </Base>

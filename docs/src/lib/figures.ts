@@ -30,8 +30,6 @@ export const FIGS: Record<string, [string, number, string][]> = {
     ["3-sample-it-then-build-the-manifest", 2, "sampler"],
   ],
   models: [["parity", 2, "paritydots"]],
-  catalog: [["", 1, "modeltable"]],
-  datasets: [["", 1, "datatable"]],
   spark: [
     ["curnagl", 5, "storage"],
     ["curnagl", 8, "jobs"],

@@ -14,6 +14,16 @@ export async function getStaticPaths() {
 }
 
 const { slug, moved } = Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
 
-{moved ? <Redirect to={import.meta.env.BASE_URL + moved} title="Moved" /> : <Doc slug={slug!} />}
+{
+  moved ? (
+    <Redirect to={base + moved} title="Moved" />
+  ) : slug === "catalog" ? (
+    // catalog.md is the two catalogs' text for GitHub; on the site each entry has a page of its own.
+    <Redirect to={`${base}model-catalog/`} title="Model catalog" routes={[["^#(dataset|all-datasets)", `${base}dataset-catalog/`]]} />
+  ) : (
+    <Doc slug={slug!} />
+  )
+}

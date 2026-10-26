@@ -3,7 +3,8 @@
 // The docs are written so the same Markdown also reads on GitHub:
 //   models.md#parity                  another doc       -> <base>docs/models/#parity
 //   results.md, progress.md           a guided page     -> <base>results/, <base> (the Timeline)
-//   catalog.md#dataset-<id>           a dataset entry   -> <base>docs/datasets/#dataset-<id>
+//   catalog.md#model-<id>             a model's page    -> <base>model-catalog/<id>/
+//   catalog.md#dataset-<id>           a dataset's page  -> <base>dataset-catalog/<id>/
 //   /configs/eval/default.yaml        a file in the repo -> its page on GitHub
 //   https://colombo-hci-lab.github.io/deeptrace-bench/...  the live site -> the same page here
 // Anything else relative (../x) is refused: it would break once the doc moves. Astro only logs
@@ -26,9 +27,14 @@ const LIVE = "https://colombo-hci-lab.github.io/deeptrace-bench/";
 // under docs/.
 export const GUIDED = { results: "results/", progress: "", method: "method/" };
 export const docPath = (slug) => (slug in GUIDED ? GUIDED[slug] : `docs/${slug}/`);
-// catalog.md holds the dataset entries too, but they show on the Dataset catalog page.
-const catalogFrag = (frag) => /^#datasets?\b|^#dataset-/.test(frag);
-const target = (slug, frag) => (slug === "catalog" && catalogFrag(frag) ? docPath("datasets") : docPath(slug)) + frag;
+// catalog.md is generated for reading on GitHub; on the site its two halves are the Model and
+// Dataset catalogs, with a page per entry.
+function catalogTarget(frag) {
+  const entry = frag.match(/^#(model|dataset)-(.+)$/);
+  if (entry) return `${entry[1]}-catalog/${entry[2]}/`;
+  return /^#(datasets?|all-datasets)\b/.test(frag) ? "dataset-catalog/" : "model-catalog/";
+}
+const target = (slug, frag) => (slug === "catalog" ? catalogTarget(frag) : docPath(slug) + frag);
 
 // Docs merged into others on 2026-10-19, and where their content went. Old links, old URLs and
 // a stub page at each old address land there.
@@ -45,8 +51,8 @@ const movedTo = (slug, frag) => MOVED[slug] + (MOVED[slug].includes("#") ? "" : 
 export const LEGACY = {
   runs: "results/#all-runs",
   coverage: "coverage/",
-  models: "docs/catalog/#all-models",
-  datasets: "docs/datasets/#all-datasets",
+  models: "model-catalog/",
+  datasets: "dataset-catalog/",
   compute: "compute/",
   pipeline: "method/#pipeline",
   start: "method/#key-terms",

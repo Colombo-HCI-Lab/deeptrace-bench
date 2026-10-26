@@ -1,0 +1,48 @@
+---
+// The Model catalog: every detector on one table, each opening a page of its own.
+import ModelsTable from "../../components/ModelsTable.astro";
+import Stats from "../../components/Stats.astro";
+import Base from "../../layouts/Base.astro";
+import { MODELS, modelHref } from "../../lib/catalog";
+import { D } from "../../lib/status";
+
+const base = import.meta.env.BASE_URL;
+const scored = new Set(D.runs.map((r) => r.model));
+---
+
+<Base
+  title="Model catalog · deeptrace-bench"
+  description="Every detector in deeptrace-bench: why it was picked, what it trained on, parity, and its South Asian results at a glance."
+  current="model-catalog"
+>
+  <div class="page">
+    <header class="mast">
+      <div class="kicker">Models and datasets</div>
+      <h1>Model catalog</h1>
+      <p class="lede">Every detector, why it's here and how it does on South Asian data. Each name opens its own page.</p>
+    </header>
+    <Stats
+      items={[
+        { n: MODELS.length, label: "detectors" },
+        { n: MODELS.filter((m) => m.parity).length, label: "pass parity" },
+        { n: MODELS.filter((m) => scored.has(m.id)).length, label: "scored" },
+        { n: MODELS.filter((m) => m.cut).length, label: "cut candidates", tone: "bad" },
+      ]}
+    />
+    <section class="panel">
+      <div class="scroll"><ModelsTable /></div>
+      <p class="note">
+        South Asian AUC: one dot per South Asian evalset scored, on a 0 to 1 axis with chance marked; hover a dot for
+        its evalset. Every number is in <a href={`${base}coverage/`}>Coverage</a> and
+        <a href={`${base}results/#all-runs`}>all runs</a>. Cut candidates add little the others don't show; the team
+        decides (<a href={`${base}#open-decisions-that-shape-the-results`}>open decisions</a>).
+      </p>
+    </section>
+  </div>
+</Base>
+
+<script is:inline define:vars={{ to: Object.fromEntries(MODELS.map((m) => [m.id, modelHref(m.id)])) }}>
+  // Old links to an entry on the single catalog page (#model-<id>) open its own page now.
+  const id = location.hash.match(/^#model-(.+)$/)?.[1];
+  if (id && to[id]) location.replace(to[id]);
+</script>

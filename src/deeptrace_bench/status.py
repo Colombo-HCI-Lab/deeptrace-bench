@@ -24,7 +24,7 @@ from . import evalset as evalsets
 from .eval.contamination import Verdict, check
 from .eval.publish import publish_refusal
 from .paths import PUBLISHED_RESULTS_DIR, REPO_ROOT, run_dir, store_root
-from .reference import model_input, recorded_features
+from .reference import held_languages, model_input, recorded_features
 from .registry import EvalsetConfig, ModelConfig, Registry, accepts
 from .runs import config_hash
 
@@ -327,6 +327,7 @@ def collect(registry: Registry) -> dict[str, Any]:
                 "format": entry.get("format"),
                 "notes": entry.get("notes"),
                 "recorded": recorded_features(d.id),
+                "languages_held": held_languages(d.id),
                 "paper": _paper(entry, citations),
                 "evalsets": sorted(
                     e.id for e in evalset_list if any(c.dataset == d.id for c in e.components)

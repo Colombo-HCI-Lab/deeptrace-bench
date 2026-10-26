@@ -1,0 +1,19 @@
+---
+// A row of headline counts that opens a catalog.
+interface Props {
+  items: { n: number | string; label: string; tone?: "bad" }[];
+}
+
+const { items } = Astro.props;
+---
+
+<dl class="stats">
+  {
+    items.map((s) => (
+      <div class={s.tone}>
+        <dt>{s.label}</dt>
+        <dd>{s.n}</dd>
+      </div>
+    ))
+  }
+</dl>

@@ -1,7 +1,8 @@
 """The site's model and dataset reference: every model and dataset described for newcomers.
 
 Written to ``docs/src/content/docs/catalog.md`` from the same data as the status page
-(``status.collect``), so the two never disagree. The prose comes from
+(``status.collect``), so the two never disagree. It is for reading on GitHub: the site builds its
+Model and Dataset catalogs, a page per entry, from ``status.json`` directly. The prose comes from
 ``docs/src/reference/catalog.yaml``; sizes, costs and citation counts are
 measured or looked up; the features a dataset records come from its manifest.
 """
@@ -102,6 +103,20 @@ def recorded_features(dataset_id: str) -> tuple[str, list[str]] | None:
             df = pd.read_parquet(path)
             return source, [FEATURES[c] for c in FEATURES if c in df and df[c].notna().any()]
     return None
+
+
+def held_languages(dataset_id: str) -> list[str] | None:
+    """Languages the full manifest holds, or None without a full build or a language column.
+
+    A partial download (IndicSynth's Hindi of its 12 languages) then reads as what it is.
+    """
+    path = dtb_root() / "manifests" / f"{dataset_id}.parquet"
+    if not path.exists():
+        return None
+    df = pd.read_parquet(path)
+    if "language" not in df or df["language"].isna().all():
+        return None
+    return sorted(df["language"].dropna().unique())
 
 
 def _languages(codes: list[str]) -> str:
