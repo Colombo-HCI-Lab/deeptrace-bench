@@ -2,10 +2,12 @@
 
 Reads aggregates only: the configs, parity summaries in ``results/parity/``, compute profiles
 in ``results/profile/``, citation counts in ``results/citations.json``, the plain-language
-catalog in ``docs/src/reference/catalog.yaml``, and the store's run summaries, score files
-(for timing) and manifests (for evalset sizes). Smoke runs and pipeline tests never count, by
-the same rule as ``--publish``. A run counts only while its model and evalset configs are
-unchanged, and the latest such run wins when a pair has several.
+catalog in ``docs/src/reference/catalog.yaml``, and the run summaries, score files (for
+timing) and manifests (for evalset sizes). Runs come from the store and from the repo's
+published ``results/<run_id>/`` (summary plus ``provenance.json``), so a machine whose store
+lacks a round, such as one scored on SPARK, still shows it. Smoke runs and pipeline tests
+never count, by the same rule as ``--publish``. A run counts only while its model and evalset
+configs are unchanged, and the latest such run wins when a pair has several.
 """
 
 from __future__ import annotations
@@ -34,6 +36,10 @@ S2_BATCH = "https://api.semanticscholar.org/graph/v1/paper/batch"
 
 _METRICS = ("n", "n_real", "n_fake", "n_failed")
 _METRICS += ("auc", "auc_lo", "auc_hi", "eer", "eer_lo", "eer_hi")
+# Added 2026-10-27; older summaries lack them and show null.
+_METRICS += ("acc", "bal_acc", "ap", "tpr_at_fpr01", "tpr_at_fpr05")
+_COMPUTE = ("items_per_s", "windows_per_s", "realtime_factor", "cuda_max_allocated_gb")
+_COMPUTE += ("gpu_util_mean", "energy_wh", "energy_wh_per_1k_items")
 
 
 def run_flags(
@@ -71,32 +77,59 @@ def _is_current(record: dict[str, Any], model: ModelConfig, evalset: EvalsetConf
     return hashes["model"] == config_hash(model) and hashes["evalset"] == config_hash(evalset)
 
 
-def scored_runs(registry: Registry) -> list[dict[str, Any]]:
-    """The latest countable run per (model, evalset) pair, as page rows."""
-    best: dict[tuple[str, str], tuple[str, dict[str, Any]]] = {}
+def _run_sources() -> dict[str, tuple[dict[str, Any], dict[str, Any], bool]]:
+    """Every run's ``(summary, inputs, in_store)``, from the store first, then published.
+
+    ``inputs`` carries ``config_hashes`` and ``started``: from the store's ``run.json``, or
+    from a published run's ``provenance.json``.
+    """
+    found: dict[str, tuple[dict[str, Any], dict[str, Any], bool]] = {}
     for path in sorted((store_root() / "results").glob("*/summary.json")):
         summary = json.loads(path.read_text())
         record_path = run_dir(summary["run_id"]) / "run.json"
-        model = registry.models.get(summary["model"])
-        evalset = registry.evalsets.get(summary["evalset"])
-        if model is None or evalset is None or not record_path.exists():
+        if not record_path.exists():
             continue
         record = json.loads(record_path.read_text())
+        inputs = {
+            "config_hashes": record["config_hashes"],
+            "started": record["sessions"][-1]["started_utc"],
+        }
+        found[summary["run_id"]] = (summary, inputs, True)
+    for path in sorted(PUBLISHED_RESULTS_DIR.glob("*/summary.json")):
+        provenance = _json(path.parent / "provenance.json")
+        summary = json.loads(path.read_text())
+        if summary["run_id"] in found or provenance is None:
+            continue
+        inputs = {
+            "config_hashes": provenance["config_hashes"],
+            "started": provenance["last_started_utc"],
+        }
+        found[summary["run_id"]] = (summary, inputs, False)
+    return found
+
+
+def scored_runs(registry: Registry) -> list[dict[str, Any]]:
+    """The latest countable run per (model, evalset) pair, as page rows."""
+    best: dict[tuple[str, str], tuple[str, dict[str, Any], bool]] = {}
+    for summary, inputs, in_store in _run_sources().values():
+        model = registry.models.get(summary["model"])
+        evalset = registry.evalsets.get(summary["evalset"])
+        if model is None or evalset is None:
+            continue
         if publish_refusal(evalset, summary["namespace"]):
             continue
-        if not _is_current(record, model, evalset):
+        if not _is_current(inputs, model, evalset):
             continue
-        started = record["sessions"][-1]["started_utc"]
         key = (model.id, evalset.id)
-        if key not in best or started > best[key][0]:
-            best[key] = (started, summary)
+        if key not in best or inputs["started"] > best[key][0]:
+            best[key] = (inputs["started"], summary, in_store)
     directed = {
         model_id
-        for (model_id, evalset_id), (_, summary) in best.items()
+        for (model_id, evalset_id), (_, summary, _) in best.items()
         if registry.evalset(evalset_id).role == "reproduction" and summary.get("score_direction_ok")
     }
     rows = []
-    for (model_id, evalset_id), (_, summary) in sorted(best.items()):
+    for (model_id, evalset_id), (_, summary, in_store) in sorted(best.items()):
         evalset = registry.evalset(evalset_id)
         parity = _json(PUBLISHED_RESULTS_DIR / "parity" / f"{model_id}.json")
         rows.append(
@@ -105,7 +138,7 @@ def scored_runs(registry: Registry) -> list[dict[str, Any]]:
                 "evalset": evalset_id,
                 "run_id": summary["run_id"],
                 "pairing": evalset.pairing,
-                **{k: summary["overall"][k] for k in _METRICS},
+                **{k: summary["overall"].get(k) for k in _METRICS},
                 "verdict": summary["verdict"],
                 "reasons": summary["verdict_reasons"] if summary["verdict"] != "clean" else [],
                 "flags": run_flags(
@@ -114,7 +147,8 @@ def scored_runs(registry: Registry) -> list[dict[str, Any]]:
                     parity_checked=bool(parity and parity["passed"]),
                     direction_checked=model_id in directed,
                 ),
-                **run_timing(summary["run_id"]),
+                **(run_timing(summary["run_id"]) if in_store else published_timing(summary)),
+                "compute": measured_compute(summary),
             }
         )
     return rows
@@ -134,6 +168,21 @@ def run_timing(run_id: str) -> dict[str, Any]:
     end = max(p.stat().st_mtime for p in parts)
     windows = sum(int(pd.read_parquet(p, columns=["n_windows"])["n_windows"].sum()) for p in parts)
     return {"wall_s": round(end - start), "windows": windows}
+
+
+def published_timing(summary: dict[str, Any]) -> dict[str, Any]:
+    """``run_timing``'s fields for a run known only from its published summary."""
+    compute = summary.get("compute") or {}
+    return {"wall_s": compute.get("wall_s"), "windows": compute.get("windows")}
+
+
+def measured_compute(summary: dict[str, Any]) -> dict[str, Any] | None:
+    """What scoring measured on the machine that ran it, or None for runs before telemetry."""
+    compute = summary.get("compute")
+    if not compute or not compute.get("measured"):
+        return None
+    env = compute.get("env") or {}
+    return {**{k: compute.get(k) for k in _COMPUTE}, "gpu": env.get("gpu")}
 
 
 def evalset_size(evalset: EvalsetConfig, runs: list[dict[str, Any]]) -> dict[str, Any] | None:

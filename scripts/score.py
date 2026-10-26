@@ -13,6 +13,10 @@ each item's audio (an audio-video item's audio track) cut into windows. ``--shar
 scores one stable slice, for SLURM array jobs.
 ``--save-crops K`` keeps up to K face crops per item under the run's ``crops/`` folder, for
 people to look at. ``--smoke`` works in the smoke namespace (``DTB_ROOT/smoke/``).
+``--rescore-untimed`` moves aside score parts from before per-item timing existed and scores
+those items again, so the run's compute numbers cover it all. Each invocation records what it
+cost (phases, GPU load, memory, energy, the machine) in the run's ``telemetry/`` folder; see
+``deeptrace_bench.telemetry``.
 """
 
 from __future__ import annotations
@@ -28,7 +32,14 @@ from deeptrace_bench.models.base import load_detector, resolve_device, set_tf32
 from deeptrace_bench.paths import namespace, prepare_store, use_namespace
 from deeptrace_bench.registry import Modality, Registry, accepts
 from deeptrace_bench.runs import config_hash, start_run
-from deeptrace_bench.score import build_loader, part_prefix, score_items, shard_items
+from deeptrace_bench.score import (
+    build_loader,
+    part_prefix,
+    score_items,
+    shard_items,
+    supersede_untimed,
+)
+from deeptrace_bench.telemetry import Session
 
 log = logging.getLogger("score")
 
@@ -44,6 +55,9 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="score even if contaminated")
     parser.add_argument("--save-crops", type=int, default=0, metavar="K", help="keep K crops")
     parser.add_argument("--smoke", action="store_true", help="use the smoke namespace")
+    parser.add_argument(
+        "--rescore-untimed", action="store_true", help="score again items scored before timing"
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     if args.smoke:
@@ -105,23 +119,29 @@ def main() -> int:
         session={"device": device, "namespace": namespace(), "shard": args.shard},
     )
     log.info("run %s, shard %d/%d, %d items", record.run_id, index, count, len(items))
+    if args.rescore_untimed:
+        supersede_untimed(directory)
 
-    loader, aggregate = build_loader(
-        registry,
-        model,
-        device,
-        crops_dir=directory / "crops" if args.save_crops else None,
-        save_crops=args.save_crops,
-        prefix=prefix,
-    )
-
-    detector = load_detector(model)
-    detector.load(device)
-    try:
-        n = score_items(detector, items, loader, directory, aggregate=aggregate, prefix=prefix)
-    finally:
-        if hasattr(loader, "close"):
-            loader.close()
+    with Session(directory, device, prefix) as session:
+        loader, aggregate = build_loader(
+            registry,
+            model,
+            device,
+            crops_dir=directory / "crops" if args.save_crops else None,
+            save_crops=args.save_crops,
+            prefix=prefix,
+        )
+        session.mark("build_loader")
+        detector = load_detector(model)
+        detector.load(device)
+        session.mark("load_model")
+        try:
+            n = score_items(detector, items, loader, directory, aggregate=aggregate, prefix=prefix)
+            session.items = n
+        finally:
+            if hasattr(loader, "close"):
+                loader.close()
+            session.mark("score")
     log.info("scored %d items into %s", n, directory)
     return 0
 

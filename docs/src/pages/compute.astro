@@ -3,10 +3,12 @@
 // a full evalset, from the measured profiles in src/reference/status.json.
 import ComputeTable from "../components/ComputeTable.astro";
 import EstimateTable from "../components/EstimateTable.astro";
+import MeasuredTable from "../components/MeasuredTable.astro";
 import Base from "../layouts/Base.astro";
 import { D } from "../lib/status";
 
 const gpu = D.models.find((m) => m.profile?.gpu)?.profile;
+const runGpu = D.runs.find((r) => r.compute?.gpu)?.compute?.gpu;
 const gpuIntro = gpu
   ? `Forward pass only, model loaded, one ${gpu.gpu}, ${gpu.precision}. Audio per 4 s window; video per face crop, 32 frames per video for most models.`
   : "Forward pass only, model loaded. Audio per 4 s window; video per face crop, 32 frames per video for most models.";
@@ -30,6 +32,12 @@ const gpuIntro = gpu
         Model time only, from the measured time per window. Grey: wall time of a real run, usually I/O-bound.
       </p>
       <div class="scroll"><EstimateTable /></div>
+      <h3>Measured on real runs</h3>
+      <p class="note" style="font-size: 0.92rem">
+        Recorded while scoring{runGpu ? ` on one ${runGpu}` : ""}: whole runs including reading and preprocessing. Inputs are
+        4 s audio windows or face frames; GPU busy is the mean utilisation, energy the GPU's own counter.
+      </p>
+      <div class="scroll"><MeasuredTable /></div>
     </section>
   </div>
 </Base>

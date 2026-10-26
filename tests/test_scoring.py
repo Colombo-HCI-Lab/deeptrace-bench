@@ -12,7 +12,14 @@ from deeptrace_bench.preprocess import PreprocessError
 from deeptrace_bench.preprocess.audio import segment
 from deeptrace_bench.registry import Component, EvalsetConfig
 from deeptrace_bench.runs import start_run
-from deeptrace_bench.score import part_prefix, read_scores, score_items, shard_items
+from deeptrace_bench.score import (
+    part_prefix,
+    progress_line,
+    read_scores,
+    score_items,
+    shard_items,
+    supersede_untimed,
+)
 
 from .conftest import make_manifest
 
@@ -85,6 +92,48 @@ def test_scoring_resumes_and_records_failures(registry, tmp_path):
     assert len(scores) == 10 and scores["item_id"].is_unique
     failed = scores.set_index("item_id").loc["toy/7"]
     assert failed["status"] == "too_short" and np.isnan(failed["score"])
+    # every item is timed; a failed item has a load time but no inference time
+    assert scores["load_s"].notna().all() and np.isnan(failed["infer_s"])
+    assert scores.loc[scores["status"] == "ok", "infer_s"].notna().all()
+
+
+def test_parts_from_before_timing_still_resume(registry, tmp_path):
+    detector = load_detector(registry.model("dummy"))
+    detector.load("cpu")
+    items = pd.DataFrame({"item_id": [f"toy/{i}" for i in range(4)]})
+    old = pd.DataFrame(
+        {"item_id": ["toy/0", "toy/1"], "score": 0.5, "n_windows": 1, "status": "ok"}
+    )
+    old.to_parquet(tmp_path / "part-000of001-00000.parquet", index=False)
+
+    def loader(row: pd.Series) -> np.ndarray:
+        return np.zeros((1, 4), dtype=np.float32)
+
+    assert score_items(detector, items, loader, tmp_path, prefix=part_prefix(0, 1)) == 2
+    scores = read_scores(tmp_path).set_index("item_id")
+    assert np.isnan(scores.loc["toy/0", "load_s"]) and scores.loc["toy/3", "load_s"] >= 0
+
+
+def test_untimed_parts_are_moved_aside_and_rescored(registry, tmp_path):
+    detector = load_detector(registry.model("dummy"))
+    detector.load("cpu")
+    items = pd.DataFrame({"item_id": ["toy/0", "toy/1"]})
+    old = pd.DataFrame({"item_id": ["toy/0"], "score": 0.5, "n_windows": 1, "status": "ok"})
+    old.to_parquet(tmp_path / "part-000of001-00000.parquet", index=False)
+    assert supersede_untimed(tmp_path) == 1 and supersede_untimed(tmp_path) == 0
+    assert len(list((tmp_path / "superseded").glob("*/part-*.parquet"))) == 1
+
+    def loader(row: pd.Series) -> np.ndarray:
+        return np.zeros((1, 4), dtype=np.float32)
+
+    assert score_items(detector, items, loader, tmp_path, prefix=part_prefix(0, 1)) == 2
+    assert read_scores(tmp_path)["load_s"].notna().all()
+
+
+def test_progress_line_format():
+    line = progress_line("aasist__urdu_csalt__1234abcd", 128, 512, 4.0, 3)
+    run = "aasist__urdu_csalt__1234abcd"
+    assert line == f"[progress] {run} 128/512 items 4.00 it/s eta 1m36s fail 3"
 
 
 def test_shards_write_their_own_parts(registry, tmp_path):

@@ -1,0 +1,61 @@
+---
+// What each scored run actually cost on the GPU that ran it, from the telemetry recorded while
+// scoring: throughput, peak memory, GPU load and energy. Runs before telemetry aren't listed.
+import { D, MOD, models } from "../lib/status";
+
+const measured = D.runs.filter((r) => r.compute);
+const groups = (["audio", "video", "audio_video"] as const)
+  .map((mod) => ({
+    mod,
+    rows: measured
+      .filter((r) => models.get(r.model)?.modality === mod)
+      .sort((a, b) => a.model.localeCompare(b.model) || a.evalset.localeCompare(b.evalset)),
+  }))
+  .filter((g) => g.rows.length);
+const num = (x: number | null | undefined, d = 1) => (x == null ? "·" : x.toFixed(d));
+---
+
+{
+  measured.length === 0 ? (
+    <p class="note">No run has been scored with telemetry yet.</p>
+  ) : (
+    <table class="tbl compute">
+      <thead>
+        <tr>
+          <th>Detector</th><th>Evalset</th><th class="num">Items per s</th><th class="num">Inputs per s</th><th
+            class="num">Faster than real time</th
+          ><th class="num">Peak GPU memory</th><th class="num">GPU busy</th><th class="num">Energy</th><th class="num"
+            >Wh per 1,000 items</th
+          >
+        </tr>
+      </thead>
+      <tbody>
+        {
+          groups.map(({ mod, rows }) => (
+            <Fragment>
+              <tr class="group">
+                <td colspan="9">{MOD[mod]}</td>
+              </tr>
+              {rows.map((r) => {
+                const c = r.compute!;
+                return (
+                  <tr>
+                    <td class="nowrap">{models.get(r.model)?.name ?? r.model}</td>
+                    <td class="nowrap">{r.evalset}</td>
+                    <td class="num">{num(c.items_per_s)}</td>
+                    <td class="num">{num(c.windows_per_s)}</td>
+                    <td class="num">{c.realtime_factor == null ? "·" : `${num(c.realtime_factor, 0)}×`}</td>
+                    <td class="num">{c.cuda_max_allocated_gb == null ? "·" : `${num(c.cuda_max_allocated_gb)} GB`}</td>
+                    <td class="num">{c.gpu_util_mean == null ? "·" : `${num(c.gpu_util_mean, 0)}%`}</td>
+                    <td class="num">{c.energy_wh == null ? "·" : `${num(c.energy_wh)} Wh`}</td>
+                    <td class="num">{num(c.energy_wh_per_1k_items, 2)}</td>
+                  </tr>
+                );
+              })}
+            </Fragment>
+          ))
+        }
+      </tbody>
+    </table>
+  )
+}

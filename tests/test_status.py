@@ -57,11 +57,35 @@ def _store_run(root, registry, run_id, started, stale=False, **kw):
 def test_latest_current_run_wins(registry, tmp_path, monkeypatch):
     monkeypatch.setenv("DTB_ROOT", str(tmp_path))
     monkeypatch.delenv("DTB_NAMESPACE", raising=False)
+    monkeypatch.setattr(status, "PUBLISHED_RESULTS_DIR", tmp_path / "published")
     _store_run(tmp_path, registry, "aasist__urdu_csalt__old", "2026-10-01T00:00:00", auc=0.7)
     _store_run(tmp_path, registry, "aasist__urdu_csalt__new", "2026-10-02T00:00:00", auc=0.8)
     _store_run(tmp_path, registry, "aasist__urdu_csalt__x", "2026-10-03", auc=0.9, stale=True)
     [row] = scored_runs(registry)
     assert row["run_id"] == "aasist__urdu_csalt__new"
+
+
+def test_published_runs_count_when_the_store_lacks_them(registry, tmp_path, monkeypatch):
+    monkeypatch.setenv("DTB_ROOT", str(tmp_path / "store"))
+    monkeypatch.delenv("DTB_NAMESPACE", raising=False)
+    published = tmp_path / "published"
+    monkeypatch.setattr(status, "PUBLISHED_RESULTS_DIR", published)
+    _store_run(tmp_path / "store", registry, "aasist__urdu_csalt__old", "2026-10-01", auc=0.7)
+    run = published / "aasist__urdu_csalt__spark"
+    run.mkdir(parents=True)
+    summary = _summary("aasist", "urdu_csalt", run.name, auc=0.86)
+    summary["compute"] = {"measured": True, "wall_s": 90.0, "windows": 12, "energy_wh": 2.5}
+    summary["compute"]["env"] = {"gpu": "NVIDIA GeForce RTX 3090"}
+    (run / "summary.json").write_text(json.dumps(summary))
+    hashes = {
+        "model": config_hash(registry.model("aasist")),
+        "evalset": config_hash(registry.evalset("urdu_csalt")),
+    }
+    provenance = {"config_hashes": hashes, "last_started_utc": "2026-10-27T00:00:00+00:00"}
+    (run / "provenance.json").write_text(json.dumps(provenance))
+    [row] = scored_runs(registry)
+    assert row["run_id"] == run.name and row["wall_s"] == 90.0
+    assert row["compute"]["energy_wh"] == 2.5 and row["compute"]["gpu"].endswith("3090")
 
 
 def test_flags(registry):

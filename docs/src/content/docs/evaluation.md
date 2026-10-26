@@ -52,7 +52,10 @@ Decision 5 settles these:
 | --- | --- |
 | AUC and EER | fake as positive, overall and per group, each with a 95% stratified bootstrap interval (1,000 resamples) |
 | Per-group FPR and FNR | at one global threshold, the overall EER point; they catch a group that ranks well but is miscalibrated, which an AUC gap misses |
-| Fake detection rate at 5% FPR | overall and per group |
+| Fake detection rate at 1% and 5% FPR | overall and per group (`tpr_at_fpr01`, `tpr_at_fpr05`): the share of fakes caught at the best threshold that wrongly flags no more than 1% or 5% of real items; 5% is `metrics.fixed_fpr_reference` |
+| Accuracy and balanced accuracy | at the overall EER threshold; balanced accuracy averages the real and fake hit rates, so a mostly real set can't flatter a model that calls everything real |
+| Average precision | the area under the precision-recall curve, fake as positive |
+| Compute | every summary's `compute` block: time per phase, load and inference ms per item (mean, p50, p95), items and inputs per second, how much faster than real time for audio, peak GPU and process memory, mean GPU utilisation and power, and energy from the GPU's counter, with the GPU, driver, CUDA and torch versions. Recorded per scoring session in the run's `telemetry/` folder (`deeptrace_bench.telemetry`) |
 | Failures | `no_face`, `too_short` and `unreadable` counted per group. Face detectors fail more often on darker skin, so dropping failures would bias the gaps |
 | Small groups | under 30 real or fake items: reported and flagged, their gaps not interpreted |
 | Group gap | the headline fairness number. Its definition (`eval.metrics.group_gap`) is still open: max minus min, worst group against the rest, or the largest pair with non-overlapping intervals |

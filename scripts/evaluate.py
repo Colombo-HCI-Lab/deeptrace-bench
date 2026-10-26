@@ -5,10 +5,14 @@ Examples:
     uv run scripts/evaluate.py --run aasist__urdu_csalt__1a2b3c4d --publish
     uv run scripts/evaluate.py --smoke --model gend --evalset unidatapro_videos
 
-Writes full results (including per-item rows) to ``results/<run_id>/`` in the store. With
-``--publish`` it also copies the aggregate tables, which name no items, into the repo's
-``results/<run_id>/`` so they can be committed; pipeline tests and smoke runs are refused
-(exit 2). ``--smoke`` works in the smoke namespace (``DTB_ROOT/smoke/``).
+Writes full results (including per-item rows) to ``results/<run_id>/`` in the store. The
+summary also carries what scoring cost (``compute``: time per phase and per item, throughput,
+peak memory, GPU load, energy and the machine, from the run's telemetry), failures by
+reason, and whether the model's adapter passed parity. With ``--publish`` it also copies the
+aggregate tables, which name no items, into the repo's ``results/<run_id>/`` with a
+``provenance.json`` (configs, weights, commits; no host names) so they can be committed;
+pipeline tests and smoke runs are refused (exit 2). ``--smoke`` works in the smoke namespace
+(``DTB_ROOT/smoke/``).
 """
 
 from __future__ import annotations
@@ -21,7 +25,12 @@ import sys
 
 from deeptrace_bench import evalset as evalsets
 from deeptrace_bench.eval.contamination import check
-from deeptrace_bench.eval.metrics import per_group, score_direction_ok, summarize_scores
+from deeptrace_bench.eval.metrics import (
+    FPR_TARGETS,
+    per_group,
+    score_direction_ok,
+    summarize_scores,
+)
 from deeptrace_bench.eval.publish import publish_refusal
 from deeptrace_bench.paths import (
     PUBLISHED_RESULTS_DIR,
@@ -31,8 +40,9 @@ from deeptrace_bench.paths import (
     scores_root,
     use_namespace,
 )
-from deeptrace_bench.registry import Registry
+from deeptrace_bench.registry import Modality, Registry
 from deeptrace_bench.score import read_scores
+from deeptrace_bench.telemetry import read_sessions, summarize_compute
 
 log = logging.getLogger("evaluate")
 
@@ -45,6 +55,20 @@ def find_run(model_id: str, evalset_id: str) -> str:
             f"expected one run for {model_id} on {evalset_id}, found {runs}; use --run"
         )
     return runs[0]
+
+
+def provenance(record: dict) -> dict:
+    """What defines a run and which code scored it, safe to publish (no host names)."""
+    sessions = record["sessions"]
+    return {
+        **{k: record[k] for k in ("run_id", "model_id", "evalset_id", "upstream_commit")},
+        **{k: record[k] for k in ("weights_sha256", "config_hashes", "preprocessing")},
+        "first_started_utc": sessions[0]["started_utc"],
+        "last_started_utc": sessions[-1]["started_utc"],
+        "repo_commits": sorted({s["repo_commit"] for s in sessions if s.get("repo_commit")}),
+        "repo_dirty": any(s.get("repo_dirty") for s in sessions),
+        "devices": sorted({s["device"] for s in sessions if s.get("device")}),
+    }
 
 
 def main() -> int:
@@ -74,11 +98,19 @@ def main() -> int:
     if missing:
         log.warning("%d items have no score yet; evaluating the %d that do", missing, len(df))
 
+    fpr_targets = sorted({*FPR_TARGETS, metric_cfg["fixed_fpr_reference"]})
     overall = summarize_scores(
-        df, n_boot=metric_cfg["bootstrap"]["n"], seed=metric_cfg["bootstrap"]["seed"]
+        df,
+        n_boot=metric_cfg["bootstrap"]["n"],
+        seed=metric_cfg["bootstrap"]["seed"],
+        fpr_targets=fpr_targets,
     )
     verdict = check(model, evalset, registry)
     ok = df[df["status"] == "ok"]
+    audio = registry.eval.audio
+    is_audio = model.modality == Modality.AUDIO
+    window_s = audio["segment_samples"] / audio["sample_rate"] if is_audio else None
+    parity = PUBLISHED_RESULTS_DIR / "parity" / f"{model.id}.json"
     summary = {
         "run_id": run_id,
         "model": model.id,
@@ -90,8 +122,13 @@ def main() -> int:
         "verdict_reasons": verdict.reasons,
         "score_direction_ok": score_direction_ok(ok["label"], ok["score"]),
         "eval_config_status": registry.eval.status,
+        "parity_passed": bool(parity.exists() and json.loads(parity.read_text())["passed"]),
         "overall": overall,
         "unscored_items": missing,
+        "failures": {
+            str(k): int(v) for k, v in df.loc[df["status"] != "ok", "status"].value_counts().items()
+        },
+        "compute": summarize_compute(scores, read_sessions(run_dir(run_id)), window_s),
     }
 
     out = results_dir(run_id)
@@ -108,6 +145,7 @@ def main() -> int:
             min_n=metric_cfg["min_group_n"],
             n_boot=metric_cfg["bootstrap"]["n"],
             seed=metric_cfg["bootstrap"]["seed"],
+            fpr_targets=fpr_targets,
         )
         table.to_csv(out / f"by_{col}.csv", index=False)
     df[["item_id", "label", "score", "status"]].to_parquet(out / "items.parquet", index=False)
@@ -127,6 +165,7 @@ def main() -> int:
                 continue
             if path.suffix in (".json", ".csv"):
                 shutil.copy2(path, public / path.name)
+        (public / "provenance.json").write_text(json.dumps(provenance(record), indent=2) + "\n")
         log.info("published aggregates to %s", public)
     return 0
 

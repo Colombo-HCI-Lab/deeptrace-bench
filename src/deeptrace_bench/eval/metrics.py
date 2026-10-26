@@ -8,7 +8,9 @@ finding in itself.
 Per-group numbers come with stratified bootstrap confidence intervals, and groups below
 ``min_n`` items of either class are flagged rather than hidden. FPR and FNR are reported at
 one global threshold (the overall EER threshold) because a model can rank every group well
-(similar AUC) yet be miscalibrated for one of them, which an AUC gap would miss.
+(similar AUC) yet be miscalibrated for one of them, which an AUC gap would miss. Accuracy is
+reported at that same threshold, and the fake detection rate at fixed false positive rates
+(``FPR_TARGETS``) says what a deployment that may wrongly flag 1% or 5% of real media gets.
 """
 
 from __future__ import annotations
@@ -17,9 +19,13 @@ from collections.abc import Callable, Mapping, Sequence
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.metrics import average_precision_score, roc_auc_score, roc_curve
 
 Metric = Callable[[np.ndarray, np.ndarray], float]
+
+# False positive rates at which the fake detection rate is reported; the eval config's
+# ``fixed_fpr_reference`` is added to these.
+FPR_TARGETS = (0.01, 0.05)
 
 
 def to_binary(labels: Sequence) -> np.ndarray:
@@ -71,6 +77,49 @@ def rates_at_threshold(labels: Sequence, scores: Sequence, threshold: float) -> 
     return {"fpr": fpr, "fnr": fnr}
 
 
+def accuracy_at_threshold(labels: Sequence, scores: Sequence, threshold: float) -> dict[str, float]:
+    """Plain and balanced accuracy when ``score >= threshold`` means fake.
+
+    Balanced accuracy averages the two classes' hit rates, so it doesn't reward a model for
+    calling everything real on a set that is mostly real.
+    """
+    y = to_binary(labels)
+    if len(y) == 0:
+        return {"acc": float("nan"), "bal_acc": float("nan")}
+    pred_fake = np.asarray(scores, dtype=float) >= threshold
+    rates = rates_at_threshold(y, scores, threshold)
+    return {
+        "acc": float((pred_fake == (y == 1)).mean()),
+        "bal_acc": float(1 - np.nanmean([rates["fpr"], rates["fnr"]])),
+    }
+
+
+def tpr_at_fpr(labels: Sequence, scores: Sequence, target: float) -> float:
+    """The share of fakes caught at the best threshold whose FPR stays at or below ``target``.
+
+    Reads the ROC curve's steps without interpolating, so the rate is one some threshold
+    actually reaches; NaN if only one class is present.
+    """
+    y = to_binary(labels)
+    if len(np.unique(y)) < 2:
+        return float("nan")
+    fpr, tpr, _ = roc_curve(y, np.asarray(scores, dtype=float))
+    return float(tpr[fpr <= target].max())
+
+
+def tpr_key(target: float) -> str:
+    """The column name for the fake detection rate at FPR ``target``: ``tpr_at_fpr05`` at 5%."""
+    return f"tpr_at_fpr{round(target * 100):02d}"
+
+
+def average_precision(labels: Sequence, scores: Sequence) -> float:
+    """Area under the precision-recall curve with fake as the positive class."""
+    y = to_binary(labels)
+    if len(np.unique(y)) < 2:
+        return float("nan")
+    return float(average_precision_score(y, np.asarray(scores, dtype=float)))
+
+
 def bootstrap_ci(
     labels: Sequence,
     scores: Sequence,
@@ -110,12 +159,14 @@ def summarize_scores(
     threshold: float | None = None,
     n_boot: int = 1000,
     seed: int = 0,
+    fpr_targets: Sequence[float] = FPR_TARGETS,
 ) -> dict[str, float]:
-    """AUC and EER with intervals, rates at ``threshold``, and counts, for one set of rows.
+    """AUC and EER with intervals, rates and accuracy at ``threshold``, and counts.
 
     Args:
         df: rows with ``label``, ``score`` and ``status``.
         threshold: the global threshold for FPR/FNR; defaults to this set's own EER point.
+        fpr_targets: false positive rates to report the fake detection rate at.
     """
     ok = df[df["status"] == "ok"]
     y, s = to_binary(ok["label"]), ok["score"].to_numpy(dtype=float)
@@ -133,6 +184,10 @@ def summarize_scores(
     out["auc_lo"], out["auc_hi"] = bootstrap_ci(y, s, auc, n=n_boot, seed=seed)
     out["eer_lo"], out["eer_hi"] = bootstrap_ci(y, s, _eer_only, n=n_boot, seed=seed)
     out.update(rates_at_threshold(y, s, thr) if len(ok) else {"fpr": np.nan, "fnr": np.nan})
+    out.update(accuracy_at_threshold(y, s, thr))
+    out["ap"] = average_precision(y, s)
+    for target in sorted(set(fpr_targets)):
+        out[tpr_key(target)] = tpr_at_fpr(y, s, target)
     return out
 
 
@@ -143,6 +198,7 @@ def per_group(
     min_n: int = 30,
     n_boot: int = 1000,
     seed: int = 0,
+    fpr_targets: Sequence[float] = FPR_TARGETS,
 ) -> pd.DataFrame:
     """One row of ``summarize_scores`` per value of ``group_col``.
 
@@ -153,7 +209,7 @@ def per_group(
     rows = []
     keys = df[group_col].astype(object).where(df[group_col].notna(), "<null>")
     for value, part in df.groupby(keys, sort=True):
-        row = {"group": value, **summarize_scores(part, threshold, n_boot, seed)}
+        row = {"group": value, **summarize_scores(part, threshold, n_boot, seed, fpr_targets)}
         row["small"] = row["n_real"] < min_n or row["n_fake"] < min_n
         rows.append(row)
     return pd.DataFrame(rows)

@@ -5,20 +5,26 @@ process names its parts with its own prefix (``part-003of008-00000.parquet`` for
 8), so array jobs that start together never write the same file. On restart the items
 already in any part are skipped, so a job that hits Curnagl's 3-day limit or gets pre-empted
 picks up where it stopped. Items that can't be preprocessed get a status instead of a score,
-so failures can be counted per group.
+so failures can be counted per group. Each row also keeps how long its item took to load
+(``load_s``: reading, decoding, face or window extraction) and to score (``infer_s``), and a
+``[progress]`` line is logged at every flush and at least once a minute.
 """
 
 from __future__ import annotations
 
 import hashlib
 import logging
+import shutil
+import time
 from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
 from functools import partial
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 
 from .models.base import Detector
 from .paths import dataset_dir, weights_dir
@@ -31,6 +37,8 @@ from .registry import Modality, ModelConfig, Registry
 from .upstream import checkout_dir
 
 log = logging.getLogger(__name__)
+
+PROGRESS_EVERY_S = 60
 
 AGGREGATIONS: dict[str, Callable[[np.ndarray], float]] = {
     "mean": lambda s: float(np.mean(s)),
@@ -60,7 +68,8 @@ def read_scores(directory: Path) -> pd.DataFrame:
     """All score parts in a run directory, as one table."""
     parts = sorted(directory.glob("part-*.parquet"))
     if not parts:
-        return pd.DataFrame(columns=["item_id", "score", "n_windows", "status"])
+        columns = ["item_id", "score", "n_windows", "status", "load_s", "infer_s"]
+        return pd.DataFrame(columns=columns)
     return pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True)
 
 
@@ -100,29 +109,88 @@ def score_items(
     combine = AGGREGATIONS[aggregate]
     next_part = len(list(directory.glob(f"{prefix}-*.parquet")))
     buffer: list[dict] = []
+    total, scored, failed = len(done) + len(todo), 0, 0
+    start = last_report = time.perf_counter()
+
+    def report() -> None:
+        rate = scored / max(time.perf_counter() - start, 1e-9)
+        log.info(progress_line(directory.name, len(done) + scored, total, rate, failed))
+
     for _, row in todo.iterrows():
+        t0 = time.perf_counter()
         try:
             inputs = load_inputs(row)
+            t1 = time.perf_counter()
+            # np.asarray pulls the scores to the host, so a GPU model has finished by t2.
             window_scores = np.asarray(detector.score(inputs), dtype=np.float64)
+            t2 = time.perf_counter()
             buffer.append(
                 {
                     "item_id": row["item_id"],
                     "score": combine(window_scores),
                     "n_windows": int(len(window_scores)),
                     "status": "ok",
+                    "load_s": t1 - t0,
+                    "infer_s": t2 - t1,
                 }
             )
         except PreprocessError as exc:
+            failed += 1
             buffer.append(
-                {"item_id": row["item_id"], "score": np.nan, "n_windows": 0, "status": exc.reason}
+                {
+                    "item_id": row["item_id"],
+                    "score": np.nan,
+                    "n_windows": 0,
+                    "status": exc.reason,
+                    "load_s": time.perf_counter() - t0,
+                    "infer_s": np.nan,
+                }
             )
+        scored += 1
         if len(buffer) >= flush_every:
             _flush(buffer, directory, prefix, next_part)
             next_part += 1
             buffer = []
+            report()
+            last_report = time.perf_counter()
+        elif time.perf_counter() - last_report >= PROGRESS_EVERY_S:
+            report()
+            last_report = time.perf_counter()
     if buffer:
         _flush(buffer, directory, prefix, next_part)
+    report()
     return len(todo)
+
+
+def supersede_untimed(directory: Path) -> int:
+    """Move score parts written before per-item timing to ``superseded/<UTC>/``.
+
+    Their items are then scored again, with timing, so a run's compute numbers cover all of
+    it. The old parts are kept, not deleted, and ``read_scores`` no longer sees them.
+    """
+    parts = sorted(directory.glob("part-*.parquet"))
+    untimed = [p for p in parts if "load_s" not in pq.read_schema(p).names]
+    if not untimed:
+        return 0
+    dest = directory / "superseded" / datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    dest.mkdir(parents=True)
+    for path in untimed:
+        shutil.move(path, dest / path.name)
+    log.info("moved %d untimed parts to %s; their items are scored again", len(untimed), dest)
+    return len(untimed)
+
+
+def _duration(seconds: float) -> str:
+    seconds = int(seconds)
+    if seconds >= 3600:
+        return f"{seconds // 3600}h{seconds % 3600 // 60:02d}m"
+    return f"{seconds // 60}m{seconds % 60:02d}s"
+
+
+def progress_line(run_id: str, done: int, total: int, rate: float, failed: int) -> str:
+    """One ``[progress]`` log line; deeptrace-experiments' ``exp.py progress`` parses it."""
+    eta = _duration((total - done) / rate) if rate > 0 else "?"
+    return f"[progress] {run_id} {done}/{total} items {rate:.2f} it/s eta {eta} fail {failed}"
 
 
 def _flush(rows: list[dict], directory: Path, prefix: str, part: int) -> None:

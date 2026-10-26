@@ -26,9 +26,10 @@ $DTB_ROOT/
 │   └── part-000of001-00000.parquet
 ├── scores/<model>__<evalset>__<8hex>/       one run
 │   ├── run.json                             provenance: inputs, sessions (commit, device, host)
-│   ├── part-000of001-00000.parquet          item_id, score, n_windows, status
+│   ├── part-000of001-00000.parquet          item_id, score, n_windows, status, load_s, infer_s
+│   ├── telemetry/<part prefix>-<UTC>-<pid>.json   one per session: phases, GPU load, memory, energy
 │   └── crops/<item_id>/frame_0007.png       only with score.py --save-crops
-├── results/<model>__<evalset>__<8hex>/      summary.json, by_<group>.csv, items.parquet
+├── results/<model>__<evalset>__<8hex>/      summary.json (with compute), by_<group>.csv, items.parquet
 ├── splits/                                  identity-safe fine-tuning splits
 ├── parity/<model>/<UTC time>/               a parity run: inputs.npz, parity.json, adapter.npy,
 │                                            reference.npy, reference.json

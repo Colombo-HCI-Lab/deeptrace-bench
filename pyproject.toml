@@ -12,6 +12,7 @@ dependencies = [
     "gdown>=5.2",
     "huggingface-hub>=0.34,<1.0",
     "numpy>=2.0",
+    "nvidia-ml-py>=12.570",
     "onnxruntime>=1.19",
     "opencv-python-headless>=4.10,<5",  # upstream detectors pin 4.x; same major eases parity
     "pandas>=2.2",

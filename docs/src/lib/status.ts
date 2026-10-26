@@ -109,6 +109,19 @@ export interface Run {
   reasons: string[];
   flags: string[];
   wall_s: number | null;
+  // Measured while scoring (telemetry, since 2026-10-27); null for runs before it.
+  compute: RunCompute | null;
+}
+
+export interface RunCompute {
+  items_per_s: number | null;
+  windows_per_s: number | null;
+  realtime_factor: number | null;
+  cuda_max_allocated_gb: number | null;
+  gpu_util_mean: number | null;
+  energy_wh: number | null;
+  energy_wh_per_1k_items: number | null;
+  gpu: string | null;
 }
 
 // A kind of fake, defined once in catalog.yaml: what it changes and what it leaves behind.

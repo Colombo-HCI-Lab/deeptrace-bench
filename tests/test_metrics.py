@@ -8,13 +8,17 @@ import numpy as np
 import pandas as pd
 
 from deeptrace_bench.eval.metrics import (
+    accuracy_at_threshold,
     auc,
+    average_precision,
     bootstrap_ci,
     eer,
     per_group,
     rates_at_threshold,
     score_direction_ok,
     summarize_scores,
+    tpr_at_fpr,
+    tpr_key,
 )
 
 
@@ -79,3 +83,36 @@ def test_per_group_counts_failures_and_flags_small_groups():
     assert by_group.loc["<null>", "n_failed"] == 2
     assert by_group.loc["<null>", "small"]
     assert overall["n_failed"] == 2
+
+
+def test_accuracy_at_threshold():
+    # 3 reals, 1 fake; one real above the threshold. Plain accuracy 3/4; balanced is the mean
+    # of the real hit rate (2/3) and the fake hit rate (1).
+    labels = ["real", "real", "real", "fake"]
+    out = accuracy_at_threshold(labels, [0.1, 0.2, 0.7, 0.9], 0.5)
+    assert out["acc"] == 0.75
+    assert math.isclose(out["bal_acc"], (2 / 3 + 1) / 2)
+
+
+def test_tpr_at_fpr_reads_the_roc_steps():
+    # 10 reals, 10 fakes; one real outscores 4 fakes. Below 10% FPR only the 6 fakes above
+    # that real are caught; at 10% FPR every fake is.
+    labels = ["real"] * 10 + ["fake"] * 10
+    scores = [i / 100 for i in range(9)] + [0.5] + [0.4, 0.41, 0.42, 0.43] + [0.6] * 6
+    assert tpr_at_fpr(labels, scores, 0.05) == 0.6
+    assert tpr_at_fpr(labels, scores, 0.10) == 1.0
+    assert math.isnan(tpr_at_fpr(["fake", "fake"], [0.1, 0.2], 0.05))
+    assert tpr_key(0.05) == "tpr_at_fpr05" and tpr_key(0.01) == "tpr_at_fpr01"
+
+
+def test_average_precision_of_a_perfect_ranking_is_one():
+    assert average_precision(["real", "fake", "fake"], [0.1, 0.8, 0.9]) == 1.0
+
+
+def test_summary_carries_accuracy_and_fixed_fpr_rates():
+    df = pd.DataFrame(
+        {"label": ["real", "real", "fake", "fake"], "score": [0.1, 0.2, 0.8, 0.9], "status": "ok"}
+    )
+    out = summarize_scores(df, n_boot=10, fpr_targets=(0.01, 0.05))
+    assert out["acc"] == 1.0 and out["bal_acc"] == 1.0 and out["ap"] == 1.0
+    assert out["tpr_at_fpr01"] == 1.0 and out["tpr_at_fpr05"] == 1.0
