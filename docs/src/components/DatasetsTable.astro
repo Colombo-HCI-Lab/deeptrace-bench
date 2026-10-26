@@ -34,6 +34,7 @@ const groups = ["south_asian", "reproduction", "real_reference", "in_the_wild"]
                   <a class="name" href={`#dataset-${d.id}`}>
                     {d.name}
                   </a>
+                  {d.cut && <span class="flagtag cut" title={d.why ?? undefined}>cut candidate</span>}
                   <span class="sum">
                     {MOD[d.modality] || d.modality}
                     {d.summary ? `. ${d.summary}` : ""}

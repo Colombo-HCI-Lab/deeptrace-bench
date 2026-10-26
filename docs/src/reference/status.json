@@ -56,7 +56,9 @@
     "peak_memory_gb": 0.36683225631713867,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The most-cited open audio detector, trained only on English ASVspoof speech: it stands for the off-the-shelf detector a South Asian platform would deploy today, and is the classic half of the probe's audio pair.",
+   "cut": false
   },
   {
    "id": "aasist3",
@@ -155,7 +157,9 @@
     "peak_memory_gb": 1.4064998626708984,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Picked as the only AASIST variant trained with multilingual fakes (MLAAD, which has Hindi, Bengali, Tamil, Urdu and Sinhala). The released weights aren't the paper's and score far below it, so they can't answer that question, and the guard refuses them on every MLAAD evalset.",
+   "cut": true
   },
   {
    "id": "aasist_l",
@@ -210,7 +214,9 @@
     "peak_memory_gb": 0.35856199264526367,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Picked as the phone-sized AASIST, for detection on cheap devices. On every South Asian set so far it scores within a few hundredths of AASIST, so it shows nothing the bigger model doesn't.",
+   "cut": true
   },
   {
    "id": "altfreezing",
@@ -265,7 +271,9 @@
     "FaceForensics++"
    ],
    "parity": null,
-   "profile": null
+   "profile": null,
+   "why": "The probe's temporal video detector: talking heads and lip-sync fakes are edited over time, and frame models can miss motion artefacts. Blocked until someone can fetch its weights.",
+   "cut": false
   },
   {
    "id": "antideepfake_mms_300m",
@@ -520,7 +528,9 @@
     "peak_memory_gb": 1.324605941772461,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Half of the cleanest test of the language question: the same post-training as the w2v2 small model on a backbone pretrained on about 1,400 languages. Its post-training heard Hindi, Bengali, Urdu, Tamil and Nepali but no Sinhala, so a Sinhala set would show what an unheard South Asian language does.",
+   "cut": false
   },
   {
    "id": "antideepfake_w2v_small",
@@ -750,7 +760,9 @@
     "peak_memory_gb": 0.4506702423095703,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The other half of that pair: the same post-training on an English-only backbone, so its gap to MMS-300M on South Asian speech comes from the pretraining languages alone.",
+   "cut": false
   },
   {
    "id": "core",
@@ -825,7 +837,9 @@
     "peak_memory_gb": 0.9411115646362305,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Trained for representations that stay consistent across augmented views, so it tests whether that robustness survives South Asian faces and the recompression of forwarded clips. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
+   "cut": false
   },
   {
    "id": "df_arena_1b",
@@ -967,7 +981,9 @@
     "peak_memory_gb": 4.530937671661377,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The strongest open audio detector, so it sets the ceiling South Asian results are read against. Its training includes MLAAD, whose generators recur in South Asian sets, so part of its score there may be familiarity.",
+   "cut": false
   },
   {
    "id": "df_arena_500m",
@@ -1109,7 +1125,9 @@
     "peak_memory_gb": 1.703409194946289,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Picked to test whether size helps on South Asian speech. The 1B model isn't consistently better, so with that reported the smaller one is redundant.",
+   "cut": true
   },
   {
    "id": "efficientnet_b4",
@@ -1184,7 +1202,9 @@
     "peak_memory_gb": 0.968353271484375,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Picked as a second classic video baseline beside Xception. It reads the same texture cue from the same FF++ training, so it is unlikely to show anything about South Asian faces that Xception doesn't.",
+   "cut": true
   },
   {
    "id": "effort",
@@ -1244,7 +1264,9 @@
     "FaceForensics++"
    ],
    "parity": null,
-   "profile": null
+   "profile": null,
+   "why": "The probe's original foundation-model video detector, the partner to Xception. Blocked on weights; GenD holds its place until they arrive.",
+   "cut": false
   },
   {
    "id": "f3net",
@@ -1319,7 +1341,9 @@
     "peak_memory_gb": 1.0373125076293945,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Reads frequency bands chosen to survive compression, the cue most likely to matter for South Asian clips that circulate recompressed on messaging apps. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
+   "cut": false
   },
   {
    "id": "ffd",
@@ -1394,7 +1418,9 @@
     "peak_memory_gb": 0.9411392211914062,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Learns where on the face the manipulation is, so it shows whether its attention transfers to South Asian faces. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
+   "cut": false
   },
   {
    "id": "gend",
@@ -1464,7 +1490,9 @@
     "peak_memory_gb": 1.6532783508300781,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The foundation-model half of the video pair, in Effort's place. Its backbone was pretrained on far more varied faces than FF++, which tests whether that removes skin-tone bias; on HiDF it flagged real Indian faces most often, so it is the first model to check on South Asian faces.",
+   "cut": false
   },
   {
    "id": "gend_pe_l",
@@ -1534,7 +1562,9 @@
     "peak_memory_gb": 1.572800636291504,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The same GenD recipe on Meta's Perception Encoder instead of CLIP: whether the pretraining behind the backbone changes how it treats South Asian faces. Second tier, run beside GenD (CLIP).",
+   "cut": false
   },
   {
    "id": "havic",
@@ -1604,7 +1634,9 @@
     "peak_memory_gb": 1.9081230163574219,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The only open audio-visual detector. v1 focuses on lip-sync with cloned voices, which only a model that checks whether voice and mouth agree can catch; MAVOS-DD Hindi is its South Asian test, and it is refused on FakeAVCeleb, which it was fine-tuned on.",
+   "cut": false
   },
   {
    "id": "lipforensics",
@@ -1674,7 +1706,9 @@
     "peak_memory_gb": 4.336434364318848,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Looks only at the mouth, where lip-sync fakes, v1's focus, are edited. Tests whether FF++ face-swap detectors miss mouth-only edits on South Asian talking heads.",
+   "cut": false
   },
   {
    "id": "recce",
@@ -1749,7 +1783,9 @@
     "peak_memory_gb": 1.037496566772461,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Learns to reconstruct real faces only, so it tests whether its idea of a real face, learned from FF++, holds for South Asian faces. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
+   "cut": false
   },
   {
    "id": "sbi",
@@ -1823,7 +1859,9 @@
     "peak_memory_gb": 1.0756282806396484,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Trained on real faces blended into themselves, never on real deepfakes, so it depends least on its training set's faces and generators. The probe's test of whether that generalises better to South Asian faces and unseen generators.",
+   "cut": false
   },
   {
    "id": "spsl",
@@ -1898,7 +1936,9 @@
     "peak_memory_gb": 0.9879875183105469,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Reads the phase spectrum, where upsampling leaves traces whatever the face, so it tests a cue that shouldn't depend on skin tone. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
+   "cut": false
   },
   {
    "id": "srm",
@@ -1973,7 +2013,9 @@
     "peak_memory_gb": 1.273916244506836,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Reads high-frequency noise residuals, a cue sensitive to the phone cameras and compression typical of South Asian social media. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
+   "cut": false
   },
   {
    "id": "ucf",
@@ -2048,7 +2090,9 @@
     "peak_memory_gb": 1.0383291244506836,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "Built to find forgery traces common to every generator, so it tests generalisation to the generators actually used in South Asia. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
+   "cut": false
   },
   {
    "id": "xception",
@@ -2123,7 +2167,9 @@
     "peak_memory_gb": 0.9411115646362305,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The most-cited video detector and the classic half of the video pair. Its training set, FF++, is dominated by lighter-skinned faces, so it measures what a standard detector does on South Asian skin tones.",
+   "cut": false
   },
   {
    "id": "xlsr_aasist",
@@ -2209,7 +2255,9 @@
     "peak_memory_gb": 1.3263330459594727,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The same training data as AASIST on a backbone pretrained on 128 languages: whether multilingual pretraining alone, with English-only fakes, carries over to South Asian speech. The foundation-model half of the probe's audio pair.",
+   "cut": false
   },
   {
    "id": "xlsr_mamba",
@@ -2299,7 +2347,9 @@
     "peak_memory_gb": 1.3333797454833984,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The same backbone and training as XLS-R + AASIST with a Mamba back end, so a failure the two share on South Asian speech points at the training data, not the head. Second tier.",
+   "cut": false
   },
   {
    "id": "xlsr_sls",
@@ -2389,7 +2439,9 @@
     "peak_memory_gb": 1.4140405654907227,
     "gpu": "24 GB GPU",
     "precision": "fp32"
-   }
+   },
+   "why": "The same backbone and training as XLS-R + AASIST with a back end that pools every layer, so a failure the two share on South Asian speech points at the training data, not the head. Second tier.",
+   "cut": false
   }
  ],
  "datasets": [
@@ -2438,7 +2490,9 @@
    },
    "evalsets": [
     "asvspoof2019_la_eval"
-   ]
+   ],
+   "why": "Not South Asian. The reproduction set for the detectors trained on it: an adapter must match its published numbers here, and settle its score direction, before its South Asian numbers count, so a low South Asian AUC reads as a real failure rather than a flipped sign.",
+   "cut": false
   },
   {
    "id": "bangla_voices",
@@ -2477,7 +2531,9 @@
    "paper": null,
    "evalsets": [
     "bangla_voices"
-   ]
+   ],
+   "why": "Bangladeshi Bengali with every fake paired to the same speaker's real clip and a gender label, so it separates the fake from speaker and recording differences and gives the gender comparison.",
+   "cut": false
   },
   {
    "id": "banglafake",
@@ -2525,7 +2581,9 @@
    },
    "evalsets": [
     "banglafake"
-   ]
+   ],
+   "why": "The largest open Bengali set, with sub-corpora recorded in different ways, so results can be split by recording condition.",
+   "cut": false
   },
   {
    "id": "bd_grf6",
@@ -2559,7 +2617,9 @@
    "paper": null,
    "evalsets": [
     "bd_grf6"
-   ]
+   ],
+   "why": "Bangladeshi speech with a third-gender group, which Bangladesh, India, Nepal and Pakistan recognise in law: the only set that tests gender beyond male and female. Cross-corpus until its file formats are checked, since they may give the label away.",
+   "cut": false
   },
   {
    "id": "casual_conversations_v2",
@@ -2602,7 +2662,9 @@
     "venue": "CVPRW 2023",
     "url": "https://arxiv.org/abs/2303.04838"
    },
-   "evalsets": []
+   "evalsets": [],
+   "why": "Real video only, with India its largest country and self-reported demographics: how often detectors flag real South Asian faces as fake, the harm that falls on real people.",
+   "cut": false
   },
   {
    "id": "celeb_df_v2",
@@ -2639,7 +2701,9 @@
    },
    "evalsets": [
     "celeb_df_v2_test"
-   ]
+   ],
+   "why": "Not South Asian (mostly Caucasian subjects). A video reproduction set: it or FF++ settles every video model's score direction, without which no video number counts.",
+   "cut": false
   },
   {
    "id": "deepfake_eval_2024",
@@ -2674,7 +2738,9 @@
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2503.02857"
    },
-   "evalsets": []
+   "evalsets": [],
+   "why": "Picked as the only set of deepfakes that actually circulated online. It has no country field, so South Asian items can't be picked out, and access requests are often rejected.",
+   "cut": true
   },
   {
    "id": "deephy",
@@ -2715,7 +2781,9 @@
    },
    "evalsets": [
     "deephy"
-   ]
+   ],
+   "why": "Indian face swaps with up to three successive generators, so South Asian faces under several generators. With few real videos it measures misses more than false alarms.",
+   "cut": false
   },
   {
    "id": "dfplatter",
@@ -2757,7 +2825,9 @@
    },
    "evalsets": [
     "dfplatter_sample"
-   ]
+   ],
+   "why": "The largest Indian video set, labelled by skin tone, gender, age and occlusion: where skin- tone effects on South Asian faces can be measured directly.",
+   "cut": false
   },
   {
    "id": "fakeavceleb",
@@ -2800,7 +2870,9 @@
    },
    "evalsets": [
     "fakeavceleb"
-   ]
+   ],
+   "why": "The only set with a South Asian group beside four other ethnic groups under one recording setup, so it gives the probe's South Asian against others comparison. Its speech is English.",
+   "cut": false
   },
   {
    "id": "ffpp",
@@ -2841,7 +2913,9 @@
    },
    "evalsets": [
     "ffpp_test"
-   ]
+   ],
+   "why": "Not South Asian. Every video detector here trained on it, so its test split is where video adapters reproduce published numbers and settle score direction.",
+   "cut": false
   },
   {
    "id": "hidf",
@@ -2889,7 +2963,9 @@
    },
    "evalsets": [
     "hidf_video"
-   ]
+   ],
+   "why": "Not South Asian, but race-labelled with an Indian group: a stopgap check of false alarms on real faces by race until South Asian video arrives. Its Indian group is small, so it should step back once FakeAVCeleb or DF-Platter is in.",
+   "cut": false
   },
   {
    "id": "iav_df",
@@ -2916,7 +2992,9 @@
    "notes": "Only a sample was ever released and its link is dead, so nothing can be downloaded.",
    "recorded": null,
    "paper": null,
-   "evalsets": []
+   "evalsets": [],
+   "why": "Picked because it is Indian lip-sync with cloned voices, exactly v1's type. Dropped: its only sample link is dead.",
+   "cut": false
   },
   {
    "id": "in_the_wild",
@@ -2956,7 +3034,9 @@
    },
    "evalsets": [
     "in_the_wild"
-   ]
+   ],
+   "why": "Not South Asian. Real-world English deepfakes of public figures: the reproduction set where the guard refuses ASVspoof (DF Arena, AntiDeepfake), and the out-of-domain reference South Asian scores are compared with.",
+   "cut": false
   },
   {
    "id": "indeepfake",
@@ -2995,7 +3075,9 @@
    },
    "evalsets": [
     "indeepfake"
-   ]
+   ],
+   "why": "Indian YouTube video in seven languages with face swaps and TTS plus Wav2Lip lip-sync: South Asian talking heads with cloned voices, close to v1's type.",
+   "cut": false
   },
   {
    "id": "indic_codecfake",
@@ -3027,7 +3109,9 @@
     "venue": "ACL 2026 Findings",
     "url": "https://arxiv.org/abs/2604.19949"
    },
-   "evalsets": []
+   "evalsets": [],
+   "why": "Picked as Indian-language fakes from neural audio codecs, a kind of fake no other set covers. Dropped: no download exists.",
+   "cut": false
   },
   {
    "id": "indicsuperb",
@@ -3091,7 +3175,9 @@
     "speechfake_ml",
     "speechfake_mr",
     "speechfake_ta"
-   ]
+   ],
+   "why": "Real read speech in 12 Indian languages from the speakers IndicSynth clones, so IndicSynth's evalsets pair each fake with real speech from the same speakers and corpus.",
+   "cut": false
   },
   {
    "id": "indicsynth",
@@ -3158,7 +3244,9 @@
     "indicsynth_bn",
     "indicsynth_hi",
     "indicsynth_ur"
-   ]
+   ],
+   "why": "The largest open South Asian fake speech, with voice conversion (FreeVC24) beside TTS: the cloned-voice half of v1, with generator and gender labels.",
+   "cut": false
   },
   {
    "id": "indictts_challenge",
@@ -3214,7 +3302,9 @@
    "paper": null,
    "evalsets": [
     "indictts_challenge"
-   ]
+   ],
+   "why": "Sixteen Indian languages and the only labelled Nepali fakes in one set, so it is where language becomes a per-group attribute.",
+   "cut": false
   },
   {
    "id": "indiefake",
@@ -3254,7 +3344,9 @@
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2506.19014"
    },
-   "evalsets": []
+   "evalsets": [],
+   "why": "Indian-accented English with voices cloned across speakers: voice-cloning scams in the English South Asian public figures often speak.",
+   "cut": false
   },
   {
    "id": "lrlspoof",
@@ -3295,7 +3387,9 @@
     "venue": "Interspeech 2026 (arXiv)",
     "url": "https://arxiv.org/abs/2603.02364"
    },
-   "evalsets": []
+   "evalsets": [],
+   "why": "More Nepali and Assamese fakes from 24 TTS systems, where Nepali data is thinnest. Deferred: no language can be fetched without the whole 462 GB archive.",
+   "cut": false
   },
   {
    "id": "mavos_dd_hi",
@@ -3342,7 +3436,9 @@
    "evalsets": [
     "mavos_dd_hi_audio",
     "mavos_dd_hi_video"
-   ]
+   ],
+   "why": "The only South Asian video anyone can download: Hindi talking heads, face swaps and voice conversion, so it is the first test of v1's lip-sync with cloned voices, and HAVIC's only South Asian set.",
+   "cut": false
   },
   {
    "id": "mendeley_roop_akool",
@@ -3377,7 +3473,9 @@
     ]
    ],
    "paper": null,
-   "evalsets": []
+   "evalsets": [],
+   "why": "Bangladeshi and Indian face crops faked with consumer tools: a pipeline test, used for video parity checks, never for results.",
+   "cut": false
   },
   {
    "id": "mlaad",
@@ -3424,7 +3522,9 @@
     "mlaad_bn",
     "mlaad_hi",
     "mlaad_si"
-   ]
+   ],
+   "why": "The only Sinhala deepfake speech anywhere, plus Hindi, Bengali, Tamil and Urdu. Fake only, so its evalsets are cross-corpus and diagnostic until the shortcut probe clears them.",
+   "cut": false
   },
   {
    "id": "openslr_sinhala",
@@ -3464,7 +3564,9 @@
    },
    "evalsets": [
     "mlaad_si"
-   ]
+   ],
+   "why": "Real Sinhala read speech, the real half for MLAAD's Sinhala fakes: the only way to test Sri Lanka's main language today.",
+   "cut": false
   },
   {
    "id": "sea_spoof",
@@ -3517,7 +3619,9 @@
    "evalsets": [
     "sea_spoof_hi",
     "sea_spoof_ta"
-   ]
+   ],
+   "why": "Hindi and Tamil fakes from named commercial voice tools as well as open TTS, the kind of tools behind real scams.",
+   "cut": false
   },
   {
    "id": "speechfake",
@@ -3573,7 +3677,9 @@
     "speechfake_ml",
     "speechfake_mr",
     "speechfake_ta"
-   ]
+   ],
+   "why": "More Indic fakes (Hindi, Bengali, Tamil, Marathi, Malayalam) from a free, widely used TTS and from voice conversion. Cross-corpus, so diagnostic until the shortcut probe.",
+   "cut": false
   },
   {
    "id": "svarah",
@@ -3609,7 +3715,9 @@
     "venue": "Interspeech 2023",
     "url": "https://arxiv.org/abs/2305.15760"
    },
-   "evalsets": []
+   "evalsets": [],
+   "why": "Real Indian-accented English from across India with gender, age, state and first language: false alarms on real South Asian voices, split by region.",
+   "cut": false
   },
   {
    "id": "unidatapro_videos",
@@ -3643,7 +3751,9 @@
     ]
    ],
    "paper": null,
-   "evalsets": []
+   "evalsets": [],
+   "why": "A tiny free preview of phone videos and their face swaps: a pipeline test, never reported.",
+   "cut": false
   },
   {
    "id": "urdu_csalt",
@@ -3691,7 +3801,9 @@
    },
    "evalsets": [
     "urdu_csalt"
-   ]
+   ],
+   "why": "Pakistan's Urdu with generator labels (VITS, Tacotron), the first South Asian set scored. It behaves unlike the others, which makes it the test case for recording artefacts.",
+   "cut": false
   }
  ],
  "evalsets": [

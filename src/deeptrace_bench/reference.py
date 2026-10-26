@@ -134,6 +134,12 @@ def _table(rows: list[tuple[str, str]]) -> list[str]:
     return lines
 
 
+def _why(entry: dict[str, Any]) -> str:
+    """Why an entry is here, flagged when it is a cut candidate."""
+    why = entry.get("why") or ""
+    return f"Cut candidate. {why}" if entry.get("cut") else why
+
+
 def _published(rows: list[dict[str, Any]]) -> str:
     return "; ".join(f"{r['test']}: {r['metric']} {r['value']} ({r['source']})" for r in rows)
 
@@ -163,6 +169,7 @@ def _model(m: dict[str, Any], model_runs: list[dict[str, Any]]) -> list[str]:
         status += f", scored on {runs} evalset{'s' if runs > 1 else ''}"
     out += _table(
         [
+            ("Why it's here", _why(m)),
             ("How it works", m.get("architecture") or ""),
             ("Input", m.get("input") or ""),
             ("Paper", _paper(m.get("paper"))),
@@ -194,6 +201,7 @@ def _dataset(d: dict[str, Any]) -> list[str]:
         recorded_text = "not built yet"
     out += _table(
         [
+            ("Why it's here", _why(d)),
             ("Kind", f"{MODALITIES[d['modality']]}, {' and '.join(d['contains'])}"),
             ("Languages", _languages(d["languages"])),
             ("Size", d.get("scale") or ""),

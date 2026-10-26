@@ -1,6 +1,8 @@
 # Facts for the site's Models & data tables and docs/catalog.md, keyed by config id.
 # Descriptions rewritten 2026-10-12 against the configs, builders, docs and each paper;
 # published numbers checked 2026-10-12.
+#   why        why it was picked and what it tests for South Asia, in one or two sentences
+#   cut        true for a cut candidate: it adds little the others don't show; the team decides
 #   s2_id      Semantic Scholar id of the paper (ARXIV:, DOI: or a paperId); counts are
 #              fetched into results/citations.json by `scripts/build_site.py --citations`
 #   venue      short venue and year, as the page shows it
@@ -16,6 +18,10 @@
 #              labels the dataset ships), format, notes (a caveat users must know)
 models:
   aasist:
+    why: >-
+      The most-cited open audio detector, trained only on English ASVspoof speech: it stands for the
+      off-the-shelf detector a South Asian platform would deploy today, and is the classic half of
+      the probe's audio pair.
     s2_id: ARXIV:2110.01200
     venue: ICASSP 2022
     published:
@@ -33,6 +39,11 @@ models:
       2019 LA training split, with no pretraining. A compact single-corpus baseline that sits near
       chance on In-the-Wild.
   aasist3:
+    why: >-
+      Picked as the only AASIST variant trained with multilingual fakes (MLAAD, which has Hindi,
+      Bengali, Tamil, Urdu and Sinhala). The released weights aren't the paper's and score far below
+      it, so they can't answer that question, and the guard refuses them on every MLAAD evalset.
+    cut: true
     s2_id: ARXIV:2408.17352
     venue: ASVspoof 2024 Workshop
     published:
@@ -53,6 +64,10 @@ models:
       not the weights behind the paper's numbers, and the model card's Speech Arena re-scoring puts
       them far lower, so treat it as a weak multilingual baseline; parity is not checked yet.
   aasist_l:
+    why: >-
+      Picked as the phone-sized AASIST, for detection on cheap devices. On every South Asian set so
+      far it scores within a few hundredths of AASIST, so it shows nothing the bigger model doesn't.
+    cut: true
     s2_id: ARXIV:2110.01200
     venue: ICASSP 2022
     published:
@@ -69,6 +84,9 @@ models:
       2019 LA training split. The cheapest single-corpus baseline here; like AASIST it is near chance
       on In-the-Wild.
   altfreezing:
+    why: >-
+      The probe's temporal video detector: talking heads and lip-sync fakes are edited over time,
+      and frame models can miss motion artefacts. Blocked until someone can fetch its weights.
     s2_id: ARXIV:2307.08317
     venue: CVPR 2023
     published:
@@ -87,6 +105,11 @@ models:
       trained on FaceForensics++ (compression not stated). Blocked here: the weights are only on
       RecDrive and Baidu, upstream issues report the file gone, and there is no adapter.
   antideepfake_mms_300m:
+    why: >-
+      Half of the cleanest test of the language question: the same post-training as the w2v2 small
+      model on a backbone pretrained on about 1,400 languages. Its post-training heard Hindi,
+      Bengali, Urdu, Tamil and Nepali but no Sinhala, so a Sinhala set would show what an unheard
+      South Asian language does.
     s2_id: ARXIV:2506.21090
     venue: ASRU 2025
     published:
@@ -107,6 +130,9 @@ models:
       exposure of any audio model here, so the contamination guard refuses it on MLAAD-based evalsets
       and anything built from FLEURS.
   antideepfake_w2v_small:
+    why: >-
+      The other half of that pair: the same post-training on an English-only backbone, so its gap to
+      MMS-300M on South Asian speech comes from the pretraining languages alone.
     s2_id: ARXIV:2506.21090
     venue: ASRU 2025
     published:
@@ -126,6 +152,11 @@ models:
       pretraining. The contamination guard refuses it on MLAAD-based evalsets and anything built from
       FLEURS.
   core:
+    why: >-
+      Trained for representations that stay consistent across augmented views, so it tests whether
+      that robustness survives South Asian faces and the recompression of forwarded clips. Like
+      every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the
+      same faces; second tier, worth running once South Asian video arrives.
     s2_id: ARXIV:2206.02749
     venue: CVPRW 2022
     published:
@@ -145,6 +176,10 @@ models:
       per the DeepfakeBench README) after ImageNet pretraining. It differs from the Xception baseline
       only in the training loss.
   df_arena_1b:
+    why: >-
+      The strongest open audio detector, so it sets the ceiling South Asian results are read
+      against. Its training includes MLAAD, whose generators recur in South Asian sets, so part of
+      its score there may be familiarity.
     s2_id: ARXIV:2509.02859
     venue: Speech DF Arena 2025
     published:
@@ -164,6 +199,10 @@ models:
       and EnvSDD. The contamination guard therefore refuses it on ASVspoof 2019 LA eval and MLAAD-based
       evalsets.
   df_arena_500m:
+    why: >-
+      Picked to test whether size helps on South Asian speech. The 1B model isn't consistently
+      better, so with that reported the smaller one is redundant.
+    cut: true
     s2_id: ARXIV:2509.02859
     venue: Speech DF Arena 2025
     published:
@@ -182,6 +221,11 @@ models:
       saw ASVspoof 2019 and 2024, MLAAD, Codecfake, LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb and EnvSDD.
       The contamination guard refuses it on ASVspoof 2019 LA eval and MLAAD-based evalsets.
   efficientnet_b4:
+    why: >-
+      Picked as a second classic video baseline beside Xception. It reads the same texture cue from
+      the same FF++ training, so it is unlikely to show anything about South Asian faces that
+      Xception doesn't.
+    cut: true
     s2_id: ARXIV:2004.07676
     venue: ICPR 2020
     published:
@@ -198,6 +242,9 @@ models:
       (c23 per the DeepfakeBench README) after ImageNet pretraining. With Xception it is the plain-CNN
       video baseline, with no forgery-specific cue.
   effort:
+    why: >-
+      The probe's original foundation-model video detector, the partner to Xception. Blocked on
+      weights; GenD holds its place until they arrive.
     s2_id: ARXIV:2411.15633
     venue: ICML 2025
     published:
@@ -219,6 +266,11 @@ models:
       as over quota on 2026-10-05; upstream also reports a Celeb-DF v2 reproduction gap and has no
       licence file.
   f3net:
+    why: >-
+      Reads frequency bands chosen to survive compression, the cue most likely to matter for South
+      Asian clips that circulate recompressed on messaging apps. Like every DeepfakeBench detector
+      here it trained on FF++, so each reads a different cue on the same faces; second tier, worth
+      running once South Asian video arrives.
     s2_id: ARXIV:2007.09355
     venue: ECCV 2020
     published:
@@ -238,6 +290,10 @@ models:
       pretraining. The detector's yaml names only NeuralTextures, which may not describe the checkpoint;
       the benchmark treats it as trained on all of FF++.
   ffd:
+    why: >-
+      Learns where on the face the manipulation is, so it shows whether its attention transfers to
+      South Asian faces. Like every DeepfakeBench detector here it trained on FF++, so each reads a
+      different cue on the same faces; second tier, worth running once South Asian video arrives.
     s2_id: ARXIV:1910.01717
     venue: CVPR 2020
     published:
@@ -256,6 +312,10 @@ models:
       weights were trained on FaceForensics++ (c23 per the DeepfakeBench README) after ImageNet pretraining.
       Passes parity against the original code.
   gend:
+    why: >-
+      The foundation-model half of the video pair, in Effort's place. Its backbone was pretrained on
+      far more varied faces than FF++, which tests whether that removes skin-tone bias; on HiDF it
+      flagged real Indian faces most often, so it is the first model to check on South Asian faces.
     s2_id: ARXIV:2508.06248
     venue: WACV 2026
     published:
@@ -275,6 +335,10 @@ models:
       only, after CLIP pretraining on OpenAI's private image-text data. The main generalisation-first
       video model here; the adapter runs end to end but parity is not checked yet.
   gend_pe_l:
+    why: >-
+      The same GenD recipe on Meta's Perception Encoder instead of CLIP: whether the pretraining
+      behind the backbone changes how it treats South Asian faces. Second tier, run beside GenD
+      (CLIP).
     s2_id: ARXIV:2508.06248
     venue: WACV 2026
     published:
@@ -293,6 +357,10 @@ models:
       only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Parity
       is not checked yet.
   havic:
+    why: >-
+      The only open audio-visual detector. v1 focuses on lip-sync with cloned voices, which only a
+      model that checks whether voice and mouth agree can catch; MAVOS-DD Hindi is its South Asian
+      test, and it is refused on FakeAVCeleb, which it was fine-tuned on.
     s2_id: ARXIV:2603.23960
     venue: CVPR 2026 Findings
     published:
@@ -314,6 +382,9 @@ models:
       detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long
       for HiDF), and parity is not checked yet.
   lipforensics:
+    why: >-
+      Looks only at the mouth, where lip-sync fakes, v1's focus, are edited. Tests whether FF++
+      face-swap detectors miss mouth-only edits on South Asian talking heads.
     s2_id: ARXIV:2012.07657
     venue: CVPR 2021
     published:
@@ -334,6 +405,11 @@ models:
       reproduce, it needs 25 consecutive frames with a detectable face, and parity is not checked
       yet.
   recce:
+    why: >-
+      Learns to reconstruct real faces only, so it tests whether its idea of a real face, learned
+      from FF++, holds for South Asian faces. Like every DeepfakeBench detector here it trained on
+      FF++, so each reads a different cue on the same faces; second tier, worth running once South
+      Asian video arrives.
     s2_id: 1537faa9593d0d20e62055e4e6af6d382a26d313
     venue: CVPR 2022
     published:
@@ -352,6 +428,10 @@ models:
       manipulation method. DeepfakeBench's weights were trained on FaceForensics++ (c23 per the DeepfakeBench
       README) after ImageNet pretraining. Passes parity against the original code.
   sbi:
+    why: >-
+      Trained on real faces blended into themselves, never on real deepfakes, so it depends least on
+      its training set's faces and generators. The probe's test of whether that generalises better
+      to South Asian faces and unseen generators.
     s2_id: ARXIV:2204.08376
     venue: CVPR 2022
     published:
@@ -371,6 +451,11 @@ models:
       after ImageNet pretraining; the c23 checkpoint is used here. Research-only licence, so its code
       is never copied into this repository.
   spsl:
+    why: >-
+      Reads the phase spectrum, where upsampling leaves traces whatever the face, so it tests a cue
+      that shouldn't depend on skin tone. Like every DeepfakeBench detector here it trained on FF++,
+      so each reads a different cue on the same faces; second tier, worth running once South Asian
+      video arrives.
     s2_id: ARXIV:2103.01856
     venue: CVPR 2021
     published:
@@ -390,6 +475,11 @@ models:
       shallower network. The detector's yaml lists only FaceSwap, which may not describe the checkpoint;
       the benchmark treats it as trained on all of FF++.
   srm:
+    why: >-
+      Reads high-frequency noise residuals, a cue sensitive to the phone cameras and compression
+      typical of South Asian social media. Like every DeepfakeBench detector here it trained on
+      FF++, so each reads a different cue on the same faces; second tier, worth running once South
+      Asian video arrives.
     s2_id: ARXIV:2103.12376
     venue: CVPR 2021
     published:
@@ -409,6 +499,11 @@ models:
       (c23 per the DeepfakeBench README) after ImageNet pretraining. Passes parity against the original
       code.
   ucf:
+    why: >-
+      Built to find forgery traces common to every generator, so it tests generalisation to the
+      generators actually used in South Asia. Like every DeepfakeBench detector here it trained on
+      FF++, so each reads a different cue on the same faces; second tier, worth running once South
+      Asian video arrives.
     s2_id: ARXIV:2304.13949
     venue: ICCV 2023
     published:
@@ -427,6 +522,10 @@ models:
       methods. DeepfakeBench's weights were trained on all four FaceForensics++ methods (c23) after
       ImageNet pretraining. Passes parity against the original code.
   xception:
+    why: >-
+      The most-cited video detector and the classic half of the video pair. Its training set, FF++,
+      is dominated by lighter-skinned faces, so it measures what a standard detector does on South
+      Asian skin tones.
     s2_id: ARXIV:1901.08971
     venue: ICCV 2019
     published:
@@ -445,6 +544,10 @@ models:
       c23, is unanswered) after ImageNet pretraining. Some users report the released weights do not
       reproduce DeepfakeBench's README table.
   xlsr_aasist:
+    why: >-
+      The same training data as AASIST on a backbone pretrained on 128 languages: whether
+      multilingual pretraining alone, with English-only fakes, carries over to South Asian speech.
+      The foundation-model half of the probe's audio pair.
     s2_id: ARXIV:2202.12233
     venue: Odyssey 2022
     published:
@@ -463,6 +566,9 @@ models:
       no MLAAD or FLEURS in training it is a clean zero-shot probe on South Asian sets. The adapter
       replaces fairseq and passes parity against upstream's own stack (2026-10-12).
   xlsr_mamba:
+    why: >-
+      The same backbone and training as XLS-R + AASIST with a Mamba back end, so a failure the two
+      share on South Asian speech points at the training data, not the head. Second tier.
     s2_id: ARXIV:2411.10027
     venue: IEEE SPL 2024
     published:
@@ -482,6 +588,10 @@ models:
       2019 LA training split alone. Here mamba-ssm's CUDA kernels are replaced by slower pure-PyTorch
       stand-ins, and parity against the kernels is not checked yet.
   xlsr_sls:
+    why: >-
+      The same backbone and training as XLS-R + AASIST with a back end that pools every layer, so a
+      failure the two share on South Asian speech points at the training data, not the head. Second
+      tier.
     s2_id: DOI:10.1145/3664647.3681345
     venue: ACM MM 2024
     published:
@@ -503,6 +613,10 @@ models:
       parity is not checked yet.
 datasets:
   asvspoof2019_la:
+    why: >-
+      Not South Asian. The reproduction set for the detectors trained on it: an adapter must match
+      its published numbers here, and settle its score direction, before its South Asian numbers
+      count, so a low South Asian AUC reads as a real failure rather than a flipped sign.
     s2_id: DOI:10.1016/j.csl.2020.101114
     venue: CSL 2020
     summary: >-
@@ -520,6 +634,10 @@ datasets:
     format: FLAC, 16 kHz, 16-bit (VCTK downsampled)
     notes: Train and dev share attacks A01 to A06; most eval attacks are unseen in training.
   bangla_voices:
+    why: >-
+      Bangladeshi Bengali with every fake paired to the same speaker's real clip and a gender label,
+      so it separates the fake from speaker and recording differences and gives the gender
+      comparison.
     summary: >-
       Bangla read speech from 75 Bangladeshi speakers, each of 30 sentences read once and faked once,
       so every fake has a real twin.
@@ -532,6 +650,9 @@ datasets:
     format: WAV, 2 to 5 s clips
     notes: The record never names the tool that made the fakes.
   banglafake:
+    why: >-
+      The largest open Bengali set, with sub-corpora recorded in different ways, so results can be
+      split by recording condition.
     s2_id: ARXIV:2505.10885
     venue: arXiv 2025
     summary: >-
@@ -547,6 +668,10 @@ datasets:
     notes: >-
       The news sub-corpus is real only, and the archive's counts differ from the README's.
   bd_grf6:
+    why: >-
+      Bangladeshi speech with a third-gender group, which Bangladesh, India, Nepal and Pakistan
+      recognise in law: the only set that tests gender beyond male and female. Cross-corpus until
+      its file formats are checked, since they may give the label away.
     summary: >-
       Bangla real and fake speech by Bangladeshi speakers, grouped male, female and third gender;
       the only set with a third-gender group.
@@ -557,6 +682,9 @@ datasets:
     notes: >-
       Third-gender real clips are MP3 while female fakes are WAV, so file format can leak the label.
   casual_conversations_v2:
+    why: >-
+      Real video only, with India its largest country and self-reported demographics: how often
+      detectors flag real South Asian faces as fake, the harm that falls on real people.
     s2_id: ARXIV:2303.04838
     venue: CVPRW 2023
     summary: >-
@@ -578,6 +706,9 @@ datasets:
     format: video, 26,467 recordings, about 674 h in all
     notes: Real videos only; some labels are licensed for evaluation use only.
   celeb_df_v2:
+    why: >-
+      Not South Asian (mostly Caucasian subjects). A video reproduction set: it or FF++ settles
+      every video model's score direction, without which no video number counts.
     s2_id: ARXIV:1909.12962
     venue: CVPR 2020
     summary: >-
@@ -592,6 +723,10 @@ datasets:
     format: MP4
     notes: About 88% of subjects are Caucasian, so it carries no South Asian signal.
   deepfake_eval_2024:
+    why: >-
+      Picked as the only set of deepfakes that actually circulated online. It has no country field,
+      so South Asian items can't be picked out, and access requests are often rejected.
+    cut: true
     s2_id: ARXIV:2503.02857
     venue: arXiv 2025
     summary: >-
@@ -613,6 +748,9 @@ datasets:
     notes: >-
       Evaluation only, no training on it; its metadata columns are unverified until access is granted.
   deephy:
+    why: >-
+      Indian face swaps with up to three successive generators, so South Asian faces under several
+      generators. With few real videos it measures misses more than false alarms.
     s2_id: ARXIV:2209.09111
     venue: IJCB 2022
     summary: >-
@@ -633,6 +771,9 @@ datasets:
     format: MP4, 720p, 25 fps, about 20 s
     notes: Only 100 real videos against 5,040 fakes.
   dfplatter:
+    why: >-
+      The largest Indian video set, labelled by skin tone, gender, age and occlusion: where skin-
+      tone effects on South Asian faces can be measured directly.
     s2_id: f1a9f5f42a68a8b5ee07e06dee800629fccc533f
     venue: CVPR 2023
     summary: >-
@@ -654,6 +795,9 @@ datasets:
     format: videos at low and high resolution, c0, c23 and c40 compression
     notes: Its licence limits use to research colleagues at the signing institution.
   fakeavceleb:
+    why: >-
+      The only set with a South Asian group beside four other ethnic groups under one recording
+      setup, so it gives the probe's South Asian against others comparison. Its speech is English.
     s2_id: ARXIV:2108.05080
     venue: NeurIPS D&B 2021
     summary: >-
@@ -678,6 +822,9 @@ datasets:
     notes: >-
       Ethnicity and gender come from the folder layout, which is unverified until a copy arrives.
   ffpp:
+    why: >-
+      Not South Asian. Every video detector here trained on it, so its test split is where video
+      adapters reproduce published numbers and settle score direction.
     s2_id: ARXIV:1901.08971
     venue: ICCV 2019
     summary: >-
@@ -698,6 +845,10 @@ datasets:
     format: MP4, c23 compression used here (raw and c40 also exist)
     notes: Real videos come from 977 YouTube videos, mostly frontal faces.
   hidf:
+    why: >-
+      Not South Asian, but race-labelled with an Indian group: a stopgap check of false alarms on
+      real faces by race until South Asian video arrives. Its Indian group is small, so it should
+      step back once FakeAVCeleb or DF-Platter is in.
     s2_id: DOI:10.1145/3711896.3737399
     venue: KDD 2025
     summary: >-
@@ -715,6 +866,9 @@ datasets:
     format: MP4 with audio, 512 px face crops, about 3 s
     notes: Clips are too short for HAVIC's 3.2 s windows, and the 62k images are not fetched.
   iav_df:
+    why: >-
+      Picked because it is Indian lip-sync with cloned voices, exactly v1's type. Dropped: its only
+      sample link is dead.
     summary: >-
       Indian audio-video deepfakes: motion-model reenactment, face swaps and Wav2Lip lip-sync with
       cloned voices.
@@ -725,6 +879,10 @@ datasets:
     - Wav2Lip lip-sync with cloned voices
     notes: Only a sample was ever released and its link is dead, so nothing can be downloaded.
   in_the_wild:
+    why: >-
+      Not South Asian. Real-world English deepfakes of public figures: the reproduction set where
+      the guard refuses ASVspoof (DF Arena, AntiDeepfake), and the out-of-domain reference South
+      Asian scores are compared with.
     s2_id: ARXIV:2203.16263
     venue: Interspeech 2022
     summary: >-
@@ -736,6 +894,9 @@ datasets:
     format: WAV, 37.9 h in all (20.7 h real, 17.2 h fake)
     notes: meta.csv lists 54 speakers while the card says 58 celebrities and politicians.
   indeepfake:
+    why: >-
+      Indian YouTube video in seven languages with face swaps and TTS plus Wav2Lip lip-sync: South
+      Asian talking heads with cloned voices, close to v1's type.
     s2_id: DOI:10.1016/j.patrec.2025.07.002
     venue: Pattern Recognition Letters 2025
     summary: >-
@@ -754,6 +915,9 @@ datasets:
     format: video excerpts of about 10 to 12 s from YouTube
     notes: Access is restricted to academic institutions on request.
   indic_codecfake:
+    why: >-
+      Picked as Indian-language fakes from neural audio codecs, a kind of fake no other set covers.
+      Dropped: no download exists.
     s2_id: ARXIV:2604.19949
     venue: ACL 2026 Findings
     summary: >-
@@ -766,6 +930,9 @@ datasets:
     - language (12 Indic languages)
     notes: No download exists yet; its real side is IndicSUPERB.
   indicsuperb:
+    why: >-
+      Real read speech in 12 Indian languages from the speakers IndicSynth clones, so IndicSynth's
+      evalsets pair each fake with real speech from the same speakers and corpus.
     s2_id: ARXIV:2208.11761
     venue: AAAI 2023
     summary: >-
@@ -782,6 +949,9 @@ datasets:
     format: m4a
     notes: Only the clean test splits are fetched; the 85 GB train split is left out.
   indicsynth:
+    why: >-
+      The largest open South Asian fake speech, with voice conversion (FreeVC24) beside TTS: the
+      cloned-voice half of v1, with generator and gender labels.
     s2_id: DOI:10.18653/v1/2025.acl-long.1070
     venue: ACL 2025
     summary: >-
@@ -805,6 +975,9 @@ datasets:
       Fake only; real speech comes from IndicSUPERB. Shards are sorted by generator, so small samples
       may miss some.
   indictts_challenge:
+    why: >-
+      Sixteen Indian languages and the only labelled Nepali fakes in one set, so it is where
+      language becomes a per-group attribute.
     summary: >-
       Real and text-to-speech clips in 16 Indian languages, including Nepali, from a Hugging Face
       community challenge.
@@ -818,6 +991,9 @@ datasets:
     format: 16 kHz audio embedded in parquet rows
     notes: The card names neither the TTS system nor where the real speech comes from.
   indiefake:
+    why: >-
+      Indian-accented English with voices cloned across speakers: voice-cloning scams in the English
+      South Asian public figures often speak.
     s2_id: ARXIV:2506.19014
     venue: arXiv 2025
     summary: >-
@@ -837,6 +1013,9 @@ datasets:
     format: WAV, 16 kHz, about 5 s on average
     notes: Indian-accented English only, no South Asian languages.
   lrlspoof:
+    why: >-
+      More Nepali and Assamese fakes from 24 TTS systems, where Nepali data is thinnest. Deferred:
+      no language can be fetched without the whole 462 GB archive.
     s2_id: ARXIV:2603.02364
     venue: Interspeech 2026 (arXiv)
     summary: >-
@@ -851,6 +1030,10 @@ datasets:
     format: WAV, shipped as one gzipped tarball in 47 parts
     notes: Spoof only, and no language can be fetched without the whole 462 GB archive.
   mavos_dd_hi:
+    why: >-
+      The only South Asian video anyone can download: Hindi talking heads, face swaps and voice
+      conversion, so it is the first test of v1's lip-sync with cloned voices, and HAVIC's only
+      South Asian set.
     s2_id: ARXIV:2505.11109
     venue: arXiv 2025
     summary: >-
@@ -876,6 +1059,9 @@ datasets:
       The paper says face swaps keep their source audio, but the repo leaves the audio label of non-knnvc
       fakes null until the metadata confirms it.
   mendeley_roop_akool:
+    why: >-
+      Bangladeshi and Indian face crops faked with consumer tools: a pipeline test, used for video
+      parity checks, never for results.
     summary: >-
       Face-crop frames of Bangladeshi and Indian people, real and faked with Roop and Akool.
     scale: 3,746 real and 106,948 fake frames
@@ -891,6 +1077,9 @@ datasets:
       Pipeline test only, never reported; frames of one video are near-duplicates, so never split
       them across train and test.
   mlaad:
+    why: >-
+      The only Sinhala deepfake speech anywhere, plus Hindi, Bengali, Tamil and Urdu. Fake only, so
+      its evalsets are cross-corpus and diagnostic until the shortcut probe clears them.
     s2_id: ARXIV:2401.09512
     venue: IJCNN 2024
     summary: >-
@@ -910,6 +1099,9 @@ datasets:
     notes: >-
       Fake only; real speech must come from another corpus, so every evalset on it is cross-corpus.
   openslr_sinhala:
+    why: >-
+      Real Sinhala read speech, the real half for MLAAD's Sinhala fakes: the only way to test Sri
+      Lanka's main language today.
     s2_id: DOI:10.21437/SLTU.2018-11
     venue: SLTU 2018
     summary: >-
@@ -922,6 +1114,9 @@ datasets:
     format: FLAC
     notes: No gender labels, and only the first of 16 zips is fetched.
   sea_spoof:
+    why: >-
+      Hindi and Tamil fakes from named commercial voice tools as well as open TTS, the kind of tools
+      behind real scams.
     s2_id: ARXIV:2509.19865
     venue: arXiv 2025
     summary: >-
@@ -950,6 +1145,9 @@ datasets:
     format: FLAC, 16 kHz, in parquet shards
     notes: The schema comes from the card and paper; nobody on the team has seen the files yet.
   speechfake:
+    why: >-
+      More Indic fakes (Hindi, Bengali, Tamil, Marathi, Malayalam) from a free, widely used TTS and
+      from voice conversion. Cross-corpus, so diagnostic until the shortcut probe.
     s2_id: ARXIV:2507.21463
     venue: ACL 2025
     summary: >-
@@ -969,6 +1167,9 @@ datasets:
       The paper promises transcripts and voice ids, but the metadata CSVs we read carry only label,
       generator kind, model and language.
   svarah:
+    why: >-
+      Real Indian-accented English from across India with gender, age, state and first language:
+      false alarms on real South Asian voices, split by region.
     s2_id: ARXIV:2305.15760
     venue: Interspeech 2023
     summary: >-
@@ -986,6 +1187,8 @@ datasets:
     format: audio embedded in parquet, test split only
     notes: No licence is declared, so nothing derived from it is published yet.
   unidatapro_videos:
+    why: >-
+      A tiny free preview of phone videos and their face swaps: a pipeline test, never reported.
     summary: >-
       Free preview: five real phone videos and five face-swap fakes made from them.
     scale: 10 videos, about 68 MB
@@ -998,6 +1201,9 @@ datasets:
     format: MP4 and MOV phone videos with audio, 480p to 1080p
     notes: Pipeline test only, never reported; whether the fakes keep the original audio is unknown.
   urdu_csalt:
+    why: >-
+      Pakistan's Urdu with generator labels (VITS, Tacotron), the first South Asian set scored. It
+      behaves unlike the others, which makes it the test case for recording artefacts.
     s2_id: DOI:10.18653/v1/2024.findings-acl.861
     venue: ACL 2024 Findings
     summary: >-

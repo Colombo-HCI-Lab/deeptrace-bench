@@ -90,6 +90,7 @@ In order:
 - **Decision 4**, the rule for keeping an attribute. As proposed it uses AUC only. On HiDF one group's AUC barely moves while its false-positive rate doubles ([Results](results.md#video-hidf)), so a false-positive-rate rule at a fixed threshold may be needed too ([the rule](evaluation.md#metrics)).
 - **Decision 5**, the evaluation setup in [`configs/eval/default.yaml`](/configs/eval/default.yaml): due 2026-10-09, still open. The settings in question are in [Evaluation](evaluation.md#settings-still-open).
 - **`group_gap`**, the headline fairness number, is still undefined ([evaluation.md](evaluation.md#metrics)).
+- **Cut candidates** (proposed 2026-10-26): AASIST-L, AASIST3, DF Arena 500M, EfficientNet-B4 and Deepfake-Eval-2024 add little the others don't show for South Asia. Each is marked in the [catalog](catalog.md#models) with its reason; the team decides whether to drop them.
 
 ## Adding an entry
 

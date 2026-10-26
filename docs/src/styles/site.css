@@ -279,6 +279,7 @@ nav.index a:hover { color: var(--ink); }
 .tbl.models { min-width: 1080px; }
 .tbl.models td.wide { min-width: 260px; width: 26%; }
 .tbl .venue { margin-left: 8px; font: 400 12px/1.4 var(--mono); color: var(--muted); }
+.tbl .flagtag.cut { margin-left: 8px; color: var(--bad); border-color: var(--bad); }
 .tbl td.res { font-size: 0.84rem; line-height: 1.45; min-width: 230px; }
 .tbl td.res > span + span { margin-top: 3px; }
 .tbl td.res > span { display: block; }

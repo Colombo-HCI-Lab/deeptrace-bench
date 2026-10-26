@@ -36,7 +36,7 @@ Checked on 2026-10-12.
 | Effort's weights | Google Drive refuses them over quota ([Effort](#effort)) |
 | Parity for eight adapters | [Parity](#parity) says what each needs |
 
-**Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus.
+**Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus. Each model's own reason, and whether it is a cut candidate, opens its entry in the [catalog](catalog.md#models).
 
 ## Parity
 

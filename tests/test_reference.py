@@ -44,6 +44,21 @@ def test_render_anchors_every_model_and_dataset():
     assert "none: real clips only" in text and "Sinhala" in text
 
 
+def test_render_gives_the_reason_and_marks_cut_candidates():
+    model = {
+        "id": "m", "name": "M", "modality": "audio", "licence": "MIT", "blocked": False,
+        "training": [], "parity": None, "why": "Tests Sinhala.", "cut": True,
+    }  # fmt: skip
+    dataset = {
+        "id": "d", "name": "D", "modality": "audio", "role": "south_asian", "status": "open",
+        "languages": ["si"], "licence": "CC BY 4.0", "contains": ["real", "fake"],
+        "evalsets": [], "why": "The only Sinhala fakes.",
+    }  # fmt: skip
+    text = render({"built": "2026-10-26", "models": [model], "datasets": [dataset], "runs": []})
+    assert "| Why it's here | Cut candidate. Tests Sinhala. |" in text
+    assert "| Why it's here | The only Sinhala fakes. |" in text
+
+
 def test_render_sets_published_numbers_beside_ours():
     model = {
         "id": "m", "name": "M", "modality": "audio", "licence": "MIT", "blocked": False,

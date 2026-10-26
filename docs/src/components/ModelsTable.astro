@@ -48,6 +48,7 @@ const trained = (m: Model) =>
                   <a class="name" href={`#model-${m.id}`}>
                     {m.name}
                   </a>
+                  {m.cut && <span class="flagtag cut" title={m.why ?? undefined}>cut candidate</span>}
                   {m.paper && (
                     <a class="venue" href={m.paper.url} title={m.paper.title ?? undefined} target="_blank" rel="noopener">
                       {m.paper.venue || m.paper.year}

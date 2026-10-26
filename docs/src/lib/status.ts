@@ -41,6 +41,8 @@ export interface Model {
   adapter: boolean;
   blocked: boolean;
   summary: string | null;
+  why: string | null;
+  cut: boolean;
   paper: Paper | null;
   published: Published[];
   trained_on: string[];
@@ -56,6 +58,8 @@ export interface Dataset {
   status: string;
   languages: string[];
   summary: string | null;
+  why: string | null;
+  cut: boolean;
   scale: string | null;
   paper: Paper | null;
   evalsets: string[];
