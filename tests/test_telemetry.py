@@ -24,6 +24,16 @@ def test_a_cpu_session_records_phases_without_a_gpu(tmp_path, monkeypatch):
     assert "host" not in json.dumps(record["env"])
 
 
+def test_a_cuda_session_survives_cuda_never_starting(tmp_path, monkeypatch):
+    # The first SPARK run crashed resetting peak memory before CUDA was initialised.
+    monkeypatch.setattr(telemetry, "_nvml", lambda: None)
+    with Session(tmp_path, "cuda", "p") as session:
+        session.mark("score")
+    [record] = read_sessions(tmp_path)
+    assert record["completed"]
+    assert "cuda_max_allocated_gb" in record
+
+
 def test_a_failed_session_is_still_written(tmp_path, monkeypatch):
     monkeypatch.setattr(telemetry, "_nvml", lambda: None)
     try:

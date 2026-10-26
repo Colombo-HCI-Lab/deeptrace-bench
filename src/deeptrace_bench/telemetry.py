@@ -203,7 +203,10 @@ class Session:
         if index is not None:
             import torch
 
-            torch.cuda.reset_peak_memory_stats(index)
+            # A fresh process starts at zero; resetting before CUDA is initialised raises
+            # "Invalid device argument".
+            if torch.cuda.is_initialized():
+                torch.cuda.reset_peak_memory_stats(index)
         return self
 
     def mark(self, name: str) -> None:
@@ -230,14 +233,25 @@ class Session:
         }
         index = _cuda_index(self.device)
         if index is not None:
-            import torch
-
-            record["cuda_max_allocated_gb"] = round(torch.cuda.max_memory_allocated(index) / 1e9, 3)
-            record["cuda_max_reserved_gb"] = round(torch.cuda.max_memory_reserved(index) / 1e9, 3)
+            record.update(_cuda_peaks(index))
         try:
             write_session(self.directory, record)
         except OSError as err:  # never let bookkeeping hide the scoring error
             log.warning("couldn't write telemetry: %s", err)
+
+
+def _cuda_peaks(index: int) -> dict[str, float | None]:
+    """torch's peak allocated and reserved GPU memory, or None where CUDA never started."""
+    import torch
+
+    try:
+        return {
+            "cuda_max_allocated_gb": round(torch.cuda.max_memory_allocated(index) / 1e9, 3),
+            "cuda_max_reserved_gb": round(torch.cuda.max_memory_reserved(index) / 1e9, 3),
+        }
+    except (RuntimeError, AssertionError) as err:  # AssertionError: a build without CUDA
+        log.warning("no CUDA memory stats: %s", err)
+        return {"cuda_max_allocated_gb": None, "cuda_max_reserved_gb": None}
 
 
 def write_session(directory: Path, record: dict[str, Any]) -> Path:
