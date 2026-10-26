@@ -21,6 +21,8 @@ AASIST (Jung et al., ICASSP 2022) builds graphs over spectral and temporal nodes
 | | |
 | --- | --- |
 | Why it's here | The most-cited open audio detector, trained only on English ASVspoof speech: it stands for the off-the-shelf detector a South Asian platform would deploy today, and is the classic half of the probe's audio pair. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | spectral and temporal artefacts in the raw waveform |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows, SincNet-style filters and residual encoder, spectral and temporal graph attention with a max graph operation, two-way classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks](https://arxiv.org/abs/2110.01200), ICASSP 2022 · 652 citations |
@@ -41,6 +43,8 @@ AASIST-L is the reduced configuration from the AASIST paper (Jung et al., ICASSP
 | | |
 | --- | --- |
 | Why it's here | Cut candidate. Picked as the phone-sized AASIST, for detection on cheap devices. On every South Asian set so far it scores within a few hundredths of AASIST, so it shows nothing the bigger model doesn't. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | spectral and temporal artefacts in the raw waveform |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows, SincNet-style filters and residual encoder, spectral and temporal graph attention with a max graph operation, two-way classifier (lightweight configuration) |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks](https://arxiv.org/abs/2110.01200), ICASSP 2022 · 652 citations |
@@ -61,6 +65,8 @@ AASIST3 (Borodin et al., 2024), built for ASVspoof 5, feeds XLSR-53 features int
 | | |
 | --- | --- |
 | Why it's here | Cut candidate. Picked as the only AASIST variant trained with multilingual fakes (MLAAD, which has Hindi, Bengali, Tamil, Urdu and Sinhala). The released weights aren't the paper's and score far below it, so they can't answer that question, and the guard refuses them on every MLAAD evalset. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features (XLSR-53) |
 | How it works | Pre-emphasised 16 kHz window, wav2vec 2.0 XLSR-53 features, KAN bridge and residual encoder, spectral and temporal graph attention, four inference branches, KAN output layer, two-way classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [AASIST3: KAN-Enhanced AASIST Speech Deepfake Detection using SSL Features and Additional Regularization for the ASVspoof 2024 Challenge](https://arxiv.org/abs/2408.17352), ASVspoof 2024 Workshop · 44 citations |
@@ -80,6 +86,8 @@ AntiDeepfake (Ge et al., NII Yamagishi Lab, 2025) inserts a post-training stage 
 | | |
 | --- | --- |
 | Why it's here | Half of the cleanest test of the language question: the same post-training as the w2v2 small model on a backbone pretrained on about 1,400 languages. Its post-training heard Hindi, Bengali, Urdu, Tamil and Nepali but no Sinhala, so a Sinhala set would show what an unheard South Asian language does. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features (MMS, 1,400 languages) |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows (zero mean, unit variance), MMS-300M wav2vec 2.0 front end, mean pooling over frames, linear layer, two-way classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [Post-training for Deepfake Speech Detection](https://arxiv.org/abs/2506.21090), ASRU 2025 · 31 citations |
@@ -100,6 +108,8 @@ The smallest AntiDeepfake model (Ge et al., 2025): wav2vec 2.0 base pretrained o
 | | |
 | --- | --- |
 | Why it's here | The other half of that pair: the same post-training on an English-only backbone, so its gap to MMS-300M on South Asian speech comes from the pretraining languages alone. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features (wav2vec 2.0, English) |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows (zero mean, unit variance), wav2vec 2.0 base front end, mean pooling over frames, linear layer, two-way classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [Post-training for Deepfake Speech Detection](https://arxiv.org/abs/2506.21090), ASRU 2025 · 31 citations |
@@ -120,6 +130,8 @@ Released by the team behind the Speech DF Arena leaderboard (Speech-Arena-2025).
 | | |
 | --- | --- |
 | Why it's here | The strongest open audio detector, so it sets the ceiling South Asian results are read against. Its training includes MLAAD, whose generators recur in South Asian sets, so part of its score there may be familiarity. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features from every layer (XLS-R) |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows, XLS-R 1B front end, attention pooling over every hidden layer, conformer head, spoof or bona fide classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models](https://arxiv.org/abs/2509.02859), Speech DF Arena 2025 · 36 citations |
@@ -140,6 +152,8 @@ Same design and training data as DF Arena 1B (Speech-Arena-2025) with the smalle
 | | |
 | --- | --- |
 | Why it's here | Cut candidate. Picked to test whether size helps on South Asian speech. The 1B model isn't consistently better, so with that reported the smaller one is redundant. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features from every layer (XLS-R) |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows, XLS-R 300M front end, attention pooling over every hidden layer, conformer head, spoof or bona fide classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models](https://arxiv.org/abs/2509.02859), Speech DF Arena 2025 · 36 citations |
@@ -160,6 +174,8 @@ XLS-R + AASIST (Tak et al., Odyssey 2022) fine-tunes the SSL front end jointly w
 | | |
 | --- | --- |
 | Why it's here | The same training data as AASIST on a backbone pretrained on 128 languages: whether multilingual pretraining alone, with English-only fakes, carries over to South Asian speech. The foundation-model half of the probe's audio pair. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features (XLS-R) with graph attention |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, AASIST graph attention back end on the last layer, two-way classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [Automatic speaker verification spoofing and deepfake detection using wav2vec 2.0 and data augmentation](https://arxiv.org/abs/2202.12233), Odyssey 2022 · 358 citations |
@@ -180,6 +196,8 @@ XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with l
 | | |
 | --- | --- |
 | Why it's here | The same backbone and training as XLS-R + AASIST with a back end that pools every layer, so a failure the two share on South Asian speech points at the training data, not the head. Second tier. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features from every layer (XLS-R) |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, learned attention over all 24 layers (SLS), two linear layers, two-way classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier](https://doi.org/10.1145/3664647.3681345), ACM MM 2024 · 136 citations |
@@ -199,6 +217,8 @@ XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention back end with fo
 | | |
 | --- | --- |
 | Why it's here | The same backbone and training as XLS-R + AASIST with a Mamba back end, so a failure the two share on South Asian speech points at the training data, not the head. Second tier. |
+| Kinds of fake it trained on | Text to speech, Voice conversion |
+| What it looks at | self-supervised speech features (XLS-R) over time |
 | How it works | Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, dual-column bidirectional Mamba back end (six blocks per direction), two-way classifier |
 | Input | 4.04 s windows of raw 16 kHz audio |
 | Paper | [XLSR-Mamba: A Dual-Column Bidirectional State Space Model for Spoofing Attack Detection](https://arxiv.org/abs/2411.10027), IEEE SPL 2024 · 77 citations |
@@ -220,6 +240,8 @@ AltFreezing (Wang et al., CVPR 2023) counters a 3D CNN's tendency to rely on eit
 | | |
 | --- | --- |
 | Why it's here | The probe's temporal video detector: talking heads and lip-sync fakes are edited over time, and frame models can miss motion artefacts. Blocked until someone can fetch its weights. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | spatial and temporal artefacts across frames |
 | How it works | Face video clip, 3D convolutional network whose spatial and temporal weight groups are frozen alternately during training, two-way classifier |
 | Paper | [AltFreezing for More General Video Face Forgery Detection](https://arxiv.org/abs/2307.08317), CVPR 2023 · 148 citations |
 | Training | trained on FaceForensics++ (train split) |
@@ -236,6 +258,8 @@ CORE (Ni et al., CVPRW 2022) penalises the distance between representations of d
 | | |
 | --- | --- |
 | Why it's here | Trained for representations that stay consistent across augmented views, so it tests whether that robustness survives South Asian faces and the recompression of forwarded clips. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | face texture, consistent across augmentations |
 | How it works | Aligned 256 px face crop, Xception CNN trained with a consistency loss across augmented views, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [CORE: Consistent Representation Learning for Face Forgery Detection](https://arxiv.org/abs/2206.02749), CVPRW 2022 · 160 citations |
@@ -255,6 +279,8 @@ DeepfakeBench's single-network version of the detector studied by Bonettini et a
 | | |
 | --- | --- |
 | Why it's here | Cut candidate. Picked as a second classic video baseline beside Xception. It reads the same texture cue from the same FF++ training, so it is unlikely to show anything about South Asian faces that Xception doesn't. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | face texture |
 | How it works | Aligned 256 px face crop, EfficientNet-B4 CNN, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [Video Face Manipulation Detection Through Ensemble of CNNs](https://arxiv.org/abs/2004.07676), ICPR 2020 · 278 citations |
@@ -274,6 +300,8 @@ Effort (Yan et al., ICML 2025) splits each weight matrix by SVD, freezes the pri
 | | |
 | --- | --- |
 | Why it's here | The probe's original foundation-model video detector, the partner to Xception. Blocked on weights; GenD holds its place until they arrive. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | foundation-model features (CLIP) |
 | How it works | Aligned 224 px face crop, CLIP ViT-L/14 image encoder with SVD-split weights (principal part frozen, residual part tuned), linear head |
 | Input | 224 px aligned face crops, 32 frames per video |
 | Paper | [Orthogonal Subspace Decomposition for Generalizable AI-Generated Image Detection](https://arxiv.org/abs/2411.15633), ICML 2025 · 128 citations |
@@ -291,6 +319,8 @@ F3Net (Qian et al., ECCV 2020) splits each face crop into frequency bands with a
 | | |
 | --- | --- |
 | Why it's here | Reads frequency bands chosen to survive compression, the cue most likely to matter for South Asian clips that circulate recompressed on messaging apps. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | frequency bands |
 | How it works | Aligned 256 px face crop, DCT frequency-band decomposition (12 input channels), Xception CNN, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [Thinking in Frequency: Face Forgery Detection by Mining Frequency-aware Clues](https://arxiv.org/abs/2007.09355), ECCV 2020 · 1,265 citations |
@@ -310,6 +340,8 @@ FFD (Dang et al., CVPR 2020) estimates an attention map of manipulated face regi
 | | |
 | --- | --- |
 | Why it's here | Learns where on the face the manipulation is, so it shows whether its attention transfers to South Asian faces. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | where on the face the edit is |
 | How it works | Aligned 256 px face crop, Xception CNN with an attention map over manipulated regions, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [On the Detection of Digital Face Manipulation](https://arxiv.org/abs/1910.01717), CVPR 2020 · 784 citations |
@@ -329,6 +361,8 @@ GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 
 | | |
 | --- | --- |
 | Why it's here | The foundation-model half of the video pair, in Effort's place. Its backbone was pretrained on far more varied faces than FF++, which tests whether that removes skin-tone bias; on HiDF it flagged real Indian faces most often, so it is the first model to check on South Asian faces. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | foundation-model features (CLIP) |
 | How it works | Aligned face crop at native size, CLIP ViT-L/14 image encoder with only LayerNorm parameters tuned, L2-normalised features, linear head |
 | Input | native-size aligned face crops, 32 frames per video |
 | Paper | [Deepfake Detection that Generalizes Across Benchmarks](https://arxiv.org/abs/2508.06248), WACV 2026 · 35 citations |
@@ -349,6 +383,8 @@ GenD's second released backbone (Yermakov et al., WACV 2026): identical training
 | | |
 | --- | --- |
 | Why it's here | The same GenD recipe on Meta's Perception Encoder instead of CLIP: whether the pretraining behind the backbone changes how it treats South Asian faces. Second tier, run beside GenD (CLIP). |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | foundation-model features (Perception Encoder) |
 | How it works | Aligned face crop at native size resized to 224, Meta Perception Encoder L/14 with only LayerNorm parameters tuned, L2-normalised features, linear head |
 | Input | native-size aligned face crops, 32 frames per video |
 | Paper | [Deepfake Detection that Generalizes Across Benchmarks](https://arxiv.org/abs/2508.06248), WACV 2026 · 35 citations |
@@ -368,6 +404,8 @@ LipForensics (Haliassos et al., CVPR 2021) is pretrained for lipreading on LRW, 
 | | |
 | --- | --- |
 | Why it's here | Looks only at the mouth, where lip-sync fakes, v1's focus, are edited. Tests whether FF++ face-swap detectors miss mouth-only edits on South Asian talking heads. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | mouth motion over time |
 | How it works | 25-frame clips of 96 px grayscale mouth crops (88 px centre crop), ResNet-18 with 3D stem, multi-scale temporal convolutional network, one logit per clip |
 | Input | mouth crops from 25 consecutive frames at a time (up to 100 frames per video) |
 | Paper | [Lips Don't Lie: A Generalisable and Robust Approach to Face Forgery Detection](https://arxiv.org/abs/2012.07657), CVPR 2021 · 663 citations |
@@ -387,6 +425,8 @@ RECCE (Cao et al., CVPR 2022) trains a decoder to reconstruct real faces, so fak
 | | |
 | --- | --- |
 | Why it's here | Learns to reconstruct real faces only, so it tests whether its idea of a real face, learned from FF++, holds for South Asian faces. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | how badly a real-face decoder rebuilds it |
 | How it works | Aligned 256 px face crop, Xception encoder with a decoder that reconstructs the face and guides attention from the reconstruction, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [End-to-End Reconstruction-Classification Learning for Face Forgery Detection](https://www.semanticscholar.org/paper/1537faa9593d0d20e62055e4e6af6d382a26d313), CVPR 2022 · 446 citations |
@@ -406,6 +446,8 @@ SBI (Shiohara and Yamasaki, CVPR 2022) synthesises its training fakes by blendin
 | | |
 | --- | --- |
 | Why it's here | Trained on real faces blended into themselves, never on real deepfakes, so it depends least on its training set's faces and generators. The probe's test of whether that generalises better to South Asian faces and unseen generators. |
+| Kinds of fake it trained on | Face swap |
+| What it looks at | blending boundaries |
 | How it works | Face box widened by one eighth on each side and resized to 380 px, EfficientNet-B4 CNN, two-way classifier |
 | Input | 380 px face-box crops, 32 frames per video |
 | Paper | [Detecting Deepfakes with Self-Blended Images](https://arxiv.org/abs/2204.08376), CVPR 2022 · 656 citations |
@@ -426,6 +468,8 @@ SPSL (Liu et al., CVPR 2021) adds the phase spectrum as an input channel beside 
 | | |
 | --- | --- |
 | Why it's here | Reads the phase spectrum, where upsampling leaves traces whatever the face, so it tests a cue that shouldn't depend on skin tone. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | phase spectrum |
 | How it works | Aligned 256 px face crop, RGB plus phase spectrum of the grey image as a fourth channel, Xception CNN, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [Spatial-Phase Shallow Learning: Rethinking Face Forgery Detection in Frequency Domain](https://arxiv.org/abs/2103.01856), CVPR 2021 · 628 citations |
@@ -445,6 +489,8 @@ SRM (Luo et al., CVPR 2021) adds a stream of SRM-filtered high-frequency noise, 
 | | |
 | --- | --- |
 | Why it's here | Reads high-frequency noise residuals, a cue sensitive to the phone cameras and compression typical of South Asian social media. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | high-frequency noise residuals |
 | How it works | Aligned 256 px face crop, RGB stream plus a stream of high-frequency noise residuals from SRM filters, Xception CNN with attention linking the two streams, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [Generalizing Face Forgery Detection with High-frequency Features](https://arxiv.org/abs/2103.12376), CVPR 2021 · 632 citations |
@@ -464,6 +510,8 @@ UCF (Yan et al., ICCV 2023) splits face features into forgery-irrelevant content
 | | |
 | --- | --- |
 | Why it's here | Built to find forgery traces common to every generator, so it tests generalisation to the generators actually used in South Asia. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | forgery traces shared by every method |
 | How it works | Aligned 256 px face crop, Xception encoders separating content, method-specific forgery and common forgery features, scored with the common-forgery head only |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [UCF: Uncovering Common Features for Generalizable Deepfake Detection](https://arxiv.org/abs/2304.13949), ICCV 2023 · 338 citations |
@@ -483,6 +531,8 @@ The face-forgery detector from the FaceForensics++ paper (Rossler et al., ICCV 2
 | | |
 | --- | --- |
 | Why it's here | The most-cited video detector and the classic half of the video pair. Its training set, FF++, is dominated by lighter-skinned faces, so it measures what a standard detector does on South Asian skin tones. |
+| Kinds of fake it trained on | Face swap, Reenactment |
+| What it looks at | face texture |
 | How it works | Aligned 256 px face crop, Xception CNN with depthwise separable convolutions, two-way classifier |
 | Input | 256 px aligned face crops, 32 frames per video |
 | Paper | [FaceForensics++: Learning to Detect Manipulated Facial Images](https://arxiv.org/abs/1901.08971), ICCV 2019 · 3,394 citations |
@@ -505,6 +555,8 @@ HAVIC (CVPR 2026 Findings) pretrains its audio and video encoders on real videos
 | | |
 | --- | --- |
 | Why it's here | The only open audio-visual detector. v1 focuses on lip-sync with cloned voices, which only a model that checks whether voice and mouth agree can catch; MAVOS-DD Hindi is its South Asian test, and it is refused on FakeAVCeleb, which it was fine-tuned on. |
+| Kinds of fake it trained on | Face swap, Lip-sync, Text to speech |
+| What it looks at | whether voice and lips agree |
 | How it works | 16-frame windows of 224 px face frames plus 128-bin audio filterbank, audio and video transformer encoders pretrained on real videos, audio-visual interaction module, MLP classifier, one logit per window |
 | Input | native-size face-box crops at 5 frames per second (up to 50), with the audio under them |
 | Paper | [Leave No Stone Unturned: Uncovering Holistic Audio-Visual Intrinsic Coherence for Deepfake Detection](https://arxiv.org/abs/2603.23960), CVPR 2026 Findings · 1 citations |
@@ -516,6 +568,23 @@ HAVIC (CVPR 2026 Findings) pretrains its audio and video encoders on real videos
 | Status here | adapter written |
 
 ## Datasets
+
+### Kinds of fake
+
+What each kind of fake changes and what it tends to leave behind. A detector trained on one kind often misses another.
+
+| Kind | Track | What's changed | What it leaves | Datasets |
+| --- | --- | --- | --- | --- |
+| Face swap | video | The whole face is replaced with another person's; head motion, expression, lighting and background stay from the original. | A blending boundary at the jaw and hairline, skin tone or lighting that differs between face and neck, identity flicker across frames. | Celeb-DF (v2), DF-Platter, DeePhy, Deepfake-Eval-2024, FaceForensics++, FakeAVCeleb, HiDF (human-indistinguishable deepfakes), videos, IAV-DF, InDeepFake, MAVOS-DD, Hindi subset |
+| Reenactment | video | The same person, with expression and head pose driven by someone else's performance. | Warping around moving features, smeared texture under fast motion, unnatural pose transitions. | FaceForensics++, IAV-DF, MAVOS-DD, Hindi subset |
+| Lip-sync | video | The same person and footage; only the mouth is regenerated to match new audio, often a cloned voice. | Mouth motion out of step with the sounds, blurry teeth and inner mouth, a seam around the lower face. Face-swap cues mostly don't apply. | Deepfake-Eval-2024, FakeAVCeleb, IAV-DF, InDeepFake |
+| Talking head | video | A single still photo is animated into a speaking video, driven by audio; no real footage exists. | Stiff or repeating head and shoulder motion, a background that barely moves, identity drift over long clips. | MAVOS-DD, Hindi subset |
+| Attribute edit | video | The same person and video, with age, expression, hair or makeup changed. | Flicker in the edited region and texture that doesn't track the face. | none |
+| Fully synthetic | video | Everything is generated from a text or image prompt (Sora, Veo, Kling); nobody real was filmed. | Physics and continuity errors, objects that morph. There is no pasted face or source footage, so face-forensics detectors have little to find. | Deepfake-Eval-2024 |
+| Text to speech | audio | Speech generated from text, often in a cloned voice. | Vocoder artefacts in the high frequencies, regular prosody, missing breaths and room noise. | ASVspoof 2019 Logical Access, BanglaFake, FakeAVCeleb, InDeepFake, IndicSynth, IndicTTS Deepfake Challenge data, IndieFake, LRLspoof (low-resource language spoofs), MLAAD, SEA-Spoof (Hindi and Tamil parts), SpeechFake (South Asian languages), Urdu Deepfake Audio (CSALT-LUMS) |
+| Voice conversion | audio | A real recording re-voiced as another speaker; the words and timing stay. | Timbre and pitch artefacts; natural prosody survives, so it is harder to catch than text to speech. | ASVspoof 2019 Logical Access, IndicSynth, MAVOS-DD, Hindi subset, SpeechFake (South Asian languages) |
+| Codec resynthesis | audio | Real speech encoded and decoded by a neural audio codec; voice and words are unchanged. | Codec quantisation artefacts only. | Indic-CodecFake |
+| Not stated | any | The authors don't say how the fakes were made. | Unknown. | BD-GRF6 (Bangladeshi real and fake speech, three genders), Bangla Audio Dataset, original and deepfake voices (Mendeley), In-the-Wild (Müller et al. 2022) |
 
 ### Features at a glance
 
@@ -551,9 +620,10 @@ Bangla read speech from 75 Bangladeshi speakers, each of 30 sentences read once 
 | | |
 | --- | --- |
 | Why it's here | Bangladeshi Bengali with every fake paired to the same speaker's real clip and a gender label, so it separates the fake from speaker and recording differences and gives the gender comparison. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | Bengali |
 | Size | 4,500 clips, 2 to 5 s each |
+| Kinds of fake | Not stated |
 | Labels it ships | speaker id (75 speakers); gender: male, female (from the speaker folder); sentence set: 15 sets of 30 sentences; real/fake twin: every fake has a real clip by the same speaker and sentence |
 | Format | WAV, 2 to 5 s clips |
 | Features in our manifest | real or fake, language, speaker or face id, source identity of each fake, gender |
@@ -573,9 +643,10 @@ Bengali real speech and VITS text-to-speech fakes in three sub-corpora (sust, mo
 | | |
 | --- | --- |
 | Why it's here | The largest open Bengali set, with sub-corpora recorded in different ways, so results can be split by recording condition. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | Bengali |
 | Size | 13,796 real and 12,796 fake clips |
+| Kinds of fake | Text to speech |
 | How fakes were made | VITS (text-to-speech) |
 | Labels it ships | sub-corpus: sust, mozilla, news; speaker id (mozilla sub-corpus only, five Common Voice speakers); transcript |
 | Format | WAV, 22.05 kHz, 6 to 7 s clips |
@@ -596,9 +667,10 @@ Bangla real and fake speech by Bangladeshi speakers, grouped male, female and th
 | | |
 | --- | --- |
 | Why it's here | Bangladeshi speech with a third-gender group, which Bangladesh, India, Nepal and Pakistan recognise in law: the only set that tests gender beyond male and female. Cross-corpus until its file formats are checked, since they may give the label away. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | Bengali |
 | Size | 13,566 clips, 18.7 h |
+| Kinds of fake | Not stated |
 | Labels it ships | gender: male, female, third gender |
 | Format | WAV and MP3 (format differs by class) |
 | Features in our manifest | real or fake, language, gender (from a sampled build) |
@@ -618,9 +690,10 @@ Face-swap videos with one to three successive swaps (FaceShifter, FaceSwap, FSGA
 | | |
 | --- | --- |
 | Why it's here | Indian face swaps with up to three successive generators, so South Asian faces under several generators. With few real videos it measures misses more than false alarms. |
-| Kind | Video, real and fake |
+| Media | Video, real and fake |
 | Languages | not stated |
 | Size | 100 real and 5,040 fake videos |
+| Kinds of fake | Face swap |
 | How fakes were made | FaceShifter; FaceSwap; FSGAN |
 | Labels it ships | swap succession: one, two or three successive swaps; sequence of generators used; gender; age group; skin tone; facial hair, spectacles, shades, mic and head or hair occlusion attributes |
 | Format | MP4, 720p, 25 fps, about 20 s |
@@ -641,9 +714,10 @@ Indian face-swap videos (FSGAN, FaceShifter, FaceSwap), single- and multi-subjec
 | | |
 | --- | --- |
 | Why it's here | The largest Indian video set, labelled by skin tone, gender, age and occlusion: where skin- tone effects on South Asian faces can be measured directly. |
-| Kind | Video, real and fake |
+| Media | Video, real and fake |
 | Languages | not stated |
 | Size | 133,260 videos, over 500 GB |
+| Kinds of fake | Face swap |
 | How fakes were made | FSGAN; FaceShifter; FaceSwap |
 | Labels it ships | set: A (single subject), B and C (multiple subjects); gender; age; Fitzpatrick skin tone; occlusion; resolution: low or high; compression: c0, c23, c40 |
 | Format | videos at low and high resolution, c0, c23 and c40 compression |
@@ -664,9 +738,10 @@ VoxCeleb2 celebrity videos with fake video, fake audio or both, across five ethn
 | | |
 | --- | --- |
 | Why it's here | The only set with a South Asian group beside four other ethnic groups under one recording setup, so it gives the probe's South Asian against others comparison. Its speech is English. |
-| Kind | Audio-visual, real and fake |
+| Media | Audio-visual, real and fake |
 | Languages | English |
 | Size | 500 real and 19,500 fake videos |
+| Kinds of fake | Face swap, Lip-sync, Text to speech |
 | How fakes were made | FaceSwap (video); FSGAN (video); Wav2Lip (lip-sync); SV2TTS (voice cloning) |
 | Labels it ships | category: RealVideo-RealAudio, RealVideo-FakeAudio, FakeVideo-RealAudio, FakeVideo-FakeAudio (which track is fake); ethnicity: African, Asian (East), Asian (South), Caucasian (American), Caucasian (European); gender; subject id; generation method |
 | Format | MP4 from VoxCeleb2, about 7.8 s on average |
@@ -687,9 +762,10 @@ Commercial-tool face swaps selected because people cannot tell them from real, w
 | | |
 | --- | --- |
 | Why it's here | Not South Asian, but race-labelled with an Indian group: a stopgap check of false alarms on real faces by race until South Asian video arrives. Its Indian group is small, so it should step back once FakeAVCeleb or DF-Platter is in. |
-| Kind | Video, real and fake |
+| Media | Video, real and fake |
 | Languages | not stated |
 | Size | 4,361 real and 4,361 fake videos |
+| Kinds of fake | Face swap |
 | How fakes were made | commercial face-swap tools (which tool made which video is not stated) |
 | Labels it ships | base video id; donor face id; race: White, Asian, Latino, Black, Indian; gender; age: adult, child, elderly |
 | Format | MP4 with audio, 512 px face crops, about 3 s |
@@ -710,8 +786,9 @@ Indian audio-video deepfakes: motion-model reenactment, face swaps and Wav2Lip l
 | | |
 | --- | --- |
 | Why it's here | Picked because it is Indian lip-sync with cloned voices, exactly v1's type. Dropped: its only sample link is dead. |
-| Kind | Audio-visual, real and fake |
+| Media | Audio-visual, real and fake |
 | Languages | not stated |
+| Kinds of fake | Face swap, Reenactment, Lip-sync |
 | How fakes were made | First Order Motion Model; Thin Plate Spline Motion Model; FaceApp face swap; Wav2Lip lip-sync with cloned voices |
 | Features in our manifest | not built yet |
 | Paper | no paper |
@@ -729,9 +806,10 @@ Indian YouTube videos in seven languages with face swaps and text-to-speech plus
 | | |
 | --- | --- |
 | Why it's here | Indian YouTube video in seven languages with face swaps and TTS plus Wav2Lip lip-sync: South Asian talking heads with cloned voices, close to v1's type. |
-| Kind | Audio-visual, real and fake |
+| Media | Audio-visual, real and fake |
 | Languages | not stated |
 | Size | 389 real and 4,680 fake videos |
+| Kinds of fake | Face swap, Lip-sync, Text to speech |
 | How fakes were made | FSGAN; FaceSwap; DeepFaceLab; text-to-speech plus Wav2Lip lip-sync |
 | Labels it ships | language: English, Hindi, Bengali, Telugu, Tamil, Punjabi, Rajasthani; gender; age group |
 | Format | video excerpts of about 10 to 12 s from YouTube |
@@ -752,8 +830,9 @@ Fakes made by re-encoding IndicSUPERB speech in 12 Indian languages with neural 
 | | |
 | --- | --- |
 | Why it's here | Picked as Indian-language fakes from neural audio codecs, a kind of fake no other set covers. Dropped: no download exists. |
-| Kind | Audio, fake |
+| Media | Audio, fake |
 | Languages | not stated |
+| Kinds of fake | Codec resynthesis |
 | How fakes were made | DAC neural audio codec (16, 24 and 44 kHz); Encodec neural audio codec (24 and 48 kHz) |
 | Labels it ships | language (12 Indic languages) |
 | Features in our manifest | not built yet |
@@ -772,9 +851,10 @@ Fake-only speech in 12 Indian languages from XTTS-v2, VITS and FreeVC24, cloning
 | | |
 | --- | --- |
 | Why it's here | The largest open South Asian fake speech, with voice conversion (FreeVC24) beside TTS: the cloned-voice half of v1, with generator and gender labels. |
-| Kind | Audio, fake |
+| Media | Audio, fake |
 | Languages | Hindi, Bengali, Urdu, Tamil, Marathi, Kannada, Malayalam, Gujarati, Punjabi, Telugu, Odia, Sanskrit |
 | Size | 4,000 h, 989 target speakers, 845 GB |
+| Kinds of fake | Text to speech, Voice conversion |
 | How fakes were made | XTTS-v2 (text-to-speech); VITS (text-to-speech); FreeVC24 (voice conversion) |
 | Labels it ships | generator; target speaker id (Kathbath numbering); source speaker id (voice conversion only); gender: male, female; language (12); source and target reference audio; TTS transcript |
 | Format | WAV embedded in parquet rows |
@@ -795,9 +875,10 @@ Real and text-to-speech clips in 16 Indian languages, including Nepali, from a H
 | | |
 | --- | --- |
 | Why it's here | Sixteen Indian languages and the only labelled Nepali fakes in one set, so it is where language becomes a per-group attribute. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | Assamese, Bengali, Bodo, Dogri, English, Gujarati, Hindi, Kannada, Malayalam, Manipuri, Marathi, Nepali, Odia, Sanskrit, Tamil, Telugu |
 | Size | 31,102 labelled training clips, 17.4 GB |
+| Kinds of fake | Text to speech |
 | Labels it ships | language (16); transcript; speaker code and gender (from the id); emotion (from the id); official split: train, test (test labels hidden) |
 | Format | 16 kHz audio embedded in parquet rows |
 | Features in our manifest | real or fake, kind of fake, language, speaker or face id, official split, gender |
@@ -817,9 +898,10 @@ Indian-accented English from 50 speakers: real recordings and voice-cloned fakes
 | | |
 | --- | --- |
 | Why it's here | Indian-accented English with voices cloned across speakers: voice-cloning scams in the English South Asian public figures often speak. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | English |
 | Size | 27.17 h |
+| Kinds of fake | Text to speech |
 | How fakes were made | voice cloning with tools such as Amazon Polly, Play.ht or ElevenLabs |
 | Labels it ships | speaker id (50 speakers); gender: 38 male, 12 female; age group (18 to 75); background: celebrity, politician, academic, businessman, member of the public; region and accent; transcript type: hypothetical, same-speaker, cross-speaker; official 80/20 subject-independent train/test split |
 | Format | WAV, 16 kHz, about 5 s on average |
@@ -839,9 +921,10 @@ Fake-only speech in 66 low-resource languages, including Nepali and Assamese, fr
 | | |
 | --- | --- |
 | Why it's here | More Nepali and Assamese fakes from 24 TTS systems, where Nepali data is thinnest. Deferred: no language can be fetched without the whole 462 GB archive. |
-| Kind | Audio, fake |
+| Media | Audio, fake |
 | Languages | Nepali, Hindi, Gujarati, Malayalam, Marathi, Odia, Telugu, Assamese |
 | Size | 1.3 million utterances, 462 GB |
+| Kinds of fake | Text to speech |
 | How fakes were made | 24 open-source text-to-speech systems |
 | Labels it ships | language (66); TTS model (from the folder) |
 | Format | WAV, shipped as one gzipped tarball in 47 parts |
@@ -861,9 +944,10 @@ Hindi YouTube videos and fakes from eight face-swap, talking-head, reenactment a
 | | |
 | --- | --- |
 | Why it's here | The only South Asian video anyone can download: Hindi talking heads, face swaps and voice conversion, so it is the first test of v1's lip-sync with cloned voices, and HAVIC's only South Asian set. |
-| Kind | Audio-visual, real and fake |
+| Media | Audio-visual, real and fake |
 | Languages | Hindi |
 | Size | 3,632 real and 3,881 fake videos |
+| Kinds of fake | Face swap, Talking head, Reenactment, Voice conversion |
 | How fakes were made | inswapper (face swap); hififace (face swap); roop (face swap); echomimic (talking head); sonic (talking head); memo (talking head); liveportrait (reenactment); knnvc (voice conversion) |
 | Labels it ships | generator; which track was manipulated: video, audio; language: Hindi; open-set split (per the paper) |
 | Format | MP4, 256 x 256 to 1920 x 1080, 23 to 60 fps, audio 16 to 44.1 kHz |
@@ -884,9 +968,10 @@ Fake-only text-to-speech in many languages (Hindi, Bengali, Tamil, Urdu, Sinhala
 | | |
 | --- | --- |
 | Why it's here | The only Sinhala deepfake speech anywhere, plus Hindi, Bengali, Tamil and Urdu. Fake only, so its evalsets are cross-corpus and diagnostic until the shortcut probe clears them. |
-| Kind | Audio, fake |
+| Media | Audio, fake |
 | Languages | Hindi, Bengali, Tamil, Urdu, Sinhala, Kannada, Marathi, Malayalam |
 | Size | 1,000 clips per language and generator, 9.5 GB |
+| Kinds of fake | Text to speech |
 | How fakes were made | text-to-speech systems, one folder each (Hindi 9, Bengali 4, Kannada 2, one each for Tamil, Marathi, Urdu, Sinhala, Malayalam) |
 | Labels it ships | generator; language; original M-AILABS source file; duration |
 | Format | WAV |
@@ -907,9 +992,10 @@ Real and fake speech in seven languages (Hindi and Tamil used here) from six ope
 | | |
 | --- | --- |
 | Why it's here | Hindi and Tamil fakes from named commercial voice tools as well as open TTS, the kind of tools behind real scams. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | Hindi, Tamil |
 | Size | Hindi 71,171 and Tamil 49,640 utterances |
+| Kinds of fake | Text to speech |
 | How fakes were made | VITS-MMS; FastSpeech2; Indic-TTS; F5-TTS; Tacotron2; FastPitch; HeyGen (commercial); ElevenLabs (commercial); MiniMax (commercial); GPT-4o-mini-TTS (commercial) |
 | Labels it ships | language; spoof type; source model; source dataset; speaker or voice; category: offline or online spoof; official split: train, validation, test (8:1:1) |
 | Format | FLAC, 16 kHz, in parquet shards |
@@ -930,9 +1016,10 @@ Multilingual real and fake speech; we use Hindi, Bengali, Tamil, Marathi and Mal
 | | |
 | --- | --- |
 | Why it's here | More Indic fakes (Hindi, Bengali, Tamil, Marathi, Malayalam) from a free, widely used TTS and from voice conversion. Cross-corpus, so diagnostic until the shortcut probe. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | Hindi, Bengali, Tamil, Marathi, Malayalam |
 | Size | 143 GB for the South Asian parts |
+| Kinds of fake | Text to speech, Voice conversion |
 | How fakes were made | Edge-TTS (text-to-speech); SeedVC (voice conversion, Hindi only) |
 | Labels it ships | generator; language; Edge-TTS voice name; Common Voice split folder (real clips) |
 | Format | WAV, 16 kHz mono, mostly 2 to 20 s |
@@ -953,9 +1040,10 @@ Urdu speech from 17 speakers: real clips and matched fakes from two TTS systems 
 | | |
 | --- | --- |
 | Why it's here | Pakistan's Urdu with generator labels (VITS, Tacotron), the first South Asian set scored. It behaves unlike the others, which makes it the test case for recording artefacts. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | Urdu |
 | Size | 6,794 clips (3,398 real, 3,396 fake) |
+| Kinds of fake | Text to speech |
 | How fakes were made | VITS (text-to-speech); Tacotron (text-to-speech) |
 | Labels it ships | speaker id (17 speakers); generator; bona fide part: Part 1, Part 2 |
 | Format | WAV |
@@ -978,9 +1066,10 @@ English VCTK speech, bona fide plus 19 TTS and voice-conversion attacks; the sta
 | | |
 | --- | --- |
 | Why it's here | Not South Asian. The reproduction set for the detectors trained on it: an adapter must match its published numbers here, and settle its score direction, before its South Asian numbers count, so a low South Asian AUC reads as a real failure rather than a flipped sign. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | English |
 | Size | 7.6 GB; train, dev and eval with disjoint speakers |
+| Kinds of fake | Text to speech, Voice conversion |
 | How fakes were made | 19 attack systems A01 to A19: text-to-speech, voice conversion, and TTS output passed through voice conversion (A13 to A15) |
 | Labels it ships | speaker id; attack id: A01 to A19 (TTS, VC or TTS+VC); official split: train, dev, eval (disjoint speakers) |
 | Format | FLAC, 16 kHz, 16-bit (VCTK downsampled) |
@@ -1001,9 +1090,10 @@ Celebrity face-swap videos from YouTube made with an improved DeepFake synthesis
 | | |
 | --- | --- |
 | Why it's here | Not South Asian (mostly Caucasian subjects). A video reproduction set: it or FF++ settles every video model's score direction, without which no video number counts. |
-| Kind | Video, real and fake |
+| Media | Video, real and fake |
 | Languages | English |
 | Size | 890 real and 5,639 fake videos |
+| Kinds of fake | Face swap |
 | How fakes were made | DeepFake face swap with the authors' improved synthesis process |
 | Labels it ships | source folder: Celeb-real, YouTube-real, Celeb-synthesis; official test list (518 videos) |
 | Format | MP4 |
@@ -1024,9 +1114,10 @@ Note: About 88% of subjects are Caucasian, so it carries no South Asian signal.
 | | |
 | --- | --- |
 | Why it's here | Not South Asian. Every video detector here trained on it, so its test split is where video adapters reproduce published numbers and settle score direction. |
-| Kind | Video, real and fake |
+| Media | Video, real and fake |
 | Languages | not stated |
 | Size | 1,000 real videos plus fakes, about 40 GB |
+| Kinds of fake | Face swap, Reenactment |
 | How fakes were made | Deepfakes; Face2Face; FaceSwap; NeuralTextures; FaceShifter |
 | Labels it ships | manipulation method; target id and source id of each fake; official split: train, val, test (JSON pair lists); binary manipulation masks |
 | Format | MP4, c23 compression used here (raw and c40 also exist) |
@@ -1047,9 +1138,10 @@ Real and fake English speech of public figures collected from the internet; the 
 | | |
 | --- | --- |
 | Why it's here | Not South Asian. Real-world English deepfakes of public figures: the reproduction set where the guard refuses ASVspoof (DF Arena, AntiDeepfake), and the out-of-domain reference South Asian scores are compared with. |
-| Kind | Audio, real and fake |
+| Media | Audio, real and fake |
 | Languages | English |
 | Size | 31,779 clips (19,963 real, 11,816 fake) |
+| Kinds of fake | Not stated |
 | Labels it ships | speaker (public figure name) |
 | Format | WAV, 37.9 h in all (20.7 h real, 17.2 h fake) |
 | Features in our manifest | real or fake, language, speaker or face id |
@@ -1071,9 +1163,10 @@ Real video only: consenting participants in seven countries (India the largest),
 | | |
 | --- | --- |
 | Why it's here | Real video only, with India its largest country and self-reported demographics: how often detectors flag real South Asian faces as fake, the harm that falls on real people. |
-| Kind | Video, real |
+| Media | Video, real |
 | Languages | Hindi, Tamil, Telugu, English |
 | Size | 5,567 participants |
+| Kinds of fake | none: real clips only |
 | How fakes were made | none: real clips only |
 | Labels it ships | participant id; age (self-reported); gender (self-reported); language and dialect (self-reported); country and region; disability, adornments and physical attributes (self-reported); skin tone: Fitzpatrick and Monk scales (annotated); voice timbre (annotated); recording setup: scripted or unscripted; per-second activity labels |
 | Format | video, 26,467 recordings, about 674 h in all |
@@ -1093,9 +1186,10 @@ Real read speech in 12 Indian languages (Kathbath); the real counterpart for Ind
 | | |
 | --- | --- |
 | Why it's here | Real read speech in 12 Indian languages from the speakers IndicSynth clones, so IndicSynth's evalsets pair each fake with real speech from the same speakers and corpus. |
-| Kind | Audio, real |
+| Media | Audio, real |
 | Languages | Hindi, Bengali, Urdu, Tamil, Marathi, Kannada, Malayalam, Gujarati, Punjabi, Telugu, Odia, Sanskrit |
 | Size | 5.8 GB (test splits) |
+| Kinds of fake | none: real clips only |
 | How fakes were made | none: real clips only |
 | Labels it ships | speaker id (shared with IndicSynth); gender: male, female; language (12); split: test_known, test_unknown; transcript |
 | Format | m4a |
@@ -1116,9 +1210,10 @@ Google's crowd-sourced Sinhala read speech, real only; the real half for MLAAD's
 | | |
 | --- | --- |
 | Why it's here | Real Sinhala read speech, the real half for MLAAD's Sinhala fakes: the only way to test Sri Lanka's main language today. |
-| Kind | Audio, real |
+| Media | Audio, real |
 | Languages | Sinhala |
 | Size | 11,550 clips used (full set 185k utterances) |
+| Kinds of fake | none: real clips only |
 | How fakes were made | none: real clips only |
 | Labels it ships | anonymised speaker id; transcript |
 | Format | FLAC |
@@ -1139,9 +1234,10 @@ Real Indian-accented English from 117 speakers across India, labelled by gender,
 | | |
 | --- | --- |
 | Why it's here | Real Indian-accented English from across India with gender, age, state and first language: false alarms on real South Asian voices, split by region. |
-| Kind | Audio, real |
+| Media | Audio, real |
 | Languages | English |
 | Size | 9.6 h, 117 speakers |
+| Kinds of fake | none: real clips only |
 | How fakes were made | none: real clips only |
 | Labels it ships | speaker id; gender; age group; native state and district; first language; transcript |
 | Format | audio embedded in parquet, test split only |
@@ -1163,9 +1259,10 @@ In-the-wild real and fake video, audio and images collected from social media in
 | | |
 | --- | --- |
 | Why it's here | Cut candidate. Picked as the only set of deepfakes that actually circulated online. It has no country field, so South Asian items can't be picked out, and access requests are often rejected. |
-| Kind | Audio-visual, real and fake |
+| Media | Audio-visual, real and fake |
 | Languages | not stated |
 | Size | 20.3 GB |
+| Kinds of fake | Face swap, Lip-sync, Fully synthetic |
 | How fakes were made | in the wild, unknown tools; manipulation types include lip-sync, face swap and diffusion (per the paper) |
 | Labels it ships | media type: video, audio, image; language (Whisper-detected, per the paper); source website (per the paper); manipulation type (per the paper) |
 | Format | video about 30 fps, average 576 x 720 px, about 80 s average; audio about 44.7 kHz, about 115 s average; images mostly 1024 x 1024 |
@@ -1187,9 +1284,10 @@ Face-crop frames of Bangladeshi and Indian people, real and faked with Roop and 
 | | |
 | --- | --- |
 | Why it's here | Bangladeshi and Indian face crops faked with consumer tools: a pipeline test, used for video parity checks, never for results. |
-| Kind | Image, real and fake |
+| Media | Image, real and fake |
 | Languages | not stated |
 | Size | 3,746 real and 106,948 fake frames |
+| Kinds of fake | Face swap |
 | How fakes were made | Roop; Akool |
 | Labels it ships | technique: Tech-1, Tech-2 (which is Roop and which Akool is not stated); source video; name of the person swapped in (file name) |
 | Format | JPEG face crops, 500 x 500, frames taken at 5 fps |
@@ -1209,9 +1307,10 @@ Free preview: five real phone videos and five face-swap fakes made from them.
 | | |
 | --- | --- |
 | Why it's here | A tiny free preview of phone videos and their face swaps: a pipeline test, never reported. |
-| Kind | Audio-visual, real and fake |
+| Media | Audio-visual, real and fake |
 | Languages | not stated |
 | Size | 10 videos, about 68 MB |
+| Kinds of fake | Face swap |
 | How fakes were made | aisaver.io; faceswapvideo.ai; magichour.ai (which service made which fake is not stated) |
 | Labels it ships | pairing of real video, fake and source face image (CSV) |
 | Format | MP4 and MOV phone videos with audio, 480p to 1080p |

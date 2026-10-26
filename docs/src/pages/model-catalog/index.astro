@@ -32,7 +32,9 @@ const scored = new Set(D.runs.map((r) => r.model));
     <section class="panel">
       <div class="scroll"><ModelsTable /></div>
       <p class="note">
-        South Asian AUC: one dot per South Asian evalset scored, on a 0 to 1 axis with chance marked; hover a dot for
+        Trained to catch: the kinds of fake in a detector's training data; what each kind changes, and which datasets
+        hold it, is under <a href={`${base}dataset-catalog/#kinds`}>Kinds of fake</a>. South Asian AUC: one dot per
+        South Asian evalset scored, on a 0 to 1 axis with chance marked; hover a dot for
         its evalset. Every number is in <a href={`${base}coverage/`}>Coverage</a> and
         <a href={`${base}results/#all-runs`}>all runs</a>. Cut candidates add little the others don't show; the team
         decides (<a href={`${base}#open-decisions-that-shape-the-results`}>open decisions</a>).

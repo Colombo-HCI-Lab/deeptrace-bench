@@ -1,7 +1,7 @@
 // The two catalogs: an index page each (model-catalog/, dataset-catalog/) and a page per model
 // and per dataset, all from status.json. The descriptions behind them live in
 // src/reference/catalog.yaml.
-import { D, evalsets, type Dataset, type Model, type Run } from "./status";
+import { D, evalsets, type Dataset, type FakeType, type Model, type Run } from "./status";
 
 const base = import.meta.env.BASE_URL;
 
@@ -28,6 +28,12 @@ export const LEVEL: Record<string, string> = { pretrain: "pretrained on", train:
 export const SA_LANGS = ["hi", "bn", "ur", "ta", "te", "mr", "gu", "kn", "ml", "pa", "or", "as", "ne", "si", "sa", "mni", "doi", "brx"];
 // The manifest features the dataset index tabulates, as reference.py names them.
 export const FEATURES = ["generator", "language", "speaker or face id", "source identity of each fake", "gender", "age", "race", "sub-corpus", "official split"];
+
+// Kinds of fake in catalog.yaml's order: video first, then audio, then "not stated".
+export const FAKE_TYPES: FakeType[] = D.fake_types;
+export const FAKE = new Map(FAKE_TYPES.map((t) => [t.id, t]));
+// A licence without its parenthesised caveat, for the index tables; the entry page has it in full.
+export const shortLicence = (licence: string) => licence.split(" (")[0];
 
 export const byName = <T extends { name: string }>(a: T, b: T) => a.name.localeCompare(b.name, "en", { sensitivity: "base" });
 

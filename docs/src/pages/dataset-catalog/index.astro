@@ -3,6 +3,7 @@
 // features the built ones record; each name opens a page of its own.
 import DatasetsTable from "../../components/DatasetsTable.astro";
 import FeatureMatrix from "../../components/FeatureMatrix.astro";
+import KindsTable from "../../components/KindsTable.astro";
 import LangMatrix from "../../components/LangMatrix.astro";
 import Stats from "../../components/Stats.astro";
 import Base from "../../layouts/Base.astro";
@@ -38,6 +39,21 @@ const held = (key: string) => real.filter((d) => holding(d).key === key).length;
     />
     <section class="panel">
       <div class="scroll"><DatasetsTable /></div>
+    </section>
+    <section class="table-sec" id="kinds">
+      <h2>Kinds of fake</h2>
+      <p>
+        Each kind changes something different and leaves a different trace, so a detector trained on one often misses
+        another. Datasets are shaded by what we hold; a "none" is a gap.
+      </p>
+      <div class="legend">
+        <span><i class="sq full"></i>in hand</span>
+        <span><i class="sq sample"></i>sample only</span>
+        <span><i class="sq open"></i>open, not downloaded</span>
+        <span><i class="sq request"></i>on request</span>
+        <span><i class="sq dead"></i>unavailable</span>
+      </div>
+      <div class="scroll"><KindsTable /></div>
     </section>
     <section class="table-sec" id="languages">
       <h2>South Asian languages</h2>

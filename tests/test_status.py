@@ -111,6 +111,17 @@ def test_catalog_ids_must_exist(registry, tmp_path, monkeypatch):
         load_catalog(registry)
 
 
+def test_fake_types_must_be_defined(registry, tmp_path, monkeypatch):
+    model_id = next(iter(registry.models))
+    catalog = tmp_path / "catalog.yaml"
+    catalog.write_text(
+        f"fake_types:\n  tts: {{label: TTS}}\nmodels:\n  {model_id}: {{catches: [tts, deepfake]}}\n"
+    )
+    monkeypatch.setattr(status, "CATALOG", catalog)
+    with pytest.raises(ValueError, match="deepfake"):
+        load_catalog(registry)
+
+
 def test_citations_are_keyed_by_catalog_id(tmp_path, monkeypatch):
     found = {"title": "T", "year": 2022, "citationCount": 7}
 

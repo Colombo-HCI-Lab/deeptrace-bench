@@ -2,6 +2,78 @@
  "built": "2026-10-12",
  "eval_status": "proposed",
  "citations_checked": "2026-10-05",
+ "fake_types": [
+  {
+   "id": "face_swap",
+   "label": "Face swap",
+   "modality": "video",
+   "changed": "The whole face is replaced with another person's; head motion, expression, lighting and background stay from the original.",
+   "trace": "A blending boundary at the jaw and hairline, skin tone or lighting that differs between face and neck, identity flicker across frames."
+  },
+  {
+   "id": "reenactment",
+   "label": "Reenactment",
+   "modality": "video",
+   "changed": "The same person, with expression and head pose driven by someone else's performance.",
+   "trace": "Warping around moving features, smeared texture under fast motion, unnatural pose transitions."
+  },
+  {
+   "id": "lip_sync",
+   "label": "Lip-sync",
+   "modality": "video",
+   "changed": "The same person and footage; only the mouth is regenerated to match new audio, often a cloned voice.",
+   "trace": "Mouth motion out of step with the sounds, blurry teeth and inner mouth, a seam around the lower face. Face-swap cues mostly don't apply."
+  },
+  {
+   "id": "talking_head",
+   "label": "Talking head",
+   "modality": "video",
+   "changed": "A single still photo is animated into a speaking video, driven by audio; no real footage exists.",
+   "trace": "Stiff or repeating head and shoulder motion, a background that barely moves, identity drift over long clips."
+  },
+  {
+   "id": "attribute_edit",
+   "label": "Attribute edit",
+   "modality": "video",
+   "changed": "The same person and video, with age, expression, hair or makeup changed.",
+   "trace": "Flicker in the edited region and texture that doesn't track the face."
+  },
+  {
+   "id": "fully_synthetic",
+   "label": "Fully synthetic",
+   "modality": "video",
+   "changed": "Everything is generated from a text or image prompt (Sora, Veo, Kling); nobody real was filmed.",
+   "trace": "Physics and continuity errors, objects that morph. There is no pasted face or source footage, so face-forensics detectors have little to find."
+  },
+  {
+   "id": "tts",
+   "label": "Text to speech",
+   "modality": "audio",
+   "changed": "Speech generated from text, often in a cloned voice.",
+   "trace": "Vocoder artefacts in the high frequencies, regular prosody, missing breaths and room noise."
+  },
+  {
+   "id": "vc",
+   "label": "Voice conversion",
+   "modality": "audio",
+   "changed": "A real recording re-voiced as another speaker; the words and timing stay.",
+   "trace": "Timbre and pitch artefacts; natural prosody survives, so it is harder to catch than text to speech."
+  },
+  {
+   "id": "codec",
+   "label": "Codec resynthesis",
+   "modality": "audio",
+   "changed": "Real speech encoded and decoded by a neural audio codec; voice and words are unchanged.",
+   "trace": "Codec quantisation artefacts only."
+  },
+  {
+   "id": "unstated",
+   "label": "Not stated",
+   "modality": "any",
+   "changed": "The authors don't say how the fakes were made.",
+   "trace": "Unknown."
+  }
+ ],
  "models": [
   {
    "id": "aasist",
@@ -58,7 +130,12 @@
     "precision": "fp32"
    },
    "why": "The most-cited open audio detector, trained only on English ASVspoof speech: it stands for the off-the-shelf detector a South Asian platform would deploy today, and is the classic half of the probe's audio pair.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "spectral and temporal artefacts in the raw waveform"
   },
   {
    "id": "aasist3",
@@ -159,7 +236,12 @@
     "precision": "fp32"
    },
    "why": "Picked as the only AASIST variant trained with multilingual fakes (MLAAD, which has Hindi, Bengali, Tamil, Urdu and Sinhala). The released weights aren't the paper's and score far below it, so they can't answer that question, and the guard refuses them on every MLAAD evalset.",
-   "cut": true
+   "cut": true,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features (XLSR-53)"
   },
   {
    "id": "aasist_l",
@@ -216,7 +298,12 @@
     "precision": "fp32"
    },
    "why": "Picked as the phone-sized AASIST, for detection on cheap devices. On every South Asian set so far it scores within a few hundredths of AASIST, so it shows nothing the bigger model doesn't.",
-   "cut": true
+   "cut": true,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "spectral and temporal artefacts in the raw waveform"
   },
   {
    "id": "altfreezing",
@@ -273,7 +360,12 @@
    "parity": null,
    "profile": null,
    "why": "The probe's temporal video detector: talking heads and lip-sync fakes are edited over time, and frame models can miss motion artefacts. Blocked until someone can fetch its weights.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "spatial and temporal artefacts across frames"
   },
   {
    "id": "antideepfake_mms_300m",
@@ -530,7 +622,12 @@
     "precision": "fp32"
    },
    "why": "Half of the cleanest test of the language question: the same post-training as the w2v2 small model on a backbone pretrained on about 1,400 languages. Its post-training heard Hindi, Bengali, Urdu, Tamil and Nepali but no Sinhala, so a Sinhala set would show what an unheard South Asian language does.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features (MMS, 1,400 languages)"
   },
   {
    "id": "antideepfake_w2v_small",
@@ -762,7 +859,12 @@
     "precision": "fp32"
    },
    "why": "The other half of that pair: the same post-training on an English-only backbone, so its gap to MMS-300M on South Asian speech comes from the pretraining languages alone.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features (wav2vec 2.0, English)"
   },
   {
    "id": "core",
@@ -839,7 +941,12 @@
     "precision": "fp32"
    },
    "why": "Trained for representations that stay consistent across augmented views, so it tests whether that robustness survives South Asian faces and the recompression of forwarded clips. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "face texture, consistent across augmentations"
   },
   {
    "id": "df_arena_1b",
@@ -983,7 +1090,12 @@
     "precision": "fp32"
    },
    "why": "The strongest open audio detector, so it sets the ceiling South Asian results are read against. Its training includes MLAAD, whose generators recur in South Asian sets, so part of its score there may be familiarity.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features from every layer (XLS-R)"
   },
   {
    "id": "df_arena_500m",
@@ -1127,7 +1239,12 @@
     "precision": "fp32"
    },
    "why": "Picked to test whether size helps on South Asian speech. The 1B model isn't consistently better, so with that reported the smaller one is redundant.",
-   "cut": true
+   "cut": true,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features from every layer (XLS-R)"
   },
   {
    "id": "efficientnet_b4",
@@ -1204,7 +1321,12 @@
     "precision": "fp32"
    },
    "why": "Picked as a second classic video baseline beside Xception. It reads the same texture cue from the same FF++ training, so it is unlikely to show anything about South Asian faces that Xception doesn't.",
-   "cut": true
+   "cut": true,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "face texture"
   },
   {
    "id": "effort",
@@ -1266,7 +1388,12 @@
    "parity": null,
    "profile": null,
    "why": "The probe's original foundation-model video detector, the partner to Xception. Blocked on weights; GenD holds its place until they arrive.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "foundation-model features (CLIP)"
   },
   {
    "id": "f3net",
@@ -1343,7 +1470,12 @@
     "precision": "fp32"
    },
    "why": "Reads frequency bands chosen to survive compression, the cue most likely to matter for South Asian clips that circulate recompressed on messaging apps. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "frequency bands"
   },
   {
    "id": "ffd",
@@ -1420,7 +1552,12 @@
     "precision": "fp32"
    },
    "why": "Learns where on the face the manipulation is, so it shows whether its attention transfers to South Asian faces. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "where on the face the edit is"
   },
   {
    "id": "gend",
@@ -1492,7 +1629,12 @@
     "precision": "fp32"
    },
    "why": "The foundation-model half of the video pair, in Effort's place. Its backbone was pretrained on far more varied faces than FF++, which tests whether that removes skin-tone bias; on HiDF it flagged real Indian faces most often, so it is the first model to check on South Asian faces.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "foundation-model features (CLIP)"
   },
   {
    "id": "gend_pe_l",
@@ -1564,7 +1706,12 @@
     "precision": "fp32"
    },
    "why": "The same GenD recipe on Meta's Perception Encoder instead of CLIP: whether the pretraining behind the backbone changes how it treats South Asian faces. Second tier, run beside GenD (CLIP).",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "foundation-model features (Perception Encoder)"
   },
   {
    "id": "havic",
@@ -1636,7 +1783,13 @@
     "precision": "fp32"
    },
    "why": "The only open audio-visual detector. v1 focuses on lip-sync with cloned voices, which only a model that checks whether voice and mouth agree can catch; MAVOS-DD Hindi is its South Asian test, and it is refused on FakeAVCeleb, which it was fine-tuned on.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "lip_sync",
+    "tts"
+   ],
+   "cue": "whether voice and lips agree"
   },
   {
    "id": "lipforensics",
@@ -1708,7 +1861,12 @@
     "precision": "fp32"
    },
    "why": "Looks only at the mouth, where lip-sync fakes, v1's focus, are edited. Tests whether FF++ face-swap detectors miss mouth-only edits on South Asian talking heads.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "mouth motion over time"
   },
   {
    "id": "recce",
@@ -1785,7 +1943,12 @@
     "precision": "fp32"
    },
    "why": "Learns to reconstruct real faces only, so it tests whether its idea of a real face, learned from FF++, holds for South Asian faces. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "how badly a real-face decoder rebuilds it"
   },
   {
    "id": "sbi",
@@ -1861,7 +2024,11 @@
     "precision": "fp32"
    },
    "why": "Trained on real faces blended into themselves, never on real deepfakes, so it depends least on its training set's faces and generators. The probe's test of whether that generalises better to South Asian faces and unseen generators.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap"
+   ],
+   "cue": "blending boundaries"
   },
   {
    "id": "spsl",
@@ -1938,7 +2105,12 @@
     "precision": "fp32"
    },
    "why": "Reads the phase spectrum, where upsampling leaves traces whatever the face, so it tests a cue that shouldn't depend on skin tone. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "phase spectrum"
   },
   {
    "id": "srm",
@@ -2015,7 +2187,12 @@
     "precision": "fp32"
    },
    "why": "Reads high-frequency noise residuals, a cue sensitive to the phone cameras and compression typical of South Asian social media. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "high-frequency noise residuals"
   },
   {
    "id": "ucf",
@@ -2092,7 +2269,12 @@
     "precision": "fp32"
    },
    "why": "Built to find forgery traces common to every generator, so it tests generalisation to the generators actually used in South Asia. Like every DeepfakeBench detector here it trained on FF++, so each reads a different cue on the same faces; second tier, worth running once South Asian video arrives.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "forgery traces shared by every method"
   },
   {
    "id": "xception",
@@ -2169,7 +2351,12 @@
     "precision": "fp32"
    },
    "why": "The most-cited video detector and the classic half of the video pair. Its training set, FF++, is dominated by lighter-skinned faces, so it measures what a standard detector does on South Asian skin tones.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "face_swap",
+    "reenactment"
+   ],
+   "cue": "face texture"
   },
   {
    "id": "xlsr_aasist",
@@ -2257,7 +2444,12 @@
     "precision": "fp32"
    },
    "why": "The same training data as AASIST on a backbone pretrained on 128 languages: whether multilingual pretraining alone, with English-only fakes, carries over to South Asian speech. The foundation-model half of the probe's audio pair.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features (XLS-R) with graph attention"
   },
   {
    "id": "xlsr_mamba",
@@ -2349,7 +2541,12 @@
     "precision": "fp32"
    },
    "why": "The same backbone and training as XLS-R + AASIST with a Mamba back end, so a failure the two share on South Asian speech points at the training data, not the head. Second tier.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features (XLS-R) over time"
   },
   {
    "id": "xlsr_sls",
@@ -2441,7 +2638,12 @@
     "precision": "fp32"
    },
    "why": "The same backbone and training as XLS-R + AASIST with a back end that pools every layer, so a failure the two share on South Asian speech points at the training data, not the head. Second tier.",
-   "cut": false
+   "cut": false,
+   "catches": [
+    "tts",
+    "vc"
+   ],
+   "cue": "self-supervised speech features from every layer (XLS-R)"
   }
  ],
  "datasets": [
@@ -2460,6 +2662,10 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "tts",
+    "vc"
    ],
    "generators": [
     "19 attack systems A01 to A19: text-to-speech, voice conversion, and TTS output passed through voice conversion (A13 to A15)"
@@ -2513,6 +2719,9 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "unstated"
+   ],
    "generators": null,
    "annotations": [
     "speaker id (75 speakers)",
@@ -2556,6 +2765,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "tts"
    ],
    "generators": [
     "VITS (text-to-speech)"
@@ -2610,6 +2822,9 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "unstated"
+   ],
    "generators": null,
    "annotations": [
     "gender: male, female, third gender"
@@ -2649,6 +2864,7 @@
    "contains": [
     "real"
    ],
+   "fakes": [],
    "generators": [],
    "annotations": [
     "participant id",
@@ -2693,6 +2909,9 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "face_swap"
+   ],
    "generators": [
     "DeepFake face swap with the authors' improved synthesis process"
    ],
@@ -2731,6 +2950,11 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "face_swap",
+    "lip_sync",
+    "fully_synthetic"
+   ],
    "generators": [
     "in the wild, unknown tools; manipulation types include lip-sync, face swap and diffusion (per the paper)"
    ],
@@ -2768,6 +2992,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "face_swap"
    ],
    "generators": [
     "FaceShifter",
@@ -2812,6 +3039,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "face_swap"
    ],
    "generators": [
     "FSGAN",
@@ -2860,6 +3090,11 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "face_swap",
+    "lip_sync",
+    "tts"
+   ],
    "generators": [
     "FaceSwap (video)",
     "FSGAN (video)",
@@ -2904,6 +3139,10 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "face_swap",
+    "reenactment"
+   ],
    "generators": [
     "Deepfakes",
     "Face2Face",
@@ -2947,6 +3186,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "face_swap"
    ],
    "generators": [
     "commercial face-swap tools (which tool made which video is not stated)"
@@ -2999,6 +3241,11 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "face_swap",
+    "reenactment",
+    "lip_sync"
+   ],
    "generators": [
     "First Order Motion Model",
     "Thin Plate Spline Motion Model",
@@ -3030,6 +3277,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "unstated"
    ],
    "generators": null,
    "annotations": [
@@ -3074,6 +3324,11 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "face_swap",
+    "lip_sync",
+    "tts"
+   ],
    "generators": [
     "FSGAN",
     "FaceSwap",
@@ -3114,6 +3369,9 @@
    "scale": null,
    "contains": [
     "fake"
+   ],
+   "fakes": [
+    "codec"
    ],
    "generators": [
     "DAC neural audio codec (16, 24 and 44 kHz)",
@@ -3163,6 +3421,7 @@
    "contains": [
     "real"
    ],
+   "fakes": [],
    "generators": [],
    "annotations": [
     "speaker id (shared with IndicSynth)",
@@ -3243,6 +3502,10 @@
    "contains": [
     "fake"
    ],
+   "fakes": [
+    "tts",
+    "vc"
+   ],
    "generators": [
     "XTTS-v2 (text-to-speech)",
     "VITS (text-to-speech)",
@@ -3320,6 +3583,9 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "tts"
+   ],
    "generators": null,
    "annotations": [
     "language (16)",
@@ -3381,6 +3647,9 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "tts"
+   ],
    "generators": [
     "voice cloning with tools such as Amazon Polly, Play.ht or ElevenLabs"
    ],
@@ -3430,6 +3699,9 @@
    "contains": [
     "fake"
    ],
+   "fakes": [
+    "tts"
+   ],
    "generators": [
     "24 open-source text-to-speech systems"
    ],
@@ -3467,6 +3739,12 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "face_swap",
+    "talking_head",
+    "reenactment",
+    "vc"
    ],
    "generators": [
     "inswapper (face swap)",
@@ -3516,6 +3794,9 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "face_swap"
+   ],
    "generators": [
     "Roop",
     "Akool"
@@ -3562,6 +3843,9 @@
    "contains": [
     "fake"
    ],
+   "fakes": [
+    "tts"
+   ],
    "generators": [
     "text-to-speech systems, one folder each (Hindi 9, Bengali 4, Kannada 2, one each for Tamil, Marathi, Urdu, Sinhala, Malayalam)"
    ],
@@ -3605,6 +3889,7 @@
    "contains": [
     "real"
    ],
+   "fakes": [],
    "generators": [],
    "annotations": [
     "anonymised speaker id",
@@ -3651,6 +3936,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "tts"
    ],
    "generators": [
     "VITS-MMS",
@@ -3711,6 +3999,10 @@
     "real",
     "fake"
    ],
+   "fakes": [
+    "tts",
+    "vc"
+   ],
    "generators": [
     "Edge-TTS (text-to-speech)",
     "SeedVC (voice conversion, Hindi only)"
@@ -3765,6 +4057,7 @@
    "contains": [
     "real"
    ],
+   "fakes": [],
    "generators": [],
    "annotations": [
     "speaker id",
@@ -3802,6 +4095,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "face_swap"
    ],
    "generators": [
     "aisaver.io",
@@ -3841,6 +4137,9 @@
    "contains": [
     "real",
     "fake"
+   ],
+   "fakes": [
+    "tts"
    ],
    "generators": [
     "VITS (text-to-speech)",

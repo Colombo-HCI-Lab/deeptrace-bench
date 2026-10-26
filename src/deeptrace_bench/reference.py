@@ -165,7 +165,14 @@ def _ours(runs: list[dict[str, Any]]) -> str:
     )
 
 
-def _model(m: dict[str, Any], model_runs: list[dict[str, Any]]) -> list[str]:
+def _kinds(ids: list[str] | None, kinds: dict[str, str]) -> str:
+    """Kinds of fake by label; None for an untagged entry, real only for an empty list."""
+    if ids is None:
+        return ""
+    return ", ".join(kinds.get(k, k) for k in ids) if ids else "none: real clips only"
+
+
+def _model(m: dict[str, Any], model_runs: list[dict[str, Any]], kinds: dict[str, str]) -> list[str]:
     out = [f'<a id="model-{m["id"]}"></a>', "", f"#### {m['name']}", ""]
     out += [m.get("description") or m.get("summary") or "No description yet.", ""]
     training = "; ".join(
@@ -185,6 +192,8 @@ def _model(m: dict[str, Any], model_runs: list[dict[str, Any]]) -> list[str]:
     out += _table(
         [
             ("Why it's here", _why(m)),
+            ("Kinds of fake it trained on", _kinds(m.get("catches"), kinds)),
+            ("What it looks at", m.get("cue") or ""),
             ("How it works", m.get("architecture") or ""),
             ("Input", m.get("input") or ""),
             ("Paper", _paper(m.get("paper"))),
@@ -200,7 +209,7 @@ def _model(m: dict[str, Any], model_runs: list[dict[str, Any]]) -> list[str]:
     return [*out, ""]
 
 
-def _dataset(d: dict[str, Any]) -> list[str]:
+def _dataset(d: dict[str, Any], kinds: dict[str, str]) -> list[str]:
     out = [f'<a id="dataset-{d["id"]}"></a>', "", f"#### {d['name']}", ""]
     out += [d.get("summary") or "No description yet.", ""]
     generators = d.get("generators")
@@ -217,9 +226,10 @@ def _dataset(d: dict[str, Any]) -> list[str]:
     out += _table(
         [
             ("Why it's here", _why(d)),
-            ("Kind", f"{MODALITIES[d['modality']]}, {' and '.join(d['contains'])}"),
+            ("Media", f"{MODALITIES[d['modality']]}, {' and '.join(d['contains'])}"),
             ("Languages", _languages(d["languages"])),
             ("Size", d.get("scale") or ""),
+            ("Kinds of fake", _kinds(d.get("fakes"), kinds)),
             ("How fakes were made", generators or ""),
             ("Labels it ships", "; ".join(d.get("annotations") or [])),
             ("Format", d.get("format") or ""),
@@ -237,6 +247,7 @@ def _dataset(d: dict[str, Any]) -> list[str]:
 
 def render(data: dict[str, Any]) -> str:
     """The whole reference as Markdown."""
+    kinds = {t["id"]: t["label"] for t in data.get("fake_types") or []}
     runs: dict[str, list[dict[str, Any]]] = {}
     for r in data["runs"]:
         runs.setdefault(r["model"], []).append(r)
@@ -262,13 +273,33 @@ def render(data: dict[str, Any]) -> str:
         models = [m for m in data["models"] if m["modality"] == modality]
         out += [f"### {MODALITIES[modality]} ({len(models)})", ""]
         for m in sorted(models, key=lambda m: m["name"].lower()):
-            out += _model(m, runs.get(m["id"], []))
+            out += _model(m, runs.get(m["id"], []), kinds)
 
     datasets = data["datasets"]
     built = [d for d in datasets if d.get("recorded")]
+    out += ["## Datasets", ""]
+    if data.get("fake_types"):
+        out += [
+            "### Kinds of fake",
+            "",
+            "What each kind of fake changes and what it tends to leave behind. A detector trained "
+            "on one kind often misses another.",
+            "",
+            "| Kind | Track | What's changed | What it leaves | Datasets |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+        for t in data["fake_types"]:
+            having = sorted(
+                d["name"]
+                for d in datasets
+                if t["id"] in (d.get("fakes") or []) and d["role"] != "pipeline_test"
+            )
+            out.append(
+                f"| {t['label']} | {t['modality']} | {_cell(t['changed'])} | {_cell(t['trace'])} "
+                f"| {_cell(', '.join(having)) or 'none'} |"
+            )
+        out.append("")
     out += [
-        "## Datasets",
-        "",
         "### Features at a glance",
         "",
         "Which features each built dataset records per clip, read from its manifest, so these "
@@ -294,5 +325,5 @@ def render(data: dict[str, Any]) -> str:
             continue
         out += [f"### {label} ({len(group)})", ""]
         for d in sorted(group, key=lambda d: d["name"].lower()):
-            out += _dataset(d)
+            out += _dataset(d, kinds)
     return "\n".join(out).rstrip() + "\n"

@@ -2,7 +2,7 @@
 // One dataset: why it is here, the facts in a table, and every model scored on it as AUC bars.
 import AucBars from "../../components/AucBars.astro";
 import Base from "../../layouts/Base.astro";
-import { DATASETS, ROLE_LABEL, datasetHref, datasetRuns, holding, modelHref, siblings } from "../../lib/catalog";
+import { DATASETS, FAKE, ROLE_ABOUT, ROLE_LABEL, datasetHref, datasetRuns, holding, modelHref, siblings } from "../../lib/catalog";
 import { evName } from "../../lib/guide";
 import { ACCESS, LANG, MOD, int, models, type Dataset } from "../../lib/status";
 
@@ -14,6 +14,8 @@ const { d } = Astro.props as { d: Dataset };
 const base = import.meta.env.BASE_URL;
 const runs = datasetRuns(d);
 const many = new Set(runs.map((r) => r.evalset)).size > 1;
+// A kind of fake with what it changes, for the facts table.
+const kindLine = (k: string) => (FAKE.get(k) ? `${FAKE.get(k)!.label}: ${FAKE.get(k)!.changed}` : k);
 const generators = d.generators == null ? null : d.generators.length ? d.generators : ["none: real clips only"];
 // The languages a partial download holds, named; nothing when it holds them all.
 const held = d.languages.filter((l) => d.languages_held?.includes(l));
@@ -22,7 +24,9 @@ const recorded = d.recorded
   ? `real or fake, ${d.recorded[1].join(", ")}${d.recorded[0] === "sample" ? " (from a sampled build)" : ""}`
   : "not built yet";
 const facts: [string, string | string[] | null][] = [
-  ["Kind", `${MOD[d.modality] || d.modality}, ${d.contains.join(" and ")}`],
+  ["Role", `${ROLE_LABEL[d.role]}: ${ROLE_ABOUT[d.role]}`],
+  ["Media", `${MOD[d.modality] || d.modality}, ${d.contains.join(" and ")}`],
+  ["Kinds of fake", d.fakes == null ? null : d.fakes.length ? d.fakes.map((k) => kindLine(k)) : ["none: real clips only"]],
   ["Languages", d.languages.map((l) => LANG[l] || l).join(", ") + (partial ? `; in hand: ${partial}` : "") || null],
   ["Size", d.scale],
   ["How fakes were made", generators],

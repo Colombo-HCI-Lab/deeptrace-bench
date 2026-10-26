@@ -43,6 +43,9 @@ export interface Model {
   summary: string | null;
   why: string | null;
   cut: boolean;
+  // Kinds of fake in its training data (FakeType ids) and what it looks at.
+  catches: string[];
+  cue: string | null;
   paper: Paper | null;
   published: Published[];
   trained_on: string[];
@@ -67,6 +70,8 @@ export interface Dataset {
   cut: boolean;
   licence: string;
   contains: string[];
+  // Kinds of fake it holds (FakeType ids); [] for real only, null when untagged.
+  fakes: string[] | null;
   generators: string[] | null;
   annotations: string[] | null;
   format: string | null;
@@ -106,10 +111,20 @@ export interface Run {
   wall_s: number | null;
 }
 
+// A kind of fake, defined once in catalog.yaml: what it changes and what it leaves behind.
+export interface FakeType {
+  id: string;
+  label: string;
+  modality: "video" | "audio" | "any";
+  changed: string;
+  trace: string;
+}
+
 export interface Status {
   built: string;
   eval_status: string;
   citations_checked: string | null;
+  fake_types: FakeType[];
   models: Model[];
   datasets: Dataset[];
   evalsets: Evalset[];

@@ -34,9 +34,9 @@ _METHODS: dict[str, tuple[str, str | None, str | None]] = {
     "inswapper": ("fake", None, "face_swap"),
     "hififace": ("fake", None, "face_swap"),
     "roop": ("fake", None, "face_swap"),
-    "echomimic": ("fake", None, "lip_sync"),
-    "sonic": ("fake", None, "lip_sync"),
-    "memo": ("fake", None, "lip_sync"),
+    "echomimic": ("fake", None, "talking_head"),
+    "sonic": ("fake", None, "talking_head"),
+    "memo": ("fake", None, "talking_head"),
     "liveportrait": ("fake", None, "reenactment"),
 }
 

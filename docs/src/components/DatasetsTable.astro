@@ -1,8 +1,9 @@
 ---
-// The Dataset catalog's index: every dataset by role, why it is here, its languages and size,
-// what we hold and how many runs scored it. Each name opens its own page.
-import { DATASETS, ROLES, ROLE_ABOUT, ROLE_LABEL, datasetHref, datasetRuns, holding } from "../lib/catalog";
+// The Dataset catalog's index: every dataset by role, why it is here, its kinds of fake, languages,
+// size and licence, what we hold and how many runs scored it. Each name opens its own page.
+import { DATASETS, ROLES, ROLE_ABOUT, ROLE_LABEL, datasetHref, datasetRuns, holding, shortLicence } from "../lib/catalog";
 import { LANG, MOD } from "../lib/status";
+import Kinds from "./Kinds.astro";
 
 const groups = ROLES.map((role) => ({ role, rows: DATASETS.filter((d) => d.role === role) })).filter((g) => g.rows.length);
 const langs = (codes: string[]) => {
@@ -14,7 +15,8 @@ const langs = (codes: string[]) => {
 <table class="tbl cat datasets">
   <thead>
     <tr>
-      <th>Dataset and why it's here</th><th>Kind</th><th>Languages</th><th>Size</th><th>We hold</th><th class="num">Runs</th>
+      <th>Dataset and why it's here</th><th>Media</th><th>Kinds of fake</th><th>Languages</th><th>Size</th><th>Licence</th>
+      <th>We hold</th><th class="num">Runs</th>
     </tr>
   </thead>
   <tbody>
@@ -22,7 +24,7 @@ const langs = (codes: string[]) => {
       groups.map(({ role, rows }) => (
         <Fragment>
           <tr class="group">
-            <td colspan="6">
+            <td colspan="8">
               {ROLE_LABEL[role]} · {rows.length}
               <span class="about">{ROLE_ABOUT[role]}</span>
             </td>
@@ -40,10 +42,14 @@ const langs = (codes: string[]) => {
                   {d.why && <span class="sum">{d.why}</span>}
                 </td>
                 <td class="nowrap">{MOD[d.modality] || d.modality}</td>
+                <td>
+                  <Kinds ids={d.fakes} />
+                </td>
                 <td title={d.languages.map((l) => LANG[l] || l).join(", ")}>
                   {d.languages.length ? langs(d.languages) : <span class="dim">·</span>}
                 </td>
-                <td>{d.scale || <span class="dim">·</span>}</td>
+                <td class="size">{d.scale || <span class="dim">·</span>}</td>
+                <td class="lic" title={d.licence}>{shortLicence(d.licence)}</td>
                 <td class="nowrap">
                   <span class={`hold ${h.key}`}>{h.label}</span>
                 </td>

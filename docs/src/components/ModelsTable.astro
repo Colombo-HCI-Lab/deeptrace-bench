@@ -1,9 +1,11 @@
 ---
-// The Model catalog's index: every detector by modality, why it is here, what it trained on, its
-// size and parity, and its South Asian runs as dots on an AUC axis. Each name opens its own page.
-import { MODALITIES, MODELS, modelHref, southAsianRuns } from "../lib/catalog";
+// The Model catalog's index: every detector by modality, why it is here, the kinds of fake it
+// trained on and what it looks at, what it trained on, its size, licence and parity, and its South
+// Asian runs as dots on an AUC axis. Each name opens its own page.
+import { MODALITIES, MODELS, modelHref, shortLicence, southAsianRuns } from "../lib/catalog";
 import { MOD, params, type Model } from "../lib/status";
 import AucStrip from "./AucStrip.astro";
+import Kinds from "./Kinds.astro";
 
 const groups = MODALITIES.map((mod) => ({ mod, rows: MODELS.filter((m) => m.modality === mod) })).filter((g) => g.rows.length);
 const trained = (m: Model) =>
@@ -13,7 +15,8 @@ const trained = (m: Model) =>
 <table class="tbl cat models">
   <thead>
     <tr>
-      <th>Detector and why it's here</th><th>Trained on</th><th class="num">Params</th><th>Parity</th><th>South Asian AUC</th>
+      <th>Detector and why it's here</th><th>Trained to catch</th><th>Looks at</th><th>Trained on</th><th class="num">Params</th>
+      <th>Licence</th><th>Parity</th><th>South Asian AUC</th>
     </tr>
   </thead>
   <tbody>
@@ -21,7 +24,7 @@ const trained = (m: Model) =>
       groups.map(({ mod, rows }) => (
         <Fragment>
           <tr class="group">
-            <td colspan="5">
+            <td colspan="8">
               {MOD[mod]} · {rows.length}
             </td>
           </tr>
@@ -35,8 +38,13 @@ const trained = (m: Model) =>
                 {m.cut && <span class="flagtag cut">cut candidate</span>}
                 {m.why && <span class="sum">{m.why}</span>}
               </td>
+              <td>
+                <Kinds ids={m.catches} />
+              </td>
+              <td class="cue">{m.cue || <span class="dim">·</span>}</td>
               <td title={m.trained_on.join(", ")}>{m.trained_on.length ? trained(m) : <span class="dim">·</span>}</td>
               <td class="num">{m.profile ? params(m.profile.params) : <span class="dim">·</span>}</td>
+              <td class="lic" title={m.licence}>{shortLicence(m.licence)}</td>
               <td class="nowrap">
                 {m.blocked ? <span class="dim">no weights</span> : m.parity ? "✓ passed" : <span class="dim">pending</span>}
               </td>

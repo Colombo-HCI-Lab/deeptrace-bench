@@ -3,7 +3,7 @@
 // authors report, then the longer description.
 import AucBars from "../../components/AucBars.astro";
 import Base from "../../layouts/Base.astro";
-import { DATASETS, LEVEL, MODELS, datasetHref, modelHref, modelRuns, siblings } from "../../lib/catalog";
+import { DATASETS, FAKE, LEVEL, MODELS, datasetHref, modelHref, modelRuns, siblings } from "../../lib/catalog";
 import { evName } from "../../lib/guide";
 import { MOD, evalsets, int, ms, params, type Model } from "../../lib/status";
 
@@ -24,6 +24,8 @@ const training = Object.keys(LEVEL).flatMap((lv) => {
 const p = m.profile;
 const unit = p ? (m.modality === "audio" ? "4 s window" : p.unit.replace("face ", "")) : "";
 const facts: [string, string | string[] | null][] = [
+  ["Trained to catch", m.catches.length ? m.catches.map((k) => FAKE.get(k)?.label ?? k).join(", ") : null],
+  ["Looks at", m.cue],
   ["How it works", m.architecture],
   ["Input", m.input],
   ["Training", training],

@@ -1,0 +1,28 @@
+---
+// Kinds of fake as small tags, each titled with what that kind changes. An empty list means real
+// clips only; null means the entry isn't tagged yet.
+import { FAKE } from "../lib/catalog";
+
+interface Props {
+  ids: string[] | null;
+}
+
+const { ids } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+{
+  ids == null ? (
+    <span class="dim">·</span>
+  ) : ids.length ? (
+    <span class="kinds">
+      {ids.map((id) => (
+        <a class={`kind ${FAKE.get(id)?.modality ?? ""}`} href={`${base}dataset-catalog/#kinds`} title={FAKE.get(id)?.changed}>
+          {FAKE.get(id)?.label ?? id}
+        </a>
+      ))}
+    </span>
+  ) : (
+    <span class="dim">real only</span>
+  )
+}

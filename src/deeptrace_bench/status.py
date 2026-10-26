@@ -160,6 +160,13 @@ def load_catalog(registry: Registry) -> dict[str, dict[str, Any]]:
         unknown = set(catalog.get(kind) or {}) - set(known)
         if unknown:
             raise ValueError(f"{CATALOG.name}: unknown {kind} {sorted(unknown)}")
+    kinds = set(catalog.get("fake_types") or {})
+    for kind, field in (("models", "catches"), ("datasets", "fakes")):
+        for entry_id, entry in (catalog.get(kind) or {}).items():
+            unknown = set(entry.get(field) or []) - kinds
+            if unknown:
+                kinds_list = sorted(unknown)
+                raise ValueError(f"{CATALOG.name}: {entry_id}: unknown fake types {kinds_list}")
     for model_id, entry in (catalog.get("models") or {}).items():
         for row in entry.get("published") or []:
             if row.get("evalset") and row["evalset"] not in registry.evalsets:
@@ -263,6 +270,8 @@ def collect(registry: Registry) -> dict[str, Any]:
                 "summary": entry.get("summary"),
                 "why": entry.get("why"),
                 "cut": bool(entry.get("cut")),
+                "catches": entry.get("catches") or [],
+                "cue": entry.get("cue"),
                 "architecture": entry.get("architecture"),
                 "description": entry.get("description"),
                 "input": model_input(m),
@@ -322,6 +331,7 @@ def collect(registry: Registry) -> dict[str, Any]:
                 "cut": bool(entry.get("cut")),
                 "scale": entry.get("scale"),
                 "contains": d.contains,
+                "fakes": entry.get("fakes"),
                 "generators": entry.get("generators"),
                 "annotations": entry.get("annotations"),
                 "format": entry.get("format"),
@@ -347,6 +357,7 @@ def collect(registry: Registry) -> dict[str, Any]:
         "built": datetime.now(UTC).date().isoformat(),
         "eval_status": registry.eval.status,
         "citations_checked": citations.get("checked"),
+        "fake_types": [{"id": k, **v} for k, v in (catalog.get("fake_types") or {}).items()],
         "models": model_rows,
         "datasets": dataset_rows,
         "evalsets": [

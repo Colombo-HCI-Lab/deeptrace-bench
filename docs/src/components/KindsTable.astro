@@ -1,0 +1,65 @@
+---
+// Kinds of fake, one row each: what it changes, what it leaves behind, the datasets that hold it
+// (South Asian first, each marked by what we hold) and the models that trained on it. Empty cells
+// are the gaps.
+import { DATASETS, FAKE_TYPES, MODELS, datasetHref, holding, modelHref } from "../lib/catalog";
+
+const real = DATASETS.filter((d) => d.role !== "pipeline_test");
+const rows = FAKE_TYPES.map((t) => {
+  const having = real.filter((d) => d.fakes?.includes(t.id));
+  return {
+    t,
+    southAsian: having.filter((d) => d.role === "south_asian"),
+    other: having.filter((d) => d.role !== "south_asian"),
+    models: MODELS.filter((m) => m.catches.includes(t.id)),
+  };
+});
+const TRACK: Record<string, string> = { video: "video", audio: "audio", any: "either" };
+---
+
+<table class="tbl kindtbl">
+  <thead>
+    <tr>
+      <th>Kind</th><th>What's changed</th><th>What it leaves behind</th><th>South Asian datasets</th><th>Other datasets</th>
+      <th>Models trained on it</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map(({ t, southAsian, other, models }) => (
+        <tr id={`kind-${t.id}`}>
+          <td class="nowrap">
+            <span class={`kind ${t.modality}`}>{t.label}</span>
+            <span class="track">{TRACK[t.modality]}</span>
+          </td>
+          <td class="prose-cell">{t.changed}</td>
+          <td class="prose-cell">{t.trace}</td>
+          {[southAsian, other].map((list) => (
+            <td class="dlist">
+              {list.length ? (
+                list.map((d) => (
+                  <a class={`hold ${holding(d).key}`} href={datasetHref(d.id)} title={holding(d).label}>
+                    {d.name.split(" (")[0].split(", ")[0]}
+                  </a>
+                ))
+              ) : (
+                <span class="gap">none</span>
+              )}
+            </td>
+          ))}
+          <td class="dlist">
+            {models.length ? (
+              models.length > 6 ? (
+                <span title={models.map((m) => m.name).join(", ")}>{models.length} detectors</span>
+              ) : (
+                models.map((m) => <a href={modelHref(m.id)}>{m.name}</a>)
+              )
+            ) : (
+              <span class="gap">none</span>
+            )}
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

@@ -3,7 +3,8 @@
    marks where you are (the rail, kickers, links) and one stepped diverging scale colours scores,
    petrol toward a perfect AUC and sienna below chance. Hairline rules only: no shadows, no rounded
    corners. Light only: the pages are projected and printed, so they never follow a dark OS.
-   Layout follows the width of the content column, not the window (container queries on main). */
+   Layout follows the width of the content column, not the window (container queries on main).
+   The shell is wide so tables use the screen; prose keeps its own 72ch measure. */
 :root {
   --paper: #fdfcfa;
   --card: #ffffff;
@@ -28,6 +29,8 @@
   --fake: oklch(0.72 0.09 50);
   --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --shell: 1760px;
+  --gutter: clamp(16px, 2.4vw, 40px);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -52,7 +55,7 @@ table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
 
 /* Site bar: the name, GitHub, and on narrow screens the menu that holds the nav */
 .site { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--rule); }
-.site .in { max-width: 1240px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.site .in { max-width: var(--shell); margin: 0 auto; padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .site .name { display: flex; align-items: center; gap: 10px; padding: 15px 0; text-decoration: none; color: var(--ink); font: 600 15px/1 var(--sans); letter-spacing: -0.01em; }
 .site .name::before { content: ""; width: 10px; height: 10px; background: var(--accent); }
 .site .right { display: flex; align-items: center; gap: 20px; }
@@ -65,10 +68,10 @@ table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .menu[open] summary .close { display: inline; }
 .menu[open] summary { background: var(--ink); color: var(--paper); }
 .menu > nav { position: absolute; left: 0; right: 0; top: 100%; background: var(--paper); border-bottom: 1px solid var(--rule); max-height: calc(100vh - 50px); overflow-y: auto; }
-.menu > nav .tree { max-width: 1240px; margin: 0 auto; padding: 6px 20px 24px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 24px; }
+.menu > nav .tree { max-width: var(--shell); margin: 0 auto; padding: 6px var(--gutter) 24px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 24px; }
 
 /* The one nav: every page in its group; Models and datasets docs open to their sections */
-.shell { max-width: 1240px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 44px; align-items: start; }
+.shell { max-width: var(--shell); margin: 0 auto; padding: 0 var(--gutter); display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 44px; align-items: start; }
 .side { align-self: stretch; padding-top: 44px; }
 .side > nav { position: sticky; top: 72px; max-height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: thin; padding-bottom: 24px; }
 .tree { display: grid; gap: 24px; }
@@ -276,8 +279,11 @@ nav.index a:hover { color: var(--ink); }
 .tbl.runs td { padding-block: 8px; }
 .tbl.runs td.auc { padding-block: 6px; text-align: right; }
 .tbl.runs .id { display: block; font: 400 11.5px/1.4 var(--mono); color: var(--muted); }
-.tbl.models { min-width: 1080px; }
-.tbl.models td.wide { min-width: 260px; width: 26%; }
+.tbl.models { min-width: 1360px; }
+.tbl.models td.wide { min-width: 280px; width: 24%; }
+.tbl td.cue { font-size: 0.86rem; line-height: 1.45; color: var(--ink-2); min-width: 150px; }
+.tbl td.lic { font-size: 0.84rem; line-height: 1.45; color: var(--ink-2); min-width: 100px; max-width: 170px; }
+.tbl td.size { font-size: 0.86rem; line-height: 1.45; min-width: 140px; }
 .tbl .venue { margin-left: 8px; font: 400 12px/1.4 var(--mono); color: var(--muted); }
 .tbl .flagtag.cut { margin-left: 8px; color: var(--bad); border-color: var(--bad); }
 .tbl td.res { font-size: 0.84rem; line-height: 1.45; min-width: 230px; }
@@ -285,7 +291,21 @@ nav.index a:hover { color: var(--ink); }
 .tbl td.res > span { display: block; }
 .tbl td.res b { font: 500 12px/1.45 var(--mono); white-space: nowrap; }
 .tbl td.res i { font-style: normal; color: var(--muted); font-size: 0.78rem; }
-.tbl.datasets { min-width: 1040px; }
+.tbl.datasets { min-width: 1320px; }
+/* Kinds of fake: tags in the catalog tables (video outlined, audio filled) and the kinds table */
+.kinds { display: flex; flex-wrap: wrap; gap: 4px; min-width: 120px; }
+.kind { font: 400 11.5px/1 var(--mono); padding: 4px 6px; border: 1px solid var(--rule-2); white-space: nowrap; color: var(--ink); text-decoration: none; }
+.kind.audio { background: var(--tint-2); border-color: var(--tint-2); }
+.kind.any { color: var(--muted); border-style: dashed; }
+a.kind:hover { border-color: var(--ink); color: var(--ink); }
+.tbl.kindtbl { min-width: 1240px; }
+.kindtbl .track { display: block; margin-top: 7px; font: 400 11.5px/1.3 var(--mono); color: var(--muted); }
+.kindtbl td.prose-cell { font-size: 0.87rem; line-height: 1.45; min-width: 210px; max-width: 36ch; }
+.kindtbl td.dlist { font-size: 0.86rem; line-height: 1.4; min-width: 150px; }
+.kindtbl td.dlist > * { display: flex; }
+.kindtbl td.dlist > * + * { margin-top: 5px; }
+.kindtbl td.dlist .hold { font: 400 12px/1.35 var(--mono); align-items: baseline; }
+.kindtbl .gap { font: 500 12px/1.4 var(--mono); color: var(--bad); }
 .tbl.compute { min-width: 760px; }
 .tbl.est { min-width: 680px; }
 .tbl.est th.num { color: var(--ink); }
