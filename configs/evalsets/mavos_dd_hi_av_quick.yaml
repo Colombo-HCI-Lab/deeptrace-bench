@@ -1,0 +1,13 @@
+id: mavos_dd_hi_av_quick
+modality: audio_video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: mavos_dd_hi
+group_by: [method]
+status: ready
+subset:
+  per_stratum: 300
+  strata: [method]
+  seed: 0
+notes: The same videos as mavos_dd_hi_video_quick (up to 300 per method, seed 0), labelled for audio-visual models, so knnvc counts as fake (2026-10-27).

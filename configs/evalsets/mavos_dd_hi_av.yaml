@@ -1,0 +1,9 @@
+id: mavos_dd_hi_av
+modality: audio_video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: mavos_dd_hi
+group_by: [method]
+status: ready
+notes: For audio-visual models (HAVIC), which see the frames and hear the soundtrack together. A video is fake when either track was changed, so knnvc (voice conversion, video untouched) counts as fake here, unlike in mavos_dd_hi_video.
