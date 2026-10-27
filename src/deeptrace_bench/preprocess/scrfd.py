@@ -67,7 +67,9 @@ class SCRFD:
         input_size: side of the square, letterboxed network input.
         det_threshold: minimum face score.
         nms_threshold: IoU above which overlapping boxes are merged.
-        threads: onnxruntime intra-op threads (default: up to 4).
+        threads: onnxruntime intra-op threads (default: up to 8, or ``DTB_FACE_THREADS``).
+            Detection is the slow part of scoring a video set for the first time; the thread
+            count changes how fast it runs, not the boxes it finds.
     """
 
     def __init__(
@@ -85,7 +87,8 @@ class SCRFD:
         # The detector has no reason to send anything anywhere.
         onnxruntime.disable_telemetry_events()
         options = onnxruntime.SessionOptions()
-        options.intra_op_num_threads = threads or min(4, os.cpu_count() or 1)
+        default = int(os.environ.get("DTB_FACE_THREADS", 0)) or min(8, os.cpu_count() or 1)
+        options.intra_op_num_threads = threads or default
         options.inter_op_num_threads = 1
         self.session = onnxruntime.InferenceSession(
             str(model_path), options, providers=["CPUExecutionProvider"]
