@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_aasist__indicsynth_hi__d8733a89",
+  "model_id": "xlsr_aasist",
+  "evalset_id": "indicsynth_hi",
+  "upstream_commit": "4acaa61dcef5f7610f43aa4d0b29c4559b970cd2",
+  "weights_sha256": {
+    "LA_model.pth": "bd6f36097259fe54e7004eb983651e5304d807be81156dbd04faccb70d91e10c",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "2933c7be4503202470b764a54f446625b4113e09cc48fe860e0f8e50ee5b2a9e",
+    "model": "59e0ce6c4ff92a23a74cb19c2b9543afd973c55d34ca6b7a414ffde9e99df3c4"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T07:08:28+00:00",
+  "last_started_utc": "2026-10-27T07:08:28+00:00",
+  "repo_commits": [
+    "4a89767dea9675c12ca4962d7f0190aa1db7052c"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

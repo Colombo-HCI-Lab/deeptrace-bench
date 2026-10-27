@@ -1,0 +1,24 @@
+{
+  "run_id": "antideepfake_w2v_small__indicsynth_hi__58803f28",
+  "model_id": "antideepfake_w2v_small",
+  "evalset_id": "indicsynth_hi",
+  "upstream_commit": "0dea622bde8f064c8ee5a557f2598643123fc6b6",
+  "weights_sha256": {
+    "wav2vec-small-anti-deepfake.safetensors": "828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "2933c7be4503202470b764a54f446625b4113e09cc48fe860e0f8e50ee5b2a9e",
+    "model": "946884cb602854fef4529c668f841a169c24ab7941719043c0ea787cdc9742c0"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T06:14:52+00:00",
+  "last_started_utc": "2026-10-27T06:14:52+00:00",
+  "repo_commits": [
+    "4a89767dea9675c12ca4962d7f0190aa1db7052c"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

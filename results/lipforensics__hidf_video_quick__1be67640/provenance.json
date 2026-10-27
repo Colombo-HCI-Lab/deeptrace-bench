@@ -1,0 +1,26 @@
+{
+  "run_id": "lipforensics__hidf_video_quick__1be67640",
+  "model_id": "lipforensics",
+  "evalset_id": "hidf_video_quick",
+  "upstream_commit": "d0bf5553bfb9676f1771d590472b26a3a76de894",
+  "weights_sha256": {
+    "2DFAN4-cd938726ad.zip": "cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46",
+    "lipforensics_ff.pth": "4b7790bc8e02d0c25ecfa0d8d6a2907123c2206cc32e2bad6044e50f013c253d",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "2c5cbd7296e5b1f948a422517a3c47115fc3a3720e9a02d2c599cf6929cb4850",
+    "model": "988547ccd0c5fa3ddb45f9169ed52917a15bb3b611d0d46492233f5d516acd9c"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T07:42:25+00:00",
+  "last_started_utc": "2026-10-27T07:42:25+00:00",
+  "repo_commits": [
+    "d04db5be00a75c80bc17bd4eda6e9ebe8f2ecd2e"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

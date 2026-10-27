@@ -1,0 +1,4 @@
+group,n,n_real,n_fake,n_failed,auc,eer,threshold,auc_lo,auc_hi,eer_lo,eer_hi,fpr,fnr,acc,bal_acc,ap,tpr_at_fpr01,tpr_at_fpr05,small
+<null>,5059,5059,0,0,,,0.500070511319791,,,,,0.2466890689859656,,0.7533109310140343,0.7533109310140345,,,,True
+freevc24,5000,0,5000,0,,,0.500070511319791,,,,,,0.4614,0.5386,0.5386,,,,True
+xtts_v2,5000,0,5000,0,,,0.500070511319791,,,,,,0.029,0.971,0.971,,,,True
