@@ -1,0 +1,25 @@
+{
+  "run_id": "xception__hidf_video__5a5a2b71",
+  "model_id": "xception",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "xception_best.pth": "dd61186f9ac8e99aae85982cae338b555dfaeef042f6b699e5a55cae3998ba47"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "b126868c2712957f51253cf6e638fa9a4c3bbcb208259bd6f6d48cc9bb8d803c"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T17:40:37+00:00",
+  "last_started_utc": "2026-10-27T17:40:37+00:00",
+  "repo_commits": [
+    "838d7826eb78254ff26bb04be97c64ae9f2e53f6"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
