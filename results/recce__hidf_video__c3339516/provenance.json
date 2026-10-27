@@ -1,0 +1,25 @@
+{
+  "run_id": "recce__hidf_video__c3339516",
+  "model_id": "recce",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "recce_best.pth": "1349fd80d75cdb2d212f2dc4035529140b147b80ae87ad227242fa0451586ceb",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "e5dddceb6332bd5eb4a833f1fddefc96154b3f36a027c3878f47c246458523e7"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T19:23:16+00:00",
+  "last_started_utc": "2026-10-27T19:23:16+00:00",
+  "repo_commits": [
+    "c9a0a9f0ba4fc92290f8eeb7105ae2ef00877da8"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

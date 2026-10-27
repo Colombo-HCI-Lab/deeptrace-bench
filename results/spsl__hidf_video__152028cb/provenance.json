@@ -1,0 +1,25 @@
+{
+  "run_id": "spsl__hidf_video__152028cb",
+  "model_id": "spsl",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "spsl_best.pth": "7305d660c68aa6ac138f8d59c068832a43244f390fa6e54355f211d81bc246bd"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "911fa6b2823b740d7ca3d9adebf936e5da90dff676a5c5701b995a52de69fb34"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T19:08:32+00:00",
+  "last_started_utc": "2026-10-27T19:08:32+00:00",
+  "repo_commits": [
+    "c9a0a9f0ba4fc92290f8eeb7105ae2ef00877da8"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "run_id": "f3net__hidf_video__6244c836",
+  "model_id": "f3net",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "f3net_best.pth": "deee7d25bfc1b8b5ba83054a664880078de51213b1067f1e472c2bed7cc667f9",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "6547fa07959c3094a116cbe57d2674ce8a8b3b80b05cb5cf7039cb703462ae1d"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T18:53:58+00:00",
+  "last_started_utc": "2026-10-27T18:53:58+00:00",
+  "repo_commits": [
+    "cf32e873b1ffac9a20d4aed150e6c4a0f4d89884"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
