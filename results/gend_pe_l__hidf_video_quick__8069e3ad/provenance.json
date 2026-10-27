@@ -1,0 +1,26 @@
+{
+  "run_id": "gend_pe_l__hidf_video_quick__8069e3ad",
+  "model_id": "gend_pe_l",
+  "evalset_id": "hidf_video_quick",
+  "upstream_commit": "387a42266dd385fbe8f7626c5d3aa03eea3bfaab",
+  "weights_sha256": {
+    "config.json": "c04ccdd62714a25884a65dde2086fd740006159455be4afb200c78808bc8ea67",
+    "model.safetensors": "e2367f8db3a6b76f8d5cc5857f1ed0ea0993b33c9e1f428d3b06e5ca95de2213",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "2c5cbd7296e5b1f948a422517a3c47115fc3a3720e9a02d2c599cf6929cb4850",
+    "model": "44e3dba8c34dec8ca751349ebbb52169a838dcb90ec4a361ee8397793eaefb3f"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T09:35:27+00:00",
+  "last_started_utc": "2026-10-27T09:35:27+00:00",
+  "repo_commits": [
+    "ccee5890b5870fe36b13b3a6338e416602ed5770"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
