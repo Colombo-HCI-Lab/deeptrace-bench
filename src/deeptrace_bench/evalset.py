@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
+
 import pandas as pd
 
 from .manifest import read_manifest
-from .registry import EvalsetConfig
+from .registry import EvalsetConfig, Subset
 
 
 class EvalsetError(ValueError):
@@ -39,6 +41,19 @@ def _track_label(df: pd.DataFrame, column: str, evalset_id: str) -> pd.Series:
     return df[column]
 
 
+def take_subset(items: pd.DataFrame, subset: Subset, evalset_id: str) -> pd.DataFrame:
+    """Up to ``subset.per_stratum`` items of every stratum, in the table's own order."""
+    missing = [c for c in subset.strata if c not in items.columns]
+    if missing:
+        raise EvalsetError(f"{evalset_id}: subset strata {missing} not in the item table")
+    rank = items["item_id"].map(
+        lambda item: hashlib.sha1(f"{subset.seed}:{item}".encode()).hexdigest()
+    )
+    ranked = items.assign(_rank=rank).sort_values("_rank", kind="stable")
+    kept = ranked.groupby(subset.strata, dropna=False, sort=False).head(subset.per_stratum)
+    return kept.sort_index().drop(columns="_rank")
+
+
 def load_items(
     evalset: EvalsetConfig, manifests: dict[str, pd.DataFrame] | None = None
 ) -> pd.DataFrame:
@@ -52,7 +67,8 @@ def load_items(
     Returns:
         The concatenated rows, with ``label`` overridden where a component forces it or
         takes a track's label, plus
-        ``component`` (its index in the config) and ``pairing``.
+        ``component`` (its index in the config) and ``pairing``; only the evalset's
+        ``subset`` of them when it has one.
 
     Raises:
         EvalsetError: if the evalset ends up without both real and fake items, or with
@@ -73,6 +89,8 @@ def load_items(
 
     if items["item_id"].duplicated().any():
         raise EvalsetError(f"{evalset.id}: an item appears in more than one component")
+    if evalset.subset is not None:
+        items = take_subset(items, evalset.subset, evalset.id).reset_index(drop=True)
     labels = set(items["label"])
     if labels != {"real", "fake"}:
         raise EvalsetError(f"{evalset.id}: needs real and fake items, has only {labels}")

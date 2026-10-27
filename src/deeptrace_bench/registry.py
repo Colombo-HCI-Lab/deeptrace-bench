@@ -240,8 +240,27 @@ class Component(_Strict):
     label: Literal["from_manifest", "from_video", "from_audio", "real", "fake"] = "from_manifest"
 
 
+class Subset(_Strict):
+    """A fixed share of an evalset's items, for quick runs over many models.
+
+    Items are grouped by the ``strata`` columns and up to ``per_stratum`` are kept from each
+    group, so small groups stay whole and large ones are capped. Which items are kept depends
+    only on ``seed`` and the item ids (ranked by ``sha1("<seed>:<item_id>")``), so the same
+    subset comes back on any machine, and a larger ``per_stratum`` keeps every item of a
+    smaller one.
+    """
+
+    per_stratum: int = Field(gt=0)
+    strata: list[str] = Field(default=["label"], min_length=1)
+    seed: int = 0
+
+
 class EvalsetConfig(_Strict):
-    """What gets scored: components, how real and fake are paired, and what to group by."""
+    """What gets scored: components, how real and fake are paired, and what to group by.
+
+    ``subset`` scores a stratified share of the items instead of all of them; it is part of the
+    config, so it is part of the run id too.
+    """
 
     id: str
     modality: Modality
@@ -251,6 +270,7 @@ class EvalsetConfig(_Strict):
     match_on: list[str] = []
     group_by: list[str] = []
     status: Literal["ready", "pending_access", "needs_real_source"]
+    subset: Subset | None = None
     notes: str | None = None
 
 

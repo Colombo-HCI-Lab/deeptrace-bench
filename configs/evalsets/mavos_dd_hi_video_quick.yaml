@@ -1,0 +1,14 @@
+id: mavos_dd_hi_video_quick
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: mavos_dd_hi
+    label: from_video
+group_by: [method]
+status: ready
+subset:
+  per_stratum: 300
+  strata: [method]
+  seed: 0
+notes: A quick share of mavos_dd_hi_video, about 2,500 of its 7,513 videos, for scoring every video model within a day (2026-10-27). Up to 300 videos of each method, so roop (186) and memo (208) stay whole; real is 300 YouTube videos plus 300 knnvc ones (voice conversion, video untouched). Face swap, talking head and reenactment each get several generators. Overall numbers weigh the generators evenly, unlike the full set's.

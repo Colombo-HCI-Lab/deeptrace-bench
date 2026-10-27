@@ -7,5 +7,5 @@ components:
     filter: {label_audio: [real, fake]}
     label: from_audio
 group_by: [method]
-status: pending_access
+status: ready
 notes: Audio models hear the soundtrack; labels say whether the audio was changed. Until the metadata settles the audio of the face-swap, talking-head and reenactment videos, only real and knnvc (voice conversion) items have a known audio label, so only those are scored.

@@ -10,7 +10,7 @@ from deeptrace_bench.evalset import EvalsetError, load_items
 from deeptrace_bench.models.base import load_detector
 from deeptrace_bench.preprocess import PreprocessError
 from deeptrace_bench.preprocess.audio import segment
-from deeptrace_bench.registry import Component, EvalsetConfig
+from deeptrace_bench.registry import Component, EvalsetConfig, Subset
 from deeptrace_bench.runs import start_run
 from deeptrace_bench.score import (
     part_prefix,
@@ -72,6 +72,49 @@ def test_evalset_without_both_labels_fails():
     )
     with pytest.raises(EvalsetError, match="needs real and fake"):
         load_items(evalset, manifests={"fk": fake})
+
+
+def _subset_evalset(per_stratum: int, seed: int = 0) -> EvalsetConfig:
+    return EvalsetConfig(
+        id="sub",
+        modality="video",
+        role="south_asian",
+        pairing="same_corpus",
+        components=[Component(dataset="ds")],
+        status="ready",
+        subset=Subset(per_stratum=per_stratum, strata=["label", "method"], seed=seed),
+    )
+
+
+def _strata_manifest():
+    rows = [
+        {"local": f"{method}{i}", "label": label, "method": method}
+        for label, method, n in [("real", "real", 30), ("fake", "swap", 20), ("fake", "rare", 3)]
+        for i in range(n)
+    ]
+    return make_manifest("ds", rows)
+
+
+def test_subset_caps_each_stratum_and_keeps_small_ones_whole():
+    manifest = _strata_manifest()
+    items = load_items(_subset_evalset(5), manifests={"ds": manifest})
+    assert items.groupby("method").size().to_dict() == {"rare": 3, "real": 5, "swap": 5}
+    again = load_items(
+        _subset_evalset(5), manifests={"ds": manifest.sample(frac=1, random_state=1)}
+    )
+    assert set(again["item_id"]) == set(items["item_id"])
+    bigger = load_items(_subset_evalset(8), manifests={"ds": manifest})
+    assert set(items["item_id"]) <= set(bigger["item_id"])
+    other = load_items(_subset_evalset(5, seed=1), manifests={"ds": manifest})
+    assert set(other["item_id"]) != set(items["item_id"])
+
+
+def test_subset_on_a_missing_column_fails():
+    evalset = _subset_evalset(5).model_copy(
+        update={"subset": Subset(per_stratum=5, strata=["nope"])}
+    )
+    with pytest.raises(EvalsetError, match="nope"):
+        load_items(evalset, manifests={"ds": _strata_manifest()})
 
 
 def test_scoring_resumes_and_records_failures(registry, tmp_path):

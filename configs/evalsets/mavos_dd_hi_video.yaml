@@ -6,5 +6,5 @@ components:
   - dataset: mavos_dd_hi
     label: from_video
 group_by: [method]
-status: pending_access
-notes: Video models score the frames; labels say whether the video track was changed, so knnvc (voice conversion only) counts as real. Ready once the MAVOS-DD terms are accepted and a sample passes the smoke test.
+status: ready
+notes: Video models score the frames; labels say whether the video track was changed, so knnvc (voice conversion only) counts as real. The terms were accepted on 2026-10-27; its builder was first run on the real files that day.

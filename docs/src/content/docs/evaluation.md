@@ -14,6 +14,12 @@ An evalset (`configs/evalsets/<id>.yaml`) combines one or more datasets, a filte
 | `same_corpus` | the same recordings or speakers | Urdu CSALT, BanglaFake, FakeAVCeleb, IndicSynth with its source IndicSUPERB | yes |
 | `cross_corpus` | different corpora, so microphone, noise, loudness or sample rate can give the label away | MLAAD fakes with real speech from elsewhere | never; each gets a [shortcut probe](#shortcut-probe-planned) |
 
+### Quick subsets
+
+An evalset may score a fixed share of its items through a `subset` block: `per_stratum` items from each group of the `strata` columns, so small groups stay whole and large ones are capped. Which items are kept depends only on the seed and the item ids, so every machine scores the same ones, and a larger `per_stratum` keeps every item of a smaller one. The block is part of the evalset's config, so a subset run never shares a run id with a full one.
+
+Quick evalsets carry `_quick` in their id. `hidf_video_quick` (2,011 of 8,722 items, up to 250 per label and race) and `mavos_dd_hi_video_quick` (up to 300 videos per method) were added on 2026-10-27 to score every video model within a day. Because the caps even out the groups, their overall numbers weigh races or generators more evenly than the full sets do; compare them with each other, not with full-set runs.
+
 ## Preprocessing
 
 | Input | Preprocessing | Item score | Failure status |

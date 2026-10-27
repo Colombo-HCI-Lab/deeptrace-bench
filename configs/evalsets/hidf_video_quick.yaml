@@ -1,0 +1,13 @@
+id: hidf_video_quick
+modality: video
+role: south_asian
+pairing: same_corpus
+components:
+  - dataset: hidf
+group_by: [g_race, g_gender, g_age]
+status: ready
+subset:
+  per_stratum: 250
+  strata: [label, g_race]
+  seed: 0
+notes: A quick share of hidf_video, 2,011 of its 8,722 items, for scoring every video model within a day (2026-10-27). Up to 250 real and 250 fake per race, so the Indian, Asian, Black and Latino groups stay whole or nearly whole and White, 79% of the full set, is capped; its overall AUC therefore weighs the races more evenly than the full set's does, and the two are not interchangeable.
