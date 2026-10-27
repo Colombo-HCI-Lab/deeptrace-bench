@@ -1,0 +1,25 @@
+{
+  "run_id": "srm__hidf_video__f449d7cf",
+  "model_id": "srm",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "srm_best.pth": "666e8fc7f9938f541a7f5cea7b11d975cc749ec1c8ba6b350ae3eb3d2d34a1e8"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "644d3cfd1d18bd8c02dd45925f2ec7be8154b64b94bcee55b96935f7c909147a"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T19:48:15+00:00",
+  "last_started_utc": "2026-10-27T19:48:15+00:00",
+  "repo_commits": [
+    "c9a0a9f0ba4fc92290f8eeb7105ae2ef00877da8"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
