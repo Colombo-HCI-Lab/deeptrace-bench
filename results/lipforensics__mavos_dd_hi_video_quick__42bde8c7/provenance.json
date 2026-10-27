@@ -1,0 +1,26 @@
+{
+  "run_id": "lipforensics__mavos_dd_hi_video_quick__42bde8c7",
+  "model_id": "lipforensics",
+  "evalset_id": "mavos_dd_hi_video_quick",
+  "upstream_commit": "d0bf5553bfb9676f1771d590472b26a3a76de894",
+  "weights_sha256": {
+    "2DFAN4-cd938726ad.zip": "cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46",
+    "lipforensics_ff.pth": "4b7790bc8e02d0c25ecfa0d8d6a2907123c2206cc32e2bad6044e50f013c253d",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "c5fed96d0558f4b39b929bbc81384c69e76a947b30154b6a525deb93ac8948c4",
+    "model": "988547ccd0c5fa3ddb45f9169ed52917a15bb3b611d0d46492233f5d516acd9c"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T11:39:59+00:00",
+  "last_started_utc": "2026-10-27T12:39:16+00:00",
+  "repo_commits": [
+    "9e1a94ca02dfd1d0e2572dde20503a9e73e4c8b9"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
