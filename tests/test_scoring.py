@@ -130,6 +130,19 @@ def test_untimed_parts_are_moved_aside_and_rescored(registry, tmp_path):
     assert read_scores(tmp_path)["load_s"].notna().all()
 
 
+def test_parts_without_any_telemetry_are_rescored(tmp_path):
+    timed = pd.DataFrame(
+        {"item_id": ["toy/0"], "score": 0.5, "n_windows": 1, "status": "ok", "load_s": 0.1}
+    )
+    timed.assign(infer_s=0.1).to_parquet(tmp_path / "part-000of001-00000.parquet", index=False)
+    # timed parts but no session telemetry: a session crashed before writing it
+    assert supersede_untimed(tmp_path) == 1
+    (tmp_path / "telemetry").mkdir()
+    (tmp_path / "telemetry" / "s.json").write_text("{}")
+    timed.assign(infer_s=0.1).to_parquet(tmp_path / "part-000of001-00001.parquet", index=False)
+    assert supersede_untimed(tmp_path) == 0
+
+
 def test_progress_line_format():
     line = progress_line("aasist__urdu_csalt__1234abcd", 128, 512, 4.0, 3)
     run = "aasist__urdu_csalt__1234abcd"

@@ -123,7 +123,8 @@ class GpuSampler(threading.Thread):
         self.handle = nvml.nvmlDeviceGetHandleByIndex(index)
         self.every_s = every_s
         self.samples: list[tuple[float, float, float, float, float]] = []
-        self._stop = threading.Event()
+        # Not ``_stop``: Thread has a method of that name, which join() calls.
+        self._halt = threading.Event()
         self.energy_start_mj = self._energy_mj()
 
     def _energy_mj(self) -> int | None:
@@ -134,7 +135,7 @@ class GpuSampler(threading.Thread):
 
     def run(self) -> None:
         nvml = self.nvml
-        while not self._stop.is_set():
+        while not self._halt.is_set():
             try:
                 util = nvml.nvmlDeviceGetUtilizationRates(self.handle)
                 mem = nvml.nvmlDeviceGetMemoryInfo(self.handle)
@@ -143,10 +144,10 @@ class GpuSampler(threading.Thread):
                 self.samples.append((time.monotonic(), util.gpu, mem.used / 1e9, watts, temp))
             except Exception as exc:  # a sampling hiccup must never stop scoring
                 log.debug("nvml sample failed: %s", exc)
-            self._stop.wait(self.every_s)
+            self._halt.wait(self.every_s)
 
     def stop(self) -> None:
-        self._stop.set()
+        self._halt.set()
         self.join(timeout=5)
 
     def stats(self) -> dict[str, Any]:

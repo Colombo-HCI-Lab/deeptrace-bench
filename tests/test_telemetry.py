@@ -45,6 +45,52 @@ def test_a_failed_session_is_still_written(tmp_path, monkeypatch):
     assert not record["completed"] and "boom" in record["error"]
 
 
+class FakeNvml:
+    """Just enough of pynvml for a sampler thread to run."""
+
+    NVML_TEMPERATURE_GPU = 0
+
+    class Util:
+        gpu = 40
+
+    class Mem:
+        used = 2e9
+
+    def __init__(self):
+        self.energy = 1_000_000
+
+    def nvmlDeviceGetHandleByIndex(self, index):
+        return index
+
+    def nvmlDeviceGetUtilizationRates(self, handle):
+        return self.Util()
+
+    def nvmlDeviceGetMemoryInfo(self, handle):
+        return self.Mem()
+
+    def nvmlDeviceGetPowerUsage(self, handle):
+        return 150_000
+
+    def nvmlDeviceGetTemperature(self, handle, kind):
+        return 55
+
+    def nvmlDeviceGetTotalEnergyConsumption(self, handle):
+        self.energy += 3_600_000  # 1 Wh per call
+        return self.energy
+
+
+def test_a_sampler_thread_starts_and_stops():
+    # The first GPU runs crashed in join(): the stop flag shadowed Thread._stop.
+    sampler = telemetry.GpuSampler(FakeNvml(), 0, every_s=0.01)
+    sampler.start()
+    sampler._halt.wait(0.05)
+    sampler.stop()
+    assert not sampler.is_alive()
+    stats = sampler.stats()
+    assert stats["samples"] >= 1 and stats["energy_source"] == "counter"
+    assert stats["gpu_util_mean"] == 40 and stats["energy_wh"] == 1.0
+
+
 def test_sampler_stats_from_samples():
     sampler = telemetry.GpuSampler.__new__(telemetry.GpuSampler)
     sampler.samples = [(0.0, 50, 2.0, 100.0, 60), (3600.0, 100, 4.0, 300.0, 70)]

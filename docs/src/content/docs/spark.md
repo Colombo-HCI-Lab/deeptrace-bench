@@ -134,6 +134,19 @@ SPARK runs deeptrace-bench at the commit pinned in `params.yaml`, never your wor
 
 The worker builds the environment from `uv.lock`: about a minute when the lock changed, seconds when it didn't.
 
+### Many pairs at once: waves
+
+For a whole round, a wave lists the pairs (`waves/<name>.yaml` in the experiments repo) and the `matrix` stage scores them all in one job of up to 24 hours:
+
+```bash
+scripts/exp.py matrix w1_audio_same --hours 24
+scripts/exp.py go --no-watch
+scripts/exp.py progress            # live: each pair's phase, items scored, speed and ETA
+scripts/exp.py import --build-site # when it lands: the runs and their ledger rows into this repo
+```
+
+Every pair is measured as it is scored, and the numbers land in its summary's `compute` block ([Evaluation](evaluation.md#metrics)): time per phase, load and inference time per item, items per second, peak GPU memory, GPU utilisation, power and energy. The job's ledger (`reports/matrix.json` there, `results/ledger.csv` here once imported) also keeps pairs the contamination guard refused, pairs whose data couldn't be fetched, and the gap to the published run where one exists. A wave that runs out of time stops cleanly and resumes when ordered again.
+
 ### Bigger experiments
 
 Some of these need deeptrace-bench changed before an order can name them, so talk to Oshan first. The order is always: code into deeptrace-bench, then move `bench.commit` to that commit ([Run code you just changed](#run-code-you-just-changed)).

@@ -163,13 +163,18 @@ def score_items(
 
 
 def supersede_untimed(directory: Path) -> int:
-    """Move score parts written before per-item timing to ``superseded/<UTC>/``.
+    """Move score parts that no measured session accounts for to ``superseded/<UTC>/``.
 
-    Their items are then scored again, with timing, so a run's compute numbers cover all of
-    it. The old parts are kept, not deleted, and ``read_scores`` no longer sees them.
+    That is parts written before per-item timing existed, or every part of a run with no
+    session telemetry at all (a session that crashed before writing it). Their items are then
+    scored again, measured, so a run's compute numbers cover all of it. The old parts are kept,
+    not deleted, and ``read_scores`` no longer sees them.
     """
     parts = sorted(directory.glob("part-*.parquet"))
-    untimed = [p for p in parts if "load_s" not in pq.read_schema(p).names]
+    if not any((directory / "telemetry").glob("*.json")):
+        untimed = parts
+    else:
+        untimed = [p for p in parts if "load_s" not in pq.read_schema(p).names]
     if not untimed:
         return 0
     dest = directory / "superseded" / datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")

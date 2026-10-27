@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import signal
 import sys
 
 from deeptrace_bench import evalset as evalsets
@@ -60,6 +61,9 @@ def main() -> int:
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    # A job cut off at its time limit gets SIGTERM; exiting through SystemExit lets the session
+    # write its telemetry, so the items it scored keep counting as measured.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     if args.smoke:
         use_namespace("smoke")
 
