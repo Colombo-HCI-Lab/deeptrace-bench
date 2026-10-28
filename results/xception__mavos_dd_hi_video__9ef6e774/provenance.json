@@ -1,0 +1,25 @@
+{
+  "run_id": "xception__mavos_dd_hi_video__9ef6e774",
+  "model_id": "xception",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "xception_best.pth": "dd61186f9ac8e99aae85982cae338b555dfaeef042f6b699e5a55cae3998ba47"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "b126868c2712957f51253cf6e638fa9a4c3bbcb208259bd6f6d48cc9bb8d803c"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T23:40:48+00:00",
+  "last_started_utc": "2026-10-27T23:40:48+00:00",
+  "repo_commits": [
+    "7be064f743d56bc379b9a435f1dba180de32999c"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "run_id": "core__mavos_dd_hi_video__45e5dd1b",
+  "model_id": "core",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "core_best.pth": "3d34dca33ab66ee027425e0bc48fb889811ecd4ea53f72f958d83124144d1af7",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "d5d3a0d2b8d60163f520ba43d7a41a401495a23d47eacb9aa28f40a402486525"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T22:50:55+00:00",
+  "last_started_utc": "2026-10-27T22:50:55+00:00",
+  "repo_commits": [
+    "f29bfa9554c7ad388a09129e46d4c12a5dd74f59"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

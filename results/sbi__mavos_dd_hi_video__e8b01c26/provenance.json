@@ -1,0 +1,26 @@
+{
+  "run_id": "sbi__mavos_dd_hi_video__e8b01c26",
+  "model_id": "sbi",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "d6d9a351f32334ae9a3a250872c05836e0dd0f2c",
+  "weights_sha256": {
+    "FFc23.tar": "2b05c2ba36ccb9e9f4f9e1aae9acd443ae2e6400ce725f56104fdb175d3c3267",
+    "FFraw.tar": "e477fc1789f8c1d2147cffe86a47eb37a24adedae10b106b7d47c1eeb73777e2",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "88fd318439df811f354aeeef3fef0f4c2407b6fbc82dc6a8c71f3a34b6302495"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T20:21:53+00:00",
+  "last_started_utc": "2026-10-27T21:03:28+00:00",
+  "repo_commits": [
+    "7be064f743d56bc379b9a435f1dba180de32999c"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

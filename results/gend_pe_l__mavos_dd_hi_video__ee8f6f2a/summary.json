@@ -36,13 +36,13 @@
   },
   "compute": {
     "measured": true,
-    "sessions": 2,
-    "sessions_completed": 2,
-    "wall_s": 16117.4,
+    "sessions": 3,
+    "sessions_completed": 3,
+    "wall_s": 16122.3,
     "phases_s": {
-      "build_loader": 0.111,
-      "load_model": 9.789,
-      "score": 16107.519
+      "build_loader": 0.143,
+      "load_model": 14.538,
+      "score": 16107.584
     },
     "items_timed": 7513,
     "items_per_s": 0.466,
@@ -67,8 +67,8 @@
     "gpu_util_mean": 23.2,
     "power_mean_w": 106.9,
     "temp_max_c": 69.0,
-    "energy_wh": 469.91,
-    "energy_wh_per_1k_items": 62.546,
+    "energy_wh": 470.101,
+    "energy_wh_per_1k_items": 62.572,
     "env": {
       "device": "cuda",
       "python": "3.12.14",

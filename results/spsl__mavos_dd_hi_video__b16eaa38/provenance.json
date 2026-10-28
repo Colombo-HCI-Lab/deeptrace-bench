@@ -1,0 +1,25 @@
+{
+  "run_id": "spsl__mavos_dd_hi_video__b16eaa38",
+  "model_id": "spsl",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "spsl_best.pth": "7305d660c68aa6ac138f8d59c068832a43244f390fa6e54355f211d81bc246bd"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "911fa6b2823b740d7ca3d9adebf936e5da90dff676a5c5701b995a52de69fb34"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T01:06:12+00:00",
+  "last_started_utc": "2026-10-28T01:06:12+00:00",
+  "repo_commits": [
+    "7be064f743d56bc379b9a435f1dba180de32999c"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

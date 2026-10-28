@@ -1,0 +1,25 @@
+{
+  "run_id": "srm__mavos_dd_hi_video__bd9e6a29",
+  "model_id": "srm",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "srm_best.pth": "666e8fc7f9938f541a7f5cea7b11d975cc749ec1c8ba6b350ae3eb3d2d34a1e8"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "644d3cfd1d18bd8c02dd45925f2ec7be8154b64b94bcee55b96935f7c909147a"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-27T23:23:23+00:00",
+  "last_started_utc": "2026-10-27T23:23:23+00:00",
+  "repo_commits": [
+    "f29bfa9554c7ad388a09129e46d4c12a5dd74f59"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
