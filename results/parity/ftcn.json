@@ -1,0 +1,29 @@
+{
+  "model": "ftcn",
+  "checked_utc": "2026-10-28T08:17:48+00:00",
+  "evalset": "hidf_video",
+  "namespace": null,
+  "items": 50,
+  "n": 160,
+  "max_abs_diff": 4.559755325317383e-06,
+  "mean_abs_diff": 3.622755457399762e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "yinglinzheng/FTCN",
+    "commit": "853256a888bd5c4879955c06a4c5a666740f91a4"
+  },
+  "weights_sha256": {
+    "ftcn_tt.pth": "3d08fc78174bbfdb3fbede317b95dcac9095202ed7113649eecf6e2ef5ee77d8"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.8.20",
+    "torch": "1.4.0+cpu"
+  },
+  "reference": "upstream PluginLoader classifier and load(), ftcn_tt.pth, one clip at a time"
+}

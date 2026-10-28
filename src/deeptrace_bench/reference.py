@@ -72,6 +72,11 @@ def model_input(model: ModelConfig) -> str | None:
     if "segment_samples" in spec:
         seconds = spec["segment_samples"] / spec["sample_rate"]
         return f"{seconds:.2f} s windows of raw {spec['sample_rate'] / 1000:g} kHz audio"
+    if spec.get("inputs") == "face_clips":
+        return (
+            f"224 px face clips of {spec['clip_frames']} consecutive frames, one alignment per "
+            f"clip, every {spec['clip_stride']} frames (up to {spec['max_frames']} per video)"
+        )
     if spec.get("inputs") == "mouths":
         return (
             f"mouth crops from {spec['clip_frames']} consecutive frames at a time "

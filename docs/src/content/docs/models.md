@@ -19,7 +19,8 @@ Checked on 2026-10-12.
 | Effort                                  | video       | workable         | not yet    | not yet   |
 | LipForensics                            | video       | workable         | not yet    | not yet   |
 | AltFreezing                             | video       | blocked          | no adapter |           |
-| FTCN, GenConViT, DFDC winner (B7), UnivFD | video     | later            | no adapter |           |
+| FTCN                                    | video       | workable         | yes        | not yet   |
+| GenConViT, DFDC winner (B7), UnivFD     | video       | later            | no adapter |           |
 | RealForensics, LAA-Net, FakeSTormer     | video       | later            | no adapter |           |
 | TALL                                    | video       | blocked          | no weights |           |
 | AVAD, AVH-Align, LipFD                  | audio-video | later            | no adapter |           |
@@ -54,6 +55,7 @@ Passed, each against upstream run in its original environment (`scripts/parity.p
 | SBI 3.6e-6                                                                                                                         | 2026-10-12 | upstream `Detector`, `FFc23.tar` (torch 1.13)                       |
 | XLS-R + AASIST 1.1e-4                                                                                                              | 2026-10-12 | upstream `model.py`, its vendored fairseq (torch 1.8.1)             |
 | AntiDeepfake MMS-300M 9.0e-5, w2v2 small 3.2e-5                                                                                    | 2026-10-12 | upstream `W2V.py`, the Hub checkpoint, fairseq 0.12.2 (torch 1.13)  |
+| FTCN 4.6e-6 (160 clips of 50 HiDF videos)                                                                                          | 2026-10-28 | upstream `PluginLoader` classifier and `load()`, `ftcn_tt.pth`, fvcore (torch 1.4.0, CPU) |
 
 DeepfakeBench's reference shares the adapter's import stand-ins (and RECCE's and FFD's build stand-ins), so a pass there covers weights, numerics and transform, not upstream's imports; the strict load covers the architecture.
 
@@ -107,6 +109,10 @@ NII Yamagishi Lab (`nii-yamagishilab/*-anti-deepfake`), post-trained on 74k hour
 ### AASIST3
 
 `lab260/AASIST3`, a weak multilingual baseline: the released weights aren't the paper's, and the Speech DF Arena measures them at 28 to 32% EER on In-the-Wild and ASVspoof 2021. Input is pre-emphasised (0.97) per window. The README reads index 0 as bona fide but the training code reads index 1; the sanity check sides with the code, so P(fake) is index 0. Refused on `mlaad_*`.
+
+### FTCN
+
+`ftcn_tt.pth` (FTCN+TT, FF++ c23) from the GitHub release. Upstream states no licence, so it is imported from the checkout: built by upstream's own `config` and `PluginLoader` with yacs in place of fvcore's `CfgNode` and training-only imports stubbed. Two patches (`patches/FTCN/`): `nn.Conv3d`'s signature gained `device` and `dtype` after torch 1.4, and `get_crop_box` used `np.int`. Input (`preprocess/clips.py`): the first 96 consecutive frames, each face box widened by half on each side, then 32-frame clips every 16 frames, each aligned by upstream's `FasterCropAlignXRay` with one transform fitted to the whole clip's five landmarks; P(fake) is a clip's sigmoid. Upstream reads up to 768 frames and slides one frame at a time; its padding of short tracks is kept, including its failure on tracks under 9 frames (`too_short`; the config asks for 16). The reference needs torch 1.4, which has no macOS arm64 wheels: Python 3.8, `torch==1.4.0+cpu`, `numpy<1.20`, `opencv-python-headless<4.6`, `fvcore==0.1.1.post20200716`, pyyaml, einops, termcolor, simplejson, psutil and `matplotlib<3.6` on a Linux x86 machine, with `DTB_PATH_MAP` when the run directory is mounted at another path.
 
 ### Effort
 

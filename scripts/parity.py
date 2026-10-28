@@ -43,6 +43,7 @@ from deeptrace_bench.preprocess import PreprocessError
 from deeptrace_bench.preprocess.audio import load_audio, segment
 from deeptrace_bench.preprocess.faces import FaceLoader
 from deeptrace_bench.registry import Modality, ModelConfig, Registry
+from deeptrace_bench.score import build_loader
 
 log = logging.getLogger("parity")
 
@@ -54,6 +55,7 @@ REFERENCES = {
     "SBIDetector": ("sbi.py", "{dtb_root}/parity/envs/dfb/bin/python"),
     "SSLXLSRDetector": ("ssl_xlsr.py", "<fairseq venv>/bin/python"),
     "AntiDeepfakeDetector": ("antideepfake.py", "<fairseq venv>/bin/python"),
+    "FTCNDetector": ("ftcn.py", "<ftcn venv>/bin/python"),
 }
 
 
@@ -67,6 +69,9 @@ def _inputs_loader(registry: Registry, model: ModelConfig):
             return segment(wave, audio["segment_samples"], min_samples=min_samples)
 
         return load
+    if model.input.get("inputs") in ("mouths", "face_clips"):
+        # models fed more than single crops get the loader scoring gives them
+        return build_loader(registry, model, "cpu")[0]
     return FaceLoader.from_registry(registry, model)
 
 

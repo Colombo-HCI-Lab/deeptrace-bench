@@ -31,6 +31,7 @@ from .paths import dataset_dir, weights_dir
 from .preprocess import PreprocessError
 from .preprocess.audio import load_audio, segment
 from .preprocess.av import AudioVideoLoader
+from .preprocess.clips import FaceClipLoader
 from .preprocess.faces import FaceLoader
 from .preprocess.mouths import MouthLoader
 from .registry import Modality, ModelConfig, Registry
@@ -247,5 +248,14 @@ def build_loader(
             upstream_dir=checkout_dir(model.upstream),
             device=device,
             min_frames=int(model.input["clip_frames"]),
+        )
+    elif model.input.get("inputs") == "face_clips":
+        # a clip-level model gets aligned clips, one transform per clip, not single crops
+        loader = FaceClipLoader(
+            loader,
+            upstream_dir=checkout_dir(model.upstream),
+            clip_frames=int(model.input["clip_frames"]),
+            clip_stride=int(model.input["clip_stride"]),
+            min_frames=int(model.input["min_face_frames"]),
         )
     return loader, registry.eval.video["aggregation"]

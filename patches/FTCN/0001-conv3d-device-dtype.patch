@@ -1,0 +1,13 @@
+diff --git a/model/classifier/i3d_temporal_var_fix_dropout_tt_cfg.py b/model/classifier/i3d_temporal_var_fix_dropout_tt_cfg.py
+index 6ce13fc..86a3dfd 100644
+--- a/model/classifier/i3d_temporal_var_fix_dropout_tt_cfg.py
++++ b/model/classifier/i3d_temporal_var_fix_dropout_tt_cfg.py
+@@ -181,7 +181,7 @@ class TransformerHead(nn.Module):
+         return x
+ 
+ 
+-parameters = [parameter for parameter in signature(nn.Conv3d).parameters]
++parameters = [parameter for parameter in signature(nn.Conv3d).parameters if parameter not in ("device", "dtype")]
+ print(parameters)
+ 
+ spatial_count = my_cfg.model.inco.spatial_count

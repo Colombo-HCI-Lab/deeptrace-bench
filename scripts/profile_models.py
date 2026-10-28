@@ -113,6 +113,8 @@ def profile(model: ModelConfig, registry: Registry, device: str, n_items: int, r
         unit = "4 s audio window"
     elif model.input.get("inputs") == "mouths":
         unit = "mouth clip"
+    elif model.input.get("inputs") == "face_clips":
+        unit = "face clip"
     else:
         unit = "clip" if max(units) == 1 else "face frame"
     gpu = None
