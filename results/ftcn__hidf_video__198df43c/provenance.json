@@ -1,0 +1,25 @@
+{
+  "run_id": "ftcn__hidf_video__198df43c",
+  "model_id": "ftcn",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "853256a888bd5c4879955c06a4c5a666740f91a4",
+  "weights_sha256": {
+    "ftcn_tt.pth": "3d08fc78174bbfdb3fbede317b95dcac9095202ed7113649eecf6e2ef5ee77d8",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "ee79944485a29c9dbe601a5fc37affe32b8f2df213c7bcd3a7d1c3e79e0a47bb"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T09:26:51+00:00",
+  "last_started_utc": "2026-10-28T09:26:51+00:00",
+  "repo_commits": [
+    "c25ec2baaf5e20c9aef104927cabac04cda1d93b"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

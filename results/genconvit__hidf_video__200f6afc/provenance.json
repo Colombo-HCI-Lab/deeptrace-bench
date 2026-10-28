@@ -1,0 +1,25 @@
+{
+  "run_id": "genconvit__hidf_video__200f6afc",
+  "model_id": "genconvit",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "2c1d0bd7eecea94926595781a744e3f4b8b55290",
+  "weights_sha256": {
+    "genconvit_ed_inference.pth": "86f0c2e875016435def7d031b357bda5dc0061367290d73de121186df3f03f8c",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "bbc1444491d8e004ff811af555119b2a392342d7356665b4fd0da23fbf51cf9e"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T10:22:33+00:00",
+  "last_started_utc": "2026-10-28T10:22:33+00:00",
+  "repo_commits": [
+    "043f50b1b4aac1e9c9d21d44e842309506230b3f"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
