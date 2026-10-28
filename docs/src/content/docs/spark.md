@@ -147,6 +147,8 @@ scripts/exp.py import --build-site # when it lands: the runs and their ledger ro
 
 Every pair is measured as it is scored, and the numbers land in its summary's `compute` block ([Evaluation](evaluation.md#metrics)): time per phase, load and inference time per item, items per second, peak GPU memory, GPU utilisation, power and energy. The job's ledger (`reports/matrix.json` there, `results/ledger.csv` here once imported) also keeps pairs the contamination guard refused, pairs whose data couldn't be fetched, and the gap to the published run where one exists. A wave that runs out of time stops cleanly and resumes when ordered again.
 
+**The same stage off the cluster.** `stages/matrix.py --commit local --out <dir>` runs a wave on any GPU with a checkout of this repo (`DTB_LOCAL_CHECKOUT` and `DTB_ROOT` set), and `scripts/exp.py import --from <dir>` brings its runs here. The 2026-10-28 round ran this way on two 24 GB GPUs next to SPARK. Change such a queue only between pairs: a pair stopped mid-run scores again from the start. The experiments repo's README has the commands.
+
 ### Bigger experiments
 
 Some of these need deeptrace-bench changed before an order can name them, so talk to Oshan first. The order is always: code into deeptrace-bench, then move `bench.commit` to that commit ([Run code you just changed](#run-code-you-just-changed)).
@@ -154,8 +156,8 @@ Some of these need deeptrace-bench changed before an order can name them, so tal
 | You want to | What's needed |
 | --- | --- |
 | score a pair with no published run | nothing: `scripts/exp.py score <model> <evalset> --no-reference`, or any pair the site has no run for. Proved on 2026-10-19 with XLS-R + SLS on Urdu CSALT; that model's number doesn't count yet (no parity) |
-| use an evalset outside the five above (IndicSynth, HiDF, MAVOS-DD) | the stage reads an evalset's datasets from deeptrace-bench's registry and fetches each, only the languages it needs. Not run on SPARK yet, and some datasets need access requests first ([Datasets](datasets.md)) |
-| run a video model (GenD, SBI, Xception) | it runs on the cluster (the smoke test runs GenD); a full video evalset hasn't been scored there yet |
+| use an evalset outside the five above (IndicSynth, HiDF, MAVOS-DD) | the stage reads an evalset's datasets from deeptrace-bench's registry and fetches each, only the languages it needs. HiDF and MAVOS-DD Hindi have run in waves; request-only datasets need their files first ([Datasets](datasets.md)) |
+| run a video model | nothing: every video model with weights has run on full HiDF and MAVOS-DD Hindi in waves (2026-10-28) |
 | add a model or a dataset | an adapter or builder in deeptrace-bench, and a parity check before any number counts ([Adding a model](adding_a_model.md), [Adding a dataset](adding_a_dataset.md)) |
 | fine-tune a model | not built yet; planned after the evaluation setup is settled ([Progress](progress.md#next)) |
 | use the ARM workers' larger memory | not yet: `uv.lock` has no ARM Linux wheels ([Workers and limits](#workers-and-limits)) |
