@@ -19,6 +19,8 @@ df_arena_1b:
 df_arena_500m:
   pytorch_model.bin: ebd7662047f3b33a6a0fcb9d205bbdcea07220bf42853ae57c6cf4d8e40f66a2
   xls-r-300m-config/config.json: 0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac
+dfdc_b7:
+  final_111_DeepFakeClassifier_tf_efficientnet_b7_ns_0_36: 9db77ab9318863e2f8ab287c8eb83c2232584b82dc2fb41f1d614ddd7900cccb
 efficientnet_b4:
   effnb4_best.pth: 74cbd82d7be1bf5e6adec717824274a95b4509b02e1e78401608d32b3cbeaf0f
 effort:
@@ -32,7 +34,6 @@ ftcn:
   ftcn_tt.pth: 3d08fc78174bbfdb3fbede317b95dcac9095202ed7113649eecf6e2ef5ee77d8
 genconvit:
   genconvit_ed_inference.pth: 86f0c2e875016435def7d031b357bda5dc0061367290d73de121186df3f03f8c
-  genconvit_vae_inference.pth: 53c627c82d1439fc80e18ac462c1ed6969a3babe5376124a5c38d1c0c88c9042
 gend:
   clip-vit-large-patch14/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
   clip-vit-large-patch14/merges.txt: 9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a

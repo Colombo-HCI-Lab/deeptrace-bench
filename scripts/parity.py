@@ -56,6 +56,7 @@ REFERENCES = {
     "SSLXLSRDetector": ("ssl_xlsr.py", "<fairseq venv>/bin/python"),
     "AntiDeepfakeDetector": ("antideepfake.py", "<fairseq venv>/bin/python"),
     "FTCNDetector": ("ftcn.py", "<ftcn venv>/bin/python"),
+    "GenConViTDetector": ("genconvit.py", "{dtb_root}/parity/envs/genconvit/bin/python"),
 }
 
 

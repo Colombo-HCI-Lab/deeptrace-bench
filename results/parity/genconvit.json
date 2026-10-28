@@ -1,0 +1,30 @@
+{
+  "model": "genconvit",
+  "checked_utc": "2026-10-28T08:36:03+00:00",
+  "evalset": "hidf_video",
+  "namespace": null,
+  "items": 20,
+  "n": 640,
+  "max_abs_diff": 6.3478946685791016e-06,
+  "mean_abs_diff": 6.291265890467912e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "erprogs/GenConViT",
+    "commit": "2c1d0bd7eecea94926595781a744e3f4b8b55290"
+  },
+  "weights_sha256": {
+    "genconvit_ed_inference.pth": "86f0c2e875016435def7d031b357bda5dc0061367290d73de121186df3f03f8c"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.9.6",
+    "torch": "1.13.1",
+    "timm": "0.6.5"
+  },
+  "reference": "upstream GenConViT(net='ed') and its own load, pred_func preprocessing"
+}

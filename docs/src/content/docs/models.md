@@ -20,7 +20,8 @@ Checked on 2026-10-12.
 | LipForensics                            | video       | workable         | not yet    | not yet   |
 | AltFreezing                             | video       | blocked          | no adapter |           |
 | FTCN                                    | video       | workable         | yes        | not yet   |
-| GenConViT, DFDC winner (B7), UnivFD     | video       | later            | no adapter |           |
+| GenConViT (ED)                          | video       | workable         | yes        | not yet   |
+| DFDC winner (B7), UnivFD                | video       | later            | no adapter |           |
 | RealForensics, LAA-Net, FakeSTormer     | video       | later            | no adapter |           |
 | TALL                                    | video       | blocked          | no weights |           |
 | AVAD, AVH-Align, LipFD                  | audio-video | later            | no adapter |           |
@@ -56,6 +57,7 @@ Passed, each against upstream run in its original environment (`scripts/parity.p
 | XLS-R + AASIST 1.1e-4                                                                                                              | 2026-10-12 | upstream `model.py`, its vendored fairseq (torch 1.8.1)             |
 | AntiDeepfake MMS-300M 9.0e-5, w2v2 small 3.2e-5                                                                                    | 2026-10-12 | upstream `W2V.py`, the Hub checkpoint, fairseq 0.12.2 (torch 1.13)  |
 | FTCN 4.6e-6 (160 clips of 50 HiDF videos)                                                                                          | 2026-10-28 | upstream `PluginLoader` classifier and `load()`, `ftcn_tt.pth`, fvcore (torch 1.4.0, CPU) |
+| GenConViT (ED) 6.4e-6 (640 crops of 20 HiDF videos)                                                                                | 2026-10-28 | upstream `GenConViT(net="ed")` and its own strict load, `pred_func` preprocessing (timm 0.6.5, torch 1.13.1) |
 
 DeepfakeBench's reference shares the adapter's import stand-ins (and RECCE's and FFD's build stand-ins), so a pass there covers weights, numerics and transform, not upstream's imports; the strict load covers the architecture.
 
@@ -113,6 +115,10 @@ NII Yamagishi Lab (`nii-yamagishilab/*-anti-deepfake`), post-trained on 74k hour
 ### FTCN
 
 `ftcn_tt.pth` (FTCN+TT, FF++ c23) from the GitHub release. Upstream states no licence, so it is imported from the checkout: built by upstream's own `config` and `PluginLoader` with yacs in place of fvcore's `CfgNode` and training-only imports stubbed. Two patches (`patches/FTCN/`): `nn.Conv3d`'s signature gained `device` and `dtype` after torch 1.4, and `get_crop_box` used `np.int`. Input (`preprocess/clips.py`): the first 96 consecutive frames, each face box widened by half on each side, then 32-frame clips every 16 frames, each aligned by upstream's `FasterCropAlignXRay` with one transform fitted to the whole clip's five landmarks; P(fake) is a clip's sigmoid. Upstream reads up to 768 frames and slides one frame at a time; its padding of short tracks is kept, including its failure on tracks under 9 frames (`too_short`; the config asks for 16). The reference needs torch 1.4, which has no macOS arm64 wheels: Python 3.8, `torch==1.4.0+cpu`, `numpy<1.20`, `opencv-python-headless<4.6`, `fvcore==0.1.1.post20200716`, pyyaml, einops, termcolor, simplejson, psutil and `matplotlib<3.6` on a Linux x86 machine, with `DTB_PATH_MAP` when the run directory is mounted at another path.
+
+### GenConViT
+
+`genconvit_ed_inference.pth` from `Deressa/GenConViT` (CC BY-NC 4.0 weights over MIT code). Only the ED branch is scored, upstream's `--net ed`: the VAE branch draws `torch.randn_like` noise in its encoder at test time, so its scores differ between runs. Upstream's `GenConViTED` is built with `pretrained=False`; the Swin embedder it attaches as the ConvNeXt's `patch_embed` is never called by ConvNeXt's forward, but its weights are loaded strictly. The checkpoint was saved with timm 0.6.5, so conversion runs timm's own Swin `checkpoint_filter_fn` on both copies of the embedder, then saves one copy of the shared tensors. Class 0 is fake; P(fake) is the sigmoid of logit 0. Crops are the shared detector's box stretched to 224 (upstream: dlib's tight box via `face_recognition`, `INTER_AREA`), 32 frames per video (upstream 15). Reference env: Python 3.9, `torch==1.13.1`, `torchvision==0.14.1`, `numpy<1.24`, `timm==0.6.5`, pyyaml, at `$DTB_ROOT/parity/envs/genconvit`.
 
 ### Effort
 
