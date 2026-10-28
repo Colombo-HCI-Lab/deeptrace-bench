@@ -1,0 +1,31 @@
+{
+  "model": "avh_align",
+  "checked_utc": "2026-10-28T10:42:08+00:00",
+  "evalset": "mavos_dd_hi_av",
+  "namespace": null,
+  "items": 20,
+  "n": 20,
+  "max_abs_diff": 3.932845514809102e-06,
+  "mean_abs_diff": 1.0457231949425118e-06,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "bit-ml/AVH-Align",
+    "commit": "55401ded7d94a6ad59106c401696d89ce8d16faf"
+  },
+  "weights_sha256": {
+    "2DFAN4-cd938726ad.zip": "cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46",
+    "AVH-Align_AV1M.pt": "71f7b4fdfe153a2ed7f8a4f2fa552662af3909aa009c80f089f8aa0cc45eda85",
+    "self_large_vox_433h.pt": "2689a9e9e8d601b30f9181342017dc0215669990732d8920ac7065c88f81d954"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.8.20",
+    "torch": "1.10.0+cpu"
+  },
+  "reference": "fairseq AV-HuBERT extract_finetune (audio-only, video-only), FusionModel"
+}

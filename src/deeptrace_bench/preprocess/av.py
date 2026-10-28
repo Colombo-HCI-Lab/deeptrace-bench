@@ -52,3 +52,22 @@ class AudioVideoLoader:
     def close(self) -> None:
         """Flush the face cache."""
         self.faces.close()
+
+
+class MouthAudioLoader:
+    """Mouth crops and the audio track together, for lip-sync models (AVH-Align):
+    ``{"mouths", "audio", "sample_rate"}``. The audio is the whole track from its start, which
+    the model aligns with the first mouth frame."""
+
+    def __init__(self, mouths: Any, sample_rate: int = SAMPLE_RATE) -> None:
+        self.mouths = mouths
+        self.sample_rate = sample_rate
+
+    def __call__(self, row: pd.Series) -> dict[str, Any]:
+        crops = self.mouths(row)
+        audio = load_audio(dataset_dir(row["dataset"]) / row["rel_path"], self.sample_rate)
+        return {"mouths": crops, "audio": audio, "sample_rate": self.sample_rate}
+
+    def close(self) -> None:
+        """Flush the face cache."""
+        self.mouths.close()

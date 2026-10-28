@@ -30,7 +30,7 @@ from .models.base import Detector
 from .paths import dataset_dir, weights_dir
 from .preprocess import PreprocessError
 from .preprocess.audio import load_audio, segment
-from .preprocess.av import AudioVideoLoader
+from .preprocess.av import AudioVideoLoader, MouthAudioLoader
 from .preprocess.clips import FaceClipLoader
 from .preprocess.faces import FaceLoader
 from .preprocess.mouths import MouthLoader
@@ -238,20 +238,25 @@ def build_loader(
     loader = FaceLoader.from_registry(
         registry, model, save_crops_to=crops_dir, save_crops=save_crops, part_prefix=prefix
     )
-    if model.modality == Modality.AUDIO_VIDEO:
-        # an audio-visual model gets its faces and the audio track together
-        loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
-    elif model.input.get("inputs") in ("mouths", "faces_150"):
+    if model.input.get("inputs") in ("mouths", "faces_150"):
         # a lip-based model gets mouth crops cut from landmarks, not face crops (RealForensics:
-        # whole faces cut the same way)
+        # whole faces cut the same way); the crop code may come from another model's checkout
         kind = MouthLoader if model.input["inputs"] == "mouths" else TalkingFaceLoader
+        crop_code = model.input.get("crop_code_from")
+        upstream = registry.model(crop_code).upstream if crop_code else model.upstream
         loader = kind(
             loader,
             fan_path=weights_dir(model.id) / model.input["landmarks"],
-            upstream_dir=checkout_dir(model.upstream),
+            upstream_dir=checkout_dir(upstream),
             device=device,
             min_frames=int(model.input["clip_frames"]),
         )
+        if model.modality == Modality.AUDIO_VIDEO:
+            # a lip-sync model gets the audio track beside its mouths
+            loader = MouthAudioLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
+    elif model.modality == Modality.AUDIO_VIDEO:
+        # an audio-visual model gets its faces and the audio track together
+        loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
     elif model.input.get("inputs") == "face_clips":
         # a clip-level model gets aligned clips, one transform per clip, not single crops
         loader = FaceClipLoader(

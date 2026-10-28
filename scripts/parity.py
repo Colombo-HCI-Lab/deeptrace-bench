@@ -59,6 +59,7 @@ REFERENCES = {
     "GenConViTDetector": ("genconvit.py", "{dtb_root}/parity/envs/genconvit/bin/python"),
     "DFDCWinnerDetector": ("dfdc_b7.py", "<dfdc venv>/bin/python"),
     "RealForensicsDetector": ("realforensics.py", "<realforensics venv>/bin/python"),
+    "AVHAlignDetector": ("avh_align.py", "<av_hubert venv>/bin/python"),
 }
 
 
@@ -87,17 +88,27 @@ def export(args: argparse.Namespace) -> int:
     per_item, kept = [], []
     for _, row in items.iterrows():
         try:
-            per_item.append(np.asarray(loader(row)))
+            inputs = loader(row)
+            per_item.append(inputs if isinstance(inputs, dict) else np.asarray(inputs))
             kept.append(row["item_id"])
         except PreprocessError as exc:
             log.info("%s skipped: %s", row["item_id"], exc.reason)
     if hasattr(loader, "close"):
         loader.close()
-    units, item_index = parity.pack_inputs(per_item)
 
     run = parity.parity_root(model.id) / datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     run.mkdir(parents=True)
-    np.savez(run / parity.INPUTS, units=units, item_index=item_index)
+    if per_item and isinstance(per_item[0], dict):
+        # several arrays per item (a lip-sync model's mouths and audio): saved as
+        # "<item>__<name>", and the adapter scores each item's dict
+        np.savez(
+            run / parity.INPUTS,
+            **{f"{i}__{k}": np.asarray(v) for i, d in enumerate(per_item) for k, v in d.items()},
+        )
+        units, item_index = None, None
+    else:
+        units, item_index = parity.pack_inputs(per_item)
+        np.savez(run / parity.INPUTS, units=units, item_index=item_index)
     detector = load_detector(model)
     reference, python = REFERENCES[type(detector).__name__]
     spec = {
@@ -115,10 +126,13 @@ def export(args: argparse.Namespace) -> int:
     (run / parity.RUN_INFO).write_text(json.dumps(spec, indent=2) + "\n")
 
     detector.load("cpu")
-    scores = [detector.score(units[item_index == i]) for i in range(len(kept))]
+    if units is None:
+        scores = [detector.score(d) for d in per_item]
+    else:
+        scores = [detector.score(units[item_index == i]) for i in range(len(kept))]
     np.save(run / parity.ADAPTER_SCORES, np.concatenate(scores).astype(np.float64))
     command = python.format(dtb_root=dtb_root())
-    print(f"{len(kept)} items, {len(units)} inputs in {run}")
+    print(f"{len(kept)} items, {len(units) if units is not None else len(kept)} inputs in {run}")
     print(f"next: {command} {REPO_ROOT / 'scripts' / 'parity_reference' / reference} {run}")
     print(f"then: uv run scripts/parity.py compare --model {model.id} --run {run}")
     return 0

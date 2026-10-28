@@ -1,7 +1,7 @@
 id: avh_align
 name: AVH-Align
 modality: audio_video
-status: later
+status: workable
 licence: CC BY-NC-SA 4.0 (README)
 paper: Smeu et al., Circumventing Shortcuts in Audio-visual Deepfake Detection Datasets with Unsupervised Learning, CVPR 2025
 upstream:
@@ -14,11 +14,22 @@ weights:
   - name: self_large_vox_433h.pt
     kind: url
     url: https://dl.fbaipublicfiles.com/avhubert/model/lrs3_vox/vsr/self_large_vox_433h.pt
+  # FAN (2DFAN4) for the 68 landmarks, as LipForensics (AV-HuBERT uses dlib's)
+  - name: 2DFAN4-cd938726ad.zip
+    kind: url
+    url: https://www.adrianbulat.com/downloads/python-fan/2DFAN4-cd938726ad.zip
+    size_bytes: 96316515
 training_data:
   - {dataset: lrs3, level: pretrain, note: "AV-HuBERT large"}
   - {dataset: voxceleb2, level: pretrain, note: "AV-HuBERT large"}
   - {dataset: av_deepfake1m, level: train, note: "45,000 real videos only, no fakes"}
+adapter: deeptrace_bench.models.avh_align:AVHAlignDetector
 input:
-  inputs: faces
-  needs_audio: true
-notes: Learns audio-visual alignment from real videos only, on AV-HuBERT features, and its paper shows that supervised audio-visual detectors exploit dataset shortcuts. Fits MAVOS-DD's lip-sync fakes and avoids fake-side training bias. The checkpoint is confirmed reachable 2026-10-28 (20.9 MB); the AV-HuBERT URL is not yet tested. AV-HuBERT normally needs fairseq, which we don't install, so the adapter needs a stand-in like models/_fairseq.py. No adapter yet.
+  inputs: mouths                    # preprocess.mouths.MouthLoader, with the audio beside it
+  crop_code_from: lipforensics      # the mpc001 mouth crop AV-HuBERT uses, from LipForensics' checkout
+  frame_sampling: consecutive
+  max_frames: 100                   # the first 100 frames, sharing LipForensics' detection cache
+  min_face_frames: 25
+  clip_frames: 25
+  landmarks: 2DFAN4-cd938726ad.zip
+notes: Learns audio-visual alignment from real videos only, on AV-HuBERT features, and its paper shows that supervised audio-visual detectors exploit dataset shortcuts. Fits MAVOS-DD's lip-sync fakes and avoids fake-side training bias. AV-HuBERT's licence (Meta, facebookresearch/av_hubert LICENSE, section 2) bars using the software, derivative works or its outputs for "biometric processing" and bars reverse-engineering it; running it on faces and voices to detect deepfakes may count as the first, and a fairseq-free port as the second. Oshan accepted that risk for this non-commercial research use on 2026-10-28, so the adapter goes ahead; anyone reusing it must make that call for themselves.

@@ -12,7 +12,9 @@ antideepfake_mms_300m:
 antideepfake_w2v_small:
   wav2vec-small-anti-deepfake.safetensors: 828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0
 avh_align:
+  2DFAN4-cd938726ad.zip: cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46
   AVH-Align_AV1M.pt: 71f7b4fdfe153a2ed7f8a4f2fa552662af3909aa009c80f089f8aa0cc45eda85
+  self_large_vox_433h.pt: 2689a9e9e8d601b30f9181342017dc0215669990732d8920ac7065c88f81d954
 core:
   core_best.pth: 3d34dca33ab66ee027425e0bc48fb889811ecd4ea53f72f958d83124144d1af7
 df_arena_1b:

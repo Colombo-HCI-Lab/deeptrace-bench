@@ -26,7 +26,8 @@ Checked on 2026-10-12.
 | RealForensics                           | video       | workable         | yes        | not yet   |
 | LAA-Net, FakeSTormer                    | video       | later            | no adapter |           |
 | TALL                                    | video       | blocked          | no weights |           |
-| AVAD, AVH-Align, LipFD                  | audio-video | later            | no adapter |           |
+| AVH-Align                               | audio-video | workable         | yes        | not yet   |
+| AVAD, LipFD                             | audio-video | later            | no adapter |           |
 | AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   |
 | XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   |
 | XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    |
@@ -59,6 +60,7 @@ Passed, each against upstream run in its original environment (`scripts/parity.p
 | XLS-R + AASIST 1.1e-4                                                                                                              | 2026-10-12 | upstream `model.py`, its vendored fairseq (torch 1.8.1)             |
 | AntiDeepfake MMS-300M 9.0e-5, w2v2 small 3.2e-5                                                                                    | 2026-10-12 | upstream `W2V.py`, the Hub checkpoint, fairseq 0.12.2 (torch 1.13)  |
 | FTCN 4.6e-6 (160 clips of 50 HiDF videos)                                                                                          | 2026-10-28 | upstream `PluginLoader` classifier and `load()`, `ftcn_tt.pth`, fvcore (torch 1.4.0, CPU) |
+| AVH-Align 3.9e-6 (20 MAVOS-DD audio-visual videos)                                                                                 | 2026-10-28 | fairseq AV-HuBERT (`facebookresearch/av_hubert` and its pinned fairseq fork) `extract_finetune`, upstream `FusionModel` (torch 1.10.0, CPU) |
 | DFDC winner 9.0e-6 (128 crops of 4 HiDF videos, all seven models)                                                                  | 2026-10-28 | upstream `DeepFakeClassifier` x7, `predict_folder.py`'s strict load, fp32 (torch 1.10.0, timm 0.4.12, CPU) |
 | RealForensics 6.4e-6 (63 clips of 20 HiDF videos)                                                                                  | 2026-10-28 | upstream `csn_temporal_no_head` and `MeanLinear`, `eval.py`'s load, the test transform (torch 1.9.0, torchvision 0.10, pytorchvideo 0.1.2, CPU) |
 | GenConViT (ED) 6.4e-6 (640 crops of 20 HiDF videos)                                                                                | 2026-10-28 | upstream `GenConViT(net="ed")` and its own strict load, `pred_func` preprocessing (timm 0.6.5, torch 1.13.1) |
@@ -131,6 +133,10 @@ Runs through the DeepfakeBench adapter, with `loralib` stubbed and CLIP built fr
 ### HAVIC
 
 The only open audio-visual detector (`JielunPeng/HAVIC`). Two patches (`patches/HAVIC/`) fix timm 1.x and a `use_mask` bug in upstream's own inference. Input: up to 50 frames at 5 per second, raw face boxes resized to 224, in 16-frame windows at stride 2, with the audio under each window as 128-bin Kaldi filterbanks; P(fake) is each window's sigmoid. A frame without a face drops out (upstream skips the video). It needs at least 3.2 s with a face in 16 sampled frames, so HiDF's 3 s clips are too short; MAVOS-DD Hindi is its South Asian set once its terms are accepted. Fine-tuned on an unpublished 70% of FakeAVCeleb, so refused there.
+
+### AVH-Align
+
+AVH-Align's fusion network (`AVH-Align_AV1M.pt`, CC BY-NC-SA 4.0) scores the agreement of AV-HuBERT large's video-only and audio-only features, frame by frame; a video's score is `logsumexp(-agreement)` over frames, reported through a sigmoid (monotone, so AUC and EER are upstream's). AV-HuBERT's licence bars "biometric processing" and reverse-engineering; Oshan accepted that risk for this research use on 2026-10-28. fairseq doesn't install here, so `models/avh_align.py` rebuilds AV-HuBERT's encoder from its architecture (3D stem and ResNet-18 trunk with PReLU, the audio projection, concat fusion, and the 24-layer pre-norm transformer as transformers' `Wav2Vec2EncoderStableLayerNorm`, fairseq names mapped by `_fairseq.hf_name`), and loads `self_large_vox_433h.pt` through torch's safe unpickler with inert stand-ins for the lip-reading vocabulary it pickles. Inputs: LipForensics' mouth crops (the same mpc001 recipe AV-HuBERT's `align_mouth.py` uses, here on FAN landmarks, not dlib's) over the first 100 frames, and the audio as 26 log filterbanks stacked four at a time. Neither side resamples to 25 fps, as upstream doesn't; MAVOS-DD is 24 fps. Scores audio-visual evalsets only (HiDF has no audio). Reference env: AV-HuBERT's repo with `git submodule update --init` and its fairseq fork installed editable (`--no-build-isolation`, after `wheel`) into Python 3.8 with `torch==1.10.0+cpu`, `numpy<1.24`, `setuptools<60`, `pip<24.1`, cython, `omegaconf==2.0.6`, `hydra-core==1.0.7`, sentencepiece, scipy, python_speech_features, scikit-image and opencv; run with `AVHUBERT_DIR` set to its `avhubert/` folder.
 
 ### DFDC winner
 
