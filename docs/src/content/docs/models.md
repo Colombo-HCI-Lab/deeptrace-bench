@@ -21,7 +21,8 @@ Checked on 2026-10-12.
 | AltFreezing                             | video       | blocked          | no adapter |           |
 | FTCN                                    | video       | workable         | yes        | not yet   |
 | GenConViT (ED)                          | video       | workable         | yes        | not yet   |
-| DFDC winner (B7), UnivFD                | video       | later            | no adapter |           |
+| DFDC winner (7 x B7)                    | video       | workable         | yes        | not yet   |
+| UnivFD                                  | video       | later            | no adapter |           |
 | RealForensics                           | video       | workable         | yes        | not yet   |
 | LAA-Net, FakeSTormer                    | video       | later            | no adapter |           |
 | TALL                                    | video       | blocked          | no weights |           |
@@ -58,6 +59,7 @@ Passed, each against upstream run in its original environment (`scripts/parity.p
 | XLS-R + AASIST 1.1e-4                                                                                                              | 2026-10-12 | upstream `model.py`, its vendored fairseq (torch 1.8.1)             |
 | AntiDeepfake MMS-300M 9.0e-5, w2v2 small 3.2e-5                                                                                    | 2026-10-12 | upstream `W2V.py`, the Hub checkpoint, fairseq 0.12.2 (torch 1.13)  |
 | FTCN 4.6e-6 (160 clips of 50 HiDF videos)                                                                                          | 2026-10-28 | upstream `PluginLoader` classifier and `load()`, `ftcn_tt.pth`, fvcore (torch 1.4.0, CPU) |
+| DFDC winner 9.0e-6 (128 crops of 4 HiDF videos, all seven models)                                                                  | 2026-10-28 | upstream `DeepFakeClassifier` x7, `predict_folder.py`'s strict load, fp32 (torch 1.10.0, timm 0.4.12, CPU) |
 | RealForensics 6.4e-6 (63 clips of 20 HiDF videos)                                                                                  | 2026-10-28 | upstream `csn_temporal_no_head` and `MeanLinear`, `eval.py`'s load, the test transform (torch 1.9.0, torchvision 0.10, pytorchvideo 0.1.2, CPU) |
 | GenConViT (ED) 6.4e-6 (640 crops of 20 HiDF videos)                                                                                | 2026-10-28 | upstream `GenConViT(net="ed")` and its own strict load, `pred_func` preprocessing (timm 0.6.5, torch 1.13.1) |
 
@@ -129,6 +131,10 @@ Runs through the DeepfakeBench adapter, with `loralib` stubbed and CLIP built fr
 ### HAVIC
 
 The only open audio-visual detector (`JielunPeng/HAVIC`). Two patches (`patches/HAVIC/`) fix timm 1.x and a `use_mask` bug in upstream's own inference. Input: up to 50 frames at 5 per second, raw face boxes resized to 224, in 16-frame windows at stride 2, with the audio under each window as 128-bin Kaldi filterbanks; P(fake) is each window's sigmoid. A frame without a face drops out (upstream skips the video). It needs at least 3.2 s with a face in 16 sampled frames, so HiDF's 3 s clips are too short; MAVOS-DD Hindi is its South Asian set once its terms are accepted. Fine-tuned on an unpublished 70% of FakeAVCeleb, so refused there.
+
+### DFDC winner
+
+The seven EfficientNet-B7 checkpoints of Selim Seferbekov's winning DFDC entry (MIT, GitHub release 0.0.1; the release serves each stream slowly, so fetch them in parallel), each built by upstream's own `DeepFakeClassifier` with timm's constructors told not to fetch ImageNet weights, converted to one safetensors file per checkpoint (their pickles carry a numpy scalar, so the safe unpickler is told about numpy's scalar and dtype) and loaded strictly. Faces use the shared `letterbox` crop: the box widened by a third each side, resized to 380 on its longer side and centred on black, with upstream's two helpers (MIT, copied into `preprocess/faces.py`). P(fake) per frame is the mean of the seven sigmoids. Upstream runs fp16 and summarises each model's frames with its "confident strategy"; here fp32 and the shared mean. Reference env: Python 3.8, `torch==1.10.0+cpu`, `torchvision==0.11.1+cpu`, `timm==0.4.12`, `numpy<1.24`, `setuptools<70` on Linux x86, with patchelf `--clear-execstack` on torch's libraries.
 
 ### RealForensics
 

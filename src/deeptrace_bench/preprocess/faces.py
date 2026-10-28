@@ -75,8 +75,9 @@ class CropSpec(BaseModel):
     margin: float = 1.3
     # none: a square around the box; five_point: GenD's landmark alignment; box: the box
     # itself, each side widened by (margin - 1) / 2 of its own length, then stretched to
-    # ``size`` (SBI's test crop)
-    align: Literal["none", "five_point", "box"] = "none"
+    # ``size`` (SBI's test crop); letterbox: the same widened box resized so its longer side
+    # is ``size`` and centred on a black square (the DFDC winner's)
+    align: Literal["none", "five_point", "box", "letterbox"] = "none"
 
 
 def sample_frame_indices(n_frames: int, k: int) -> list[int]:
@@ -245,12 +246,60 @@ def stretch_crop(image: np.ndarray, box: np.ndarray, size: int | None, margin: f
     return crop if size is None else cv2.resize(crop, (size, size))
 
 
+def isotropically_resize_image(
+    img: np.ndarray,
+    size: int,
+    interpolation_down: int = cv2.INTER_AREA,
+    interpolation_up: int = cv2.INTER_CUBIC,
+) -> np.ndarray:
+    """Resize so the longer side is ``size``, keeping the aspect ratio.
+
+    Copied from the DFDC winner's ``kernel_utils.py`` (selimsef/dfdc_deepfake_challenge, MIT,
+    Copyright (c) 2020 Selim Seferbekov), which can't be imported: it imports facenet-pytorch
+    and albumentations at the top.
+    """
+    h, w = img.shape[:2]
+    if max(w, h) == size:
+        return img
+    if w > h:
+        scale = size / w
+        h = h * scale
+        w = size
+    else:
+        scale = size / h
+        w = w * scale
+        h = size
+    interpolation = interpolation_up if scale > 1 else interpolation_down
+    return cv2.resize(img, (int(w), int(h)), interpolation=interpolation)
+
+
+def put_to_center(img: np.ndarray, input_size: int) -> np.ndarray:
+    """Centre ``img`` on a black square. Copied from the same ``kernel_utils.py`` (MIT)."""
+    img = img[:input_size, :input_size]
+    image = np.zeros((input_size, input_size, 3), dtype=np.uint8)
+    start_w = (input_size - img.shape[1]) // 2
+    start_h = (input_size - img.shape[0]) // 2
+    image[start_h : start_h + img.shape[0], start_w : start_w + img.shape[1], :] = img
+    return image
+
+
+def letterbox_crop(image: np.ndarray, box: np.ndarray, size: int, margin: float) -> np.ndarray:
+    """The widened box (as ``stretch_crop``) resized to ``size`` on its longer side and centred
+    on a black ``size`` square, as the DFDC winner's ``predict_on_video``."""
+    crop = stretch_crop(image, box, None, margin)
+    return put_to_center(isotropically_resize_image(crop, size), size)
+
+
 def crop_face(image: np.ndarray, box: np.ndarray, kps: np.ndarray, spec: CropSpec) -> np.ndarray:
     """Cut one face from a frame per a model's crop spec."""
     if spec.align == "five_point":
         return align_face(image, kps, spec.size, spec.margin)
     if spec.align == "box":
         return stretch_crop(image, box, spec.size, spec.margin)
+    if spec.align == "letterbox":
+        if spec.size is None:
+            raise ValueError("a letterbox crop needs a size")
+        return letterbox_crop(image, box, spec.size, spec.margin)
     return box_crop(image, box, spec.size, spec.margin)
 
 
