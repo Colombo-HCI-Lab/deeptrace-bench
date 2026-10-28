@@ -1,0 +1,31 @@
+{
+  "run_id": "dfdc_b7__mavos_dd_hi_video__d231cade",
+  "model_id": "dfdc_b7",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "89c6290490bac96b29193a4061b3db9dd3933e36",
+  "weights_sha256": {
+    "final_111_DeepFakeClassifier_tf_efficientnet_b7_ns_0_36": "9db77ab9318863e2f8ab287c8eb83c2232584b82dc2fb41f1d614ddd7900cccb",
+    "final_555_DeepFakeClassifier_tf_efficientnet_b7_ns_0_19": "e2f0066a8ff036add2f5b418d2eba1051c2d2788f84168f00a85207f3b666e04",
+    "final_777_DeepFakeClassifier_tf_efficientnet_b7_ns_0_29": "9fe4311d551a9cbaa1475dbcd6b15fccb31a1e17a8d63069e90a8899aef03b5c",
+    "final_777_DeepFakeClassifier_tf_efficientnet_b7_ns_0_31": "00dd6cd9466cddfd7da7c333d8fecae81593307827093deaf4d7cdf704bc8bfa",
+    "final_888_DeepFakeClassifier_tf_efficientnet_b7_ns_0_37": "d4a2bb4aefde59e045463ad469ed9660765beb086f65a09f9478ab060d403c7c",
+    "final_888_DeepFakeClassifier_tf_efficientnet_b7_ns_0_40": "c1d326a6651011390efe602e42cb8228232d6d18a15c404cf85d7233482f6d6d",
+    "final_999_DeepFakeClassifier_tf_efficientnet_b7_ns_0_23": "849036dc211387420412feb68c7451e98a948072b94e213e1104e2f2bf7791ad",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "929b8b49c06edd2382f45296c384f5a78db7753324f471306271bb06733ef192"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T13:22:55+00:00",
+  "last_started_utc": "2026-10-28T13:22:55+00:00",
+  "repo_commits": [
+    "e68c436c924636518219603c74fb5039661d5e36"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
