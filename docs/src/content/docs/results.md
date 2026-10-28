@@ -188,7 +188,7 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 
 - **MAVOS-DD Hindi is the hard set.** Every model drops from HiDF to MAVOS-DD, by 0.08 (SPSL) to 0.32 (Effort). The eight DeepfakeBench detectors fall to 0.53 to 0.63, close to chance. Its fakes include audio-driven talking heads and lip-sync, which frame-level face-swap detectors weren't trained on.
 - **The best are foundation models and SBI.** GenD PE-L leads on MAVOS-DD (0.798), with SBI (0.777) close behind, the strongest model with a parity check. At a 5% false-alarm rate, no model catches half of MAVOS-DD's fakes.
-- **Mouth and audio cues don't rescue it yet.** LipForensics (lip movement, 0.703) and HAVIC (audio and video together, 0.692) sit mid-table, below GenD PE-L and SBI.
+- **Talking heads are the visual models' blind spot, and HAVIC's strength.** At each model's EER threshold, GenD PE-L misses 78% of EchoMimic's audio-driven talking heads while catching 92 to 95% of face swaps. HAVIC, which reads audio and video together, misses only 4 to 6% of the talking heads but about half the swaps, so it sits mid-table overall (0.692) with LipForensics (0.703). The two cover each other's gaps (miss rates per generator are in each run's `by_method.csv`).
 - **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
 - **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2), and the models marked "no" haven't passed parity, so their numbers don't count as results yet.
 
