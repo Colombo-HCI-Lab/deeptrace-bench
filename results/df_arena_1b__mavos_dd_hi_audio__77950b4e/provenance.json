@@ -1,0 +1,25 @@
+{
+  "run_id": "df_arena_1b__mavos_dd_hi_audio__77950b4e",
+  "model_id": "df_arena_1b",
+  "evalset_id": "mavos_dd_hi_audio",
+  "upstream_commit": "fb6ce85de12c2c5a509d89114adaf827dd75f49f",
+  "weights_sha256": {
+    "pytorch_model.bin": "780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988",
+    "xls-r-1b-config/config.json": "36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "4fee0c1ff4b6ce6e9a90988de2efc9b17d41243294b8c9e8aa0d039fbd7dbb95",
+    "model": "1d65ae205f6d634480742f387384bcefab8ffa49bbd696db73be01aafcc71f98"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T07:29:02+00:00",
+  "last_started_utc": "2026-10-28T07:29:02+00:00",
+  "repo_commits": [
+    "7be064f743d56bc379b9a435f1dba180de32999c"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

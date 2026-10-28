@@ -1,0 +1,3 @@
+group,n,n_real,n_fake,n_failed,auc,eer,threshold,auc_lo,auc_hi,eer_lo,eer_hi,fpr,fnr,acc,bal_acc,ap,tpr_at_fpr01,tpr_at_fpr05,small
+<null>,3632,3632,0,1,,,0.8287356346845627,,,,,0.0013770311209033324,,0.9986229688790966,0.9986229688790966,,,,True
+knnvc,831,0,831,1,,,0.8287356346845627,,,,,,0.0012048192771084338,0.9987951807228915,0.9987951807228915,,,,True

@@ -1,0 +1,88 @@
+{
+  "run_id": "aasist3__urdu_csalt__3576a0d6",
+  "model": "aasist3",
+  "evalset": "urdu_csalt",
+  "role": "south_asian",
+  "namespace": null,
+  "pairing": "same_corpus",
+  "verdict": "clean",
+  "verdict_reasons": [],
+  "score_direction_ok": true,
+  "eval_config_status": "proposed",
+  "parity_passed": false,
+  "overall": {
+    "n": 6794,
+    "n_real": 3398,
+    "n_fake": 3396,
+    "n_failed": 19,
+    "auc": 0.8062857438654276,
+    "eer": 0.2881106533254856,
+    "threshold": 0.9997141361236572,
+    "auc_lo": 0.7962383974321323,
+    "auc_hi": 0.8154782712853612,
+    "eer_lo": 0.2774591230396811,
+    "eer_hi": 0.2990014767696792,
+    "fpr": 0.2881106533254856,
+    "fnr": 0.28782943440923897,
+    "acc": 0.712029520295203,
+    "bal_acc": 0.7120299561326378,
+    "ap": 0.8075841708827141,
+    "tpr_at_fpr01": 0.0,
+    "tpr_at_fpr05": 0.3802191294047972
+  },
+  "unscored_items": 0,
+  "failures": {
+    "too_short": 19
+  },
+  "compute": {
+    "measured": true,
+    "sessions": 1,
+    "sessions_completed": 1,
+    "wall_s": 687.9,
+    "phases_s": {
+      "build_loader": 0.031,
+      "load_model": 9.05,
+      "score": 678.865
+    },
+    "items_timed": 6794,
+    "items_per_s": 10.008,
+    "load_ms": {
+      "mean": 10.6,
+      "p50": 9.52,
+      "p95": 18.31
+    },
+    "infer_ms": {
+      "mean": 89.4,
+      "p50": 84.67,
+      "p95": 146.44
+    },
+    "windows": 17745,
+    "window_unit": "4.04 s audio window",
+    "windows_per_s": 29.3,
+    "realtime_factor": 105.54,
+    "cuda_max_allocated_gb": 2.411,
+    "cuda_max_reserved_gb": 6.237,
+    "gpu_mem_used_max_gb": 7.939,
+    "peak_rss_gb": 3.496,
+    "gpu_util_mean": 88.3,
+    "power_mean_w": 287.7,
+    "temp_max_c": 79.0,
+    "energy_wh": 55.136,
+    "energy_wh_per_1k_items": 8.115,
+    "env": {
+      "device": "cuda",
+      "python": "3.12.14",
+      "torch": "2.8.0+cu128",
+      "cuda_runtime": "12.8",
+      "cudnn": 91002,
+      "arch": "x86_64",
+      "cpu": "AMD Ryzen 9 9950X 16-Core Processor",
+      "cpu_count": 32,
+      "ram_gb": 64.9,
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_gb": 25.3,
+      "driver": "610.57.04",
+      "compute_capability": "8.6"
+    }
+  }
+}

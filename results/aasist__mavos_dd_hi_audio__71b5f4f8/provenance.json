@@ -1,0 +1,24 @@
+{
+  "run_id": "aasist__mavos_dd_hi_audio__71b5f4f8",
+  "model_id": "aasist",
+  "evalset_id": "mavos_dd_hi_audio",
+  "upstream_commit": "a04c9863f63d44471dde8a6abcb3b082b07cd1d1",
+  "weights_sha256": {
+    "AASIST.pth": "51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "4fee0c1ff4b6ce6e9a90988de2efc9b17d41243294b8c9e8aa0d039fbd7dbb95",
+    "model": "9cb92dcb528d4533ca39f95f501a8ea54291219a6e02d106cb4f4b1ddb4d84de"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T06:56:32+00:00",
+  "last_started_utc": "2026-10-28T06:56:32+00:00",
+  "repo_commits": [
+    "7be064f743d56bc379b9a435f1dba180de32999c"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

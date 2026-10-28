@@ -1,0 +1,26 @@
+{
+  "run_id": "aasist3__urdu_csalt__3576a0d6",
+  "model_id": "aasist3",
+  "evalset_id": "urdu_csalt",
+  "upstream_commit": "33c39c24525c871225ad3abe3c8ec3b0e1ce86de",
+  "weights_sha256": {
+    "aasist3.safetensors": "a06d43d8d4a7e11b62fb4fa833f13a598fee23be7c368c416df4bec2e44e664f",
+    "aasist3_config.json": "0bd97c713c1d4b1f2a9be60cc0eb7183f49789f8af95fa8319b3113e6392ba81",
+    "xlsr-53-config/config.json": "48576e4a1b0f02c7770f57e236747169459db9a8b9a529bbd7a58bbbf52c45b5"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "5d01f577c119f523ed8d733a213140a5df1a24d5636e25d9b3dc31cdc6ae99dd",
+    "model": "c0b6548317655a160731d3ad5388578772fa0538393a25e7acb866e552b7faaf"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T07:53:32+00:00",
+  "last_started_utc": "2026-10-28T07:53:32+00:00",
+  "repo_commits": [
+    "6accc48a8e58a16d6f128ede9e129a2051cdd643"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

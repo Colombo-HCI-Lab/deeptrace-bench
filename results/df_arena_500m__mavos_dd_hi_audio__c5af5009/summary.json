@@ -1,0 +1,88 @@
+{
+  "run_id": "df_arena_500m__mavos_dd_hi_audio__c5af5009",
+  "model": "df_arena_500m",
+  "evalset": "mavos_dd_hi_audio",
+  "role": "south_asian",
+  "namespace": null,
+  "pairing": "same_corpus",
+  "verdict": "clean",
+  "verdict_reasons": [],
+  "score_direction_ok": true,
+  "eval_config_status": "proposed",
+  "parity_passed": true,
+  "overall": {
+    "n": 4463,
+    "n_real": 3632,
+    "n_fake": 831,
+    "n_failed": 2,
+    "auc": 0.9999973454821766,
+    "eer": 0.001101624896722666,
+    "threshold": 0.9993301928043365,
+    "auc_lo": 0.9999913728170738,
+    "auc_hi": 1.0,
+    "eer_lo": 0.0,
+    "eer_hi": 0.0019278435692646654,
+    "fpr": 0.001101624896722666,
+    "fnr": 0.0,
+    "acc": 0.9991033400582829,
+    "bal_acc": 0.9994491875516387,
+    "ap": 0.9999884238494965,
+    "tpr_at_fpr01": 1.0,
+    "tpr_at_fpr05": 1.0
+  },
+  "unscored_items": 0,
+  "failures": {
+    "too_short": 2
+  },
+  "compute": {
+    "measured": true,
+    "sessions": 1,
+    "sessions_completed": 1,
+    "wall_s": 608.9,
+    "phases_s": {
+      "build_loader": 0.055,
+      "load_model": 7.669,
+      "score": 601.164
+    },
+    "items_timed": 4463,
+    "items_per_s": 7.424,
+    "load_ms": {
+      "mean": 17.98,
+      "p50": 16.13,
+      "p95": 33.76
+    },
+    "infer_ms": {
+      "mean": 116.68,
+      "p50": 99.38,
+      "p95": 250.02
+    },
+    "windows": 14987,
+    "window_unit": "4.04 s audio window",
+    "windows_per_s": 28.79,
+    "realtime_factor": 100.65,
+    "cuda_max_allocated_gb": 1.836,
+    "cuda_max_reserved_gb": 1.917,
+    "gpu_mem_used_max_gb": 2.554,
+    "peak_rss_gb": 4.474,
+    "gpu_util_mean": 84.4,
+    "power_mean_w": 165.7,
+    "temp_max_c": 68.0,
+    "energy_wh": 26.701,
+    "energy_wh_per_1k_items": 5.983,
+    "env": {
+      "device": "cuda",
+      "python": "3.12.14",
+      "torch": "2.8.0+cu128",
+      "cuda_runtime": "12.8",
+      "cudnn": 91002,
+      "arch": "x86_64",
+      "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+      "cpu_count": 16,
+      "ram_gb": 37.8,
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_gb": 25.8,
+      "driver": "617.14",
+      "compute_capability": "8.6"
+    }
+  }
+}

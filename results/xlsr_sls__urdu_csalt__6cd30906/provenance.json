@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_sls__urdu_csalt__6cd30906",
+  "model_id": "xlsr_sls",
+  "evalset_id": "urdu_csalt",
+  "upstream_commit": "89a09ac4404c5687d96d6c123fcf6db20e4e4b38",
+  "weights_sha256": {
+    "MMpaper_model.pth": "0d315184aa8e6f017ea72c4d2458c11bae8f07fd743fe860a3aa932e36135fa6",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "5d01f577c119f523ed8d733a213140a5df1a24d5636e25d9b3dc31cdc6ae99dd",
+    "model": "e99588695a16e06df4b1beaa0cc97e2c2ba2513534852cb58b8120e4a2a2b287"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T08:20:24+00:00",
+  "last_started_utc": "2026-10-28T08:20:24+00:00",
+  "repo_commits": [
+    "51417e0f2a271cf007fb9bd4721a8f28511563f8"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

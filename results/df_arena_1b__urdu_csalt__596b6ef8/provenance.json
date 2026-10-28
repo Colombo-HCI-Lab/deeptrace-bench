@@ -1,0 +1,25 @@
+{
+  "run_id": "df_arena_1b__urdu_csalt__596b6ef8",
+  "model_id": "df_arena_1b",
+  "evalset_id": "urdu_csalt",
+  "upstream_commit": "fb6ce85de12c2c5a509d89114adaf827dd75f49f",
+  "weights_sha256": {
+    "pytorch_model.bin": "780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988",
+    "xls-r-1b-config/config.json": "36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "5d01f577c119f523ed8d733a213140a5df1a24d5636e25d9b3dc31cdc6ae99dd",
+    "model": "1d65ae205f6d634480742f387384bcefab8ffa49bbd696db73be01aafcc71f98"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T07:35:38+00:00",
+  "last_started_utc": "2026-10-28T07:35:38+00:00",
+  "repo_commits": [
+    "6accc48a8e58a16d6f128ede9e129a2051cdd643"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
