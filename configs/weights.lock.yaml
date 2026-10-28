@@ -28,6 +28,11 @@ f3net:
   f3net_best.pth: deee7d25bfc1b8b5ba83054a664880078de51213b1067f1e472c2bed7cc667f9
 ffd:
   ffd_best.pth: 445f5b70f115bf777067a4bc498dd73847964dc23f90e5d516b71d0ebb4f65a7
+ftcn:
+  ftcn_tt.pth: 3d08fc78174bbfdb3fbede317b95dcac9095202ed7113649eecf6e2ef5ee77d8
+genconvit:
+  genconvit_ed_inference.pth: 86f0c2e875016435def7d031b357bda5dc0061367290d73de121186df3f03f8c
+  genconvit_vae_inference.pth: 53c627c82d1439fc80e18ac462c1ed6969a3babe5376124a5c38d1c0c88c9042
 gend:
   clip-vit-large-patch14/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
   clip-vit-large-patch14/merges.txt: 9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a
