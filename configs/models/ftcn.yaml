@@ -17,7 +17,7 @@ adapter: deeptrace_bench.models.ftcn:FTCNDetector
 input:
   inputs: face_clips              # preprocess.clips.FaceClipLoader, not face crops
   frame_sampling: consecutive
-  max_frames: 96                  # the first 96 frames; upstream reads up to 768
+  max_frames: 100                 # the first 100 frames, sharing LipForensics' detection cache; upstream reads up to 768
   min_face_frames: 16             # a shorter track can't be padded to a clip (upstream asserts)
   clip_frames: 32
   clip_stride: 16                 # upstream slides one frame at a time
