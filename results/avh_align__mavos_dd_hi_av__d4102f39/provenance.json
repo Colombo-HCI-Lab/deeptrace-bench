@@ -1,0 +1,27 @@
+{
+  "run_id": "avh_align__mavos_dd_hi_av__d4102f39",
+  "model_id": "avh_align",
+  "evalset_id": "mavos_dd_hi_av",
+  "upstream_commit": "55401ded7d94a6ad59106c401696d89ce8d16faf",
+  "weights_sha256": {
+    "2DFAN4-cd938726ad.zip": "cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46",
+    "AVH-Align_AV1M.pt": "71f7b4fdfe153a2ed7f8a4f2fa552662af3909aa009c80f089f8aa0cc45eda85",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "self_large_vox_433h.pt": "2689a9e9e8d601b30f9181342017dc0215669990732d8920ac7065c88f81d954"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "52fdc6dee089030821452bf35e6a7f1985f10161fa77189dc3f29edc9a5c2110",
+    "model": "304adecf6c2ace4a36f73843d4c28b4eb91e45207f4504e9d412cb6cc10309e2"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T17:59:03+00:00",
+  "last_started_utc": "2026-10-28T17:59:03+00:00",
+  "repo_commits": [
+    "d8e95a610e503d5397774e1ed4cda6c1374dde3a"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

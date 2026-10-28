@@ -5,11 +5,11 @@ description: "What each experiment asked, what the zero-shot runs so far show, a
 
 ## Read this first
 
-- **Two snapshots.** The first zero-shot round (2026-10-12) and the first full benchmark round (2026-10-27 to 28, [below](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)), which is still scoring audio. The latest number for every run is in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs).
+- **Two snapshots.** The first zero-shot round (2026-10-12) and the first full benchmark round (2026-10-27 to 29, [below](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)), which is still scoring audio. The latest number for every run is in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs).
 - **Zero-shot.** No model was trained or fine-tuned on these evalsets.
 - **Provisional rules.** The evaluation setup isn't settled ([decision 5](progress.md#open-decisions-that-shape-the-results)) and nothing has gone through `evaluate.py --publish`, so numbers can move.
 - **`clean` isn't proof the data is new to a model.** The guard compares datasets, not the generators behind them ([verdicts](evaluation.md#contamination-verdicts)).
-- **Video is provisional.** No video model has a settled score direction, and GenD has no parity check ([Models](models.md#status)).
+- **Video is provisional.** No video model has a settled score direction, and GenD, GenD PE-L, Effort, LipForensics and HAVIC have no parity check ([Models](models.md#status)).
 
 ## Experiments
 
@@ -166,17 +166,21 @@ By race: AUC, and the false-positive rate (FPR) on real faces at each model's gl
 
 ## The 2026-10-28 round: full HiDF and MAVOS-DD Hindi
 
-Every video model with weights was scored on all of HiDF (8,722 clips) and all of MAVOS-DD Hindi video (7,513 clips), through `evaluate.py --publish`, on one RTX 3090 on SPARK and two 24 GB GPUs outside it. Every pair's time, memory and energy are in `results/ledger.csv`. TPR at 5% FPR is the share of fakes caught when 5% of real clips are flagged.
+Every video model with weights was scored on all of HiDF (8,722 clips) and all of MAVOS-DD Hindi video (7,513 clips), the audio-visual models on MAVOS-DD's audio and video together, through `evaluate.py --publish`, on one RTX 3090 on SPARK and two 24 GB GPUs outside it. Every pair's time, memory and energy are in `results/ledger.csv`. TPR at 5% FPR is the share of fakes caught when 5% of real clips are flagged.
 
 | Model | Parity | HiDF AUC | HiDF EER | HiDF TPR@5% | MAVOS-DD AUC | MAVOS-DD EER | MAVOS-DD TPR@5% |
 | ----- | :----: | -------: | -------: | ----------: | -----------: | -----------: | --------------: |
 | GenD | no | 0.952 | 11.5% | 0.78 | 0.741 | 33.4% | 0.48 |
-| GenD PE-L | no | 0.940 | 13.4% | 0.70 | **0.798** | 28.7% | 0.48 |
+| GenD PE-L | no | 0.940 | 13.4% | 0.70 | 0.798 | 28.7% | 0.48 |
+| RealForensics | yes | 0.931 | 14.5% | 0.64 | 0.779 | 29.3% | 0.36 |
 | Effort | no | 0.919 | 15.8% | 0.69 | 0.603 | 42.7% | 0.42 |
 | SBI | yes | 0.877 | 20.0% | 0.45 | 0.777 | 29.3% | 0.29 |
 | LipForensics | no | 0.870 | 21.6% | 0.50 | 0.703 | 35.4% | 0.32 |
+| FTCN | yes | 0.865 | 21.8% | 0.40 | **0.854** | 22.6% | 0.54 |
+| DFDC winner (7 × EfficientNet-B7) | yes | 0.859 | 21.8% | 0.49 | 0.390 | 59.2% | 0.12 |
 | Xception | yes | 0.804 | 27.2% | 0.31 | 0.628 | 41.5% | 0.19 |
 | UCF | yes | 0.782 | 29.0% | 0.29 | 0.546 | 47.9% | 0.19 |
+| GenConViT (ED branch) | yes | 0.779 | 29.1% | 0.31 | 0.541 | 49.1% | 0.17 |
 | CORE | yes | 0.777 | 29.6% | 0.28 | 0.534 | 48.2% | 0.10 |
 | RECCE | yes | 0.770 | 29.7% | 0.29 | 0.539 | 47.4% | 0.15 |
 | F3Net | yes | 0.761 | 30.6% | 0.25 | 0.527 | 48.1% | 0.15 |
@@ -185,30 +189,34 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 | SRM | yes | 0.716 | 34.4% | 0.22 | 0.556 | 46.5% | 0.11 |
 | SPSL | yes | 0.680 | 36.6% | 0.15 | 0.598 | 43.4% | 0.09 |
 | HAVIC (audio and video) | no | n/a | n/a | n/a | 0.692 | 37.5% | 0.27 |
+| AVH-Align (audio and video) | yes | n/a | n/a | n/a | 0.520 | 48.4% | 0.05 |
 
-- **MAVOS-DD Hindi is the hard set.** Every model drops from HiDF to MAVOS-DD, by 0.08 (SPSL) to 0.32 (Effort). The eight DeepfakeBench detectors fall to 0.53 to 0.63, close to chance. Its fakes include audio-driven talking heads and lip-sync, which frame-level face-swap detectors weren't trained on.
-- **The best are foundation models and SBI.** GenD PE-L leads on MAVOS-DD (0.798), with SBI (0.777) close behind, the strongest model with a parity check. At a 5% false-alarm rate, no model catches half of MAVOS-DD's fakes.
-- **Talking heads are the visual models' blind spot, and HAVIC's strength.** At each model's EER threshold, GenD PE-L misses 78% of EchoMimic's audio-driven talking heads while catching 82 to 95% of face swaps. HAVIC, which reads audio and video together, misses only 4 to 6% of the talking heads but about half the swaps, so it sits mid-table overall (0.692) with LipForensics (0.703). The two cover each other's gaps (miss rates per generator are in each run's `by_method.csv`).
+- **MAVOS-DD Hindi is the hard set.** Every model but FTCN drops from HiDF to MAVOS-DD, by 0.08 (SPSL) to 0.47 (the DFDC winner); FTCN loses 0.01. The eight DeepfakeBench detectors fall to 0.53 to 0.63, close to chance. Its fakes include audio-driven talking heads and lip-sync, which frame-level face-swap detectors weren't trained on.
+- **Motion over time is what holds up.** FTCN, which looks at short clips rather than single frames, leads MAVOS-DD (0.854, with parity) and is the only model there that catches more than half the fakes at a 5% false-alarm rate (0.54). RealForensics, also temporal, is second on HiDF (0.931, behind GenD) and keeps 0.779 on MAVOS-DD. Of the frame-level models, GenD PE-L (0.798) and SBI (0.777) do best.
+- **The DFDC winner is backwards on MAVOS-DD.** It scores 0.859 on HiDF but 0.390 on MAVOS-DD: at its EER threshold it flags 59% of real Hindi videos and misses 98% of EchoMimic's and 94% of Sonic's talking heads. It matches upstream within 1e-5 per face crop, so this is the model, not the adapter. GenConViT also falls to chance (0.541).
+- **AVH-Align doesn't transfer.** The audio-visual alignment model, trained on AV-Deepfake1M (English), sits at chance on MAVOS-DD (0.520): it catches 92% of Roop face swaps and 87% of MEMO talking heads, but misses 76% of Sonic's and 61% of LivePortrait's. Its parity check passes, so this is how it behaves on Hindi.
+- **Talking heads are the frame models' blind spot, and the temporal and audio-visual models' strength.** At each model's EER threshold, GenD PE-L misses 78% of EchoMimic's audio-driven talking heads while catching 82 to 95% of face swaps. FTCN catches every EchoMimic clip and 98% of LivePortrait's, though it still misses about half of MEMO's and Sonic's. HAVIC, which reads audio and video together, misses only 4 to 6% of the talking heads but about half the swaps, so it sits mid-table overall (0.692) with LipForensics (0.703). The two cover each other's gaps (miss rates per generator are in each run's `by_method.csv`).
 - **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
 - **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2), and the models marked "no" haven't passed parity, so their numbers don't count as results yet.
 
-Audio is still being scored (2026-10-28). The first 20 pairs:
+Audio is still being scored (2026-10-29). The first 30 pairs, AUC; a dash is still queued:
 
-| Model | Parity | Urdu CSALT AUC | MAVOS-DD Hindi audio AUC | MAVOS-DD EER |
-| ----- | :----: | -------------: | -----------------------: | -----------: |
-| AASIST | yes | 0.863 | 0.635 | 38.2% |
-| AASIST-L | yes | 0.861 | 0.644 | 38.4% |
-| XLS-R + AASIST | yes | 0.802 | 0.886 | 16.9% |
-| AntiDeepfake w2v2 small | yes | 0.969 | 0.999 | 1.3% |
-| AntiDeepfake MMS-300M | yes | 0.998 | 1.000 | 0.1% |
-| DF Arena 500M | yes | 0.981 | 1.000 | 0.1% |
-| DF Arena 1B | yes | 0.995 | 1.000 | 0.1% |
-| AASIST3 | no | 0.806 | 0.907 | 18.2% |
-| XLSR-Mamba | no | 0.691 | 0.976 | 6.3% |
-| XLS-R + SLS | no | 0.855 | 0.994 | 3.1% |
+| Model | Parity | Urdu CSALT | MAVOS-DD Hindi audio (EER) | IndicSynth Bengali | IndicSynth Urdu |
+| ----- | :----: | ---------: | -------------------------: | -----------------: | --------------: |
+| AASIST | yes | 0.863 | 0.635 (38.2%) | 0.214 | 0.343 |
+| AASIST-L | yes | 0.861 | 0.644 (38.4%) | 0.234 | – |
+| XLS-R + AASIST | yes | 0.802 | 0.886 (16.9%) | 0.654 | 0.777 |
+| AntiDeepfake w2v2 small | yes | 0.969 | 0.999 (1.3%) | 0.998 | – |
+| AntiDeepfake MMS-300M | yes | 0.998 | 1.000 (0.1%) | 0.999 | 1.000 |
+| DF Arena 500M | yes | 0.981 | 1.000 (0.1%) | 0.995 | – |
+| DF Arena 1B | yes | 0.995 | 1.000 (0.1%) | 1.000 | – |
+| AASIST3 | no | 0.806 | 0.907 (18.2%) | – | – |
+| XLSR-Mamba | no | 0.691 | 0.976 (6.3%) | – | – |
+| XLS-R + SLS | no | 0.855 | 0.994 (3.1%) | – | – |
 
 - **Urdu CSALT reproduces.** All seven models with parity matched their 2026-10-12 runs (AUC and EER within 0.001, same counts) on a different GPU.
 - **MAVOS-DD's audio is easy for the post-trained models.** AntiDeepfake and DF Arena separate it almost perfectly, while the ASVspoof-only AASIST pair stays near 0.64. This is insight 6's ceiling again: their training collections may share MAVOS-DD's voice generators, which the guard can't check.
+- **IndicSynth Bengali and Urdu repeat the Hindi picture.** The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more.
 
 ## What the results can't say yet
 

@@ -1,0 +1,24 @@
+{
+  "run_id": "aasist__indicsynth_bn__001a1fd6",
+  "model_id": "aasist",
+  "evalset_id": "indicsynth_bn",
+  "upstream_commit": "a04c9863f63d44471dde8a6abcb3b082b07cd1d1",
+  "weights_sha256": {
+    "AASIST.pth": "51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "7305c75bd80e847252f71dccb9f5e996c21e86e2fd4cd0165aceab856b717893",
+    "model": "9cb92dcb528d4533ca39f95f501a8ea54291219a6e02d106cb4f4b1ddb4d84de"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T19:47:37+00:00",
+  "last_started_utc": "2026-10-28T19:47:37+00:00",
+  "repo_commits": [
+    "043f50b1b4aac1e9c9d21d44e842309506230b3f"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

@@ -5,15 +5,24 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-10-28:
+As of 2026-10-29:
 
-- **Models.** 28 detectors have adapters and weights (FTCN, GenConViT and RealForensics joined on 2026-10-28, and Effort's weights arrived). 20 pass parity against upstream code ([models.md](models.md#parity)). Nine more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
+- **Models.** 30 detectors have adapters and weights (FTCN, GenConViT, RealForensics, the DFDC winner and AVH-Align joined on 2026-10-28, and Effort's weights arrived). 22 pass parity against upstream code ([models.md](models.md#parity)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** The first full benchmark round (2026-10-27 to 28) scored every video model with weights on all of HiDF and MAVOS-DD Hindi, and is working through the audio grid ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
+- **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and is working through the audio grid ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)).
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-10-29: five more video adapters scored
+
+Commits `cefce3a` to `18a08d5`.
+
+- FTCN, GenConViT (its ED branch), RealForensics, the DFDC winner's seven-model ensemble and AVH-Align have adapters, each matching upstream in upstream's own environment within 1e-5. AVH-Align runs on an AV-HuBERT rebuilt without fairseq.
+- All five were scored on full HiDF and MAVOS-DD Hindi (AVH-Align on MAVOS-DD's audio and video). The temporal models hold up best on MAVOS-DD; the DFDC winner falls below chance there ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).
+- A power cut on 2026-10-28 stopped every machine mid-wave; runs resumed from their saved parts, so two RealForensics runs record only the resumed session's compute.
+- `evaluate.py` now writes each result through a temporary file and a rename: over the workers' SMB mount, a shorter file copied over a longer one had kept the old last byte.
 
 ### 2026-10-28: the first full benchmark round
 
@@ -93,11 +102,11 @@ Commits `15a2e2c` and `d3a6d03`.
 In order:
 
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
-2. **The rest of the round**: FTCN, GenConViT and RealForensics on both video sets, then the audio grid (IndicSynth Bengali and Urdu, MAVOS-DD Hindi audio, MLAAD, SpeechFake, BD-GRF6), all queued on 2026-10-28.
+2. **The rest of the round**: the audio grid (the rest of IndicSynth Bengali and Urdu and of the reproduction sets, then MLAAD, SpeechFake and BD-GRF6), running on two GPUs since 2026-10-29.
 3. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 4. **A generator-level contamination check** of DF Arena and AntiDeepfake. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean.
 5. **The shortcut probe**, then the cross-corpus sets that wait on it (E5: MLAAD, SpeechFake, BD-GRF6, `mlaad_si`, the only Sinhala fakes).
-6. **Parity still owed:** GenD (the export can't handle native-size crops yet), XLS-R + SLS (needs the fairseq zip its checkout ships), XLSR-Mamba, AASIST3, GenD PE-L, HAVIC, LipForensics, Effort.
+6. **Parity still owed:** GenD (the letterbox crop added for the DFDC winner may unblock its export), XLS-R + SLS (needs the fairseq zip its checkout ships), XLSR-Mamba, AASIST3, GenD PE-L, HAVIC, LipForensics, Effort.
 7. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
 8. **deeptrace's own data** (E7), once collection starts.
 
