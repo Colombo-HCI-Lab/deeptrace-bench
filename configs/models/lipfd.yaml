@@ -1,0 +1,22 @@
+id: lipfd
+name: LipFD
+modality: audio_video
+status: later
+licence: none stated; code imported from the pinned checkout, never copied
+paper: "Liu et al., Lips Are Lying: Spotting the Temporal Inconsistency between Audio and Visual in Lip-Syncing DeepFakes, NeurIPS 2024"
+upstream:
+  repo: AaronComo/LipFD
+  commit: 3ed140aec0345dcffa07f7a7468ea8fe800afe41
+weights:
+  - name: ckpt.pth
+    kind: gdrive
+    drive_id: 1NPAcx0QS8N9v_9qUr-51jBaL9kGDT-cp
+training_data:
+  - {dataset: avlips, level: train, note: "Wav2Lip, MakeItTalk and TalkLip fakes over LRS3 speakers"}
+  - {dataset: lrs3, level: train, note: "through AVLips' real side"}
+input:
+  inputs: mouths
+  clip_frames: 25                 # provisional; set with the adapter
+  max_frames: 100
+  needs_audio: true
+notes: Built for lip-sync fakes specifically, MAVOS-DD's largest manipulation family. Weights on Google Drive (file confirmed 2026-10-28). No adapter yet.

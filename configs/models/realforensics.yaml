@@ -1,0 +1,22 @@
+id: realforensics
+name: RealForensics
+modality: video
+status: later
+licence: MIT
+paper: Haliassos et al., Leveraging Real Talking Faces via Self-Supervision for Robust Forgery Detection, CVPR 2022
+upstream:
+  repo: ahaliassos/RealForensics
+  commit: a53e849407d2fd5be0f0a7eb3df7d1a846b5b803
+weights:
+  - name: realforensics_ff.pth
+    kind: gdrive
+    drive_id: 1nqEVlRN51WyzMWSeB7x9okcaegFgA-BQ
+training_data:
+  - {dataset: lrw, level: pretrain, note: "stage 1, self-supervised on real talking faces with their audio"}
+  - {dataset: ffpp, level: train, split: train, note: "stage 2, c23"}
+input:
+  inputs: mouths
+  frame_sampling: consecutive
+  clip_frames: 25
+  max_frames: 100                 # provisional, as LipForensics; set with the adapter
+notes: LipForensics' successor from the same author, pretrained on real talking faces, so it targets the lip-sync and talking-head fakes that dominate MAVOS-DD; audio is used only in pretraining. The FF++-trained checkpoint and four leave-one-manipulation-out checkpoints are on Google Drive (file confirmed to exist 2026-10-28). No adapter yet; LipForensics' mouth pipeline should serve it.

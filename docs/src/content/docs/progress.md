@@ -15,6 +15,14 @@ As of 2026-10-19:
 
 ## Timeline
 
+### 2026-10-28: a wider video roster
+
+Config and docs only; no new runs.
+
+- Eleven video and audio-visual models join the registry with weights confirmed reachable, none adapted yet ([Models](models.md#added-2026-10-28-not-adapted-yet)): FTCN, RealForensics, AVAD, AVH-Align, GenConViT, the DFDC winner, LipFD, LAA-Net, FakeSTormer, UnivFD, and TALL (blocked, no weights).
+- Ten datasets join it ([Datasets](datasets.md#at-a-glance)). Four are South Asian: HAV-DF (Hindi), DeepFakeX (Urdu), ILLUSION (Indic languages) and INDIFACE, all on request. Counterfactual-Deepfake-Bench is open and has an explicit Indian cell. TalkingHeadBench, KoDF, Celeb-DF++, AV-Deepfake1M and DFDC are anchors and contrasts.
+- Video comes before audio in the work queue from here on.
+
 ### 2026-10-19: any pair on SPARK, one command to order it
 
 The changes are in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (`abeac55` to `32d361c`); here, only [Where to run](spark.md) changed.

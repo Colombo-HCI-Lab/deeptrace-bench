@@ -1,0 +1,20 @@
+id: fakestormer
+name: FakeSTormer
+modality: video
+status: later
+licence: SnT academic licence (research use only)
+paper: Nguyen et al., FakeSTormer, ICCV 2025
+upstream:
+  repo: 10Ring/FakeSTormer
+  commit: c5b5f75100b878212a192c00013275f275f86182
+weights:
+  - name: fakestormer.pth
+    kind: manual
+    instructions: The README links a Dropbox folder with the checkpoint; take it into $DTB_ROOT/weights/fakestormer/ and record its hash with setup_models.py --record. Folder page loads, file names unverified (2026-10-28).
+training_data:
+  - {dataset: ffpp, level: train, split: train, note: "real videos only, with video-level pseudo-fakes"}
+input:
+  inputs: faces
+  frame_sampling: consecutive
+  clip_frames: 16
+notes: A 2025 spatio-temporal transformer trained like SBI on real videos with synthetic fakes, the temporal counterpart of LAA-Net. No adapter yet.

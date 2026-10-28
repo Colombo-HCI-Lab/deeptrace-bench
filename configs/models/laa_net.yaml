@@ -1,0 +1,19 @@
+id: laa_net
+name: LAA-Net
+modality: video
+status: later
+licence: SnT academic licence (research use only)
+paper: Nguyen et al., LAA-Net, CVPR 2024
+upstream:
+  repo: 10Ring/LAA-Net
+  commit: a33446ab94b3bc0d176a879d43e0700adc52c817
+weights:
+  - name: laa_net_sbi.pth
+    kind: manual
+    instructions: The README links a Dropbox folder holding the BI and SBI checkpoints; take the SBI one into $DTB_ROOT/weights/laa_net/ and record its hash with setup_models.py --record. Folder page loads, file names unverified (2026-10-28).
+training_data:
+  - {dataset: ffpp, level: train, split: train, note: "original (c0) real frames only, with blended pseudo-fakes"}
+input:
+  crop: {size: 384, margin: 1.3, align: five_point}
+  frames_per_clip: 32
+notes: SBI-style training on real faces only plus localised artefact attention. SBI is the second most robust model on full MAVOS-DD here (AUC 0.7765, 2026-10-28), so its newer relative is the natural next test. Upstream uses dlib landmarks, which we don't install. No adapter yet.

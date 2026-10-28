@@ -1,0 +1,14 @@
+id: celeb_df_pp
+name: Celeb-DF++
+modality: video
+role: reproduction
+status: request
+access:
+  kind: manual
+  page: https://github.com/OUC-VAS/Celeb-DF-PP
+  request: Fill in the request form (wj.qq.com, with a Google Form fallback) linked from the repo; the download link comes by email. Contact Yuezun Li.
+licence: CC BY-NC 4.0 plus the dataset's terms of use
+contains: [real, fake]
+size_gb: null
+derived_from: [celeb_df_v2]
+notes: Li et al., arXiv 2507.18015. Extends Celeb-DF v2 to 53,196 fakes from 22 face-swap, reenactment and talking-face methods over the same 590 real videos (about 88% Caucasian, 5% Asian). A newer-generator contrast anchor; checked 2026-10-28.

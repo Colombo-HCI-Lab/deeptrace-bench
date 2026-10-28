@@ -1,0 +1,15 @@
+id: talkingheadbench
+name: TalkingHeadBench
+modality: video
+role: reproduction
+status: open
+access:
+  kind: hf
+  page: https://huggingface.co/datasets/luchaoqi/TalkingHeadBench
+  repo: luchaoqi/TalkingHeadBench
+  revision: cd5f4672a13c61efe0df6aa79c61bbc9602ff625
+licence: MIT (the real videos follow FFHQ, CelebV-HQ and FF++ terms)
+contains: [real, fake]
+size_gb: null
+derived_from: [celebv_hq, ffpp, ffhq]
+notes: Xiong et al., WACV 2026. 2,994 fake and 2,312 real clips from recent talking-head generators (Hallo, Hallo2, AniPortrait, LivePortrait, EMOPortraits, plus MAGI-1 and Hallo3 in test only). The modern-generator, non-South-Asian anchor for MAVOS-DD's talking heads. Ungated on the Hub, checked 2026-10-28. Its FF++-derived reals overlap the training data of every FF++ model, so the guard must see that derived_from.

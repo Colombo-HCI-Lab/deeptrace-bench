@@ -9,6 +9,9 @@
   note: Not public, so overlap with our data can't be checked.
 - id: lrs2
   name: LRS2 (BBC lip reading sentences)
+- id: lrs3
+  name: LRS3 (TED and TEDx lip reading sentences)
+  note: AV-HuBERT's pretraining and AVLips' real side.
 - id: lrw
   name: LRW (lip reading in the wild)
   note: LipForensics' lip-reading pretraining.
@@ -108,3 +111,21 @@
 - id: pe_pretraining
   name: Perception Encoder pretraining data (Meta)
   note: Not public, so overlap with our data can't be checked. GenD PE-L's backbone.
+- id: deepfake_timit
+  name: DeepfakeTIMIT (face swaps over VidTIMIT)
+  note: Part of GenConViT's training mix.
+- id: avlips
+  name: AVLips (LipFD's lip-sync training set, over LRS3)
+  note: Wav2Lip, MakeItTalk and TalkLip fakes.
+- id: progan_forensynths
+  name: ProGAN images from ForenSynths (Wang et al., CVPR 2020)
+  note: UnivFD's linear probe and NPR train on it; GAN images of 20 LSUN classes, no faces.
+- id: celebv_hq
+  name: CelebV-HQ (35k celebrity face videos)
+  note: Real side of TalkingHeadBench and Counterfactual-Deepfake-Bench.
+- id: celebv_text
+  name: CelebV-Text (face videos with text descriptions)
+  note: Identity source for ILLUSION's Set A.
+- id: ffhq
+  name: FFHQ (Flickr faces)
+  note: Source images for TalkingHeadBench's portrait animations.

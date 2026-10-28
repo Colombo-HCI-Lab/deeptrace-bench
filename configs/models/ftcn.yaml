@@ -1,0 +1,20 @@
+id: ftcn
+name: FTCN (FTCN+TT)
+modality: video
+status: later
+licence: none stated (upstream issue 16 asks for one); code imported from the pinned checkout, never copied
+paper: Zheng et al., Exploring Temporal Coherence for More General Video Face Forgery Detection, ICCV 2021
+upstream:
+  repo: yinglinzheng/FTCN
+  commit: 853256a888bd5c4879955c06a4c5a666740f91a4
+weights:
+  - name: ftcn_tt.pth
+    kind: github_release
+    url: https://github.com/yinglinzheng/FTCN/releases/download/weights/ftcn_tt.pth
+training_data:
+  - {dataset: ffpp, level: train, split: train, note: "c23 per the README and ftcn_tt.yaml; whether DFDC data touched training is upstream issue 17, unanswered"}
+input:
+  inputs: faces
+  frame_sampling: consecutive
+  clip_frames: 32
+notes: The roster's first purely temporal video detector (spatial kernels set to 1), so it reads motion incoherence rather than face texture, the cue most likely to carry over to South Asian faces. Release asset confirmed reachable 2026-10-28 (59.2 MB). Upstream targets PyTorch 1.4; no adapter yet.

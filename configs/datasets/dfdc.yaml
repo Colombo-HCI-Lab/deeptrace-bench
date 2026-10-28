@@ -1,0 +1,14 @@
+id: dfdc
+name: DFDC (Deepfake Detection Challenge)
+modality: audio_video
+role: reproduction
+status: request
+access:
+  kind: manual
+  page: https://ai.meta.com/datasets/dfdc/
+  request: Meta's page hands out the data through AWS with an IAM account; the Kaggle competition copy needs a Kaggle login and accepting the competition rules. Neither was tried (2026-10-28).
+licence: DFDC data licence (research use)
+contains: [real, fake]
+languages: [en]
+size_gb: 470
+notes: Dolhansky et al., 2020. 124k videos of 3,426 paid actors, far more varied in skin tone than FF++ though without released ethnicity labels. Listed for the contamination guard (GenConViT and the DFDC winner trained on it) and as the in-domain anchor for those two models.

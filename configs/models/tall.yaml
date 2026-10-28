@@ -1,0 +1,16 @@
+id: tall
+name: TALL (thumbnail layout)
+modality: video
+status: blocked
+licence: MIT
+paper: Xu et al., TALL, ICCV 2023
+upstream:
+  repo: rainy-xu/TALL4Deepfake
+  commit: 96d28d1707100f28968c306c2df636fc984c155a
+weights:
+  - name: tall.pth
+    kind: manual
+    instructions: No checkpoint is released (upstream issues 14, 16 and 17; DeepfakeBench ships none either, checked 2026-10-28). MAVOS-DD's authors share a TALL_best.pth fine-tuned on MAVOS-DD, which the contamination guard would refuse on MAVOS-DD.
+training_data:
+  - {dataset: ffpp, level: train, split: train}
+notes: Blocked until FF++-trained weights exist. Kept on the roster because MAVOS-DD reports it as a baseline.

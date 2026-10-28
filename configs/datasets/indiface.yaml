@@ -1,0 +1,13 @@
+id: indiface
+name: INDIFACE
+modality: video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://ieeexplore.ieee.org/
+  request: No hosting link found (checked 2026-10-28); a later paper reports getting it from the authors (Kuckreja, Hoque, Dhall, Das; Abhinav Dhall at Monash University and IIT Ropar). Email them.
+licence: unknown
+contains: [real, fake]
+size_gb: null
+notes: Kuckreja et al., FG 2024. Indian subjects only, 101 source videos and two manipulation methods (from search results, unverified). Kept on the roster as the one Indian-only face set besides DF-Platter and DeePhy.

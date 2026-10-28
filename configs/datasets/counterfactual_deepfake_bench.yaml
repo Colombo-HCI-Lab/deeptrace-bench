@@ -1,0 +1,17 @@
+id: counterfactual_deepfake_bench
+name: Counterfactual-Deepfake-Bench
+modality: audio_video
+role: south_asian
+status: open
+access:
+  kind: hf
+  page: https://huggingface.co/datasets/machine-intelligence-lab-wvu/counterfactual-deepfake-bench
+  repo: machine-intelligence-lab-wvu/counterfactual-deepfake-bench
+  revision: 613e158914ec8e04560c239d82259414f6128d96
+licence: CC BY-NC 4.0
+licence_terms:
+  - Non-commercial use only.
+contains: [fake]
+size_gb: null
+derived_from: [celebv_hq]
+notes: 7,056 fully synthetic talking-head clips in 56 prompted cells, seven perceived-race groups (Black, East Asian, Indian, Latino, MENA, Southeast Asian, White) by two genders and four age bands, from four text-to-video generators (LTX 2.3 and 2.5 with audio, Wan 2.2, HunyuanVideo 1.5). The only open set with an explicit Indian cell, so it asks whether the miss rate changes with the face alone, same generator and same prompt. The people are synthetic and the labels are prompted presentation, not self-reported. Its real half (CelebV-HQ, FairFace labels) isn't redistributed, so an evalset needs CelebV-HQ fetched separately. Ungated on the Hub, checked 2026-10-28.

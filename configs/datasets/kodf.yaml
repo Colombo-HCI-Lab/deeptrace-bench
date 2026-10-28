@@ -1,0 +1,14 @@
+id: kodf
+name: KoDF (Korean deepfakes)
+modality: video
+role: reproduction
+status: request
+access:
+  kind: manual
+  page: https://moneybrain-research.github.io/kodf/
+  request: Submit the request form linked from the project page (contact kodf@deepbrainai.io); since September 2025 the clips are cropped and re-encoded and the Google Drive links open in limited windows.
+licence: KoDF terms (research only)
+contains: [real, fake]
+languages: [ko]
+size_gb: null
+notes: Kwon et al., ICCV 2021. 62,166 real and 175,776 fake videos of Korean subjects from six generators. The non-Western, non-South-Asian contrast group, so a drop on South Asian faces can be told apart from a drop on any non-Western faces. Checked 2026-10-28.

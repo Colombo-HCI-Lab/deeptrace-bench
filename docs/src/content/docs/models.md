@@ -16,9 +16,13 @@ Checked on 2026-10-12.
 | GenD (CLIP L/14)                        | video       | ready, wave 1    | not yet    | not yet   |
 | GenD (PE L/14)                          | video       | workable         | not yet    | not yet   |
 | UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD | video       | workable         | yes        | not yet   |
-| Effort                                  | video       | workable         | no weights | not yet   |
+| Effort                                  | video       | workable         | not yet    | not yet   |
 | LipForensics                            | video       | workable         | not yet    | not yet   |
 | AltFreezing                             | video       | blocked          | no adapter |           |
+| FTCN, GenConViT, DFDC winner (B7), UnivFD | video     | later            | no adapter |           |
+| RealForensics, LAA-Net, FakeSTormer     | video       | later            | no adapter |           |
+| TALL                                    | video       | blocked          | no weights |           |
+| AVAD, AVH-Align, LipFD                  | audio-video | later            | no adapter |           |
 | AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   |
 | XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   |
 | XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    |
@@ -33,7 +37,7 @@ Checked on 2026-10-12.
 | --- | --- |
 | Video score direction | waits on FF++ test or Celeb-DF v2, both on request ([Datasets](datasets.md#requests-to-send)) |
 | AltFreezing (`blocked`) | weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them |
-| Effort's weights | Google Drive refuses them over quota ([Effort](#effort)) |
+| Effort's weights | Google Drive refuses scripted downloads over quota; fetched by hand through a signed-in browser on 2026-10-28 ([Effort](#effort)) |
 | Parity for eight adapters | [Parity](#parity) says what each needs |
 
 **Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus. Each model's own reason, and whether it is a cut candidate, is on its page in the [Model catalog](catalog.md#models).
@@ -116,6 +120,19 @@ The only open audio-visual detector (`JielunPeng/HAVIC`). Two patches (`patches/
 
 `lipforensics_ff.pth` from Google Drive. Mouth crops reuse upstream's warp and crop code on 68 FAN landmarks per frame, from the shared detector's boxes (upstream suggests RetinaFace): the first 100 consecutive frames, landmarks smoothed over 12 frames, 96 x 96 grayscale mouth patches, then non-overlapping 25-frame clips centre-cropped to 88. P(fake) is a clip's sigmoid. Users report its FF++ numbers don't reproduce (#9).
 
+### Added 2026-10-28, not adapted yet
+
+Eleven video and audio-visual models chosen for the South Asian question, each with weights confirmed reachable on 2026-10-28 except TALL's. They fall into four tests:
+
+| Test | Models |
+| --- | --- |
+| Do cues that ignore face texture drop less on South Asian faces? | FTCN (motion only), RealForensics (lip motion from real talking faces) |
+| Do detectors that never saw a fake avoid training-face bias? | AVAD, AVH-Align (audio-visual alignment of real speech) |
+| Do more varied training faces help? | GenConViT, DFDC winner (both trained on DFDC's paid actors, not only FF++) |
+| Newer relatives of what holds up on MAVOS-DD | LAA-Net, FakeSTormer (SBI-style training), LipFD (lip-sync specific), UnivFD (generic AI-image floor), TALL (MAVOS-DD's own baseline) |
+
+DeepfakeBench releases no checkpoint for any of its video detectors (TALL, FTCN, AltFreezing, STIL, VideoMAE, TimeSformer, X-CLIP), only the frame-level set already here (checked 2026-10-28), so these come from their authors' repos. LAA-Net's and FakeSTormer's checkpoints are in Dropbox folders fetched by hand; AVH-Align needs AV-HuBERT without fairseq; FTCN and LipFD state no licence.
+
 ### Candidates, not yet configured
 
-Checked 2026-10-05: **Nes2Net-X** (another back end on the same XLS-R; licence undeclared), **Forensics Adapter** (CVPR 2025; CC BY-NC 4.0; no inference script), **LipFD** (NeurIPS 2024; closest to v1's lip-sync focus; no licence), the **AI-Face fairness checkpoints** (login-walled, and they saw Celeb-DF v2) and the **MAVOS-DD baselines** (fine-tuned on MAVOS-DD). Hugging Face community classifiers with undisclosed training data are left out.
+Checked 2026-10-05: **Nes2Net-X** (another back end on the same XLS-R; licence undeclared), **Forensics Adapter** (CVPR 2025; CC BY-NC 4.0; no inference script), the **AI-Face fairness checkpoints** (login-walled, and they saw Celeb-DF v2) and the **MAVOS-DD baselines** (fine-tuned on MAVOS-DD). Checked 2026-10-28: **Referee** (needs a reference clip of each speaker), **NPR** and **CLIPping the Deception** (GAN-image detectors that add little beside UnivFD), **ExposeAnyone** (no code or weights released). Hugging Face community classifiers with undisclosed training data are left out.

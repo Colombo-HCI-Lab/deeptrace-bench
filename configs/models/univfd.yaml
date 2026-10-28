@@ -1,0 +1,29 @@
+id: univfd
+name: UnivFD
+modality: video
+status: later
+licence: MIT
+paper: Ojha, Li and Lee, Towards Universal Fake Image Detectors that Generalize Across Generative Models, CVPR 2023
+upstream:
+  repo: WisconsinAIVision/UniversalFakeDetect
+  commit: 030495aea3300a8b54c0ec37ec7fe1dd7e63c619
+weights:
+  - name: fc_weights.pth
+    kind: github_raw
+    url: https://raw.githubusercontent.com/WisconsinAIVision/UniversalFakeDetect/030495aea3300a8b54c0ec37ec7fe1dd7e63c619/pretrained_weights/fc_weights.pth
+    size_bytes: 4083
+  - name: clip-vit-large-patch14
+    kind: hf_snapshot
+    repo: openai/clip-vit-large-patch14
+    revision: 32bd64288804d66eefd0ccbe215aa642df71cc41
+    allow_patterns:
+      - config.json
+      - model.safetensors
+      - preprocessor_config.json
+training_data:
+  - {dataset: clip_wit, level: pretrain}
+  - {dataset: progan_forensynths, level: train, note: "linear probe on ProGAN real and fake images, 20 LSUN classes"}
+input:
+  crop: {size: 224, margin: 1.3, align: box}
+  frames_per_clip: 32
+notes: A linear probe on frozen CLIP features, trained on GAN images, not faces. The roster's test of whether a generic AI-image detector transfers to face video, and a non-face baseline for MAVOS-DD's newer generators. Uses the same pinned CLIP snapshot as GenD. No adapter yet.

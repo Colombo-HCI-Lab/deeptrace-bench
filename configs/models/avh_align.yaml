@@ -1,0 +1,24 @@
+id: avh_align
+name: AVH-Align
+modality: audio_video
+status: later
+licence: CC BY-NC-SA 4.0 (README)
+paper: Smeu et al., Circumventing Shortcuts in Audio-visual Deepfake Detection Datasets with Unsupervised Learning, CVPR 2025
+upstream:
+  repo: bit-ml/AVH-Align
+  commit: 55401ded7d94a6ad59106c401696d89ce8d16faf
+weights:
+  - name: AVH-Align_AV1M.pt
+    kind: github_raw
+    url: https://raw.githubusercontent.com/bit-ml/AVH-Align/55401ded7d94a6ad59106c401696d89ce8d16faf/checkpoints/AVH-Align_AV1M.pt
+  - name: self_large_vox_433h.pt
+    kind: url
+    url: https://dl.fbaipublicfiles.com/avhubert/model/lrs3_vox/vsr/self_large_vox_433h.pt
+training_data:
+  - {dataset: lrs3, level: pretrain, note: "AV-HuBERT large"}
+  - {dataset: voxceleb2, level: pretrain, note: "AV-HuBERT large"}
+  - {dataset: av_deepfake1m, level: train, note: "45,000 real videos only, no fakes"}
+input:
+  inputs: faces
+  needs_audio: true
+notes: Learns audio-visual alignment from real videos only, on AV-HuBERT features, and its paper shows that supervised audio-visual detectors exploit dataset shortcuts. Fits MAVOS-DD's lip-sync fakes and avoids fake-side training bias. The checkpoint is confirmed reachable 2026-10-28 (20.9 MB); the AV-HuBERT URL is not yet tested. AV-HuBERT normally needs fairseq, which we don't install, so the adapter needs a stand-in like models/_fairseq.py. No adapter yet.

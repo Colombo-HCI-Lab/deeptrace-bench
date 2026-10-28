@@ -1,0 +1,16 @@
+id: deepfakex
+name: DeepFakeX (South Asian and Urdu subset)
+modality: audio_video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://zenodo.org/records/14202454
+  request: Use the Zenodo record's request-access button (restricted files) with a clear research purpose; requests may be declined. Authors at FAST-NUCES Karachi (Sonia Salman, Jawwad A. Shamsi).
+licence: CC BY-NC 4.0
+licence_terms:
+  - Non-commercial use only; cite Salman and Shamsi, Data 11(6):141, 2026.
+contains: [fake]
+languages: [en, ur]
+size_gb: null
+notes: 800 fake videos (500 face swap with DeepFaceLab and SimSwap, 100 audio swap, 100 voice clone, 100 combined, using Wav2Lip, ElevenLabs and PlayHT) of public figures, labelled South Asian, African, East Asian and Caucasian, with an Urdu subset; the 200 real reference videos are not released, so an evalset needs a real side from elsewhere. The only Urdu video deepfakes found (checked 2026-10-28). The South Asian share is in the article's Table 2, not yet read.

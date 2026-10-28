@@ -1,0 +1,15 @@
+id: av_deepfake1m
+name: AV-Deepfake1M
+modality: audio_video
+role: reproduction
+status: request
+access:
+  kind: manual
+  page: https://github.com/ControlNet/AV-Deepfake1M
+  request: Register on the challenge site and email the signed EULA to the organisers; the Hub repos (ControlNet/AV-Deepfake1M and ControlNet/AV-Deepfake1M-PlusPlus) are approved by hand afterwards.
+licence: AV-Deepfake1M EULA (research only)
+contains: [real, fake]
+languages: [en]
+size_gb: null
+derived_from: [voxceleb2]
+notes: Cai et al., ACM MM 2023; the ++ edition (arXiv 2507.20579, about 2M videos, 1.46 TB) follows the same terms. LLM-rewritten transcripts with TTS and lip-sync over VoxCeleb2 speakers. Listed for the guard (AVH-Align trained on its real videos) and as the in-domain anchor for the audio-visual models. Checked 2026-10-28.

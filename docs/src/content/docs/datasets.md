@@ -37,12 +37,22 @@ Access checked on the live pages 2026-10-05; "In hand" as of 2026-10-12. Terms c
 | IndieFake               | audio       | South Asian  | no         | form (anyone)                                 | CC BY 4.0               |
 | FF++                    | video       | reproduction | no         | form (anyone)                                 | research only           |
 | Celeb-DF v2             | video       | reproduction | no         | form (anyone)                                 | research only           |
+| Counterfactual-Deepfake-Bench | audio-video | South Asian (Indian cell) | no | open (Hugging Face)                   | CC BY-NC 4.0            |
+| TalkingHeadBench        | video       | reproduction | no         | open (Hugging Face)                           | MIT                     |
+| HAV-DF                  | audio-video | South Asian  | no         | email the authors (anyone)                    | not stated              |
+| DeepFakeX               | audio-video | South Asian  | no         | Zenodo access request (anyone)                | CC BY-NC 4.0            |
+| ILLUSION                | audio-video | South Asian  | no         | signed licence to IAB Rubric (academic)       | custom                  |
+| INDIFACE                | video       | South Asian  | no         | email the authors                             | unknown                 |
+| KoDF                    | video       | reproduction (contrast) | no | form (anyone)                              | research only           |
+| Celeb-DF++              | video       | reproduction | no         | form (anyone)                                 | CC BY-NC 4.0            |
+| AV-Deepfake1M           | audio-video | reproduction | no         | signed EULA (anyone)                          | custom                  |
+| DFDC                    | audio-video | reproduction | no         | AWS account or Kaggle rules (anyone)          | research only           |
 
 Dropped: IAV-DF (its only sample link is dead) and Indic-CodecFake (no download anywhere), both rechecked 2026-10-05. The two pipeline-test datasets are in [Getting started](getting_started.md#the-pipeline-test-datasets).
 
 Gaps worth knowing:
 
-- **South Asian video:** only MAVOS-DD's Hindi subset needs no institutional request. Every other South Asian video set is Indian and needs one.
+- **South Asian video:** only MAVOS-DD's Hindi subset needs no request; it is MAVOS-DD's only South Asian language. Counterfactual-Deepfake-Bench is open but its "Indian" people are synthetic. Every other South Asian video set needs a request: HAV-DF (Hindi), DeepFakeX (Urdu, the only Urdu video found), ILLUSION (seven Indic languages in its real-world set) and the Indian sets. No Bangla, Sinhala, Nepali or Tamil face-video deepfake set was found (searched 2026-10-28).
 - **Sinhala:** the only deepfake audio is MLAAD's 1,000 Edge-TTS clips, paired with OpenSLR's real speech: cross-corpus, so diagnostic only.
 - **Nepali:** the only labelled real and fake is in the IndicTTS challenge set. LRLspoof has more Nepali fakes, but only inside its 462 GB tarball.
 
@@ -76,6 +86,13 @@ These need a person. Send them early: replies take days to months. On 2026-10-04
 | IndieFake               | Form on <https://indie-fake-dataset.netlify.app/>                                                                | any team member                                             |
 | Celeb-DF v2             | Request form linked from <https://github.com/yuezunli/celeb-deepfakeforensics>                                   | any team member                                             |
 | Casual Conversations v2 | Request on <https://ai.meta.com/datasets/casual-conversations-v2-dataset/> and accept Meta's licence             | any team member                                             |
+| HAV-DF                  | Email the BML Munjal University authors (addresses in the paper, arXiv 2411.15457); ask for the release behind the splits later papers report | any team member |
+| DeepFakeX               | Request access on <https://zenodo.org/records/14202454> with a research purpose                                  | any team member                                             |
+| ILLUSION                | Signed licence to IAB Rubric, the same lab as DeePhy and DF-Platter; ask whether Set D (real-world, Indic languages) can come alone | someone with legal authority, as for DeePhy |
+| INDIFACE                | Email the authors (Kuckreja, Hoque, Dhall, Das; FG 2024); no hosting link found                                  | any team member                                             |
+| KoDF                    | Request form linked from <https://moneybrain-research.github.io/kodf/>                                           | any team member                                             |
+| Celeb-DF++              | Request form linked from <https://github.com/OUC-VAS/Celeb-DF-PP>                                                | any team member                                             |
+| AV-Deepfake1M           | Register on the challenge site and email the signed EULA (<https://github.com/ControlNet/AV-Deepfake1M>)          | any team member                                             |
 | SEA-Spoof               | Email the authors (wu_jinyang@a-star.edu.sg, imcc.sg@gmail.com), then submit the form on <https://huggingface.co/datasets/Jack-ppkdczgx/SEA-Spoof> | an applicant at an academic institution |
 
 - **FakeAVCeleb:** requests without ethics (IRB) approval are rejected; complete ones got access within days, says a maintainer (GitHub issue 13, 2024-12-18), though others report months. Don't use the unofficial Hugging Face mirrors.
@@ -111,6 +128,7 @@ Searched 2026-10-05:
 | Why not | Datasets |
 | --- | --- |
 | Fake only or unknown provenance | `satwc-reddy/indian-language-deepfake-speech` (Telugu, Tamil, Malayalam, Konkani; worth adding with IndicSUPERB reals if Telugu or Konkani voice conversion matters); a Nepali set with no README or licence |
-| Not downloadable | MLADDC and IndicFake (TMLR 2025) aren't released; HAV-DF's Kaggle page is gone |
+| Not downloadable | MLADDC and IndicFake (TMLR 2025) aren't released; HAV-DF's Kaggle page is gone (it is now on request, above) |
 | Real references only | FairFace ("Indian" faces), FLEURS (AntiDeepfake trained on it), IndicVoices-R (gated, about 1 TB) |
-| No South Asian class | AI-Face, DeepSpeak |
+| No South Asian class | AI-Face, DeepSpeak (v2 is US residents only); PolyGlotFake (no Indic language) |
+| Images only, or no demographics | FairFD and RWFS (images); DF40, WildDeepfake and RedFace (no demographic labels), searched 2026-10-28 |

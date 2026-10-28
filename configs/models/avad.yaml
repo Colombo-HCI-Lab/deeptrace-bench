@@ -1,0 +1,28 @@
+id: avad
+name: AVAD (audio-visual anomaly detection)
+modality: audio_video
+status: later
+licence: MIT
+paper: Feng, Chen and Owens, Self-Supervised Video Forensics by Audio-Visual Anomaly Detection, CVPR 2023
+upstream:
+  repo: cfeng16/audio-visual-forensics
+  commit: b6358e17738869fae3223cdd59e7fc09f0442161
+weights:
+  - name: sync_model.pth
+    kind: gdrive
+    drive_id: 1BxaPiZmpiOJDsbbq8ZIDHJU7--RJE7Br
+  - name: avfeature_regressive_model.pth
+    kind: github_raw
+    url: https://raw.githubusercontent.com/cfeng16/audio-visual-forensics/b6358e17738869fae3223cdd59e7fc09f0442161/avfeature_regressive_model.pth
+  - name: dist_regressive_model.pth
+    kind: github_raw
+    url: https://raw.githubusercontent.com/cfeng16/audio-visual-forensics/b6358e17738869fae3223cdd59e7fc09f0442161/dist_regressive_model.pth
+  - name: pca.pkl
+    kind: github_raw
+    url: https://raw.githubusercontent.com/cfeng16/audio-visual-forensics/b6358e17738869fae3223cdd59e7fc09f0442161/pca.pkl
+training_data:
+  - {dataset: lrs2, level: train, note: "real videos only, no fakes; the paper uses LRS2 or LRS3, which one the release used is unverified (checked 2026-10-28)"}
+input:
+  inputs: faces
+  needs_audio: true
+notes: Never sees a fake in training; it flags videos whose audio-visual synchronisation an autoregressive model of real speech finds unlikely. A fake-free detector is the cleanest test of whether training-set faces bias detection, and lip-sync is MAVOS-DD's main manipulation. Raw-file paths are verified on the default branch 2026-10-28; check them at the pinned commit on first fetch. No adapter yet.

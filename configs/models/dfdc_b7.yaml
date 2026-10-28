@@ -1,0 +1,20 @@
+id: dfdc_b7
+name: DFDC winner (EfficientNet-B7 ensemble)
+modality: video
+status: later
+licence: MIT
+paper: Seferbekov, Deepfake Detection Challenge first place, 2020 (no paper)
+upstream:
+  repo: selimsef/dfdc_deepfake_challenge
+  commit: 89c6290490bac96b29193a4061b3db9dd3933e36
+weights:
+  - name: final_111_DeepFakeClassifier_tf_efficientnet_b7_ns_0_36
+    kind: github_release
+    url: https://github.com/selimsef/dfdc_deepfake_challenge/releases/download/0.0.1/final_111_DeepFakeClassifier_tf_efficientnet_b7_ns_0_36
+training_data:
+  - {dataset: imagenet, level: pretrain, note: "Noisy Student EfficientNet-B7, which also saw JFT-300M"}
+  - {dataset: dfdc, level: train}
+input:
+  crop: {size: 380, margin: 1.3, align: box}
+  frames_per_clip: 32
+notes: The Kaggle DFDC winner, trained only on DFDC's diverse paid actors, against FF++'s mostly Western YouTube faces for every DeepfakeBench model here. One of the seven ensemble checkpoints (267 MB each, release 0.0.1, confirmed reachable 2026-10-28) is pinned so far; the full ensemble lists the other six from upstream's download_weights.sh. No adapter yet.

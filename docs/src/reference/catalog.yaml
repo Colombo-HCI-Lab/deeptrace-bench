@@ -220,6 +220,45 @@ models:
       and one linear layer. Identical post-training data make the pair a controlled test of multilingual
       pretraining. The contamination guard refuses it on MLAAD-based evalsets and anything built from
       FLEURS.
+  avad:
+    catches: [lip_sync, talking_head]
+    cue: audio-visual synchronisation of real speech
+    why: >-
+      Never trained on a fake: it flags videos whose lip motion and sound a model of real speech
+      finds unlikely. A fake-free detector tests whether training-set faces bias detection, and
+      lip-sync is MAVOS-DD's main manipulation.
+    s2_id: ARXIV:2301.01767
+    venue: CVPR 2023
+    summary: >-
+      Audio-visual synchronisation features from real videos, scored by an autoregressive model
+      of their sequence; anomalies read as fakes.
+    architecture: >-
+      Face clip and its audio, audio-visual synchronisation network, PCA, autoregressive
+      regressors over the feature and time-offset sequences, anomaly score
+    description: >-
+      AVAD (Feng, Chen and Owens, CVPR 2023) learns only from real talking faces (LRS2 or LRS3;
+      which one the released weights used is unverified) and scores how surprising a video's
+      audio-visual synchronisation is. Unsupervised, so it carries no bias from fake-side
+      training data. Not adapted yet.
+  avh_align:
+    catches: [lip_sync, talking_head]
+    cue: audio-visual alignment in AV-HuBERT features
+    why: >-
+      Its paper shows supervised audio-visual detectors learn dataset shortcuts; it learns
+      alignment from real videos only. The strongest unsupervised candidate for MAVOS-DD's
+      lip-sync fakes.
+    s2_id: ARXIV:2412.00175
+    venue: CVPR 2025
+    summary: >-
+      Small alignment network over frozen AV-HuBERT audio and visual features, trained on real
+      AV-Deepfake1M videos; misalignment reads as fake.
+    architecture: >-
+      Mouth-region video and audio, AV-HuBERT large encoder (frozen), per-frame alignment head,
+      mean misalignment score
+    description: >-
+      AVH-Align (Smeu et al., CVPR 2025) trains only on 45,000 real AV-Deepfake1M videos over
+      AV-HuBERT features pretrained on LRS3 and VoxCeleb2. AV-HuBERT is a fairseq model, which this
+      repo doesn't install, so the adapter needs a stand-in. Not adapted yet.
   core:
     catches: [face_swap, reenactment]
     cue: face texture, consistent across augmentations
@@ -295,6 +334,23 @@ models:
       front end, pretrained on Common Voice, BABEL, MLS, VoxPopuli and VoxLingua107; the detector
       saw ASVspoof 2019 and 2024, MLAAD, Codecfake, LibriSeVoc, DFADD, CtrSVDD, SpoofCeleb and EnvSDD.
       The contamination guard refuses it on ASVspoof 2019 LA eval and MLAAD-based evalsets.
+  dfdc_b7:
+    catches: [face_swap]
+    cue: face texture, frame by frame
+    why: >-
+      Trained only on DFDC's paid actors, who are far more varied in skin tone than FF++'s
+      YouTube faces. Every DeepfakeBench model here saw FF++ only, so this is the cleanest test of
+      whether more varied training faces help on South Asian ones.
+    venue: Kaggle DFDC 2020
+    summary: >-
+      EfficientNet-B7 (Noisy Student) frame classifier from the DFDC first-place ensemble; DFDC
+      training data only.
+    architecture: >-
+      380 px face crops (30% margin), EfficientNet-B7 backbone, binary head, mean over frames
+    description: >-
+      Selim Seferbekov's winning DFDC entry averaged seven EfficientNet-B7 classifiers trained on
+      DFDC face crops with heavy augmentation. One checkpoint is pinned so far; the full
+      ensemble is the other six from the same release. Not adapted yet.
   efficientnet_b4:
     catches: [face_swap, reenactment]
     cue: face texture
@@ -370,6 +426,22 @@ models:
       video compression. DeepfakeBench's weights were trained on FaceForensics++ (c23) after ImageNet
       pretraining. The detector's yaml names only NeuralTextures, which may not describe the checkpoint;
       the benchmark treats it as trained on all of FF++.
+  fakestormer:
+    catches: [face_swap, reenactment]
+    cue: spatial and temporal artefacts of blending
+    why: >-
+      The 2025 spatio-temporal counterpart of SBI and LAA-Net: trained on real videos with
+      synthetic video-level fakes, so it sees no particular generator.
+    venue: ICCV 2025
+    summary: >-
+      Spatio-temporal transformer on face clips, trained on FF++ real videos with video-level
+      pseudo-fakes.
+    architecture: >-
+      Face clip, spatio-temporal transformer with artefact-focused auxiliary heads, binary head
+    description: >-
+      FakeSTormer (Nguyen et al., ICCV 2025) extends self-blended training to video. Its
+      checkpoint sits in a Dropbox folder that must be fetched by hand, under an academic licence.
+      Not adapted yet.
   ffd:
     catches: [face_swap, reenactment]
     cue: where on the face the edit is
@@ -394,6 +466,42 @@ models:
       it to reweight the feature maps; the map doubles as a coarse forgery localisation. DeepfakeBench's
       weights were trained on FaceForensics++ (c23 per the DeepfakeBench README) after ImageNet pretraining.
       Passes parity against the original code.
+  ftcn:
+    catches: [face_swap, reenactment]
+    cue: temporal incoherence of the face over time
+    why: >-
+      Purely temporal: spatial kernels are cut to 1, so it reads how the face moves, not its
+      texture. If skin tone and face shape drive the South Asian drop, a motion-only model should
+      drop least.
+    s2_id: ARXIV:2108.06693
+    venue: ICCV 2021
+    summary: >-
+      Fully temporal 3D convolutional network plus a temporal transformer on face clips; FF++
+      c23.
+    architecture: >-
+      Face clip, 3D ResNet-50 with spatial kernel size 1, temporal transformer, binary head
+    description: >-
+      FTCN (Zheng et al., ICCV 2021) removes spatial convolution so the network must use
+      temporal coherence. The FTCN+TT weights were trained on FF++ c23. Upstream targets PyTorch
+      1.4 and states no licence. Not adapted yet.
+  genconvit:
+    catches: [face_swap, reenactment]
+    cue: face texture and its reconstruction error
+    why: >-
+      Trained on DFDC as well as FF++, so it pairs with the DFDC winner to test whether more
+      varied training faces carry over to South Asian ones.
+    s2_id: ARXIV:2307.07036
+    venue: arXiv 2023
+    summary: >-
+      ConvNeXt and Swin features combined with an autoencoder and a VAE whose reconstructions
+      feed the classifier; trained on DFDC, FF++ and DeepfakeTIMIT.
+    architecture: >-
+      224 px face crops, 15 frames per video, ConvNeXt-Swin hybrid with autoencoder and VAE
+      branches, two-way classifier averaged over frames
+    description: >-
+      GenConViT (Wodajo et al., 2023) pairs a convolutional-transformer classifier with
+      generative branches. The weights on the Hub are CC BY-NC 4.0 although the code is MIT. Not
+      adapted yet.
   gend:
     catches: [face_swap, reenactment]
     cue: foundation-model features (CLIP)
@@ -470,6 +578,39 @@ models:
       item list, so the contamination guard refuses it on FakeAVCeleb. The only open audio-visual
       detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long
       for HiDF), and parity is not checked yet.
+  laa_net:
+    catches: [face_swap]
+    cue: localised blending artefacts
+    why: >-
+      SBI is the second most robust model on full MAVOS-DD here, so its newer relative, trained
+      the same way on real faces only, is the natural next test.
+    s2_id: ARXIV:2401.13856
+    venue: CVPR 2024
+    summary: >-
+      Localised artefact attention with heatmap and self-consistency heads, trained on FF++ real
+      frames with blended pseudo-fakes.
+    architecture: >-
+      Aligned face crop, EfficientNet backbone with an enhanced feature pyramid, heatmap and
+      self-consistency branches, binary head
+    description: >-
+      LAA-Net (Nguyen et al., CVPR 2024) focuses on small blending artefacts and claims
+      robustness to compression. Its checkpoints are in a Dropbox folder (fetched by hand) under an
+      academic licence, and upstream uses dlib landmarks, which this repo doesn't install. Not
+      adapted yet.
+  lipfd:
+    catches: [lip_sync]
+    cue: temporal mismatch between lip motion and audio
+    why: >-
+      Built for lip-sync fakes specifically, MAVOS-DD's largest manipulation family.
+    venue: NeurIPS 2024
+    summary: >-
+      Audio-visual detector of lip-audio inconsistency, trained on AVLips (Wav2Lip, MakeItTalk
+      and TalkLip fakes over LRS3).
+    architecture: >-
+      Mouth crops with the audio spectrogram, global and regional encoders, binary head
+    description: >-
+      LipFD (Liu et al., NeurIPS 2024) compares lip motion with audio over time. Its training
+      set covers three lip-sync generators only, and upstream states no licence. Not adapted yet.
   lipforensics:
     catches: [face_swap, reenactment]
     cue: mouth motion over time
@@ -495,6 +636,24 @@ models:
       Central here because lip-sync fakes are a focus. Caveats: users report its FF++ numbers do not
       reproduce, it needs 25 consecutive frames with a detectable face, and parity is not checked
       yet.
+  realforensics:
+    catches: [face_swap, reenactment]
+    cue: mouth and face motion learned from real talking faces
+    why: >-
+      LipForensics' successor from the same author, pretrained on real talking faces with
+      their audio. Lip cues are the likeliest to transfer across faces, and LipForensics is
+      already among the stronger models here.
+    s2_id: ARXIV:2201.07131
+    venue: CVPR 2022
+    summary: >-
+      Video encoder pretrained self-supervised on LRW talking faces (video and audio), then
+      trained on FF++ c23; scores from video alone.
+    architecture: >-
+      Face or mouth clip, CSN video backbone from audio-visual self-supervision, binary head
+    description: >-
+      RealForensics (Haliassos et al., CVPR 2022) first learns from real talking faces and their
+      audio, then fine-tunes on FF++. The released FF++ checkpoint scores from video alone.
+      Leave-one-manipulation-out checkpoints are also released. Not adapted yet.
   recce:
     catches: [face_swap, reenactment]
     cue: how badly a real-face decoder rebuilds it
@@ -597,6 +756,22 @@ models:
       the two streams guide each other with attention. DeepfakeBench's weights were trained on FaceForensics++
       (c23 per the DeepfakeBench README) after ImageNet pretraining. Passes parity against the original
       code.
+  tall:
+    catches: [face_swap, reenactment]
+    cue: spatio-temporal layout of face thumbnails
+    why: >-
+      MAVOS-DD reports TALL as a baseline, so our number would sit beside theirs. Blocked: no
+      FF++-trained checkpoint is released.
+    venue: ICCV 2023
+    summary: >-
+      Thumbnail layout of consecutive face frames into one image, classified by a Swin
+      transformer.
+    architecture: >-
+      Four face frames tiled into one thumbnail, Swin transformer, binary head
+    description: >-
+      TALL (Xu et al., ICCV 2023) turns a clip into a tiled image so an image transformer sees
+      time. No checkpoint is released (upstream issues 14, 16, 17; DeepfakeBench ships none);
+      MAVOS-DD's authors share one fine-tuned on MAVOS-DD, which the guard would refuse on it.
   ucf:
     catches: [face_swap, reenactment]
     cue: forgery traces shared by every method
@@ -622,6 +797,25 @@ models:
       forgery and common forgery parts, and decides on the common part only, aiming at unseen manipulation
       methods. DeepfakeBench's weights were trained on all four FaceForensics++ methods (c23) after
       ImageNet pretraining. Passes parity against the original code.
+  univfd:
+    catches: [fully_synthetic]
+    cue: frozen CLIP features, not faces
+    why: >-
+      A generic is-this-AI-made image detector, trained on GAN images rather than faces. It
+      tests whether the general detectors circulating publicly work on South Asian face video at
+      all.
+    s2_id: ARXIV:2302.10174
+    venue: CVPR 2023
+    summary: >-
+      Linear probe on frozen CLIP ViT-L/14 image features, trained on ProGAN real and fake
+      images.
+    architecture: >-
+      224 px frame or face crop, frozen CLIP ViT-L/14 image encoder, one linear layer, mean over
+      frames
+    description: >-
+      UnivFD (Ojha, Li and Lee, CVPR 2023) shows a linear probe on CLIP features generalises
+      across image generators. It never saw a face swap, so it is a floor for face-specific
+      models. Not adapted yet.
   xception:
     catches: [face_swap, reenactment]
     cue: face texture
@@ -743,6 +937,24 @@ datasets:
     - 'official split: train, dev, eval (disjoint speakers)'
     format: FLAC, 16 kHz, 16-bit (VCTK downsampled)
     notes: Train and dev share attacks A01 to A06; most eval attacks are unseen in training.
+  av_deepfake1m:
+    fakes: [lip_sync, tts]
+    why: >-
+      The in-domain anchor for the audio-visual models and the guard's record of AVH-Align's
+      training data.
+    s2_id: ARXIV:2311.15308
+    venue: ACM MM 2023
+    summary: >-
+      LLM-rewritten transcripts with TTS and lip-sync over VoxCeleb2 speakers, with temporal
+      localisation labels.
+    scale: about 1M videos (the ++ edition about 2M)
+    generators:
+    - LLM transcript edits with TTS and lip-sync generators
+    annotations:
+    - fake segment timestamps
+    - which track is fake
+    format: MP4 with audio
+    notes: English VoxCeleb2 speakers; on request through a signed EULA.
   bangla_voices:
     fakes: [unstated]
     why: >-
@@ -819,6 +1031,22 @@ datasets:
     - per-second activity labels
     format: video, 26,467 recordings, about 674 h in all
     notes: Real videos only; some labels are licensed for evaluation use only.
+  celeb_df_pp:
+    fakes: [face_swap, reenactment, talking_head]
+    why: >-
+      Newer generators over the same real videos as Celeb-DF v2, so a drop from v2 to ++ is
+      generator age, not faces.
+    venue: arXiv 2025
+    summary: >-
+      Celeb-DF v2's 590 real videos with 53,196 fakes from 22 face-swap, reenactment and
+      talking-face methods.
+    scale: 590 real and 53,196 fake videos
+    generators:
+    - 22 face-swap, reenactment and talking-face methods
+    annotations:
+    - method
+    format: MP4
+    notes: Real side about 88% Caucasian and 5% Asian; on request.
   celeb_df_v2:
     fakes: [face_swap]
     why: >-
@@ -837,6 +1065,31 @@ datasets:
     - official test list (518 videos)
     format: MP4
     notes: About 88% of subjects are Caucasian, so it carries no South Asian signal.
+  counterfactual_deepfake_bench:
+    fakes: [fully_synthetic, talking_head]
+    why: >-
+      The only open set with an explicit Indian cell: the same generators and prompts across
+      seven perceived-race groups, so a South Asian gap can be measured with everything else
+      held fixed.
+    venue: Hugging Face 2026
+    summary: >-
+      Synthetic talking-head clips from four text-to-video generators in a 7 x 2 x 4 grid of
+      perceived race, gender and age.
+    scale: 7,056 fake clips in 56 cells
+    generators:
+    - LTX 2.3
+    - LTX 2.5
+    - Wan 2.2
+    - HunyuanVideo 1.5
+    annotations:
+    - perceived race (Black, East Asian, Indian, Latino, MENA, Southeast Asian, White)
+    - gender
+    - age band
+    - generator
+    format: MP4 with JSON metadata; audio from the LTX models only
+    notes: >-
+      The people are synthetic and the labels are prompted presentation; the real side
+      (CelebV-HQ) must be fetched separately.
   deepfake_eval_2024:
     fakes: [face_swap, lip_sync, fully_synthetic]
     why: >-
@@ -863,6 +1116,28 @@ datasets:
       s average; images mostly 1024 x 1024
     notes: >-
       Evaluation only, no training on it; its metadata columns are unverified until access is granted.
+  deepfakex:
+    fakes: [face_swap, lip_sync, tts, vc]
+    why: >-
+      The only Urdu video deepfakes found, with South Asian subjects labelled among four
+      ethnic groups.
+    venue: Data 2026
+    summary: >-
+      Fake videos of public figures from face swaps, audio swaps, voice clones and their
+      combination, with an Urdu subset.
+    scale: 800 fake videos (real references not released)
+    generators:
+    - DeepFaceLab
+    - SimSwap
+    - Wav2Lip
+    - ElevenLabs
+    - PlayHT
+    annotations:
+    - ethnicity (South Asian, African, East Asian, Caucasian)
+    - language
+    - scenario
+    format: MP4
+    notes: Fake only; an evalset needs real videos from another source. Restricted on Zenodo.
   deephy:
     fakes: [face_swap]
     why: >-
@@ -887,6 +1162,22 @@ datasets:
     - facial hair, spectacles, shades, mic and head or hair occlusion attributes
     format: MP4, 720p, 25 fps, about 20 s
     notes: Only 100 real videos against 5,040 fakes.
+  dfdc:
+    fakes: [face_swap, vc]
+    why: >-
+      In-domain anchor for the two DFDC-trained models, and the guard's record of their
+      training data.
+    venue: arXiv 2020
+    summary: >-
+      Face-swap videos of 3,426 consenting paid actors from eight methods, the largest public
+      face-swap set.
+    scale: about 124k videos
+    generators:
+    - DFAE, MM/NN, NTH, FSGAN, StyleGAN-based and audio swaps (eight methods)
+    annotations:
+    - original video of each fake
+    format: MP4, 10 s
+    notes: No ethnicity labels released, though its actors are far more varied than FF++'s.
   dfplatter:
     fakes: [face_swap]
     why: >-
@@ -964,6 +1255,26 @@ datasets:
     - binary manipulation masks
     format: MP4, c23 compression used here (raw and c40 also exist)
     notes: Real videos come from 977 YouTube videos, mostly frontal faces.
+  hav_df:
+    fakes: [face_swap, lip_sync, vc]
+    why: >-
+      Hindi audio-visual deepfakes beside MAVOS-DD's Hindi, with face swaps that MAVOS-DD
+      lacks.
+    s2_id: ARXIV:2411.15457
+    venue: arXiv 2024
+    summary: >-
+      Hindi videos with face swaps, lip-sync and voice cloning, split by which track is fake.
+    scale: 508 videos per the paper (200 real, 308 fake)
+    generators:
+    - FSGAN
+    - FaceSwap
+    - DeepFaceLab
+    - ReTalking
+    - RVC
+    annotations:
+    - which track is fake (audio, video, both)
+    format: MP4, 1080p, 15 s
+    notes: On request by email; the released size is unverified.
   hidf:
     fakes: [face_swap]
     why: >-
@@ -1000,6 +1311,23 @@ datasets:
     - FaceApp face swap
     - Wav2Lip lip-sync with cloned voices
     notes: Only a sample was ever released and its link is dead, so nothing can be downloaded.
+  illusion:
+    fakes: [face_swap, reenactment, lip_sync, talking_head, fully_synthetic, tts]
+    why: >-
+      The widest Indic coverage of any video set: its real-world Set D spans Hindi, Tamil,
+      Kannada, Oriya, Punjabi, Gujarati and Sanskrit.
+    venue: ICLR 2025
+    summary: >-
+      Multi-modal, multilingual deepfakes from many generators, with a real-world subset.
+    scale: 1.38M samples (Set D 4,385 real-world)
+    generators:
+    - face swap, reenactment, lip-sync, talking-head, TTS and fully generated media
+    annotations:
+    - Fitzpatrick skin-tone bin (Set A)
+    - modality of the fake
+    - language
+    format: video, audio and images, about 800 GB
+    notes: Academic request to IIT Jodhpur's IAB-RUBRIC lab, the same lab as DeePhy and DF-Platter.
   in_the_wild:
     fakes: [unstated]
     why: >-
@@ -1141,6 +1469,35 @@ datasets:
     - official 80/20 subject-independent train/test split
     format: WAV, 16 kHz, about 5 s on average
     notes: Indian-accented English only, no South Asian languages.
+  indiface:
+    fakes: [face_swap]
+    why: >-
+      An Indian-only face set, beside DF-Platter and DeePhy.
+    venue: FG 2024
+    summary: >-
+      Face manipulations over Indian subjects' videos.
+    scale: 101 source videos, two manipulation methods (unverified)
+    generators:
+    - two face manipulation methods (unverified)
+    annotations: []
+    format: video
+    notes: No hosting link found; on request from the authors.
+  kodf:
+    fakes: [face_swap, reenactment, lip_sync]
+    why: >-
+      The East Asian contrast group: a drop shared with KoDF is about non-Western faces in
+      general, one seen only on South Asian sets is not.
+    venue: ICCV 2021
+    summary: >-
+      Korean subjects' videos with fakes from six face-swap, reenactment and lip-sync
+      generators.
+    scale: 62,166 real and 175,776 fake videos
+    generators:
+    - FaceSwap, DeepFaceLab, FSGAN, FOMM, ATFHP, Wav2Lip
+    annotations:
+    - generator
+    format: MP4 (re-encoded and cropped since 2025-09)
+    notes: On request; download windows are time-limited.
   lrlspoof:
     fakes: [tts]
     why: >-
@@ -1323,6 +1680,28 @@ datasets:
     - transcript
     format: audio embedded in parquet, test split only
     notes: No licence is declared, so nothing derived from it is published yet.
+  talkingheadbench:
+    fakes: [talking_head, reenactment]
+    why: >-
+      Recent talking-head generators on non-South-Asian faces: the modern-generator anchor for
+      MAVOS-DD's talking heads.
+    s2_id: ARXIV:2505.24866
+    venue: WACV 2026
+    summary: >-
+      Talking-head fakes from six recent generators over FFHQ, CelebV-HQ and FF++ identities.
+    scale: 2,994 fake and 2,312 real clips
+    generators:
+    - Hallo
+    - Hallo2
+    - AniPortrait
+    - LivePortrait
+    - EMOPortraits
+    - MAGI-1 and Hallo3 (test only)
+    annotations:
+    - generator
+    - official split
+    format: MP4
+    notes: Its FF++-derived real videos overlap every FF++ model's training data.
   unidatapro_videos:
     fakes: [face_swap]
     why: >-

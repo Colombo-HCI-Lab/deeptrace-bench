@@ -1,0 +1,16 @@
+id: hav_df
+name: HAV-DF (Hindi audio-video deepfakes)
+modality: audio_video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://arxiv.org/abs/2411.15457
+  request: Email the authors at BML Munjal University (Kiran Sharma and Sukhandeep Kaur, addresses in the paper's data availability statement) with the project, institution and intended use; ask for the release that matches the splits later papers report. No public link as of 2026-10-28.
+licence: not stated (on request)
+licence_terms:
+  - Assume research use only until the authors' terms arrive.
+contains: [real, fake]
+languages: [hi]
+size_gb: null
+notes: Kaur et al., arXiv 2411.15457 (2024, preprint). 508 videos per the paper (200 real, 308 fake), 15 s at 1080p; fakes are face swaps (FSGAN, FaceSwap, DeepFaceLab), ReTalking lip-sync and RVC voice cloning, split by which track is fake (78 fake audio only, 130 fake video only, 100 both). A later paper reports far larger splits, so the released size is unverified (checked 2026-10-28). The Hindi audio-visual set to sit beside MAVOS-DD's Hindi. No builder until the files are seen.

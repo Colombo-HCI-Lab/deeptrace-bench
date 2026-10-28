@@ -1,0 +1,15 @@
+id: illusion
+name: ILLUSION
+modality: audio_video
+role: south_asian
+status: request
+access:
+  kind: manual
+  page: https://iab-rubric.org/
+  request: Email IIT Jodhpur's IAB-RUBRIC lab (the databases address on the project page, which is printed two ways; try both) with the signed licence agreement; academic institutions only. Ask whether Set D (real-world) can be sent on its own, since the whole set is about 800 GB.
+licence: IAB-RUBRIC database licence (academic only)
+contains: [real, fake]
+languages: [en, hi, ta, kn, or, pa, gu, sa]
+size_gb: 800
+derived_from: [celebv_text]
+notes: Thakral et al., ICLR 2025 (OpenReview; not on arXiv). 1.38M samples over face swap, reenactment, lip-sync, talking heads, TTS and fully generated media. Set D, 4,385 real-world samples, covers Hindi, Tamil, Kannada, Oriya, Punjabi, Gujarati and Sanskrit, the widest Indic coverage of any video set found (checked 2026-10-28). Set A has Fitzpatrick skin-tone bins but no ethnicity label. Same lab as DeePhy and DF-Platter, so one request may cover all three.
