@@ -10,8 +10,9 @@ upstream:
   repo: SCLBD/DeepfakeBench
   commit: f188b1c105465e2e5377eb536a95022ae0e4522d
 weights:
-  # Effort's checkpoints folder 19kQwGDjF18uk78EnnypxxOLaG4Aa4v1h; Google Drive refused every
-  # file with "Quota exceeded" on 2026-10-05, so setup_models.py fails until the quota resets
+  # Effort's checkpoints folder 19kQwGDjF18uk78EnnypxxOLaG4Aa4v1h. Google Drive refuses gdown
+  # with "Quota exceeded" (2026-10-05 to 2026-10-28 at least) but serves a signed-in browser:
+  # download the file there, put it in DTB_ROOT/weights/effort/, then run setup_models.py
   - name: effort_clip_L14_trainOn_FaceForensic.pth
     kind: gdrive
     drive_id: 1m4fyJecABU-Yk3bJ4b1WhUwQa0xCkMLI

@@ -23,6 +23,7 @@ efficientnet_b4:
   effnb4_best.pth: 74cbd82d7be1bf5e6adec717824274a95b4509b02e1e78401608d32b3cbeaf0f
 effort:
   clip-vit-large-patch14-config/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
+  effort_clip_L14_trainOn_FaceForensic.pth: 8d86711f098d16b49c048962fc3e16a906380f7bb17b8a0e89bd545b926943ee
 f3net:
   f3net_best.pth: deee7d25bfc1b8b5ba83054a664880078de51213b1067f1e472c2bed7cc667f9
 ffd:
