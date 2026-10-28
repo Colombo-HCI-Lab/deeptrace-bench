@@ -1,0 +1,27 @@
+{
+  "run_id": "realforensics__mavos_dd_hi_video__d54be746",
+  "model_id": "realforensics",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "a53e849407d2fd5be0f0a7eb3df7d1a846b5b803",
+  "weights_sha256": {
+    "2DFAN4-cd938726ad.zip": "cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46",
+    "realforensics_ff.pth": "843b86f29fc98c67132a6f98180a35bfc617882a32642b8b80d571944c2e032d",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "93b71cf4027f9ccaceca211652369426ee6bc8202b17697602832febc905ad8e"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T10:59:36+00:00",
+  "last_started_utc": "2026-10-28T13:21:38+00:00",
+  "repo_commits": [
+    "e68c436c924636518219603c74fb5039661d5e36",
+    "f14e347e03b72a57f32517f76d4c489e99348341"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
