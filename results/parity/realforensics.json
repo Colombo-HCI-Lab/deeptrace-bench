@@ -1,0 +1,31 @@
+{
+  "model": "realforensics",
+  "checked_utc": "2026-10-28T09:29:06+00:00",
+  "evalset": "hidf_video",
+  "namespace": null,
+  "items": 20,
+  "n": 63,
+  "max_abs_diff": 6.4373016357421875e-06,
+  "mean_abs_diff": 3.2548505548639077e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "ahaliassos/RealForensics",
+    "commit": "a53e849407d2fd5be0f0a7eb3df7d1a846b5b803"
+  },
+  "weights_sha256": {
+    "2DFAN4-cd938726ad.zip": "cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46",
+    "realforensics_ff.pth": "843b86f29fc98c67132a6f98180a35bfc617882a32642b8b80d571944c2e032d"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.8.20",
+    "torch": "1.9.0+cpu",
+    "torchvision": "0.10.0+cpu"
+  },
+  "reference": "upstream csn_temporal_no_head + MeanLinear, eval.py load, test transform"
+}

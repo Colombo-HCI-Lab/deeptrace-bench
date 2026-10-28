@@ -20,6 +20,7 @@ dependencies = [
     "pyarrow>=17",
     "pydantic>=2.8",
     "python-dotenv>=1.0",
+    "pytorchvideo==0.1.5",
     "pyyaml>=6.0",
     "requests>=2.32",
     "safetensors>=0.4",

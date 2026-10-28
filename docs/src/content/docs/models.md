@@ -22,7 +22,8 @@ Checked on 2026-10-12.
 | FTCN                                    | video       | workable         | yes        | not yet   |
 | GenConViT (ED)                          | video       | workable         | yes        | not yet   |
 | DFDC winner (B7), UnivFD                | video       | later            | no adapter |           |
-| RealForensics, LAA-Net, FakeSTormer     | video       | later            | no adapter |           |
+| RealForensics                           | video       | workable         | yes        | not yet   |
+| LAA-Net, FakeSTormer                    | video       | later            | no adapter |           |
 | TALL                                    | video       | blocked          | no weights |           |
 | AVAD, AVH-Align, LipFD                  | audio-video | later            | no adapter |           |
 | AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   |
@@ -57,6 +58,7 @@ Passed, each against upstream run in its original environment (`scripts/parity.p
 | XLS-R + AASIST 1.1e-4                                                                                                              | 2026-10-12 | upstream `model.py`, its vendored fairseq (torch 1.8.1)             |
 | AntiDeepfake MMS-300M 9.0e-5, w2v2 small 3.2e-5                                                                                    | 2026-10-12 | upstream `W2V.py`, the Hub checkpoint, fairseq 0.12.2 (torch 1.13)  |
 | FTCN 4.6e-6 (160 clips of 50 HiDF videos)                                                                                          | 2026-10-28 | upstream `PluginLoader` classifier and `load()`, `ftcn_tt.pth`, fvcore (torch 1.4.0, CPU) |
+| RealForensics 6.4e-6 (63 clips of 20 HiDF videos)                                                                                  | 2026-10-28 | upstream `csn_temporal_no_head` and `MeanLinear`, `eval.py`'s load, the test transform (torch 1.9.0, torchvision 0.10, pytorchvideo 0.1.2, CPU) |
 | GenConViT (ED) 6.4e-6 (640 crops of 20 HiDF videos)                                                                                | 2026-10-28 | upstream `GenConViT(net="ed")` and its own strict load, `pred_func` preprocessing (timm 0.6.5, torch 1.13.1) |
 
 DeepfakeBench's reference shares the adapter's import stand-ins (and RECCE's and FFD's build stand-ins), so a pass there covers weights, numerics and transform, not upstream's imports; the strict load covers the architecture.
@@ -127,6 +129,10 @@ Runs through the DeepfakeBench adapter, with `loralib` stubbed and CLIP built fr
 ### HAVIC
 
 The only open audio-visual detector (`JielunPeng/HAVIC`). Two patches (`patches/HAVIC/`) fix timm 1.x and a `use_mask` bug in upstream's own inference. Input: up to 50 frames at 5 per second, raw face boxes resized to 224, in 16-frame windows at stride 2, with the audio under each window as 128-bin Kaldi filterbanks; P(fake) is each window's sigmoid. A frame without a face drops out (upstream skips the video). It needs at least 3.2 s with a face in 16 sampled frames, so HiDF's 3 s clips are too short; MAVOS-DD Hindi is its South Asian set once its terms are accepted. Fine-tuned on an unpublished 70% of FakeAVCeleb, so refused there.
+
+### RealForensics
+
+`realforensics_ff.pth` (FF++ c23 after LRW self-supervision) from Google Drive; the network is upstream's CSN-101 (`csn_temporal_no_head`, built from pytorchvideo's blocks, so pytorchvideo is a dependency) and normalised-linear head, loaded as `stage2/eval.py` does. Faces (`preprocess/talking_faces.py`): the same first 100 consecutive frames and FAN landmarks as LipForensics, then upstream's own `crop_patch` (landmarks smoothed over up to 6 frames each side, warped to the LRW mean face on 8 stable points, a 150 x 150 colour patch around landmarks 15 to 67). Clips of 25 frames back to back, the last moved back to the video's end (pytorchvideo's `backpad_last`), centre-cropped to 140 and resized to 112 without antialiasing, as torchvision 0.10 resized tensors; P(fake) is a clip's sigmoid. Reference env: Python 3.8, `torch==1.9.0+cpu`, `torchvision==0.10.0+cpu`, `pytorchvideo==0.1.2`, `numpy<1.21`, `pillow<10`, `setuptools<70`, on Linux x86 (patchelf `--clear-execstack` on torch's libraries where glibc refuses them).
 
 ### LipForensics
 

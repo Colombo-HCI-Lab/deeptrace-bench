@@ -1,8 +1,8 @@
 id: realforensics
 name: RealForensics
 modality: video
-status: later
-licence: MIT
+status: workable
+licence: MIT (FAN landmarks from face-alignment, BSD-3)
 paper: Haliassos et al., Leveraging Real Talking Faces via Self-Supervision for Robust Forgery Detection, CVPR 2022
 upstream:
   repo: ahaliassos/RealForensics
@@ -11,12 +11,20 @@ weights:
   - name: realforensics_ff.pth
     kind: gdrive
     drive_id: 1nqEVlRN51WyzMWSeB7x9okcaegFgA-BQ
+  # FAN (2DFAN4) for the 68 landmarks, as LipForensics
+  - name: 2DFAN4-cd938726ad.zip
+    kind: url
+    url: https://www.adrianbulat.com/downloads/python-fan/2DFAN4-cd938726ad.zip
+    size_bytes: 96316515
 training_data:
   - {dataset: lrw, level: pretrain, note: "stage 1, self-supervised on real talking faces with their audio"}
   - {dataset: ffpp, level: train, split: train, note: "stage 2, c23"}
+adapter: deeptrace_bench.models.realforensics:RealForensicsDetector
 input:
-  inputs: mouths
+  inputs: faces_150                 # preprocess.talking_faces.TalkingFaceLoader, not face crops
   frame_sampling: consecutive
+  max_frames: 100                   # the first four clips of a video
+  min_face_frames: 25
   clip_frames: 25
-  max_frames: 100                 # provisional, as LipForensics; set with the adapter
-notes: LipForensics' successor from the same author, pretrained on real talking faces, so it targets the lip-sync and talking-head fakes that dominate MAVOS-DD; audio is used only in pretraining. The FF++-trained checkpoint and four leave-one-manipulation-out checkpoints are on Google Drive (file confirmed to exist 2026-10-28). No adapter yet; LipForensics' mouth pipeline should serve it.
+  landmarks: 2DFAN4-cd938726ad.zip
+notes: LipForensics' successor from the same author, pretrained on real talking faces with their audio, so it targets the lip-sync and talking-head fakes that dominate MAVOS-DD; audio is used only in pretraining. The FF++-trained checkpoint from Google Drive (file confirmed 2026-10-28). Adapter written 2026-10-28; faces cut by upstream's own preprocessing on FAN landmarks, as LipForensics.

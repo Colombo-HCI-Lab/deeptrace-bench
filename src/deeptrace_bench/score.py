@@ -34,6 +34,7 @@ from .preprocess.av import AudioVideoLoader
 from .preprocess.clips import FaceClipLoader
 from .preprocess.faces import FaceLoader
 from .preprocess.mouths import MouthLoader
+from .preprocess.talking_faces import TalkingFaceLoader
 from .registry import Modality, ModelConfig, Registry
 from .upstream import checkout_dir
 
@@ -240,9 +241,11 @@ def build_loader(
     if model.modality == Modality.AUDIO_VIDEO:
         # an audio-visual model gets its faces and the audio track together
         loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
-    elif model.input.get("inputs") == "mouths":
-        # a lip-based model gets mouth crops cut from landmarks, not face crops
-        loader = MouthLoader(
+    elif model.input.get("inputs") in ("mouths", "faces_150"):
+        # a lip-based model gets mouth crops cut from landmarks, not face crops (RealForensics:
+        # whole faces cut the same way)
+        kind = MouthLoader if model.input["inputs"] == "mouths" else TalkingFaceLoader
+        loader = kind(
             loader,
             fan_path=weights_dir(model.id) / model.input["landmarks"],
             upstream_dir=checkout_dir(model.upstream),

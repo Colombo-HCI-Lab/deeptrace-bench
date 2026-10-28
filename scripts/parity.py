@@ -57,6 +57,8 @@ REFERENCES = {
     "AntiDeepfakeDetector": ("antideepfake.py", "<fairseq venv>/bin/python"),
     "FTCNDetector": ("ftcn.py", "<ftcn venv>/bin/python"),
     "GenConViTDetector": ("genconvit.py", "{dtb_root}/parity/envs/genconvit/bin/python"),
+    "DFDCWinnerDetector": ("dfdc_b7.py", "<dfdc venv>/bin/python"),
+    "RealForensicsDetector": ("realforensics.py", "<realforensics venv>/bin/python"),
 }
 
 
@@ -70,7 +72,7 @@ def _inputs_loader(registry: Registry, model: ModelConfig):
             return segment(wave, audio["segment_samples"], min_samples=min_samples)
 
         return load
-    if model.input.get("inputs") in ("mouths", "face_clips"):
+    if model.input.get("inputs") in ("mouths", "face_clips", "faces_150"):
         # models fed more than single crops get the loader scoring gives them
         return build_loader(registry, model, "cpu")[0]
     return FaceLoader.from_registry(registry, model)
