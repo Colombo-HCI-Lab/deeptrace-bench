@@ -1,0 +1,26 @@
+{
+  "run_id": "effort__hidf_video__b7127882",
+  "model_id": "effort",
+  "evalset_id": "hidf_video",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "clip-vit-large-patch14-config/config.json": "8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a",
+    "effort_clip_L14_trainOn_FaceForensic.pth": "8d86711f098d16b49c048962fc3e16a906380f7bb17b8a0e89bd545b926943ee",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "46219d9d6843b8b4db4ab5b4baade46222beda09e038bf0c0277b636f00ceb80",
+    "model": "5f4127b999c1e32e84d5408eb836e305b68698029850b107715819bd5063e1a9"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T03:22:01+00:00",
+  "last_started_utc": "2026-10-28T03:22:01+00:00",
+  "repo_commits": [
+    "7be064f743d56bc379b9a435f1dba180de32999c"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
