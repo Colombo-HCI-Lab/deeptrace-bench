@@ -20,8 +20,11 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import shutil
 import sys
+from collections.abc import Callable
+from pathlib import Path
 
 from deeptrace_bench import evalset as evalsets
 from deeptrace_bench.eval.contamination import check
@@ -69,6 +72,19 @@ def provenance(record: dict) -> dict:
         "repo_dirty": any(s.get("repo_dirty") for s in sessions),
         "devices": sorted({s["device"] for s in sessions if s.get("device")}),
     }
+
+
+def replace_file(path: Path, write: Callable[[Path], object]) -> None:
+    """Write ``path`` through a sibling temporary file and rename it into place.
+
+    Over the SMB mount the workers use, overwriting a file with shorter content can keep the old
+    file's tail (a 2186-byte summary.json copied over a 2187-byte one kept its last byte), so a
+    file is never rewritten in place.
+    """
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.unlink(missing_ok=True)
+    write(tmp)
+    os.replace(tmp, path)
 
 
 def main() -> int:
@@ -133,7 +149,8 @@ def main() -> int:
 
     out = results_dir(run_id)
     out.mkdir(parents=True, exist_ok=True)
-    (out / "summary.json").write_text(json.dumps(summary, indent=2, default=float) + "\n")
+    text = json.dumps(summary, indent=2, default=float) + "\n"
+    replace_file(out / "summary.json", lambda p: p.write_text(text))
     for col in evalset.group_by:
         if col not in df.columns:
             log.warning("group column %s not in the items; skipping", col)
@@ -147,8 +164,9 @@ def main() -> int:
             seed=metric_cfg["bootstrap"]["seed"],
             fpr_targets=fpr_targets,
         )
-        table.to_csv(out / f"by_{col}.csv", index=False)
-    df[["item_id", "label", "score", "status"]].to_parquet(out / "items.parquet", index=False)
+        replace_file(out / f"by_{col}.csv", lambda p, t=table: t.to_csv(p, index=False))
+    items = df[["item_id", "label", "score", "status"]]
+    replace_file(out / "items.parquet", lambda p: items.to_parquet(p, index=False))
     log.info("results in %s (verdict %s)", out, verdict.verdict.label)
 
     if args.publish:
@@ -164,8 +182,9 @@ def main() -> int:
             if path.name.startswith(("by_subject_id", "by_source_subject_id")):
                 continue
             if path.suffix in (".json", ".csv"):
-                shutil.copy2(path, public / path.name)
-        (public / "provenance.json").write_text(json.dumps(provenance(record), indent=2) + "\n")
+                replace_file(public / path.name, lambda p, src=path: shutil.copy2(src, p))
+        text = json.dumps(provenance(record), indent=2) + "\n"
+        replace_file(public / "provenance.json", lambda p: p.write_text(text))
         log.info("published aggregates to %s", public)
     return 0
 
