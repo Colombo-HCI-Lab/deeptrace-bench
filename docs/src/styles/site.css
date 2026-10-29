@@ -195,12 +195,24 @@ nav.index a:hover { color: var(--ink); }
 .heat td { padding: 0; height: 28px; text-align: center; font: 500 12px/1 var(--mono); }
 .heat.pre td { height: 30px; }
 .heat .tierrow td { padding: 14px 0 4px; height: auto; text-align: left; font: inherit; background: none; color: inherit; }
-.heat.grid { min-width: 1120px; }
-.heat.grid thead th { width: 8.4%; }
-.heat.grid thead th:first-child { width: auto; }
-.heat.grid tbody th { white-space: normal; min-width: 330px; max-width: 360px; padding: 6px 14px 6px 0; vertical-align: middle; }
+/* The grids are as wide as their columns, not the page, so the speech and face grids line up
+   column for column; the detector column stays put while a narrow screen scrolls the rest. */
+.heat.grid { width: auto; }
+.heat.grid thead th { width: 70px; min-width: 70px; }
+.heat.grid thead th span:first-child { font-size: 0.82rem; }
+.heat.grid thead th:first-child { width: auto; min-width: 0; }
+.heat.grid thead tr.cg th { width: auto; min-width: 0; padding: 0 4px 6px; text-align: left; font: 500 11px/1.3 var(--mono); color: var(--muted); border-bottom: 1px solid var(--rule-2); }
+.heat.grid thead tr.cg th:first-child { border-bottom: 0; }
+.heat.grid tbody th { white-space: normal; width: 270px; min-width: 220px; max-width: 270px; padding: 6px 14px 6px 0; vertical-align: middle; }
+/* Paper on each side fills the cell spacing, so scrolled cells don't show through beside it. */
+.heat.grid tbody th, .heat.grid thead th:first-child { position: sticky; left: 0; z-index: 1; background: var(--paper); box-shadow: -3px 0 0 var(--paper), 3px 0 0 var(--paper); }
+.heat.grid .tierhead { position: sticky; left: 0; width: fit-content; max-width: 100cqw; }
+@container main (max-width: 720px) {
+  .heat.grid tbody th, .heat.grid thead th:first-child { position: static; box-shadow: none; }
+}
 .heat.grid .dname { display: block; font-weight: 600; font-size: 0.97rem; line-height: 1.3; }
 .heat.grid .dtype { display: block; font: 400 12px/1.4 var(--mono); color: var(--muted); }
+.heat.grid .dflag { color: var(--accent-ink); }
 .heat.grid td { height: 46px; font-size: 13px; }
 .heat.grid td.g-run { background: var(--bg-auc); color: var(--fg-auc); }
 .heat.grid td sup { font-size: 10px; margin-left: 3px; }

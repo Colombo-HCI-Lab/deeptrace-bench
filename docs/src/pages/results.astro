@@ -146,56 +146,66 @@ const sections = [
       <header>
         <div class="kicker">2 · The results</div>
         <h2>Every detector on every dataset</h2>
-        <p>AUC: 0.5 is a coin flip, 1 is perfect, below 0.5 means the detector has real and fake backwards. Rows are grouped by what each detector was trained on. Hover a cell for its interval and clip count. <sup>so</sup>: source overlap.</p>
+        <p>AUC: 0.5 is a coin flip, 1 is perfect, below 0.5 means the detector has real and fake backwards. Speech detectors are grouped by what they were trained on, face detectors by what they look at. Each column is a full evalset; the quick subsets are in <a href="#all-runs">All runs</a>. Hover a cell for its interval and clip count.</p>
       </header>
       <div class="toggle" role="group" aria-label="Metric">
         <button type="button" data-metric="auc" aria-pressed="true">AUC · higher is better</button>
         <button type="button" data-metric="eer" aria-pressed="false">EER · lower is better</button>
       </div>
-      <div class="scroll">
-        <table class="heat grid">
-          <thead>
-            <tr>
-              <th>Detector</th>
-              {R.grid.cols.map((c) => <th><span>{c.name}</span><span>{c.sub}</span></th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {
-              R.grid.groups.map((g) => (
-                <Fragment>
-                  <tr class="tierrow">
-                    <td colspan={R.grid.span}>
-                      <div class="tierhead"><span class={g.badge}>{g.label}</span><span>{g.title}</span></div>
-                    </td>
+      {
+        R.grids.map((grid) => (
+          <Fragment>
+            <h3 class="sub" id={`grid-${grid.id}`}>{grid.title}</h3>
+            <div class="scroll">
+              <table class="heat grid">
+                <thead>
+                  <tr class="cg">
+                    <th></th>
+                    {grid.colGroups.map((g) => <th colspan={g.span}>{g.label}</th>)}
                   </tr>
-                  {g.rows.map((m) => (
-                    <tr>
-                      <th scope="row">
-                        <span class="dname">{m.name}</span>
-                        <span class="dtype">{m.type}</span>
-                        <span class="dtype">Backbone: {m.built}</span>
-                        <span class="dtype">Trained on: {m.trained}</span>
-                      </th>
-                      {m.cells.map((c) => (
-                        <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>
-                          {c.eer ? <Fragment><span class="auc">{c.text}</span><span class="eer">{c.eer}</span></Fragment> : c.text}
-                          {c.overlap && <sup>so</sup>}
+                  <tr>
+                    <th>Detector</th>
+                    {grid.cols.map((c) => <th><span>{c.name}</span><span>{c.sub}</span></th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {grid.groups.map((g) => (
+                    <Fragment>
+                      <tr class="tierrow">
+                        <td colspan={grid.span}>
+                          <div class="tierhead"><span class={g.badge}>{g.label}</span><span>{g.title}</span></div>
                         </td>
+                      </tr>
+                      {g.rows.map((m) => (
+                        <tr>
+                          <th scope="row">
+                            <span class="dname">{m.name}</span>
+                            {m.type && <span class="dtype">{m.type}</span>}
+                            <span class="dtype">Backbone: {m.built}</span>
+                            <span class="dtype">Trained on: {m.trained}</span>
+                            {m.noParity && <span class="dtype dflag">No parity check yet, so not a result</span>}
+                          </th>
+                          {m.cells.map((c) => (
+                            <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>
+                              {c.eer ? <Fragment><span class="auc">{c.text}</span><span class="eer">{c.eer}</span></Fragment> : c.text}
+                              {c.overlap && <sup>so</sup>}
+                            </td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
+                    </Fragment>
                   ))}
-                </Fragment>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
+                </tbody>
+              </table>
+            </div>
+          </Fragment>
+        ))
+      }
       <ul class="gridkey">
         <li><span class="sw g-trained"></span>trained on it, so not scored</li>
         <li><span class="sw home"></span>scored on the held-out part of its own training set</li>
         <li><sup>so</sup> source overlap: the detector's pretraining shares a corpus with this set</li>
-        <li><span class="sw g-na">–</span>different modality</li>
+        <li><span class="sw g-na">–</span>it can't read this set</li>
         <li><span class="sw g-todo">·</span>not run yet</li>
       </ul>
     </section>

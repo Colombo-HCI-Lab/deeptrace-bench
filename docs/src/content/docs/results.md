@@ -56,6 +56,9 @@ IndicSynth Hindi's fakes are a seeded sample of 5,000 per generator from 205,938
 | `aasist` | Graph attention network, 0.3 M parameters | none, trained from scratch | ASVspoof 2019 LA |
 | `aasist_l` | Graph attention network, 85 K parameters | none, trained from scratch | ASVspoof 2019 LA |
 | `xlsr_aasist` | Speech foundation model with a graph attention head | XLS-R 300M, 128 languages | ASVspoof 2019 LA |
+| `xlsr_sls` | Speech foundation model with attention over all 24 of its layers (SLS) | XLS-R 300M, 128 languages | ASVspoof 2019 LA |
+| `xlsr_mamba` | Speech foundation model with a bidirectional Mamba head | XLS-R 300M, 128 languages | ASVspoof 2019 LA |
+| `aasist3` | Graph attention network with KAN layers, on speech foundation model features | wav2vec 2.0 XLSR-53, 53 languages | ASVspoof 2019 and 5, MLAAD, M-AILABS |
 | `antideepfake_w2v_small` | Speech foundation model with a linear head | wav2vec 2.0 base, English only | 74k hours of real and fake speech, 100+ languages |
 | `antideepfake_mms_300m` | Speech foundation model with a linear head | MMS 300M, about 1,400 languages | 74k hours of real and fake speech, 100+ languages |
 | `df_arena_500m` | Speech foundation model with a conformer head | XLS-R 300M | ASVspoof 2019 and 5, MLAAD and six more |
@@ -63,6 +66,23 @@ IndicSynth Hindi's fakes are a seeded sample of 5,000 per generator from 205,938
 | `xception` | CNN, 22 M parameters | ImageNet | FF++ |
 | `sbi` | CNN (EfficientNet-B4), 18 M parameters | ImageNet | FF++ real videos, with fakes made by blending each face into itself |
 | `gend` | Vision foundation model, only its LayerNorms tuned | CLIP ViT-L/14 | FF++ |
+| `gend_pe_l` | Vision foundation model, only its LayerNorms tuned | Perception Encoder L/14 | FF++ |
+| `effort` | Vision foundation model, its weights split by SVD and only the residual tuned | CLIP ViT-L/14 | FF++ |
+| `realforensics` | Video network (CSN) on face clips | self-supervised on real talking faces and their audio (LRW) | FF++ |
+| `ftcn` | 3D CNN with no spatial reach, plus a temporal transformer, on face clips | none | FF++ |
+| `lipforensics` | ResNet-18 and a temporal CNN on grayscale mouth clips | lipreading (LRW) | FF++ |
+| `efficientnet_b4` | CNN (EfficientNet-B4), 18 M parameters | ImageNet | FF++ |
+| `ucf` | CNN (Xception) scoring only the forgery traces every method shares, 47 M parameters | ImageNet | FF++ |
+| `core` | CNN (Xception) trained to agree across augmented views, 22 M parameters | ImageNet | FF++ |
+| `recce` | CNN (Xception) that reconstructs real faces and attends to what it can't, 48 M parameters | ImageNet | FF++ |
+| `f3net` | CNN (Xception) on DCT frequency bands, 23 M parameters | ImageNet | FF++ |
+| `ffd` | CNN (Xception) with an attention map over manipulated regions, 22 M parameters | ImageNet | FF++ |
+| `srm` | Two-stream CNN (Xception), colour and high-frequency noise residuals, 55 M parameters | ImageNet | FF++ |
+| `spsl` | CNN (Xception) with the phase spectrum as a fourth channel, 22 M parameters | ImageNet | FF++ |
+| `dfdc_b7` | Seven CNNs (EfficientNet-B7) averaged, the DFDC challenge winner | ImageNet | DFDC |
+| `genconvit` | ConvNeXt and Swin hybrid with an autoencoder branch, the only branch scored | ImageNet | DFDC, FF++, DeepfakeTIMIT |
+| `havic` | Audio and video transformers fused over 16-frame windows | real videos (LRS2) | FakeAVCeleb |
+| `avh_align` | Small network that scores how far lips and voice drift apart | AV-HuBERT large (LRS3, VoxCeleb2), frozen | real AV-Deepfake1M videos only |
 
 ## Insights
 

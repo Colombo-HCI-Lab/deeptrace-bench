@@ -27,23 +27,55 @@ export const EV: Record<string, [string, string]> = {
   bangla_voices: ["Bangla voices", "Bengali"],
   indictts_challenge: ["IndicTTS", "16 languages"],
   indicsynth_hi: ["IndicSynth Hindi", "Hindi"],
+  indicsynth_bn: ["IndicSynth Bengali", "Bengali"],
+  indicsynth_ur: ["IndicSynth Urdu", "Urdu"],
+  mavos_dd_hi_audio: ["MAVOS-DD audio", "Hindi"],
+  mlaad_bn: ["MLAAD Bengali", "Bengali"],
+  mlaad_hi: ["MLAAD Hindi", "Hindi"],
+  mlaad_si: ["MLAAD Sinhala", "Sinhala"],
+  bd_grf6: ["BD-GRF6", "Bengali"],
   asvspoof2019_la_eval: ["ASVspoof 2019 LA", "English"],
   in_the_wild: ["In-the-Wild", "English"],
   hidf_video: ["HiDF", "Faces"],
+  mavos_dd_hi_video: ["MAVOS-DD video", "Hindi"],
+  mavos_dd_hi_av: ["MAVOS-DD audio-visual", "Hindi"],
 };
-const SA = ["urdu_csalt", "banglafake", "bangla_voices", "indictts_challenge", "indicsynth_hi"];
 
 type Kind = "bad" | "mid" | "good";
-// The three tiers results.md describes, by what each detector was trained on.
-const TIERS: { label: string; title: string; kind: Kind; models: string[] }[] = [
-  { label: "Fails", title: "Trained only on English spoofing data (ASVspoof 2019)", kind: "bad", models: ["aasist", "aasist_l"] },
-  { label: "Uneven", title: "Same training data, multilingual front end", kind: "mid", models: ["xlsr_aasist"] },
+interface Group {
+  label: string;
+  title: string;
+  kind: Kind;
+  models: string[];
+}
+// The grid's row groups. Speech is grouped by what each detector was trained on (the three tiers
+// results.md describes), faces by what each detector looks at, since nearly all trained on FF++.
+const SPEECH: Group[] = [
+  { label: "Fails", title: "Trained only on English spoofing data (ASVspoof 2019), no pretrained front end", kind: "bad", models: ["aasist", "aasist_l"] },
+  {
+    label: "Uneven",
+    title: "Multilingual pretrained front end, trained on ASVspoof (AASIST3 also on MLAAD)",
+    kind: "mid",
+    models: ["xlsr_aasist", "xlsr_sls", "xlsr_mamba", "aasist3"],
+  },
   {
     label: "Near ceiling",
     title: "Post-trained on large multilingual collections of real and fake speech",
     kind: "good",
     models: ["antideepfake_w2v_small", "antideepfake_mms_300m", "df_arena_500m", "df_arena_1b"],
   },
+];
+const FACES: Group[] = [
+  { label: "Foundation", title: "Vision foundation models, lightly tuned on FF++", kind: "mid", models: ["gend", "gend_pe_l", "effort"] },
+  { label: "Temporal", title: "Face or mouth clips over time, trained on FF++", kind: "mid", models: ["realforensics", "ftcn", "lipforensics"] },
+  {
+    label: "Frame CNN",
+    title: "Single face crops, CNNs trained on FF++",
+    kind: "mid",
+    models: ["sbi", "xception", "efficientnet_b4", "ucf", "core", "recce", "f3net", "ffd", "srm", "spsl"],
+  },
+  { label: "DFDC", title: "Trained on DFDC instead of FF++", kind: "mid", models: ["dfdc_b7", "genconvit"] },
+  { label: "Audio-visual", title: "Read the voice and the face together", kind: "mid", models: ["havic", "avh_align"] },
 ];
 
 const fmt3 = (x: number) => x.toFixed(3);
@@ -226,11 +258,36 @@ export function buildProgress(body: string) {
 export type Progress = ReturnType<typeof buildProgress>;
 
 // ---------- At a glance: every detector on every dataset ----------
-// The grid's columns: reproduction sets, the South Asian sets, then video, ending with FF++,
-// which every video detector trained on and nobody has scored yet.
-const GRID_COLS = ["asvspoof2019_la_eval", "in_the_wild", ...SA, "hidf_video", "ffpp_test"];
+// Two grids, speech and faces, since no detector crosses between them. Rows and columns come from
+// the runs, so a new detector or evalset shows up without an edit here: a detector in no group
+// lands in "Other", and an evalset outside COL_ORDER sorts after the known ones of its kind.
+// Known columns in reading order; FF++, which every FF++ detector trained on and nobody has scored
+// yet, is always shown.
+const COL_ORDER = [
+  "asvspoof2019_la_eval",
+  "in_the_wild",
+  "urdu_csalt",
+  "banglafake",
+  "bangla_voices",
+  "indictts_challenge",
+  "indicsynth_hi",
+  "indicsynth_bn",
+  "indicsynth_ur",
+  "mavos_dd_hi_audio",
+  "hidf_video",
+  "mavos_dd_hi_video",
+  "mavos_dd_hi_av",
+  "mlaad_bn",
+  "mlaad_hi",
+  "mlaad_si",
+  "bd_grf6",
+];
+const GRID_PINNED = ["ffpp_test"];
 const GRID_NAMES: Record<string, [string, string]> = { ...EV, ffpp_test: ["FF++", "Faces · training set"] };
-const VIDEO_GROUP = { label: "Faces", title: "Video detectors, all trained on FF++", models: ["xception", "sbi", "gend"] };
+const GRIDS = [
+  { id: "speech", title: "Speech", audio: true, groups: SPEECH },
+  { id: "faces", title: "Faces, and faces with their voices", audio: false, groups: FACES },
+];
 
 export interface GridCell {
   kind: "run" | "trained" | "na" | "todo";
@@ -274,28 +331,73 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) 
     if (trained || D.cells[`${id}|${ev}`] === "guard")
       return { kind: "trained", text: "trained", title: "Trained on this dataset, so it isn't scored here" };
     const audio = (x?: string) => x === "audio";
-    if (m && e && audio(m.modality) !== audio(e.modality)) return { kind: "na", text: "–", title: "Different modality" };
+    if (D.cells[`${id}|${ev}`] === "na" || (m && e && audio(m.modality) !== audio(e.modality)))
+      return { kind: "na", text: "–", title: "It can't read this set" };
     return { kind: "todo", text: "·", title: "Not run yet" };
   };
-  const groups = [...TIERS.map((t) => ({ label: t.label, title: t.title, badge: badge(t.kind), models: t.models })), {
-    ...VIDEO_GROUP,
-    badge: badge("mid"),
-  }];
-  return {
-    cols: GRID_COLS.map((ev) => ({ id: ev, name: (GRID_NAMES[ev] ?? [ev, ""])[0], sub: (GRID_NAMES[ev] ?? [ev, ""])[1] })),
-    groups: groups.map((g) => ({
-      label: g.label,
-      title: g.title,
-      badge: g.badge,
-      rows: g.models
-        .filter((id) => D.models.some((m) => m.id === id))
-        .map((id) => {
-          const [type = "", built = "", trained = ""] = facts.get(id) ?? [];
-          return { name: name(id), type, built, trained, cells: GRID_COLS.map((ev) => cell(id, ev)) };
-        }),
-    })),
-    span: GRID_COLS.length + 1,
+  // Facts for a row header: the doc's detectors table, else the catalog's training data.
+  const rowFacts = (id: string) => {
+    const f = facts.get(id);
+    if (f) return f;
+    const t = D.models.find((m) => m.id === id)?.training ?? [];
+    const list = (xs: string[]) => (xs.length > 3 ? `${xs.slice(0, 3).join(", ")} and ${xs.length - 3} more` : xs.join(", "));
+    return ["", list(t.filter((x) => x.level === "pretrain").map((x) => x.name)) || "none", list(t.filter((x) => x.level !== "pretrain").map((x) => x.name))];
   };
+  const evalset = (id: string) => D.evalsets.find((x) => x.id === id);
+  const kindOf = (id: string) => {
+    const e = evalset(id);
+    return e?.role === "reproduction" ? "repro" : e?.pairing === "cross_corpus" ? "cross" : "zero";
+  };
+  // Column groups in reading order; a group nobody has scored goes last.
+  const COL_GROUPS: Record<string, [number, string]> = {
+    repro: [0, "Reproduction"],
+    zero: [1, "Zero-shot"],
+    cross: [2, "Cross-corpus · not results until the shortcut probe"],
+  };
+  const scored = new Set(D.runs.map((r) => r.evalset));
+  const rank = (id: string) => (scored.has(id) ? COL_GROUPS[kindOf(id)][0] : 9);
+  const at = (id: string) => (COL_ORDER.includes(id) ? COL_ORDER.indexOf(id) : COL_ORDER.length);
+
+  return GRIDS.map((grid) => {
+    const mine = (modality?: string) => (modality === "audio") === grid.audio;
+    // A quick subset gives way to its full set; its runs stay in the all-runs table.
+    const cols = [...new Set([...D.runs.map((r) => r.evalset), ...GRID_PINNED])]
+      .filter((id) => mine(evalset(id)?.modality))
+      .filter((id) => !(id.endsWith("_quick") && scored.has(id.replace(/_quick$/, ""))))
+      .sort((a, b) => rank(a) - rank(b) || at(a) - at(b) || a.localeCompare(b));
+    const colGroups: { label: string; span: number }[] = [];
+    for (const id of cols) {
+      const label = COL_GROUPS[kindOf(id)][1];
+      const last = colGroups[colGroups.length - 1];
+      if (last?.label === label) last.span++;
+      else colGroups.push({ label, span: 1 });
+    }
+    const models = [...new Set(D.runs.filter((r) => cols.includes(r.evalset)).map((r) => r.model))];
+    const grouped = new Set(grid.groups.flatMap((g) => g.models));
+    const other = models.filter((id) => !grouped.has(id));
+    const groups = [...grid.groups, ...(other.length ? [{ label: "Other", title: "Not grouped yet", kind: "mid" as Kind, models: other }] : [])];
+    return {
+      id: grid.id,
+      title: grid.title,
+      colGroups,
+      cols: cols.map((ev) => ({ id: ev, name: (GRID_NAMES[ev] ?? [ev, ""])[0], sub: (GRID_NAMES[ev] ?? [ev, ""])[1] })),
+      groups: groups
+        .map((g) => ({
+          label: g.label,
+          title: g.title,
+          badge: badge(g.kind),
+          rows: g.models
+            .filter((id) => models.includes(id))
+            .map((id) => {
+              const [type = "", built = "", trained = ""] = rowFacts(id);
+              const noParity = D.runs.some((r) => r.model === id && r.flags.includes("no parity check"));
+              return { name: name(id), type, built, trained, noParity, cells: cols.map((ev) => cell(id, ev)) };
+            }),
+        }))
+        .filter((g) => g.rows.length),
+      span: cols.length + 1,
+    };
+  });
 }
 
 // ---------- Results ----------
@@ -310,7 +412,7 @@ export function buildResults(body: string) {
     rows: (dsTable?.rows ?? []).map((r) => r.map(plain)),
     note: md(prose(dsT)),
   };
-  const grid = buildGrid(tables(get(/^The detectors/))[0]);
+  const grids = buildGrid(tables(get(/^The detectors/))[0]);
   const insights = items(get(/^Insights/))
     .map(lead)
     .map((b, i) => ({ n: i + 1, label: b.label, body: md(b.rest) }));
@@ -418,7 +520,7 @@ export function buildResults(body: string) {
     asOf: firstT.match(/as of (\d{4}-\d{2}-\d{2})/)?.[1] ?? D.built,
     first,
     datasets,
-    grid,
+    grids,
     insights,
     lang: { title: plain(langS.title), ...heat(tables(langS.text)[0]), intro: md(langP[0] ?? ""), after: md(langP.slice(1).join("\n\n")) },
     pre: { title: plain(preS.title), ...heat(tables(preS.text)[0]), body: md(prose(preS.text)) },
