@@ -113,11 +113,12 @@ In order:
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
 2. **The rest of the round**, paused on 2026-10-29 with its two GPUs outside SPARK switched off: 84 audio pairs (the reproduction sets for AASIST3, XLS-R + SLS and XLSR-Mamba, 11 retries, the rest of BD-GRF6 and SpeechFake).
 3. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
-4. **A generator-level contamination check** of DF Arena and AntiDeepfake. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean.
-5. **The shortcut probe**, then the cross-corpus sets that wait on it (E5: MLAAD, SpeechFake, BD-GRF6, `mlaad_si`, the only Sinhala fakes).
-6. **Parity still owed:** GenD (the letterbox crop added for the DFDC winner may unblock its export), XLS-R + SLS (needs the fairseq zip its checkout ships), XLSR-Mamba, AASIST3, GenD PE-L, HAVIC, LipForensics, Effort.
-7. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
-8. **deeptrace's own data** (E7), once collection starts.
+4. **A generator-level contamination check** of DF Arena and AntiDeepfake, then generators they haven't seen. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean, and their 0.995-plus on the open South Asian sets may be familiarity rather than transfer.
+5. **A language control for the video drop**: the same video models on a non-South-Asian set made with MAVOS-DD's generators (its other-language subsets, if they share Hindi's), to tell "Hindi" apart from "talking head" ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).
+6. **The shortcut probe**, then the cross-corpus sets that wait on it (E5: MLAAD, SpeechFake, BD-GRF6, `mlaad_si`, the only Sinhala fakes).
+7. **Parity still owed:** GenD (the letterbox crop added for the DFDC winner may unblock its export), XLS-R + SLS (needs the fairseq zip its checkout ships), XLSR-Mamba, AASIST3, GenD PE-L, HAVIC, LipForensics, Effort.
+8. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
+9. **deeptrace's own data** (E7), once collection starts.
 
 ## Open decisions that shape the results
 

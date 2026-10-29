@@ -196,6 +196,19 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 - **The DFDC winner is backwards on MAVOS-DD.** It scores 0.859 on HiDF but 0.390 on MAVOS-DD: at its EER threshold it flags 59% of real Hindi videos and misses 98% of EchoMimic's and 94% of Sonic's talking heads. It matches upstream within 1e-5 per face crop, so this is the model, not the adapter. GenConViT also falls to chance (0.541).
 - **AVH-Align doesn't transfer.** The audio-visual alignment model, trained on AV-Deepfake1M (English), sits at chance on MAVOS-DD (0.520): it catches 92% of Roop face swaps and 87% of MEMO talking heads, but misses 76% of Sonic's and 61% of LivePortrait's. Its parity check passes, so this is how it behaves on Hindi.
 - **Talking heads are the frame models' blind spot, and the temporal and audio-visual models' strength.** At each model's EER threshold, GenD PE-L misses 78% of EchoMimic's audio-driven talking heads while catching 82 to 95% of face swaps. FTCN catches every EchoMimic clip and 98% of LivePortrait's, though it still misses about half of MEMO's and Sonic's. HAVIC, which reads audio and video together, misses only 4 to 6% of the talking heads but about half the swaps, so it sits mid-table overall (0.692) with LipForensics (0.703). The two cover each other's gaps (miss rates per generator are in each run's `by_method.csv`).
+- **The pattern holds across all 18 video models.** Share of each generator's fakes missed at each model's own EER threshold on MAVOS-DD Hindi, averaged over the 18:
+
+  | Generator | Type | Mean miss | Worst model |
+  | --------- | ---- | --------: | ----------- |
+  | EchoMimic | audio-driven talking head | 76% | DFDC winner, 98% |
+  | MEMO | audio-driven talking head | 71% | DFDC winner, 88% |
+  | Sonic | audio-driven talking head | 63% | DFDC winner, 94% |
+  | Roop | face swap | 33% | FTCN, 61% |
+  | HifiFace | face swap | 28% | DFDC winner, 52% |
+  | InSwapper | face swap | 26% | SPSL, 47% |
+  | LivePortrait | face reenactment | 15% | Effort, 57% |
+
+  Every model misses more talking heads than face swaps on average, and 16 of the 18 miss each talking-head generator more often than any face swap. MAVOS-DD's fakes are mostly talking heads, so this round can't yet separate "Hindi" from "talking head": that needs the same models on a non-South-Asian set with the same generators ([Progress](progress.md#next)).
 - **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
 - **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2), and the models marked "no" haven't passed parity, so their numbers don't count as results yet.
 
@@ -217,6 +230,7 @@ Audio is still being scored (2026-10-29). These 40 same-corpus pairs are done, A
 - **Urdu CSALT reproduces.** All seven models with parity matched their 2026-10-12 runs (AUC and EER within 0.001, same counts) on a different GPU.
 - **MAVOS-DD's audio is easy for the post-trained models.** AntiDeepfake and DF Arena separate it almost perfectly, while the ASVspoof-only AASIST pair stays near 0.64. This is insight 6's ceiling again: their training collections may share MAVOS-DD's voice generators, which the guard can't check.
 - **IndicSynth Bengali and Urdu repeat the Hindi picture.** The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34 for both); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more. Of the three models without parity, XLS-R + SLS does best (0.80 and 0.94).
+- **Bengali is the hardest of IndicSynth's three languages.** IndicSynth uses the same two generators for Hindi, Bengali and Urdu, so this comparison holds generation fixed. Every model below the post-trained ceiling scores lowest on Bengali: AASIST 0.21 against 0.34 (Urdu) and 0.39 (Hindi), XLS-R + AASIST 0.65 against 0.78 and 0.83, XLSR-Mamba 0.65 against 0.79, XLS-R + SLS 0.80 against 0.94. The same holds across corpora: XLS-R + AASIST scores 0.39 to 0.65 on all four Bengali sets and 0.78 to 0.89 on all five Hindi and Urdu ones.
 
 Cross-corpus pairs, where the real and fake clips come from different recordings, so a model can score well by telling the sources apart. They are scored and recorded but don't count as results until the shortcut probe runs. AUC, then TPR at 5% FPR; "guard" means the model trained on MLAAD, so the contamination guard refused the pair, and a dash is still queued:
 
