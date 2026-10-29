@@ -24,6 +24,7 @@ from pathlib import Path
 from deeptrace_bench.registry import Registry
 
 # Datasets whose terms rule out copies beyond their own store (data_policy.md, licence clauses).
+# Anything derived from one of them stays too, and so does a run whose evalset isn't configured.
 NO_COPY = frozenset({"dfplatter", "deephy", "indeepfake", "unidatapro_videos", "svarah"})
 
 INDEX_COLUMNS = [
@@ -74,12 +75,25 @@ def _copy_tree(src: Path, dst: Path, report: Report) -> None:
         _copy_newer(path, dst / path.relative_to(src), report)
 
 
+def _lineage(registry: Registry, dataset_id: str) -> set[str]:
+    seen, todo = set(), [dataset_id]
+    while todo:
+        current = todo.pop()
+        if current in seen:
+            continue
+        seen.add(current)
+        if current in registry.datasets:
+            todo.extend(registry.datasets[current].derived_from)
+    return seen
+
+
 def _restricted(registry: Registry, evalset_id: str) -> bool:
+    """Whether a run on ``evalset_id`` must stay in its store: unknown evalsets count as yes."""
     try:
         evalset = registry.evalset(evalset_id)
     except KeyError:
-        return False
-    return any(c.dataset in NO_COPY for c in evalset.components)
+        return True
+    return any(_lineage(registry, c.dataset) & NO_COPY for c in evalset.components)
 
 
 def archive(sources: list[Path], dest: Path, registry: Registry, published: set[str]) -> Report:

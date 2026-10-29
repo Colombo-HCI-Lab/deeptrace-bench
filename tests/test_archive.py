@@ -65,3 +65,20 @@ def test_newest_copy_wins_across_stores(registry, tmp_path):
     archive([new, old], dest, registry, published=set())
     rows = list(csv.DictReader((dest / "index.csv").open()))
     assert rows[0]["auc"] == "0.8"
+
+
+def test_unknown_evalsets_stay_in_the_store(registry, tmp_path):
+    store, dest = tmp_path / "store", tmp_path / "archive"
+    _run(store, "aasist__no_such_set__dddd0000", "no_such_set")
+    report = archive([store], dest, registry, published=set())
+    assert report.skipped_licence == ["aasist__no_such_set__dddd0000"]
+
+
+def test_datasets_derived_from_restricted_ones_stay(registry, tmp_path, monkeypatch):
+    urdu = registry.datasets["urdu_csalt"]
+    monkeypatch.setitem(
+        registry.datasets, "urdu_csalt", urdu.model_copy(update={"derived_from": ["indeepfake"]})
+    )
+    store, dest = tmp_path / "store", tmp_path / "archive"
+    _run(store, "aasist__urdu_csalt__eeee0000", "urdu_csalt")
+    assert archive([store], dest, registry, published=set()).skipped_licence
