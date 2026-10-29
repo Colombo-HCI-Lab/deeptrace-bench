@@ -5,7 +5,7 @@ description: "What each experiment asked, what the zero-shot runs so far show, a
 
 ## Read this first
 
-- **Two snapshots.** The first zero-shot round (2026-10-12) and the first full benchmark round (2026-10-27 to 29, [below](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)), which is still scoring audio. The latest number for every run is in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs).
+- **Two snapshots.** The first zero-shot round (2026-10-12) and the first full benchmark round (2026-10-27 to 29, [below](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)), paused on 2026-10-29 with 84 audio pairs left. The latest number for every run is in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs).
 - **Zero-shot.** No model was trained or fine-tuned on these evalsets.
 - **Provisional rules.** The evaluation setup isn't settled ([decision 5](progress.md#open-decisions-that-shape-the-results)) and nothing has gone through `evaluate.py --publish`, so numbers can move.
 - **`clean` isn't proof the data is new to a model.** The guard compares datasets, not the generators behind them ([verdicts](evaluation.md#contamination-verdicts)).
@@ -17,9 +17,13 @@ Each experiment is a set of model and evalset pairs that answers one question. W
 
 | Experiment | Question | Models | Evalsets | Status |
 | --- | --- | --- | --- | --- |
-| E1: reproductions | Do our adapters reproduce the published figures, with scores pointing the right way? | the seven audio models below; video models later | ASVspoof 2019 LA eval, or In-the-Wild where the guard refuses ASVspoof 2019 (DF Arena, AntiDeepfake) | audio done; video waits on FF++ or Celeb-DF v2 |
-| E2: zero-shot audio | Do detectors trained only on English spoofing data hold up on South Asian speech? Does multilingual pretraining help? Do language and gender shift the scores? | the seven audio models | the five South Asian audio sets below | done |
-| E3: zero-shot video | Does a detector's accuracy, or its false-positive rate on real faces, differ by race? | Xception, SBI, GenD | `hidf_video` | done, provisional |
+| E1: reproductions | Do our adapters reproduce the published figures, with scores pointing the right way? | the ten audio models below; video models later | ASVspoof 2019 LA eval, or In-the-Wild where the guard refuses ASVspoof 2019 (DF Arena, AntiDeepfake) | audio done for the seven first-round models, AASIST3, XLS-R + SLS and XLSR-Mamba queued; video waits on FF++ or Celeb-DF v2 |
+| E2: zero-shot audio | Do detectors trained only on English spoofing data hold up on South Asian speech? Does multilingual pretraining help? Do language and gender shift the scores? | the ten audio models | the eight same-corpus South Asian audio sets below | seven models done on all eight; AASIST3, XLS-R + SLS and XLSR-Mamba on four, the rest queued |
+| E3: zero-shot video on HiDF | Does a detector's accuracy, or its false-positive rate on real faces, differ by race? | the 18 video models; the race breakdown so far for Xception, SBI and GenD | `hidf_video` | done, provisional |
+| E4: talking heads on MAVOS-DD Hindi | Do face detectors hold up on Hindi video, including audio-driven talking heads? Do audio-visual detectors catch what they miss? | the 18 video models, HAVIC, AVH-Align | `mavos_dd_hi_video`, `mavos_dd_hi_av` | done, provisional |
+| E5: cross-corpus audio | Do the audio detectors hold up when the real and fake clips come from different recordings, and could a trivial classifier tell those apart? | the audio models the guard allows | MLAAD Bengali, Hindi and Sinhala, BD-GRF6; SpeechFake queued | partly done: 20 pairs scored, none a result until the shortcut probe |
+| E6: fine-tuned baselines | How much does training on South Asian data help, on [identity-safe splits](evaluation.md#fine-tuning-splits)? | to be chosen | to be chosen | planned |
+| E7: data from deeptrace | How do the detectors do on what deeptrace collects? | to be chosen | deeptrace's data | planned, once collection starts |
 
 To run a pair again, score in shards, then evaluate. Two shards keep one GPU busy when audio is read from shared storage:
 
@@ -33,7 +37,7 @@ On one 24 GB GPU with two shards, XLS-R-sized audio models score about 30 clips 
 
 ## The datasets
 
-Every dataset a detector was scored on, plus FF++, the training set of every video detector.
+Every evalset a detector was scored on, plus FF++, the training set of most video detectors. The cross-corpus sets take their fakes and their real clips from different recordings, so they don't count as results until the [shortcut probe](evaluation.md#shortcut-probe-planned) runs.
 
 | Dataset | Type | Role | Language | Real / fake | Fakes made by | Groups | Licence |
 | ------- | ---- | ---- | -------- | ----------: | ------------- | ------ | ------- |
@@ -44,10 +48,21 @@ Every dataset a detector was scored on, plus FF++, the training set of every vid
 | Bangla voices | Audio · TTS, each fake paired with its real twin | South Asian | Bengali | 2,250 / 2,250 | not named | gender | CC BY 4.0 |
 | IndicTTS challenge | Audio · TTS | South Asian | 16 Indian languages, Nepali among them | 15,558 / 15,544 | not named | language, gender | CC BY 4.0 |
 | IndicSynth Hindi | Audio · TTS and voice conversion | South Asian | Hindi | 5,059 / 10,000 | XTTS-v2, FreeVC24 | generator, gender | CC BY-NC |
+| IndicSynth Bengali | Audio · TTS and voice conversion | South Asian | Bengali | 4,589 / 15,000 | XTTS-v2, VITS, FreeVC24 | generator, gender | CC BY-NC |
+| IndicSynth Urdu | Audio · TTS and voice conversion | South Asian | Urdu | 5,129 / 10,000 | XTTS-v2, FreeVC24 | generator, gender | CC BY-NC |
+| MAVOS-DD Hindi, audio | Audio · voice conversion | South Asian | Hindi | 3,632 / 831 | kNN-VC | generator | CC BY-NC-SA 4.0 |
 | HiDF | Video · face swap | Race-labelled, not South Asian | n/a | 4,361 / 4,361 | a commercial face-swap tool | race, gender, age | CC BY-NC 4.0 |
+| MAVOS-DD Hindi, video | Video · face swap, talking heads, reenactment | South Asian | Hindi | 4,463 / 3,050 | InSwapper, HifiFace, Roop, EchoMimic, Sonic, MEMO, LivePortrait | generator | CC BY-NC-SA 4.0 |
+| MAVOS-DD Hindi, audio-visual | Video and audio · either track changed | South Asian | Hindi | 3,632 / 3,881 | the seven above and kNN-VC | generator | CC BY-NC-SA 4.0 |
+| MLAAD Bengali | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Bengali | 4,589 / 4,000 | four TTS systems (IndicF5, Bark, two VITS voices) | generator | CC BY-NC (fakes), CC BY 4.0 (real) |
+| MLAAD Hindi | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Hindi | 5,059 / 9,000 | nine TTS systems (XTTS-v2, Bark, IndicF5 and six more) | generator | CC BY-NC (fakes), CC BY 4.0 (real) |
+| MLAAD Sinhala | Audio · TTS, real speech from OpenSLR | South Asian, cross-corpus | Sinhala | 11,550 / 1,000 | Edge-TTS | generator | CC BY-NC (fakes), CC BY-SA 4.0 (real) |
+| BD-GRF6 | Audio · not stated | South Asian, cross-corpus | Bengali | 6,783 / 6,783 | not stated | gender, third gender included | CC BY 4.0 |
 | FF++ | Video · face swap and reenactment | Training set only | n/a | 1,000 / 4,000 | Deepfakes, Face2Face, FaceSwap, NeuralTextures | none | on request |
 
-IndicSynth Hindi's fakes are a seeded sample of 5,000 per generator from 205,938: all of them would outnumber the real clips about 40 to 1 and cost about a day of GPU time per large model, without changing AUC or EER.
+IndicSynth's fakes are a seeded sample of 5,000 per generator (from 205,938 in Hindi): all of them would outnumber the real clips about 40 to 1 and cost about a day of GPU time per large model, without changing AUC or EER.
+
+MAVOS-DD's labels follow the track a model sees. The video set counts the kNN-VC clips, whose video is untouched, as real; the audio-visual set counts them as fake; and the audio set scores only real and kNN-VC clips, the only ones whose audio label is settled so far.
 
 ## The detectors
 
@@ -90,10 +105,10 @@ IndicSynth Hindi's fakes are a seeded sample of 5,000 per generator from 205,938
 2. **Language matters only for the detectors trained on ASVspoof.** Across the 16 IndicTTS languages, XLS-R + AASIST runs from 0.49 (Gujarati) to 0.86 (English, its training language) and AASIST from 0.23 to 0.52, while MMS-300M stays at 0.996 or above. Under [decision 4's proposed rule](evaluation.md#metrics), language counts for the classic pair only.
 3. **In faces, ranking is even but false alarms aren't.** On HiDF, GenD scores 0.952, SBI 0.877 and Xception 0.804; SBI beats Xception without seeing a real deepfake in training. Across race groups AUC barely moves, yet at its global threshold GenD flags 28% of real Indian faces as fake, against 6 to 13% for the other groups. Provisional (see the HiDF section).
 4. **Doing well on its home set says nothing about South Asian speech.** AASIST scores 0.999 on ASVspoof, 0.578 on In-the-Wild and 0.048 on Bangla voices, where it is confidently backwards. It most likely learned studio-clean audio as a sign of real speech, which flips on crowd-sourced recordings.
-5. **Training data sorts the audio detectors into three tiers, and matters more than size.** Trained on ASVspoof 2019 LA only, AASIST and AASIST-L fall below chance on every South Asian set except Urdu. XLS-R + AASIST, a 300M multilingual backbone with the same training, is uneven: 0.80 on Urdu and 0.83 on IndicSynth Hindi, but 0.467 on BanglaFake and 0.389 on Bangla voices. Post-trained on large multilingual collections of real and fake speech, AntiDeepfake w2v2 small, a third of that size, scores 0.955 and 1.000 there. AASIST-L, at 85K parameters, moves no score of AASIST's by more than 0.03.
-6. **The open South Asian sets no longer separate the top tier.** MMS-300M and both DF Arena models score 0.978 or more on all five, w2v2 small 0.895 or more. Their training collections, such as MLAAD, likely share generators (VITS, XTTS) with these sets, which the guard can't see, so part of the ceiling may be familiarity. The dataset track is moving to harder material: lip-sync with cloned voices, in-the-wild clips, Sinhala and Nepali.
+5. **Training data sorts the audio detectors into three tiers, and matters more than size.** Trained on ASVspoof 2019 LA only, AASIST and AASIST-L fall below chance on every same-corpus South Asian set except Urdu CSALT (0.86) and MAVOS-DD's Hindi voice conversions (0.64). XLS-R + AASIST, a 300M multilingual backbone with the same training, is uneven: 0.80 on Urdu and 0.83 on IndicSynth Hindi, but 0.467 on BanglaFake and 0.389 on Bangla voices. XLS-R + SLS, XLSR-Mamba and AASIST3, added in the October round, land in the same middle tier, 0.65 to 0.99 on the four sets they have so far, with no parity check yet. Post-trained on large multilingual collections of real and fake speech, AntiDeepfake w2v2 small, a third of XLS-R's size, scores 0.955 and 1.000 on BanglaFake and Bangla voices. AASIST-L, at 85K parameters, moves no same-corpus score of AASIST's by more than 0.03 (on the cross-corpus BD-GRF6 and MLAAD Sinhala, by about 0.1).
+6. **The open South Asian sets no longer separate the top tier.** MMS-300M and both DF Arena models score 0.978 or more on all eight same-corpus sets, w2v2 small 0.895 or more. Only BD-GRF6 pulls the AntiDeepfake pair down, to near chance (0.51 and 0.59), and it is cross-corpus, so not a result yet. Their training collections, such as MLAAD, likely share generators (VITS, XTTS) with these sets, which the guard can't see, so part of the ceiling may be familiarity. The dataset track is moving to harder material: lip-sync with cloned voices, in-the-wild clips, Sinhala and Nepali.
 7. **Past a point, bigger doesn't help.** DF Arena 1B beats 500M on IndicTTS (0.988 against 0.978) and loses on Bangla voices (0.993 against 0.998).
-8. **Urdu is the odd one out, a warning about dataset artefacts.** The classic detectors score 0.86 on Urdu, about 0.4 on the other Bengali and Indic sets and 0.05 on Bangla voices. Nothing in them favours Urdu, so the gap likely comes from how each corpus was recorded. The planned [shortcut probe](evaluation.md#shortcut-probe-planned) will test this.
+8. **Urdu CSALT is the odd one out, a warning about dataset artefacts.** The classic detectors score 0.86 on Urdu CSALT, 0.21 to 0.40 on the IndicSynth, BanglaFake and IndicTTS sets and 0.05 on Bangla voices. IndicSynth's Urdu, the same language from another corpus, gets 0.34, so the gap most likely comes from how CSALT was recorded, not from the language. The planned [shortcut probe](evaluation.md#shortcut-probe-planned) will test this.
 9. **Voice conversion is the classic detectors' blind spot.** On IndicSynth Hindi, at the overall EER threshold, XLS-R + AASIST misses 46% of FreeVC24 voice conversions but 3% of XTTS-v2 clips; AASIST misses 92% against 27%. The multilingual detectors miss at most 5% of either.
 10. **Ranking isn't calibration.** DF Arena 1B reaches AUC 0.993 on Bangla voices and 0.995 on Urdu CSALT, yet its EER there is 4.3% and 4.0%, against 0.7% on In-the-Wild. A fixed threshold needs per-group error rates, not just AUC.
 11. **Gender barely shifts the audio scores.** The exception is XLS-R + AASIST on Bangla voices: AUC 0.29 for women, 0.48 for men.
@@ -232,7 +247,7 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 - **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
 - **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2), and the models marked "no" haven't passed parity, so their numbers don't count as results yet.
 
-Audio is still being scored (2026-10-29). These 40 same-corpus pairs are done, AUC:
+Audio was paused on 2026-10-29 with 84 pairs left ([Progress](progress.md#next)). These 40 same-corpus pairs are done, AUC:
 
 | Model | Parity | Urdu CSALT | MAVOS-DD Hindi audio (EER) | IndicSynth Bengali | IndicSynth Urdu |
 | ----- | :----: | ---------: | -------------------------: | -----------------: | --------------: |
