@@ -5,7 +5,7 @@ description: "What each experiment asked, what the zero-shot runs so far show, a
 
 ## Read this first
 
-- **Two snapshots.** The first zero-shot round (2026-10-12) and the first full benchmark round (2026-10-27 to 29, [below](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)), paused on 2026-10-29 with 73 audio pairs still to score. The latest number for every run is in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs).
+- **Two snapshots.** The first zero-shot round (2026-10-12) and the first full benchmark round (2026-10-27 to 29, [below](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)), paused on 2026-10-29; its last 73 new audio pairs have been scoring on SPARK since that afternoon. The latest number for every run is in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs).
 - **Zero-shot.** No model was trained or fine-tuned on these evalsets.
 - **Provisional rules.** The evaluation setup isn't settled ([decision 5](progress.md#open-decisions-that-shape-the-results)), so even published numbers can move.
 - **`clean` isn't proof the data is new to a model.** The guard compares datasets, not the generators behind them ([verdicts](evaluation.md#contamination-verdicts)).
@@ -247,7 +247,7 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 - **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
 - **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2), and the models marked "no" haven't passed parity, so their numbers don't count as results yet.
 
-Audio was paused on 2026-10-29 with 73 pairs still to score ([Progress](progress.md#next)). These 40 same-corpus pairs are done, AUC:
+The last 73 new audio pairs have been scoring on SPARK since the afternoon of 2026-10-29 ([Progress](progress.md#next)). These 40 same-corpus pairs are done, AUC:
 
 | Model | Parity | Urdu CSALT | MAVOS-DD Hindi audio (EER) | IndicSynth Bengali | IndicSynth Urdu |
 | ----- | :----: | ---------: | -------------------------: | -----------------: | --------------: |
