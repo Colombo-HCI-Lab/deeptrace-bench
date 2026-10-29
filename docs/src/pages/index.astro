@@ -1,7 +1,7 @@
 ---
-// The home page, the Timeline: progress.md laid out as one line through time. Open decisions and
-// the plan sit ahead of today in grey, the rounds of work below it, newest first. The full doc,
-// with where things stand, stays at docs/progress/.
+// The home page, the Timeline: progress.md laid out, and its only page. Where things stand comes
+// first, then one line through time: open decisions and the plan ahead of today in grey, the
+// rounds of work below it, newest first.
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { buildProgress } from "../lib/guide";
@@ -22,10 +22,22 @@ const ahead = P.next.slice().reverse();
       <div class="kicker">Findings · as of {P.asOf}</div>
       <h1>What's done, and what's next</h1>
       <p class="lede">
-        Each round of work, newest first, and the plan. Numbers are on <a href={`${base}results/`}>Results</a>; where
-        things stand is in the <a href={`${base}docs/progress/#where-things-stand`}>full write-up</a>.
+        Where things stand, each round of work, newest first, and the plan. Numbers are on <a href={`${base}results/`}>Results</a>.
       </p>
     </header>
+    <section id="where-things-stand" class="firstbox">
+      <h2>Where things stand</h2>
+      <div class="cols-2">
+        {
+          P.stand.map((b) => (
+            <div class="item">
+              <strong>{b.label}</strong>
+              <div class="snip" set:html={b.body} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
     <section id="timeline">
       <header>
         <h2>Timeline</h2>

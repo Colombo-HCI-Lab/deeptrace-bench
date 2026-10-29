@@ -1,15 +1,14 @@
 ---
-// Every doc in nav order, with its description from the doc's front matter, and the guided pages
-// that stand in for three of them.
+// Every page in nav order, with its description: a doc's from its front matter, a guided page's
+// from PAGE_ABOUT.
 import { getEntry } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import { NAV, PAGES, href, leaves } from "../../lib/nav";
 
-const base = import.meta.env.BASE_URL;
 const PAGE_ABOUT: Record<string, string> = {
-  timeline: "What each round of work did, and what comes next (progress.md laid out)",
-  results: "What the runs show, with the numbers and their caveats (results.md laid out)",
-  method: "The pipeline, the checks along it and the terms the site uses (method.md laid out)",
+  timeline: "Where things stand, what each round of work did, and what comes next",
+  results: "What the runs show, with the numbers and their caveats",
+  method: "The pipeline, the checks along it and the terms the site uses",
   coverage: "Every detector against every evalset: AUC, or the estimated GPU time",
   compute: "What each detector costs to run",
   "model-catalog": "Every detector: why it's here, parity and its South Asian results, with a page per model",
@@ -36,8 +35,6 @@ const groups = await Promise.all(
       <h1>Every doc</h1>
       <p class="lede">
         New here? Start with <a href={href("method")}>How it works</a>, then <a href={href("getting_started")}>Getting started</a>.
-        The full write-ups behind the guided pages are <a href={`${base}docs/progress/`}>Progress</a>,
-        <a href={`${base}docs/results/`}>Results</a> and <a href={`${base}docs/method/`}>How it works</a>.
       </p>
     </header>
     <article class="prose">

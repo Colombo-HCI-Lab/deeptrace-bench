@@ -1,7 +1,7 @@
 // Rewrites links in the docs for the site and fails the build on a broken one.
 //
 // The docs are written so the same Markdown also reads on GitHub:
-//   models.md#parity                  another doc       -> <base>docs/models/#parity
+//   models.md#parity                  another doc       -> <base>models/#parity
 //   results.md, progress.md           a guided page     -> <base>results/, <base> (the Timeline)
 //   catalog.md#model-<id>             a model's page    -> <base>model-catalog/<id>/
 //   catalog.md#dataset-<id>           a dataset's page  -> <base>dataset-catalog/<id>/
@@ -10,8 +10,8 @@
 // Anything else relative (../x) is refused: it would break once the doc moves. Astro only logs
 // an error thrown while rendering a doc, so the problems are collected and checkLinks() fails
 // the build at the end.
-import { existsSync, statSync } from "node:fs";
-import { resolve, sep } from "node:path";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineMdastPlugin } from "satteri";
 
@@ -22,11 +22,12 @@ const DOCS = resolve(process.cwd(), "src/content/docs") + sep;
 const GITHUB = "https://github.com/Colombo-HCI-Lab/deeptrace-bench";
 const LIVE = "https://colombo-hci-lab.github.io/deeptrace-bench/";
 
-// Results, Progress and How it works have guided pages of their own, built from their docs;
-// links to those docs land there. Progress is the Timeline, the home page. Every other doc lives
-// under docs/.
+// Every page has one address. Results, Progress and How it works are guided pages built from
+// their docs, so links to those docs land there; Progress is the Timeline, the home page. Every
+// other doc is a page at the site root. The docs/<slug>/ addresses they had until 2026-10-29
+// forward to these (pages/docs/[slug].astro).
 export const GUIDED = { results: "results/", progress: "", method: "method/" };
-export const docPath = (slug) => (slug in GUIDED ? GUIDED[slug] : `docs/${slug}/`);
+export const docPath = (slug) => (slug in GUIDED ? GUIDED[slug] : `${slug}/`);
 // catalog.md is generated for reading on GitHub; on the site its two halves are the Model and
 // Dataset catalogs, with a page per entry.
 function catalogTarget(frag) {
@@ -40,9 +41,9 @@ const target = (slug, frag) => (slug === "catalog" ? catalogTarget(frag) : docPa
 // a stub page at each old address land there.
 export const MOVED = {
   overview: "method/",
-  smoke_test: "docs/getting_started/",
+  smoke_test: "getting_started/",
   experiments: "results/#experiments",
-  cluster: "docs/spark/#curnagl",
+  cluster: "spark/#curnagl",
 };
 // An old doc's new address, keeping the #anchor unless the move names its own.
 const movedTo = (slug, frag) => MOVED[slug] + (MOVED[slug].includes("#") ? "" : frag);
@@ -54,7 +55,7 @@ export const LEGACY = {
   models: "model-catalog/",
   datasets: "dataset-catalog/",
   compute: "compute/",
-  pipeline: "method/#pipeline",
+  pipeline: "method/#the-pipeline",
   start: "method/#key-terms",
 };
 // The tabs of the old Models & data page (inventory/#<tab>), and where each now lives.
@@ -63,14 +64,16 @@ export const INVENTORY = { coverage: "coverage/", models: LEGACY.models, dataset
 export function rewrite(url, base) {
   if (/^(https?:|mailto:|#)/.test(url) && !url.startsWith(LIVE)) return url;
   if (url.startsWith(LIVE)) {
-    // The old Jekyll page catalog.html is the catalog route now, and docs moved under docs/.
+    // The old Jekyll page catalog.html is the catalog route now, and docs/<slug>/ is the doc's
+    // old address.
     const rest = url.slice(LIVE.length).replace(/^([\w-]+)\.html/, "$1/");
     const [page, hash] = rest.split("#", 2);
     const slug = page.replace(/\/+$/, "");
     if (!slug) return base + (hash && LEGACY[hash] ? LEGACY[hash] : rest);
     const old = slug.replace(/^docs\//, "");
-    if (MOVED[old]) return base + movedTo(old, hash === undefined ? "" : `#${hash}`);
-    if (existsSync(`${DOCS}${slug}.md`)) return base + target(slug, hash === undefined ? "" : `#${hash}`);
+    const frag = hash === undefined ? "" : `#${hash}`;
+    if (MOVED[old]) return base + movedTo(old, frag);
+    if (existsSync(`${DOCS}${old}.md`)) return base + target(old, frag);
     return base + rest;
   }
   const [path, hash] = url.split("#", 2);
@@ -107,11 +110,41 @@ export const links = ({ base }) =>
     },
   });
 
-export const checkLinks = () => ({
+// Every page has one address, so after the build a link on a page must open a page, not a
+// forwarding stub, and its #anchor must exist there.
+function checkBuilt(out, base) {
+  const pages = new Map();
+  const walk = (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith(".html")) pages.set(base + relative(out, p).split(sep).join("/").replace(/(^|\/)index\.html$/, "$1"), readFileSync(p, "utf8"));
+    }
+  };
+  walk(out);
+  const stub = (html) => html.includes('http-equiv="refresh"');
+  const ids = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
+  for (const [page, html] of pages) {
+    if (stub(html)) continue;
+    for (const [, raw] of html.matchAll(/\shref="([^"]+)"/g)) {
+      const href = raw.replaceAll("&amp;", "&");
+      const local = href.startsWith("#") ? page + href : href.startsWith(base) ? href : null;
+      if (!local || /\/_astro\/|\.\w+(#|$)/.test(local)) continue;
+      const [path, frag] = local.split("#", 2);
+      const target = pages.get(path);
+      if (target === undefined) problems.push(`${page}: ${href} is no page`);
+      else if (stub(target)) problems.push(`${page}: ${href} only forwards; link where it goes`);
+      else if (frag && !ids(target).has(decodeURIComponent(frag))) problems.push(`${page}: ${href} has no #${frag}`);
+    }
+  }
+}
+
+export const checkLinks = ({ base }) => ({
   name: "deeptrace-check-links",
   hooks: {
-    "astro:build:done": () => {
-      if (problems.length) throw new Error(`broken links:\n  ${problems.join("\n  ")}`);
+    "astro:build:done": ({ dir }) => {
+      checkBuilt(fileURLToPath(dir), base);
+      if (problems.length) throw new Error(`broken links:\n  ${[...new Set(problems)].join("\n  ")}`);
     },
   },
 });

@@ -25,7 +25,7 @@ export default defineConfig({
   site: "https://colombo-hci-lab.github.io",
   base,
   trailingSlash: "always",
-  integrations: [checkLinks()],
+  integrations: [checkLinks({ base })],
   markdown: {
     processor: satteri({ mdastPlugins: [links({ base })] }),
     shikiConfig: { theme: paper },

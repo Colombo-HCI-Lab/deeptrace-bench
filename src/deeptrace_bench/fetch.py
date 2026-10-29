@@ -323,7 +323,7 @@ def fetch_dataset(config: DatasetConfig, dest: Path, languages: list[str] | None
             )
         case _:
             raise ManualStepRequiredError(
-                f"{config.id} is {config.status} ({access.kind}); see https://colombo-hci-lab.github.io/deeptrace-bench/docs/datasets/"
+                f"{config.id} is {config.status} ({access.kind}); see https://colombo-hci-lab.github.io/deeptrace-bench/datasets/"
             )
 
 

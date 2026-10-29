@@ -36,7 +36,7 @@ export const NAV: Group[] = [
 ];
 
 // Pages built by hand rather than from one doc. Results, Progress (the Timeline) and How it works
-// are laid out from their docs; the full write-ups stay under docs/. The two catalogs are built
+// are laid out from their docs, and are those docs' only pages. The two catalogs are built
 // from status.json, with a page per model and per dataset under each.
 export const PAGES = ["timeline", "results", "method", "coverage", "compute", "model-catalog", "dataset-catalog"];
 // The docs a guided page stands in for. catalog.md, generated for reading on GitHub, is the two

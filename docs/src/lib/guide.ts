@@ -401,9 +401,32 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) 
 }
 
 // ---------- Results ----------
+// The sections laid out by hand below. Any other section of results.md (a round's write-up, say)
+// still shows, as prose in the doc's order, since this page is the doc's only home on the site.
+const RESULTS_LAID_OUT = [
+  /^Read this first/,
+  /^Experiments/,
+  /^The datasets/,
+  /^The detectors/,
+  /^Insights/,
+  /^Reproductions/,
+  /^Audio: South Asian/,
+  /^Video: HiDF/,
+  /^What the results can/,
+];
+// A heading's anchor, as the docs' Markdown makes it, so links like results.md#<heading> land.
+const anchor = (title: string) =>
+  plain(title)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N} -]/gu, "")
+    .replace(/ /g, "-");
+
 export function buildResults(body: string) {
   const secs = split(body, 2);
   const get = (re: RegExp) => section(secs, re).text;
+  const more = secs
+    .filter((s) => !RESULTS_LAID_OUT.some((re) => re.test(s.title)))
+    .map((s) => ({ id: anchor(s.title), title: plain(s.title), short: plain(s.title).split(":")[0], body: md(s.text) }));
 
   const dsT = get(/^The datasets/);
   const dsTable = tables(dsT)[0];
@@ -551,6 +574,7 @@ export function buildResults(body: string) {
       }),
     },
     gaps: md(get(/^What the results can/)),
+    more,
   };
 }
 
@@ -576,6 +600,7 @@ export function buildMethod(body: string) {
     after: md(prose(section(secs, /^The pipeline/).text)),
     checks: rows(/^The checks/).map((r) => ({ title: plain(r[0]), body: mdi(r[1]) })),
     terms: split(section(secs, /^Key terms/).text, 3).map((g) => ({
+      id: anchor(g.title),
       title: plain(g.title),
       rows: (tables(g.text)[0]?.rows ?? []).map((r) => ({ term: plain(r[0]), body: mdi(r[1]) })),
     })),

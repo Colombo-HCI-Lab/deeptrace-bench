@@ -1,29 +1,28 @@
 ---
+// The docs' addresses until 2026-10-29, when each page kept one address: every doc moved to the
+// site root, and the full write-ups of Results, Progress and How it works gave way to their
+// guided pages. Each old address forwards to the page that replaced it, with its #anchor.
 import { getCollection } from "astro:content";
 import Redirect from "../../components/Redirect.astro";
-import Doc from "../../layouts/Doc.astro";
-import { MOVED } from "../../lib/links.mjs";
+import { MOVED, docPath } from "../../lib/links.mjs";
 
 export async function getStaticPaths() {
+  const base = import.meta.env.BASE_URL;
   const docs = await getCollection("docs");
   return [
-    ...docs.map((entry) => ({ params: { slug: entry.id }, props: { slug: entry.id } })),
-    // Docs merged into others: their old address forwards to the new place.
-    ...Object.entries(MOVED).map(([slug, to]) => ({ params: { slug }, props: { moved: to } })),
+    ...docs.filter((d) => d.id !== "catalog").map((d) => ({ params: { slug: d.id }, props: { to: base + docPath(d.id), title: d.data.title } })),
+    // catalog.md has no page: its old address opens the Model or Dataset catalog by anchor.
+    ...docs
+      .filter((d) => d.id === "catalog")
+      .map(() => ({
+        params: { slug: "catalog" },
+        props: { to: `${base}model-catalog/`, title: "Model catalog", routes: [["^#(dataset|all-datasets)", `${base}dataset-catalog/`]] },
+      })),
+    ...Object.entries(MOVED).map(([slug, to]) => ({ params: { slug }, props: { to: base + to, title: "Moved" } })),
   ];
 }
 
-const { slug, moved } = Astro.props;
-const base = import.meta.env.BASE_URL;
+const { to, title, routes } = Astro.props;
 ---
 
-{
-  moved ? (
-    <Redirect to={base + moved} title="Moved" />
-  ) : slug === "catalog" ? (
-    // catalog.md is the two catalogs' text for GitHub; on the site each entry has a page of its own.
-    <Redirect to={`${base}model-catalog/`} title="Model catalog" routes={[["^#(dataset|all-datasets)", `${base}dataset-catalog/`]]} />
-  ) : (
-    <Doc slug={slug!} />
-  )
-}
+<Redirect to={to} title={title.replaceAll("`", "")} routes={routes} />

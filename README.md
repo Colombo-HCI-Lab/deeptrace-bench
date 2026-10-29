@@ -11,16 +11,16 @@ Everything lives on the site, <https://colombo-hci-lab.github.io/deeptrace-bench
 | To | Read |
 | --- | --- |
 | understand the pipeline and the terms | [How it works](https://colombo-hci-lab.github.io/deeptrace-bench/method/) |
-| install it and run the smoke test | [Getting started](https://colombo-hci-lab.github.io/deeptrace-bench/docs/getting_started/) |
-| check a model or a dataset | [Models](https://colombo-hci-lab.github.io/deeptrace-bench/docs/models/), [Datasets](https://colombo-hci-lab.github.io/deeptrace-bench/docs/datasets/) |
-| see how a number is made | [Evaluation](https://colombo-hci-lab.github.io/deeptrace-bench/docs/evaluation/) |
-| run on a GPU | [Where to run](https://colombo-hci-lab.github.io/deeptrace-bench/docs/spark/) |
-| add a model or a dataset | [Adding a model](https://colombo-hci-lab.github.io/deeptrace-bench/docs/adding_a_model/), [Adding a dataset](https://colombo-hci-lab.github.io/deeptrace-bench/docs/adding_a_dataset/) |
+| install it and run the smoke test | [Getting started](https://colombo-hci-lab.github.io/deeptrace-bench/getting_started/) |
+| check a model or a dataset | [Models](https://colombo-hci-lab.github.io/deeptrace-bench/models/), [Datasets](https://colombo-hci-lab.github.io/deeptrace-bench/datasets/) |
+| see how a number is made | [Evaluation](https://colombo-hci-lab.github.io/deeptrace-bench/evaluation/) |
+| run on a GPU | [Where to run](https://colombo-hci-lab.github.io/deeptrace-bench/spark/) |
+| add a model or a dataset | [Adding a model](https://colombo-hci-lab.github.io/deeptrace-bench/adding_a_model/), [Adding a dataset](https://colombo-hci-lab.github.io/deeptrace-bench/adding_a_dataset/) |
 | browse every doc | [Docs](https://colombo-hci-lab.github.io/deeptrace-bench/docs/) |
 
 ## Data stays out of git
 
-Datasets, weights, manifests and per-item scores live under `DTB_ROOT`, never in the repo, and the pre-commit hook enforces it ([Data policy](https://colombo-hci-lab.github.io/deeptrace-bench/docs/data_policy/)).
+Datasets, weights, manifests and per-item scores live under `DTB_ROOT`, never in the repo, and the pre-commit hook enforces it ([Data policy](https://colombo-hci-lab.github.io/deeptrace-bench/data_policy/)).
 
 ## Licence
 

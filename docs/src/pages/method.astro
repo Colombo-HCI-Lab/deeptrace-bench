@@ -13,7 +13,7 @@ const gateClass = ["g-parity", "g-guard", "g-pub"];
 // The page's sections, in the bar above them.
 const sections = [
   ...(M.plain ? [{ href: "#plain-words", text: "In plain words" }] : []),
-  { href: "#pipeline", text: "Pipeline" },
+  { href: "#the-pipeline", text: "Pipeline" },
   { href: "#key-terms", text: "Key terms" },
   { href: "#repo", text: "The repo" },
   { href: "#run", text: "Run it yourself" },
@@ -52,7 +52,7 @@ const runDocs = await Promise.all(
         </section>
       )
     }
-    <section id="pipeline" class="block">
+    <section id="the-pipeline" class="block">
       <header>
         <h2>The pipeline</h2>
         <p>One script per step.</p>
@@ -91,6 +91,7 @@ const runDocs = await Promise.all(
           ))
         }
       </dl>
+      <div class="snip text" set:html={M.after} />
     </section>
     <section id="key-terms" class="block">
       <header>
@@ -99,7 +100,7 @@ const runDocs = await Promise.all(
       <div class="terms">
         {
           M.terms.map((g) => (
-            <dl>
+            <dl id={g.id}>
               <div>{g.title}</div>
               {g.rows.map((t) => (
                 <div>

@@ -1,12 +1,12 @@
 ---
 // What the runs show: results.md laid out as tables and charts, joined with every run in
-// status.json. The full write-up stays at docs/results/.
+// status.json. This is results.md's only page: sections without a layout of their own show as
+// prose (R.more).
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { panels } from "../lib/figures";
 import { buildResults } from "../lib/guide";
 
-const base = import.meta.env.BASE_URL;
 const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
 // The page's sections, in the bar above them.
 const sections = [
@@ -18,9 +18,9 @@ const sections = [
   { href: "#audio-south-asian-speech", text: "Detail: speech" },
   { href: "#reproductions", text: "Reproductions" },
   { href: "#video-hidf", text: "Faces" },
+  ...R.more.map((m) => ({ href: `#${m.id}`, text: m.short })),
   { href: "#all-runs", text: "All runs" },
   { href: "#what-the-results-cant-say-yet", text: "Not covered yet" },
-  { href: `${base}docs/results/`, text: "Full write-up" },
 ];
 ---
 
@@ -382,6 +382,18 @@ const sections = [
       </div>
     </section>
 
+    {
+      R.more.map((m) => (
+        <section id={m.id} class="block">
+          <header>
+            <div class="kicker">Write-up</div>
+            <h2>{m.title}</h2>
+          </header>
+          <div class="prose" set:html={m.body} />
+        </section>
+      ))
+    }
+
     <section id="all-runs" class="block">
       <header>
         <div class="kicker">Every countable run</div>
@@ -446,7 +458,6 @@ const sections = [
         <h2>What the results can't say yet</h2>
       </header>
       <div class="snip" style="max-width: 72ch" set:html={R.gaps} />
-      <a class="more" href={`${base}docs/results/`}>Read the full write-up →</a>
     </section>
   </div>
 </Base>

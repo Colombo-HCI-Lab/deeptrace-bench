@@ -48,7 +48,7 @@ def dtb_root() -> Path:
     if not value:
         raise RootNotConfiguredError(
             "DTB_ROOT is not set. Copy .env.example to .env and point DTB_ROOT at the shared "
-            "store (see https://colombo-hci-lab.github.io/deeptrace-bench/docs/getting_started/#install)."
+            "store (see https://colombo-hci-lab.github.io/deeptrace-bench/getting_started/#install)."
         )
     return Path(value).expanduser()
 

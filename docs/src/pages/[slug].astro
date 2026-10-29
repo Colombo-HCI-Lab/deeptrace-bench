@@ -1,23 +1,31 @@
 ---
-// Docs used to live at the site root; they moved under docs/ when the guided pages arrived.
-// Results, Progress and How it works kept their root URLs as guided pages, so they need no stub.
-// Docs merged into others (MOVED) send their old root URL to the new place.
+// Every doc without a guided page, at the site root. Results, Progress (the Timeline) and How it
+// works are pages of their own, so they're left out here. catalog.md is the two catalogs' text
+// for GitHub, so its address opens the Model or Dataset catalog. Docs merged into others (MOVED)
+// send their old address to the new place.
 import { getCollection } from "astro:content";
 import Redirect from "../components/Redirect.astro";
+import Doc from "../layouts/Doc.astro";
 import { GUIDED, MOVED } from "../lib/links.mjs";
 
 export async function getStaticPaths() {
-  const base = import.meta.env.BASE_URL;
   const docs = await getCollection("docs");
   return [
-    ...docs
-      .filter((d) => !(d.id in GUIDED))
-      .map((d) => ({ params: { slug: d.id }, props: { to: `${base}docs/${d.id}/`, title: d.data.title } })),
-    ...Object.entries(MOVED).map(([slug, to]) => ({ params: { slug }, props: { to: base + to, title: slug } })),
+    ...docs.filter((d) => !(d.id in GUIDED)).map((d) => ({ params: { slug: d.id }, props: { slug: d.id } })),
+    ...Object.entries(MOVED).map(([slug, to]) => ({ params: { slug }, props: { moved: to } })),
   ];
 }
 
-const { to, title } = Astro.props;
+const { slug, moved } = Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
 
-<Redirect to={to} title={title.replaceAll("`", "")} />
+{
+  moved ? (
+    <Redirect to={base + moved} title="Moved" />
+  ) : slug === "catalog" ? (
+    <Redirect to={`${base}model-catalog/`} title="Model catalog" routes={[["^#(dataset|all-datasets)", `${base}dataset-catalog/`]]} />
+  ) : (
+    <Doc slug={slug!} />
+  )
+}
