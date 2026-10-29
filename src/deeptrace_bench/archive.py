@@ -57,11 +57,7 @@ class Report:
 
 
 def _copy_newer(src: Path, dst: Path, report: Report) -> None:
-    if (
-        dst.exists()
-        and dst.stat().st_mtime >= src.stat().st_mtime
-        and dst.stat().st_size == src.stat().st_size
-    ):
+    if dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime:
         return
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_name(dst.name + ".tmp")

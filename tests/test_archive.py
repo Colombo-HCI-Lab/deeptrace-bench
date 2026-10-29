@@ -63,6 +63,7 @@ def test_newest_copy_wins_across_stores(registry, tmp_path):
     _run(old, "aasist__urdu_csalt__cccc0000", "urdu_csalt", auc=0.5, mtime=1_000)
     _run(new, "aasist__urdu_csalt__cccc0000", "urdu_csalt", auc=0.8, mtime=2_000)
     archive([new, old], dest, registry, published=set())
+    assert archive([old, new], dest, registry, published=set()).copied == 0
     rows = list(csv.DictReader((dest / "index.csv").open()))
     assert rows[0]["auc"] == "0.8"
 
