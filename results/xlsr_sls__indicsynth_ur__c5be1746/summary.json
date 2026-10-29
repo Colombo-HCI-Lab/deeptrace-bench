@@ -1,0 +1,88 @@
+{
+  "run_id": "xlsr_sls__indicsynth_ur__c5be1746",
+  "model": "xlsr_sls",
+  "evalset": "indicsynth_ur",
+  "role": "south_asian",
+  "namespace": null,
+  "pairing": "same_corpus",
+  "verdict": "clean",
+  "verdict_reasons": [],
+  "score_direction_ok": true,
+  "eval_config_status": "proposed",
+  "parity_passed": false,
+  "overall": {
+    "n": 15129,
+    "n_real": 5129,
+    "n_fake": 10000,
+    "n_failed": 1,
+    "auc": 0.9422055093011739,
+    "eer": 0.1322132213221322,
+    "threshold": 0.9283766150474548,
+    "auc_lo": 0.9387088857550212,
+    "auc_hi": 0.9457257733474653,
+    "eer_lo": 0.12641264126412644,
+    "eer_hi": 0.13765029213001237,
+    "fpr": 0.1325794501852213,
+    "fnr": 0.1322132213221322,
+    "acc": 0.8676626123744051,
+    "bal_acc": 0.8676036642463232,
+    "ap": 0.9703496769223313,
+    "tpr_at_fpr01": 0.5524552455245525,
+    "tpr_at_fpr05": 0.7545754575457546
+  },
+  "unscored_items": 0,
+  "failures": {
+    "too_short": 1
+  },
+  "compute": {
+    "measured": true,
+    "sessions": 1,
+    "sessions_completed": 1,
+    "wall_s": 976.0,
+    "phases_s": {
+      "build_loader": 0.056,
+      "load_model": 5.263,
+      "score": 970.662
+    },
+    "items_timed": 15129,
+    "items_per_s": 15.586,
+    "load_ms": {
+      "mean": 2.21,
+      "p50": 1.19,
+      "p95": 5.43
+    },
+    "infer_ms": {
+      "mean": 61.87,
+      "p50": 63.3,
+      "p95": 80.84
+    },
+    "windows": 29577,
+    "window_unit": "4.04 s audio window",
+    "windows_per_s": 31.6,
+    "realtime_factor": 123.03,
+    "cuda_max_allocated_gb": 1.85,
+    "cuda_max_reserved_gb": 3.053,
+    "gpu_mem_used_max_gb": 3.69,
+    "peak_rss_gb": 3.757,
+    "gpu_util_mean": 95.3,
+    "power_mean_w": 337.8,
+    "temp_max_c": 80.0,
+    "energy_wh": 85.689,
+    "energy_wh_per_1k_items": 5.664,
+    "env": {
+      "device": "cuda",
+      "python": "3.12.14",
+      "torch": "2.8.0+cu128",
+      "cuda_runtime": "12.8",
+      "cudnn": 91002,
+      "arch": "x86_64",
+      "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+      "cpu_count": 16,
+      "ram_gb": 37.8,
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_gb": 25.8,
+      "driver": "617.14",
+      "compute_capability": "8.6"
+    }
+  }
+}

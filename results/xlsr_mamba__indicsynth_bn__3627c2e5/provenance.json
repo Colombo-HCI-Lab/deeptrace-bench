@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_mamba__indicsynth_bn__3627c2e5",
+  "model_id": "xlsr_mamba",
+  "evalset_id": "indicsynth_bn",
+  "upstream_commit": "10ec73810d24091028a2aa5454c8dfd1a239e441",
+  "weights_sha256": {
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac",
+    "xlsr_mamba_la.safetensors": "bb8a1af0b3f9ee28dbcfc7c82d733f7cc5fdc77ff3e96b25db7b4ed72f2d1663"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "7305c75bd80e847252f71dccb9f5e996c21e86e2fd4cd0165aceab856b717893",
+    "model": "fbac2e7d90315803c31ae41be14af6bfb7b6b5fe1541b21df5ea5e7982433ddd"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T22:05:45+00:00",
+  "last_started_utc": "2026-10-28T22:05:45+00:00",
+  "repo_commits": [
+    "043f50b1b4aac1e9c9d21d44e842309506230b3f"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

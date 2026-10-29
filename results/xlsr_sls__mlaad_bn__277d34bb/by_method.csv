@@ -1,0 +1,6 @@
+group,n,n_real,n_fake,n_failed,auc,eer,threshold,auc_lo,auc_hi,eer_lo,eer_hi,fpr,fnr,acc,bal_acc,ap,tpr_at_fpr01,tpr_at_fpr05,small
+<null>,4589,4589,0,0,,,0.6396566578187048,,,,,0.25277838308999784,,0.7472216169100022,0.7472216169100021,,,,True
+indicf5,1000,0,1000,1,,,0.6396566578187048,,,,,,0.057057057057057055,0.9429429429429429,0.9429429429429429,,,,True
+tts_models_bn_custom_vits-female,1000,0,1000,1,,,0.6396566578187048,,,,,,0.6586586586586587,0.34134134134134136,0.3413413413413413,,,,True
+tts_models_bn_custom_vits-male,1000,0,1000,0,,,0.6396566578187048,,,,,,0.19,0.81,0.81,,,,True
+tts_models_multilingual_multi-dataset_bark,1000,0,1000,0,,,0.6396566578187048,,,,,,0.104,0.896,0.896,,,,True

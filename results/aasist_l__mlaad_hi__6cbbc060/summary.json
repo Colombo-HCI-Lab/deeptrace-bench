@@ -1,0 +1,89 @@
+{
+  "run_id": "aasist_l__mlaad_hi__6cbbc060",
+  "model": "aasist_l",
+  "evalset": "mlaad_hi",
+  "role": "south_asian",
+  "namespace": null,
+  "pairing": "cross_corpus",
+  "verdict": "clean",
+  "verdict_reasons": [],
+  "score_direction_ok": false,
+  "eval_config_status": "proposed",
+  "parity_passed": true,
+  "overall": {
+    "n": 14059,
+    "n_real": 5059,
+    "n_fake": 9000,
+    "n_failed": 12,
+    "auc": 0.4059788421855747,
+    "eer": 0.5837121960861831,
+    "threshold": 0.9078418612480164,
+    "auc_lo": 0.3956838772335132,
+    "auc_hi": 0.4156125336186537,
+    "eer_lo": 0.5752124650969912,
+    "eer_hi": 0.5916203694051492,
+    "fpr": 0.5837121960861831,
+    "fnr": 0.5831108144192256,
+    "acc": 0.41667259913148713,
+    "bal_acc": 0.41658849474729565,
+    "ap": 0.5916181513136018,
+    "tpr_at_fpr01": 0.014797507788161994,
+    "tpr_at_fpr05": 0.050623052959501556
+  },
+  "unscored_items": 0,
+  "failures": {
+    "too_short": 11,
+    "unreadable": 1
+  },
+  "compute": {
+    "measured": true,
+    "sessions": 1,
+    "sessions_completed": 1,
+    "wall_s": 244.2,
+    "phases_s": {
+      "build_loader": 0.025,
+      "load_model": 0.333,
+      "score": 243.888
+    },
+    "items_timed": 14059,
+    "items_per_s": 57.645,
+    "load_ms": {
+      "mean": 8.18,
+      "p50": 7.54,
+      "p95": 13.36
+    },
+    "infer_ms": {
+      "mean": 9.07,
+      "p50": 7.72,
+      "p95": 14.02
+    },
+    "windows": 34508,
+    "window_unit": "4.04 s audio window",
+    "windows_per_s": 270.9,
+    "realtime_factor": 571.27,
+    "cuda_max_allocated_gb": 1.93,
+    "cuda_max_reserved_gb": 5.121,
+    "gpu_mem_used_max_gb": 6.345,
+    "peak_rss_gb": 2.066,
+    "gpu_util_mean": 51.1,
+    "power_mean_w": 283.8,
+    "temp_max_c": 78.0,
+    "energy_wh": 19.342,
+    "energy_wh_per_1k_items": 1.376,
+    "env": {
+      "device": "cuda",
+      "python": "3.12.14",
+      "torch": "2.8.0+cu128",
+      "cuda_runtime": "12.8",
+      "cudnn": 91002,
+      "arch": "x86_64",
+      "cpu": "AMD Ryzen 9 9950X 16-Core Processor",
+      "cpu_count": 32,
+      "ram_gb": 64.9,
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_gb": 25.3,
+      "driver": "610.57.04",
+      "compute_capability": "8.6"
+    }
+  }
+}

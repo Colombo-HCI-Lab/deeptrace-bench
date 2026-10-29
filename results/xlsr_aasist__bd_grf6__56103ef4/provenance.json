@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_aasist__bd_grf6__56103ef4",
+  "model_id": "xlsr_aasist",
+  "evalset_id": "bd_grf6",
+  "upstream_commit": "4acaa61dcef5f7610f43aa4d0b29c4559b970cd2",
+  "weights_sha256": {
+    "LA_model.pth": "bd6f36097259fe54e7004eb983651e5304d807be81156dbd04faccb70d91e10c",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "510d972e162bde3a90278faf5c04fc3d5624b03c194dc3cdea9ab764a2a0464d",
+    "model": "59e0ce6c4ff92a23a74cb19c2b9543afd973c55d34ca6b7a414ffde9e99df3c4"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-29T03:43:09+00:00",
+  "last_started_utc": "2026-10-29T03:43:09+00:00",
+  "repo_commits": [
+    "622bff922fa8cd77e0756bedc555cc851bc1cf3f"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

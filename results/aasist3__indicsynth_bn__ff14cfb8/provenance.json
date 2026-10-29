@@ -1,0 +1,26 @@
+{
+  "run_id": "aasist3__indicsynth_bn__ff14cfb8",
+  "model_id": "aasist3",
+  "evalset_id": "indicsynth_bn",
+  "upstream_commit": "33c39c24525c871225ad3abe3c8ec3b0e1ce86de",
+  "weights_sha256": {
+    "aasist3.safetensors": "a06d43d8d4a7e11b62fb4fa833f13a598fee23be7c368c416df4bec2e44e664f",
+    "aasist3_config.json": "0bd97c713c1d4b1f2a9be60cc0eb7183f49789f8af95fa8319b3113e6392ba81",
+    "xlsr-53-config/config.json": "48576e4a1b0f02c7770f57e236747169459db9a8b9a529bbd7a58bbbf52c45b5"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "7305c75bd80e847252f71dccb9f5e996c21e86e2fd4cd0165aceab856b717893",
+    "model": "c0b6548317655a160731d3ad5388578772fa0538393a25e7acb866e552b7faaf"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T21:37:54+00:00",
+  "last_started_utc": "2026-10-28T21:37:54+00:00",
+  "repo_commits": [
+    "043f50b1b4aac1e9c9d21d44e842309506230b3f"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

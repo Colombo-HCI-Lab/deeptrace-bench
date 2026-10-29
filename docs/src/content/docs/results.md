@@ -199,28 +199,44 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 - **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
 - **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2), and the models marked "no" haven't passed parity, so their numbers don't count as results yet.
 
-Audio is still being scored (2026-10-29). The first 30 pairs, AUC; a dash is still queued:
+Audio is still being scored (2026-10-29). These 40 same-corpus pairs are done, AUC:
 
 | Model | Parity | Urdu CSALT | MAVOS-DD Hindi audio (EER) | IndicSynth Bengali | IndicSynth Urdu |
 | ----- | :----: | ---------: | -------------------------: | -----------------: | --------------: |
 | AASIST | yes | 0.863 | 0.635 (38.2%) | 0.214 | 0.343 |
-| AASIST-L | yes | 0.861 | 0.644 (38.4%) | 0.234 | – |
+| AASIST-L | yes | 0.861 | 0.644 (38.4%) | 0.234 | 0.336 |
 | XLS-R + AASIST | yes | 0.802 | 0.886 (16.9%) | 0.654 | 0.777 |
-| AntiDeepfake w2v2 small | yes | 0.969 | 0.999 (1.3%) | 0.998 | – |
+| AntiDeepfake w2v2 small | yes | 0.969 | 0.999 (1.3%) | 0.998 | 0.996 |
 | AntiDeepfake MMS-300M | yes | 0.998 | 1.000 (0.1%) | 0.999 | 1.000 |
-| DF Arena 500M | yes | 0.981 | 1.000 (0.1%) | 0.995 | – |
-| DF Arena 1B | yes | 0.995 | 1.000 (0.1%) | 1.000 | – |
-| AASIST3 | no | 0.806 | 0.907 (18.2%) | – | – |
-| XLSR-Mamba | no | 0.691 | 0.976 (6.3%) | – | – |
-| XLS-R + SLS | no | 0.855 | 0.994 (3.1%) | – | – |
+| DF Arena 500M | yes | 0.981 | 1.000 (0.1%) | 0.995 | 0.999 |
+| DF Arena 1B | yes | 0.995 | 1.000 (0.1%) | 1.000 | 1.000 |
+| AASIST3 | no | 0.806 | 0.907 (18.2%) | 0.785 | 0.781 |
+| XLSR-Mamba | no | 0.691 | 0.976 (6.3%) | 0.654 | 0.790 |
+| XLS-R + SLS | no | 0.855 | 0.994 (3.1%) | 0.803 | 0.942 |
 
 - **Urdu CSALT reproduces.** All seven models with parity matched their 2026-10-12 runs (AUC and EER within 0.001, same counts) on a different GPU.
 - **MAVOS-DD's audio is easy for the post-trained models.** AntiDeepfake and DF Arena separate it almost perfectly, while the ASVspoof-only AASIST pair stays near 0.64. This is insight 6's ceiling again: their training collections may share MAVOS-DD's voice generators, which the guard can't check.
-- **IndicSynth Bengali and Urdu repeat the Hindi picture.** The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more.
+- **IndicSynth Bengali and Urdu repeat the Hindi picture.** The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34 for both); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more. Of the three models without parity, XLS-R + SLS does best (0.80 and 0.94).
+
+Cross-corpus pairs, where the real and fake clips come from different recordings, so a model can score well by telling the sources apart. They are scored and recorded but don't count as results until the shortcut probe runs. AUC, then TPR at 5% FPR; "guard" means the model trained on MLAAD, so the contamination guard refused the pair, and a dash is still queued:
+
+| Model | MLAAD Bengali | MLAAD Hindi | MLAAD Sinhala | BD-GRF6 |
+| ----- | ------------: | ----------: | ------------: | ------: |
+| AASIST | 0.195 (0.02) | 0.378 (0.04) | 0.900 (0.30) | 0.608 (0.19) |
+| AASIST-L | 0.185 (0.02) | 0.406 (0.05) | 0.812 (0.03) | 0.709 (0.22) |
+| XLS-R + AASIST | 0.527 (0.07) | 0.877 (0.53) | 0.941 (0.77) | 0.509 (0.07) |
+| XLSR-Mamba | 0.521 (0.13) | 0.812 (0.48) | 0.944 (0.65) | – |
+| XLS-R + SLS | 0.791 (0.35) | 0.875 (0.61) | **0.997** (0.99) | – |
+| AntiDeepfake w2v2 small, MMS-300M | guard | guard | guard | 0.592, 0.512 |
+| DF Arena 500M, 1B; AASIST3 | guard | guard | guard | – |
+
+- **XLS-R + SLS carries over best**, and is the only model that catches more than a third of MLAAD Bengali's fakes at a 5% false-alarm rate.
+- **The ASVspoof-only AASIST pair is backwards on MLAAD Bengali and Hindi** (0.19 to 0.41), as on IndicSynth Bengali, but not on Sinhala. MLAAD Sinhala has 11,550 real clips to 1,000 fakes, and AASIST-L's 0.812 there catches only 3% of fakes at 5% FPR.
+- **BD-GRF6 defeats every model so far.** The best is AASIST-L at 0.709; the post-trained AntiDeepfake models sit at chance (0.51 and 0.59).
 
 ## What the results can't say yet
 
 - **Lip-sync with cloned voices**, v1's focus: only MAVOS-DD Hindi so far, and with no video score direction settled ([above](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).
-- **Sinhala.** Its only fakes are in a cross-corpus set waiting on the shortcut probe.
+- **Sinhala.** Its only fakes are in MLAAD Sinhala, a cross-corpus set: scored above, but not a result until the shortcut probe.
 - **In-the-wild South Asian audio.** Every South Asian audio set so far is read or studio speech.
 - **Demographics in audio.** These sets carry gender at most.

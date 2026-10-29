@@ -1,0 +1,25 @@
+{
+  "run_id": "df_arena_1b__indicsynth_ur__a955b459",
+  "model_id": "df_arena_1b",
+  "evalset_id": "indicsynth_ur",
+  "upstream_commit": "fb6ce85de12c2c5a509d89114adaf827dd75f49f",
+  "weights_sha256": {
+    "pytorch_model.bin": "780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988",
+    "xls-r-1b-config/config.json": "36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "5fc4e10bef75f41a9f8c90b51717a3c907fa7d0dd5da299b13edf482f85baf1e",
+    "model": "1d65ae205f6d634480742f387384bcefab8ffa49bbd696db73be01aafcc71f98"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-28T23:38:06+00:00",
+  "last_started_utc": "2026-10-28T23:38:06+00:00",
+  "repo_commits": [
+    "043f50b1b4aac1e9c9d21d44e842309506230b3f"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

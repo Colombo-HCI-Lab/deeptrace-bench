@@ -1,0 +1,24 @@
+{
+  "run_id": "aasist__bd_grf6__bc8aa878",
+  "model_id": "aasist",
+  "evalset_id": "bd_grf6",
+  "upstream_commit": "a04c9863f63d44471dde8a6abcb3b082b07cd1d1",
+  "weights_sha256": {
+    "AASIST.pth": "51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "510d972e162bde3a90278faf5c04fc3d5624b03c194dc3cdea9ab764a2a0464d",
+    "model": "9cb92dcb528d4533ca39f95f501a8ea54291219a6e02d106cb4f4b1ddb4d84de"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-29T03:39:06+00:00",
+  "last_started_utc": "2026-10-29T03:39:06+00:00",
+  "repo_commits": [
+    "622bff922fa8cd77e0756bedc555cc851bc1cf3f"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}

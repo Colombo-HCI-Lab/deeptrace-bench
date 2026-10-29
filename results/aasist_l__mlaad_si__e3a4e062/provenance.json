@@ -1,0 +1,24 @@
+{
+  "run_id": "aasist_l__mlaad_si__e3a4e062",
+  "model_id": "aasist_l",
+  "evalset_id": "mlaad_si",
+  "upstream_commit": "a04c9863f63d44471dde8a6abcb3b082b07cd1d1",
+  "weights_sha256": {
+    "AASIST-L.pth": "814331d088032bb4c3fa61cc014789eadeed464209dd094ab3a2dd6ffbdce27a"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "1981b917512fbd2cd2de1e53f2982c096c9569a818e18c5a96a65902ffebe410",
+    "model": "6cee8b58c40bbb34c6f5aaef34db061fe236bd5ab9e115e9ae123cb5270d8225"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-29T02:19:05+00:00",
+  "last_started_utc": "2026-10-29T02:19:05+00:00",
+  "repo_commits": [
+    "622bff922fa8cd77e0756bedc555cc851bc1cf3f"
+  ],
+  "repo_dirty": true,
+  "devices": [
+    "cuda"
+  ]
+}
