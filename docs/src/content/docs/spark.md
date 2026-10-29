@@ -147,7 +147,7 @@ scripts/exp.py import --build-site # when it lands: the runs and their ledger ro
 
 Every pair is measured as it is scored, and the numbers land in its summary's `compute` block ([Evaluation](evaluation.md#metrics)): time per phase, load and inference time per item, items per second, peak GPU memory, GPU utilisation, power and energy. The job's ledger (`reports/matrix.json` there, `results/ledger.csv` here once imported) also keeps pairs the contamination guard refused, pairs whose data couldn't be fetched, and the gap to the published run where one exists. A wave that runs out of time stops cleanly and resumes when ordered again.
 
-**The same stage off the cluster.** `stages/matrix.py --commit local --out <dir>` runs a wave on any GPU with a checkout of this repo (`DTB_LOCAL_CHECKOUT` and `DTB_ROOT` set), and `scripts/exp.py import --from <dir>` brings its runs here. The 2026-10-28 round ran this way on two 24 GB GPUs next to SPARK. Change such a queue only between pairs: a pair stopped mid-run scores again from the start. The experiments repo's README has the commands.
+**The same stage off the cluster.** `stages/matrix.py --commit local --out <dir>` runs a wave on any GPU with a checkout of this repo (`DTB_LOCAL_CHECKOUT` and `DTB_ROOT` set), and `scripts/exp.py import --from <dir>` brings its runs here. Their per-item scores stay in that machine's store, so after the round `scripts/archive.py` copies them into the [archive](store_layout.md#archive). The 2026-10-28 round ran this way on two 24 GB GPUs next to SPARK. Change such a queue only between pairs: a pair stopped mid-run scores again from the start. The experiments repo's README has the commands.
 
 ### Bigger experiments
 

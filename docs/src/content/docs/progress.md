@@ -127,4 +127,4 @@ In order:
 
 ## Adding an entry
 
-After each round or milestone: a dated entry at the top of the timeline (3 to 5 bullets, commit range, no numbers that belong in Results), then update "Where things stand" and "Next", and [Results](results.md) if numbers or experiments changed.
+After each round or milestone: a dated entry at the top of the timeline (3 to 5 bullets, commit range, no numbers that belong in Results), then update "Where things stand" and "Next", and [Results](results.md) if numbers or experiments changed. Once a round's waves are imported, refresh the [archive](store_layout.md#archive) of per-item results.
