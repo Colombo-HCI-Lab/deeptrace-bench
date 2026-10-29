@@ -6424,6 +6424,35 @@
   },
   {
    "model": "aasist",
+   "evalset": "indictts_challenge",
+   "run_id": "aasist__indictts_challenge__768dbf59",
+   "pairing": "same_corpus",
+   "n": 31102,
+   "n_real": 15558,
+   "n_fake": 15544,
+   "n_failed": 17,
+   "auc": 0.40282126396100737,
+   "auc_lo": 0.3965421852171255,
+   "auc_hi": 0.4091539960977454,
+   "eer": 0.5771237199716623,
+   "eer_lo": 0.5714724147461827,
+   "eer_hi": 0.5825368712565209,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "below chance"
+   ],
+   "wall_s": 667,
+   "windows": 66541,
+   "compute": null
+  },
+  {
+   "model": "aasist",
    "evalset": "mavos_dd_hi_audio",
    "run_id": "aasist__mavos_dd_hi_audio__71b5f4f8",
    "pairing": "same_corpus",
@@ -6918,6 +6947,33 @@
   },
   {
    "model": "aasist_l",
+   "evalset": "in_the_wild",
+   "run_id": "aasist_l__in_the_wild__be308f8f",
+   "pairing": "same_corpus",
+   "n": 31779,
+   "n_real": 19963,
+   "n_fake": 11816,
+   "n_failed": 865,
+   "auc": 0.5824822660639497,
+   "auc_lo": 0.5757900745703302,
+   "auc_hi": 0.5886413768614014,
+   "eer": 0.4484939602882472,
+   "eer_lo": 0.44336020529835657,
+   "eer_hi": 0.4541936269878035,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [],
+   "wall_s": 1492,
+   "windows": 48385,
+   "compute": null
+  },
+  {
+   "model": "aasist_l",
    "evalset": "indicsynth_bn",
    "run_id": "aasist_l__indicsynth_bn__74aee57a",
    "pairing": "same_corpus",
@@ -7029,6 +7085,35 @@
     "energy_wh_per_1k_items": 0.951,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
+  },
+  {
+   "model": "aasist_l",
+   "evalset": "indictts_challenge",
+   "run_id": "aasist_l__indictts_challenge__897e0073",
+   "pairing": "same_corpus",
+   "n": 31102,
+   "n_real": 15558,
+   "n_fake": 15544,
+   "n_failed": 17,
+   "auc": 0.37694493342123536,
+   "auc_lo": 0.3709812798940904,
+   "auc_hi": 0.38296465704139454,
+   "eer": 0.588314693405322,
+   "eer_lo": 0.5827267591869565,
+   "eer_hi": 0.5935216607990693,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "below chance"
+   ],
+   "wall_s": 603,
+   "windows": 66541,
+   "compute": null
   },
   {
    "model": "aasist_l",
@@ -7240,9 +7325,7 @@
    "tpr_at_fpr05": 1.0,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 97.2,
    "windows": 5052,
    "compute": {
@@ -7281,8 +7364,7 @@
     "antideepfake_mms_300m pretrain data commonvoice shares ['commonvoice'] with banglafake"
    ],
    "flags": [
-    "source overlap",
-    "score direction unchecked"
+    "source overlap"
    ],
    "wall_s": 1092.7,
    "windows": 50954,
@@ -7320,8 +7402,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "score direction unchecked"
+    "cross-corpus"
    ],
    "wall_s": 507,
    "windows": 24368,
@@ -7335,6 +7416,33 @@
     "energy_wh_per_1k_items": 3.314,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
+  },
+  {
+   "model": "antideepfake_mms_300m",
+   "evalset": "in_the_wild",
+   "run_id": "antideepfake_mms_300m__in_the_wild__1c59c3e5",
+   "pairing": "same_corpus",
+   "n": 31779,
+   "n_real": 19963,
+   "n_fake": 11816,
+   "n_failed": 865,
+   "auc": 0.990948908983169,
+   "auc_lo": 0.9900540612316228,
+   "auc_hi": 0.9918489519627043,
+   "eer": 0.04292602001140546,
+   "eer_lo": 0.04042899764030642,
+   "eer_hi": 0.04541448493960288,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [],
+   "wall_s": 1023,
+   "windows": 48385,
+   "compute": null
   },
   {
    "model": "antideepfake_mms_300m",
@@ -7358,9 +7466,7 @@
    "tpr_at_fpr05": 0.9985333333333334,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 666.9,
    "windows": 42198,
    "compute": {
@@ -7396,9 +7502,7 @@
    "tpr_at_fpr05": 1.0,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 611.8,
    "windows": 29806,
    "compute": {
@@ -7434,9 +7538,7 @@
    "tpr_at_fpr05": 1.0,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 485.8,
    "windows": 29577,
    "compute": {
@@ -7449,6 +7551,37 @@
     "energy_wh_per_1k_items": 2.901,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
+  },
+  {
+   "model": "antideepfake_mms_300m",
+   "evalset": "indictts_challenge",
+   "run_id": "antideepfake_mms_300m__indictts_challenge__dcffce91",
+   "pairing": "same_corpus",
+   "n": 31102,
+   "n_real": 15558,
+   "n_fake": 15544,
+   "n_failed": 17,
+   "auc": 0.9971809387216821,
+   "auc_lo": 0.9967340709716533,
+   "auc_hi": 0.9975924381187117,
+   "eer": 0.023378630772203257,
+   "eer_lo": 0.02172515747525389,
+   "eer_hi": 0.02511753719327625,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "source_overlap",
+   "reasons": [
+    "antideepfake_mms_300m train data ljspeech shares ['ljspeech'] with indictts_challenge"
+   ],
+   "flags": [
+    "source overlap"
+   ],
+   "wall_s": 1185,
+   "windows": 66541,
+   "compute": null
   },
   {
    "model": "antideepfake_mms_300m",
@@ -7472,9 +7605,7 @@
    "tpr_at_fpr05": 1.0,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 388.4,
    "windows": 14987,
    "compute": {
@@ -7510,9 +7641,7 @@
    "tpr_at_fpr05": 0.9893396505774356,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 448,
    "windows": 17745,
    "compute": {
@@ -7548,9 +7677,7 @@
    "tpr_at_fpr05": 1.0,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 44.9,
    "windows": 5052,
    "compute": {
@@ -7586,9 +7713,7 @@
    "tpr_at_fpr05": 0.782336850332161,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 415.9,
    "windows": 50954,
    "compute": {
@@ -7625,8 +7750,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "score direction unchecked"
+    "cross-corpus"
    ],
    "wall_s": 290,
    "windows": 24368,
@@ -7640,6 +7764,33 @@
     "energy_wh_per_1k_items": 1.803,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
+  },
+  {
+   "model": "antideepfake_w2v_small",
+   "evalset": "in_the_wild",
+   "run_id": "antideepfake_w2v_small__in_the_wild__af407db3",
+   "pairing": "same_corpus",
+   "n": 31779,
+   "n_real": 19963,
+   "n_fake": 11816,
+   "n_failed": 865,
+   "auc": 0.992603390310484,
+   "auc_lo": 0.9919249664274641,
+   "auc_hi": 0.9932653652396458,
+   "eer": 0.04230390377935611,
+   "eer_lo": 0.03974193548387095,
+   "eer_hi": 0.044742442653537565,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [],
+   "wall_s": 495,
+   "windows": 48385,
+   "compute": null
   },
   {
    "model": "antideepfake_w2v_small",
@@ -7663,9 +7814,7 @@
    "tpr_at_fpr05": 0.9961333333333333,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 287.7,
    "windows": 42198,
    "compute": {
@@ -7701,9 +7850,7 @@
    "tpr_at_fpr05": 0.9855,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 248.7,
    "windows": 29806,
    "compute": {
@@ -7739,9 +7886,7 @@
    "tpr_at_fpr05": 0.9813981398139814,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 214.8,
    "windows": 29577,
    "compute": {
@@ -7754,6 +7899,38 @@
     "energy_wh_per_1k_items": 1.244,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
+  },
+  {
+   "model": "antideepfake_w2v_small",
+   "evalset": "indictts_challenge",
+   "run_id": "antideepfake_w2v_small__indictts_challenge__8174b974",
+   "pairing": "same_corpus",
+   "n": 31102,
+   "n_real": 15558,
+   "n_fake": 15544,
+   "n_failed": 17,
+   "auc": 0.89507520594545,
+   "auc_lo": 0.8915418434618612,
+   "auc_hi": 0.8986374438149295,
+   "eer": 0.166672028309474,
+   "eer_lo": 0.1623607264764604,
+   "eer_hi": 0.1709935883305522,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "source_overlap",
+   "reasons": [
+    "antideepfake_w2v_small pretrain data librispeech shares ['librispeech'] with indictts_challenge",
+    "antideepfake_w2v_small train data ljspeech shares ['ljspeech'] with indictts_challenge"
+   ],
+   "flags": [
+    "source overlap"
+   ],
+   "wall_s": 558,
+   "windows": 66541,
+   "compute": null
   },
   {
    "model": "antideepfake_w2v_small",
@@ -7777,9 +7954,7 @@
    "tpr_at_fpr05": 1.0,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 216.3,
    "windows": 14987,
    "compute": {
@@ -7815,9 +7990,7 @@
    "tpr_at_fpr05": 0.8714835652946402,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "score direction unchecked"
-   ],
+   "flags": [],
    "wall_s": 180,
    "windows": 17745,
    "compute": {
@@ -8240,6 +8413,33 @@
     "energy_wh_per_1k_items": 9.427,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
+  },
+  {
+   "model": "df_arena_1b",
+   "evalset": "indictts_challenge",
+   "run_id": "df_arena_1b__indictts_challenge__8e7f91da",
+   "pairing": "same_corpus",
+   "n": 31102,
+   "n_real": 15558,
+   "n_fake": 15544,
+   "n_failed": 17,
+   "auc": 0.9880048093575027,
+   "auc_lo": 0.9870047538495679,
+   "auc_hi": 0.9888888896478161,
+   "eer": 0.050777734927368555,
+   "eer_lo": 0.04839953721558041,
+   "eer_hi": 0.0533270209770981,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [],
+   "wall_s": 5680,
+   "windows": 66541,
+   "compute": null
   },
   {
    "model": "df_arena_1b",
@@ -10913,6 +11113,33 @@
   },
   {
    "model": "xlsr_aasist",
+   "evalset": "asvspoof2019_la_eval",
+   "run_id": "xlsr_aasist__asvspoof2019_la_eval__5a051498",
+   "pairing": "same_corpus",
+   "n": 71237,
+   "n_real": 7355,
+   "n_fake": 63882,
+   "n_failed": 1059,
+   "auc": 0.9998850192313679,
+   "auc_lo": 0.9997975753958003,
+   "auc_hi": 0.9999446411277964,
+   "eer": 0.003024321915191641,
+   "eer_lo": 0.002594549853559114,
+   "eer_hi": 0.0034381764930599967,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [],
+   "wall_s": 2288,
+   "windows": 86129,
+   "compute": null
+  },
+  {
+   "model": "xlsr_aasist",
    "evalset": "bangla_voices",
    "run_id": "xlsr_aasist__bangla_voices__1139830c",
    "pairing": "same_corpus",
@@ -11171,6 +11398,33 @@
     "energy_wh_per_1k_items": 3.076,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
+  },
+  {
+   "model": "xlsr_aasist",
+   "evalset": "indictts_challenge",
+   "run_id": "xlsr_aasist__indictts_challenge__e4e98dba",
+   "pairing": "same_corpus",
+   "n": 31102,
+   "n_real": 15558,
+   "n_fake": 15544,
+   "n_failed": 17,
+   "auc": 0.5812501278619837,
+   "auc_lo": 0.5753112891325249,
+   "auc_hi": 0.5878680928149136,
+   "eer": 0.45572229020416044,
+   "eer_lo": 0.45005624116210313,
+   "eer_hi": 0.46130608047306854,
+   "acc": null,
+   "bal_acc": null,
+   "ap": null,
+   "tpr_at_fpr01": null,
+   "tpr_at_fpr05": null,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [],
+   "wall_s": 1237,
+   "windows": 66541,
+   "compute": null
   },
   {
    "model": "xlsr_aasist",

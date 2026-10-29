@@ -80,6 +80,28 @@ def test_runs_hashed_before_the_subset_field_still_count(registry, tmp_path, mon
     assert row["run_id"] == "aasist__urdu_csalt__old"
 
 
+def test_runs_from_before_a_notes_edit_still_count(registry, tmp_path, monkeypatch):
+    monkeypatch.setenv("DTB_ROOT", str(tmp_path))
+    monkeypatch.delenv("DTB_NAMESPACE", raising=False)
+    monkeypatch.setattr(status, "PUBLISHED_RESULTS_DIR", tmp_path / "published")
+    now = registry.model("aasist").model_dump(mode="json")
+    new_notes = {**now, "notes": "written before the run"}
+    new_weights = {**now, "weights": []}
+    monkeypatch.setattr(status, "_committed_model_configs", lambda _: [new_notes, new_weights])
+    # The weights run is later, so it would win if a scoring change were let through.
+    for run_id, started, config in [
+        ("aasist__urdu_csalt__notes", "2026-10-01", new_notes),
+        ("aasist__urdu_csalt__weights", "2026-10-02", new_weights),
+    ]:
+        _store_run(tmp_path, registry, run_id, started, auc=0.7)
+        record = tmp_path / "scores" / run_id / "run.json"
+        data = json.loads(record.read_text())
+        data["config_hashes"]["model"] = config_hash(config)
+        record.write_text(json.dumps(data))
+    [row] = scored_runs(registry)
+    assert row["run_id"] == "aasist__urdu_csalt__notes"
+
+
 def test_published_runs_count_when_the_store_lacks_them(registry, tmp_path, monkeypatch):
     monkeypatch.setenv("DTB_ROOT", str(tmp_path / "store"))
     monkeypatch.delenv("DTB_NAMESPACE", raising=False)

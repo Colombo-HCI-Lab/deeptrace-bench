@@ -12,7 +12,9 @@ configs are unchanged, and the latest such run wins when a pair has several.
 
 from __future__ import annotations
 
+import functools
 import json
+import subprocess
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -21,6 +23,7 @@ from typing import Any
 import pandas as pd
 import requests
 import yaml
+from pydantic import ValidationError
 
 from . import evalset as evalsets
 from .eval.contamination import Verdict, check
@@ -83,9 +86,56 @@ def _evalset_hashes(evalset: EvalsetConfig) -> set[str]:
     return {config_hash(data), config_hash(older)}
 
 
+# Model fields that describe a detector without changing what its runs measure. An edit to one of
+# them keeps earlier runs current (the notes rewritten on 2026-10-19 had dropped ten of them).
+_DESCRIPTIVE_MODEL_FIELDS = ("name", "status", "wave", "licence", "paper", "notes")
+
+
+@functools.cache
+def _committed_model_configs(model_id: str) -> list[dict[str, Any]]:
+    """Every committed version of the model's config, newest first; none without git history."""
+    path = f"configs/models/{model_id}.yaml"
+
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", "-C", str(REPO_ROOT), *args], check=True, capture_output=True, text=True
+        ).stdout
+
+    try:
+        commits = git("log", "--format=%H", "--", path).split()
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    versions = []
+    for commit in commits:
+        try:
+            versions.append(yaml.safe_load(git("show", f"{commit}:{path}")))
+        except subprocess.CalledProcessError:
+            continue  # the commit that deleted or renamed it
+    return versions
+
+
+def _model_hashes(model: ModelConfig) -> set[str]:
+    """Today's hash, and that of every committed version differing only in descriptive fields."""
+    now = model.model_dump(mode="json")
+
+    def measured(config: dict[str, Any]) -> dict[str, Any]:
+        return {k: v for k, v in config.items() if k not in _DESCRIPTIVE_MODEL_FIELDS}
+
+    hashes = {config_hash(now)}
+    for raw in _committed_model_configs(model.id):
+        try:
+            older = ModelConfig.model_validate(raw).model_dump(mode="json")
+        except ValidationError:
+            continue  # written for an older schema
+        if measured(older) == measured(now):
+            hashes.add(config_hash(older))
+    return hashes
+
+
 def _is_current(record: dict[str, Any], model: ModelConfig, evalset: EvalsetConfig) -> bool:
     hashes = record["config_hashes"]
-    return hashes["model"] == config_hash(model) and hashes["evalset"] in _evalset_hashes(evalset)
+    model_ok = hashes["model"] == config_hash(model) or hashes["model"] in _model_hashes(model)
+    return model_ok and hashes["evalset"] in _evalset_hashes(evalset)
 
 
 def _run_sources() -> dict[str, tuple[dict[str, Any], dict[str, Any], bool]]:
