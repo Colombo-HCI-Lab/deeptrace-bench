@@ -12,6 +12,8 @@ description: "What may enter git, licence clauses that bind us, sharing data acr
 | manifest summaries: counts per label and group, content hash | per-item scores, per-subject tables, split assignments |
 | synthetic test fixtures                                      | anything derived from a real item, even a tiny sample  |
 
+Per-item data leaves a store only for the project's private [archive](store_layout.md#archive), never for anywhere public, and never for DF-Platter, DeePhy, InDeepFake, UniDataPro or Svarah (`NO_COPY` in `src/deeptrace_bench/archive.py`).
+
 The pre-commit hook (`git config core.hooksPath scripts/hooks`) refuses data, media, archive and weight files, anything over 5 MB, and any CSV or JSON with an `item_id` or `rel_path` column. `evaluate.py --publish` copies only aggregate tables, never per-subject ones.
 
 Pipeline tests are item-level too: sampled datasets, face crops and smoke reports (which name items and embed crops) stay in `DTB_ROOT/smoke/`, where the [publish guard](method.md#why-a-number-counts) keeps them. Test fixtures use invented file names, since some datasets' file names carry real people's names.

@@ -27,6 +27,7 @@ A result counts only once it gets past three guards. Parity asks whether our wra
 | `parity.py` | checks an adapter against upstream code ([Adding a model](adding_a_model.md#5-before-any-result-counts)) |
 | `profile_models.py` | parameters, FLOPs, GPU time and memory per model, into `results/profile/` |
 | `build_site.py` | rewrites the site's data from the store; commit what it writes, and a push to `main` redeploys |
+| `archive.py` | copies per-item results and run records into the project's private archive ([The store](store_layout.md#archive)) |
 
 The store's full tree is in [The store](store_layout.md).
 

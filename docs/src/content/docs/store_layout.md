@@ -1,6 +1,6 @@
 ---
 title: "The store (`DTB_ROOT`)"
-description: "The DTB_ROOT tree: what each folder holds, naming rules, the smoke namespace, what's safe to delete"
+description: "The DTB_ROOT tree: what each folder holds, naming rules, the smoke namespace, the archive, what's safe to delete"
 ---
 
 Everything large or item-level lives outside git, in the folder `DTB_ROOT` names in `.env`. Which script writes which folder: [the pipeline](method.md#the-pipeline).
@@ -54,6 +54,22 @@ $DTB_ROOT/
 
 `setup_datasets.py --sample` always switches to the smoke namespace, so a four-item sample can't be mistaken for the real dataset.
 
+## Archive
+
+A store is the only copy of its per-item scores, and each machine that runs waves has its own store. After each round, `scripts/archive.py` copies every evaluated run into one archive in the project's private Google Drive folder (phase 2's `benchmark results/`), so the scores outlive any one machine and the team can reanalyse them without a GPU:
+
+```bash
+uv run scripts/archive.py --to <archive> [--from <copy of another machine's store>]
+```
+
+| In the archive               | From the store                                           |
+| ---------------------------- | -------------------------------------------------------- |
+| `runs/<run_id>/`             | `results/<run_id>/` (`items.parquet`, `summary.json`, `by_*.csv`) plus `scores/<run_id>/run.json` and `telemetry/` |
+| `waves/<wave>/`              | `matrix/<wave>/`, each wave's ledger                     |
+| `index.csv`                  | one row per run: pair, verdict, parity, AUC, EER, TPR at 5% FPR, whether git has it |
+
+Score parts stay behind (`items.parquet` holds the same scores), and so do datasets, weights and face caches, which can be fetched or rebuilt. Copying keeps the newest version of each file and never deletes, so re-running it after every round is safe. Runs on datasets whose terms forbid copies are left out ([Data policy](data_policy.md#what-may-enter-git)). Runs scored on SPARK keep their per-item scores on the cluster, since only aggregates come back from it.
+
 ## What is safe to delete
 
 | Folder                  | Safe? | What it costs                                                            |
@@ -62,7 +78,7 @@ $DTB_ROOT/
 | `faces/`                | yes   | face detection runs again (the slow step for video)                      |
 | `scores/<run>/crops/`   | yes   | only the PNGs kept for people to look at                                 |
 | `results/`              | yes   | `evaluate.py` rewrites it from the scores                                |
-| `scores/`               | care  | re-scoring takes GPU time; published aggregates in git stay              |
+| `scores/`               | care  | resuming needs the parts; [archived](#archive) runs keep their final scores |
 | `manifests/`            | care  | rebuild with `setup_datasets.py <id> --manifest`                         |
 | `datasets/`, `weights/` | care  | re-download; for request-only datasets, someone has to supply them again |
 | `upstream/`             | no    | the archive is the copy that survives a deleted or rewritten upstream    |

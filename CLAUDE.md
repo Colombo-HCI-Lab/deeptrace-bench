@@ -23,6 +23,7 @@ uv run scripts/smoke.py [--model gend] [--sample 2] [--device auto|cpu|mps|cuda]
 uv run scripts/parity.py export --model <id> --evalset <id> --smoke   # then the reference and compare it prints
 uv run scripts/profile_models.py --device cuda   # params, FLOPs, GPU time per model -> results/profile/
 uv run scripts/build_site.py [--citations] # rewrite the site's data (status.json, catalog.md) from the store
+uv run scripts/archive.py --to <archive> [--from <store>]   # copy per-item results and run records off the store
 cd docs && npm ci && npm run dev           # the site locally; npm run build fails on a broken doc link
 ```
 
@@ -32,7 +33,7 @@ Paths come from `DTB_ROOT` and `DTB_CACHE` (`.env`, see `.env.example`); `docs/s
 
 ## Rules
 
-- **No data in git.** Datasets, weights, manifests, per-item scores, split assignments and per-subject tables live under `DTB_ROOT`. Only code, configs, docs and aggregate tables are committed. `scripts/hooks/pre-commit` enforces it; keep it working. Test fixtures are synthetic.
+- **No data in git.** Datasets, weights, manifests, per-item scores, split assignments and per-subject tables live under `DTB_ROOT`. Only code, configs, docs and aggregate tables are committed. `scripts/hooks/pre-commit` enforces it; keep it working. Test fixtures are synthetic. After each round, `scripts/archive.py` copies every store's per-item results into the private archive in phase 2's Google Drive folder, `benchmark results/` (`store_layout.md#archive`); nothing item-level goes anywhere else.
 - **One environment.** No dlib, fairseq or mamba-ssm. Upstream code is cloned at a pinned commit into `third_party/` (git-ignored) and loaded by adapters; never copy code from Effort (no licence), SBI (research only) or DeepfakeBench (CC BY-NC) into the repo. Compatibility fixes go in `patches/<repo>/`.
 - **Parity before results.** An adapter counts only after its scores match the upstream code in its original environment on about 200 items (within about 1e-3) and its score direction checks out on the reproduction evalset. See `docs/src/content/docs/models.md`.
 - **Evalsets, not datasets.** Score only through `configs/evalsets/`. Cross-corpus evalsets never feed headline numbers.
