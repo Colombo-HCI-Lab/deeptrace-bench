@@ -28,11 +28,11 @@ AASIST (Jung et al., ICASSP 2022) builds graphs over spectral and temporal nodes
 | Paper | [AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks](https://arxiv.org/abs/2110.01200), ICASSP 2022 · 652 citations |
 | Training | trained on ASVspoof 2019 Logical Access (train split) |
 | Reported by the authors | ASVspoof 2019 LA eval: EER 0.83% (paper) |
-| Our runs | `bd_grf6`: AUC 0.608, EER 44.8%; `indicsynth_bn`: AUC 0.214, EER 74.2%; `indicsynth_ur`: AUC 0.343, EER 61.5%; `mavos_dd_hi_audio`: AUC 0.635, EER 38.2%; `mlaad_bn`: AUC 0.195, EER 76.4%; `mlaad_hi`: AUC 0.378, EER 62.1%; `mlaad_si`: AUC 0.900, EER 14.7%; `urdu_csalt`: AUC 0.863, EER 22.2% |
+| Our runs | `asvspoof2019_la_eval`: AUC 0.999, EER 1.6%; `bangla_voices`: AUC 0.048, EER 87.1%; `banglafake`: AUC 0.365, EER 59.5%; `bd_grf6`: AUC 0.608, EER 44.8%; `in_the_wild`: AUC 0.578, EER 44.0%; `indicsynth_bn`: AUC 0.214, EER 74.2%; `indicsynth_hi`: AUC 0.393, EER 59.4%; `indicsynth_ur`: AUC 0.343, EER 61.5%; `mavos_dd_hi_audio`: AUC 0.635, EER 38.2%; `mlaad_bn`: AUC 0.195, EER 76.4%; `mlaad_hi`: AUC 0.378, EER 62.1%; `mlaad_si`: AUC 0.900, EER 14.7%; `urdu_csalt`: AUC 0.863, EER 22.2% |
 | Size | 298 K parameters |
 | Cost | 19.1 GFLOPs and 4.6 ms per window on a 24 GB GPU (fp32) |
 | Licence | MIT |
-| Status here | adapter written, parity checked, scored on 8 evalsets |
+| Status here | adapter written, parity checked, scored on 13 evalsets |
 
 <a id="model-aasist_l"></a>
 
@@ -50,11 +50,11 @@ AASIST-L is the reduced configuration from the AASIST paper (Jung et al., ICASSP
 | Paper | [AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks](https://arxiv.org/abs/2110.01200), ICASSP 2022 · 652 citations |
 | Training | trained on ASVspoof 2019 Logical Access (train split) |
 | Reported by the authors | ASVspoof 2019 LA eval: EER 0.99% (paper) |
-| Our runs | `bd_grf6`: AUC 0.709, EER 36.6%; `indicsynth_bn`: AUC 0.234, EER 71.2%; `indicsynth_ur`: AUC 0.336, EER 62.2%; `mavos_dd_hi_audio`: AUC 0.644, EER 38.4%; `mlaad_bn`: AUC 0.185, EER 77.6%; `mlaad_hi`: AUC 0.406, EER 58.4%; `mlaad_si`: AUC 0.812, EER 23.2%; `urdu_csalt`: AUC 0.861, EER 23.0% |
+| Our runs | `asvspoof2019_la_eval`: AUC 0.999, EER 1.5%; `bangla_voices`: AUC 0.055, EER 87.3%; `banglafake`: AUC 0.379, EER 58.2%; `bd_grf6`: AUC 0.709, EER 36.6%; `indicsynth_bn`: AUC 0.234, EER 71.2%; `indicsynth_hi`: AUC 0.390, EER 59.0%; `indicsynth_ur`: AUC 0.336, EER 62.2%; `mavos_dd_hi_audio`: AUC 0.644, EER 38.4%; `mlaad_bn`: AUC 0.185, EER 77.6%; `mlaad_hi`: AUC 0.406, EER 58.4%; `mlaad_si`: AUC 0.812, EER 23.2%; `urdu_csalt`: AUC 0.861, EER 23.0% |
 | Size | 85 K parameters |
 | Cost | 13.2 GFLOPs and 3.8 ms per window on a 24 GB GPU (fp32) |
 | Licence | MIT |
-| Status here | adapter written, parity checked, scored on 8 evalsets |
+| Status here | adapter written, parity checked, scored on 12 evalsets |
 
 <a id="model-aasist3"></a>
 
@@ -94,11 +94,11 @@ AntiDeepfake (Ge et al., NII Yamagishi Lab, 2025) inserts a post-training stage 
 | Paper | [Post-training for Deepfake Speech Detection](https://arxiv.org/abs/2506.21090), ASRU 2025 · 31 citations |
 | Training | pretrained on MMS-lab; pretrained on Multilingual LibriSpeech; pretrained on Mozilla Common Voice; pretrained on VoxLingua107; pretrained on IARPA BABEL; pretrained on VoxPopuli; trained on AISHELL-3; trained on ASVspoof 2019 Logical Access; trained on ASVspoof 2021; trained on ASVspoof 5; trained on CFAD; trained on CN-Celeb2; trained on Codecfake; trained on CodecFake; trained on CVoiceFake; trained on DECRO; trained on DFADD; trained on Diffuse or Confuse; trained on DiffSSD; trained on DSD; trained on FLEURS; trained on FLEURS-R; trained on HABLA; trained on LibriTTS; trained on LibriTTS-R; trained on LibriTTS re-vocoded; trained on LJSpeech; trained on MLAAD; trained on SpoofCeleb; trained on VoiceMOS challenge data; trained on VoxCeleb2; trained on VoxCeleb2 re-vocoded; trained on WaveFake |
 | Reported by the authors | In-the-Wild: EER 2.90% (model card); ADD 2023: EER 7.93% (model card); Deepfake-Eval-2024: EER 32.84% (model card) |
-| Our runs | `bd_grf6`: AUC 0.512, EER 49.0%; `indicsynth_bn`: AUC 0.999, EER 1.3%; `indicsynth_ur`: AUC 1.000, EER 0.0%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.998, EER 2.2% |
+| Our runs | `bangla_voices`: AUC 1.000, EER 0.5%; `banglafake`: AUC 0.999, EER 1.1%; `bd_grf6`: AUC 0.512, EER 49.0%; `indicsynth_bn`: AUC 0.999, EER 1.3%; `indicsynth_hi`: AUC 1.000, EER 0.1%; `indicsynth_ur`: AUC 1.000, EER 0.0%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.998, EER 2.2% |
 | Size | 315 M parameters |
 | Cost | 148.8 GFLOPs and 14.5 ms per window on a 24 GB GPU (fp32) |
 | Licence | CC BY-NC-SA 4.0 (checkpoint); code BSD-3 |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 8 evalsets |
 
 <a id="model-antideepfake_w2v_small"></a>
 
@@ -116,11 +116,11 @@ The smallest AntiDeepfake model (Ge et al., 2025): wav2vec 2.0 base pretrained o
 | Paper | [Post-training for Deepfake Speech Detection](https://arxiv.org/abs/2506.21090), ASRU 2025 · 31 citations |
 | Training | pretrained on LibriSpeech 960 h; trained on AISHELL-3; trained on ASVspoof 2019 Logical Access; trained on ASVspoof 2021; trained on ASVspoof 5; trained on CFAD; trained on CN-Celeb2; trained on Codecfake; trained on CodecFake; trained on CVoiceFake; trained on DECRO; trained on DFADD; trained on Diffuse or Confuse; trained on DiffSSD; trained on DSD; trained on FLEURS; trained on FLEURS-R; trained on HABLA; trained on LibriTTS; trained on LibriTTS-R; trained on LibriTTS re-vocoded; trained on LJSpeech; trained on MLAAD; trained on SpoofCeleb; trained on VoiceMOS challenge data; trained on VoxCeleb2; trained on VoxCeleb2 re-vocoded; trained on WaveFake |
 | Reported by the authors | In-the-Wild: EER 4.24% (model card); ADD 2023: EER 13.02% (model card); Deepfake-Eval-2024: EER 33.33% (model card) |
-| Our runs | `bd_grf6`: AUC 0.592, EER 43.0%; `indicsynth_bn`: AUC 0.998, EER 1.7%; `indicsynth_ur`: AUC 0.996, EER 2.6%; `mavos_dd_hi_audio`: AUC 0.999, EER 1.3%; `urdu_csalt`: AUC 0.969, EER 9.3% |
+| Our runs | `bangla_voices`: AUC 1.000, EER 0.2%; `banglafake`: AUC 0.955, EER 11.4%; `bd_grf6`: AUC 0.592, EER 43.0%; `indicsynth_bn`: AUC 0.998, EER 1.7%; `indicsynth_hi`: AUC 0.997, EER 2.5%; `indicsynth_ur`: AUC 0.996, EER 2.6%; `mavos_dd_hi_audio`: AUC 0.999, EER 1.3%; `urdu_csalt`: AUC 0.969, EER 9.3% |
 | Size | 94 M parameters |
 | Cost | 57.5 GFLOPs and 5.5 ms per window on a 24 GB GPU (fp32) |
 | Licence | CC BY-NC-SA 4.0 (checkpoint); code BSD-3 |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 8 evalsets |
 
 <a id="model-df_arena_1b"></a>
 
@@ -138,11 +138,11 @@ Released by the team behind the Speech DF Arena leaderboard (Speech-Arena-2025).
 | Paper | [Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models](https://arxiv.org/abs/2509.02859), Speech DF Arena 2025 · 36 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; pretrained on VoxPopuli; pretrained on VoxLingua107; trained on ASVspoof 2019 Logical Access; trained on ASVspoof 5; trained on MLAAD; trained on Codecfake; trained on LibriSeVoc; trained on DFADD; trained on CtrSVDD; trained on SpoofCeleb; trained on EnvSDD |
 | Reported by the authors | In-the-Wild: EER 0.91% (model card); ASVspoof 2019 LA: EER 1.14% (model card); ASVspoof 2021 DF eval: EER 1.75% (model card) |
-| Our runs | `indicsynth_bn`: AUC 1.000, EER 0.6%; `indicsynth_ur`: AUC 1.000, EER 0.5%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.995, EER 4.0% |
+| Our runs | `bangla_voices`: AUC 0.993, EER 4.3%; `banglafake`: AUC 0.999, EER 0.7%; `in_the_wild`: AUC 0.999, EER 0.7%; `indicsynth_bn`: AUC 1.000, EER 0.6%; `indicsynth_hi`: AUC 0.999, EER 1.7%; `indicsynth_ur`: AUC 1.000, EER 0.5%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.995, EER 4.0% |
 | Size | 1.15 B parameters |
 | Cost | 484.8 GFLOPs and 49.2 ms per window on a 24 GB GPU (fp32) |
 | Licence | non-commercial (custom LICENSE.txt in the model repo) |
-| Status here | adapter written, parity checked, scored on 4 evalsets |
+| Status here | adapter written, parity checked, scored on 8 evalsets |
 
 <a id="model-df_arena_500m"></a>
 
@@ -160,11 +160,11 @@ Same design and training data as DF Arena 1B (Speech-Arena-2025) with the smalle
 | Paper | [Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models](https://arxiv.org/abs/2509.02859), Speech DF Arena 2025 · 36 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; pretrained on VoxPopuli; pretrained on VoxLingua107; trained on ASVspoof 2019 Logical Access; trained on ASVspoof 5; trained on MLAAD; trained on Codecfake; trained on LibriSeVoc; trained on DFADD; trained on CtrSVDD; trained on SpoofCeleb; trained on EnvSDD |
 | Reported by the authors | In-the-Wild: EER 1.76% (model card); ASVspoof 2019 LA: EER 1.09% (model card); ASVspoof 2021 DF eval: EER 3.30% (model card) |
-| Our runs | `indicsynth_bn`: AUC 0.995, EER 3.1%; `indicsynth_ur`: AUC 0.999, EER 1.6%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.981, EER 7.8% |
+| Our runs | `bangla_voices`: AUC 0.998, EER 2.1%; `banglafake`: AUC 0.997, EER 2.2%; `in_the_wild`: AUC 0.999, EER 1.5%; `indicsynth_bn`: AUC 0.995, EER 3.1%; `indicsynth_hi`: AUC 0.997, EER 2.6%; `indicsynth_ur`: AUC 0.999, EER 1.6%; `indictts_challenge`: AUC 0.978, EER 6.9%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.981, EER 7.8% |
 | Size | 436 M parameters |
 | Cost | 193.8 GFLOPs and 22.7 ms per window on a 24 GB GPU (fp32) |
 | Licence | non-commercial (custom LICENSE.txt in the model repo) |
-| Status here | adapter written, parity checked, scored on 4 evalsets |
+| Status here | adapter written, parity checked, scored on 9 evalsets |
 
 <a id="model-xlsr_aasist"></a>
 
@@ -182,11 +182,11 @@ XLS-R + AASIST (Tak et al., Odyssey 2022) fine-tunes the SSL front end jointly w
 | Paper | [Automatic speaker verification spoofing and deepfake detection using wav2vec 2.0 and data augmentation](https://arxiv.org/abs/2202.12233), Odyssey 2022 · 358 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; pretrained on VoxPopuli; pretrained on VoxLingua107; trained on ASVspoof 2019 Logical Access (train split) |
 | Reported by the authors | ASVspoof 2021 LA eval: EER 0.82% (paper); ASVspoof 2021 DF eval: EER 2.85% (paper) |
-| Our runs | `bd_grf6`: AUC 0.509, EER 49.3%; `indicsynth_bn`: AUC 0.654, EER 39.7%; `indicsynth_ur`: AUC 0.777, EER 25.6%; `mavos_dd_hi_audio`: AUC 0.886, EER 16.9%; `mlaad_bn`: AUC 0.527, EER 42.8%; `mlaad_hi`: AUC 0.877, EER 17.8%; `mlaad_si`: AUC 0.941, EER 13.4%; `urdu_csalt`: AUC 0.802, EER 27.9% |
+| Our runs | `bangla_voices`: AUC 0.389, EER 58.0%; `banglafake`: AUC 0.467, EER 55.3%; `bd_grf6`: AUC 0.509, EER 49.3%; `in_the_wild`: AUC 0.961, EER 10.8%; `indicsynth_bn`: AUC 0.654, EER 39.7%; `indicsynth_hi`: AUC 0.828, EER 24.7%; `indicsynth_ur`: AUC 0.777, EER 25.6%; `mavos_dd_hi_audio`: AUC 0.886, EER 16.9%; `mlaad_bn`: AUC 0.527, EER 42.8%; `mlaad_hi`: AUC 0.877, EER 17.8%; `mlaad_si`: AUC 0.941, EER 13.4%; `urdu_csalt`: AUC 0.802, EER 27.9% |
 | Size | 316 M parameters |
 | Cost | 150.2 GFLOPs and 15.5 ms per window on a 24 GB GPU (fp32) |
 | Licence | MIT |
-| Status here | adapter written, parity checked, scored on 8 evalsets |
+| Status here | adapter written, parity checked, scored on 12 evalsets |
 
 <a id="model-xlsr_sls"></a>
 

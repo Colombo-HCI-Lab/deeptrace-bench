@@ -106,6 +106,7 @@ export interface Run {
   auc_lo: number;
   auc_hi: number;
   eer: number;
+  tpr_at_fpr05: number | null;
   reasons: string[];
   flags: string[];
   wall_s: number | null;
@@ -157,6 +158,45 @@ export const GROUPS: [string, string, string][] = [
   ["south_asian", "same_corpus", "South Asian · same corpus"],
   ["south_asian", "cross_corpus", "South Asian · cross corpus"],
 ];
+
+// AUC in bands of 0.1 for the coverage grid, each its own hue so neighbouring bands read apart at
+// a glance: red below chance, grey near it, then yellow, green, teal and indigo. The round's
+// dashboard uses the same bands.
+export const AUC_BANDS = [
+  { min: 0.9, label: "0.9 and up", bg: "#3b4cc0", fg: "#ffffff" },
+  { min: 0.8, label: "0.8 to 0.9", bg: "#1f8a8a", fg: "#ffffff" },
+  { min: 0.7, label: "0.7 to 0.8", bg: "#5cc863", fg: "#10241a" },
+  { min: 0.6, label: "0.6 to 0.7", bg: "#f2d544", fg: "#2a2306" },
+  { min: 0.5, label: "0.5 to 0.6, near chance", bg: "#c9c9c9", fg: "#222222" },
+  { min: -Infinity, label: "below 0.5", bg: "#d6453d", fg: "#ffffff" },
+];
+export const aucBand = (auc: number) => AUC_BANDS.find((b) => auc >= b.min)!;
+
+// The coverage grid's columns and row groups: the models of one modality, and the evalsets of the
+// kinds they read, without the quick subsets (stratified samples of sets shown in full).
+export const gridModels = (mod: Modality) =>
+  D.models
+    .filter((m) => m.modality === mod)
+    .sort((a, b) => nRuns(b) - nRuns(a) || Number(!!b.parity) - Number(!!a.parity) || a.name.localeCompare(b.name));
+export const gridGroups = (mods: Modality[]) =>
+  GROUPS.map(([role, pairing, label]) => ({
+    label,
+    evs: D.evalsets
+      .filter((e) => mods.includes(e.modality) && !e.id.endsWith("_quick") && e.role === role && e.pairing === pairing)
+      .sort((a, b) => Number(a.status !== "ready") - Number(b.status !== "ready") || a.id.localeCompare(b.id)),
+  })).filter((g) => g.evs.length);
+
+// What one grid cell holds: a run, a guard refusal, nothing to run (na), a pair not scored yet,
+// one waiting for data access, or one whose model has no adapter.
+export type CellState = "run" | "guard" | "na" | "empty" | "pending" | "off";
+export function cellState(m: Model, e: Evalset): CellState {
+  const key = `${m.id}|${e.id}`;
+  const state = D.cells[key];
+  if (state === "na" || state === "guard") return state;
+  if (runs.has(key)) return "run";
+  if (!m.adapter) return "off";
+  return e.status === "ready" ? "empty" : "pending";
+}
 
 // One audio window is AASIST's 64,600 samples at 16 kHz, about 4 s.
 export const WINDOW_S = 64600 / 16000;

@@ -1,15 +1,21 @@
 ---
-// Every detector against every evalset: the AUC of each run, or the estimated single-GPU time for
-// a full one, from src/reference/status.json (scripts/build_site.py writes it).
+// Every detector against every evalset, laid out like the round's dashboard: the AUC of each run in
+// bands of 0.1, or the estimated single-GPU time for a full one, from src/reference/status.json
+// (scripts/build_site.py writes it).
 import CoverageGrid from "../components/CoverageGrid.astro";
 import Base from "../layouts/Base.astro";
-import { D } from "../lib/status";
+import { AUC_BANDS, cellState, gridGroups, gridModels, int, type CellState, type Modality } from "../lib/status";
 
-const videoModels = D.models.filter((m) => m.modality === "video" || m.modality === "audio_video");
-const open = D.evalsets.filter((e) => e.modality !== "audio" && e.status === "ready").map((e) => e.id);
-const videoNote = D.runs.some((r) => videoModels.some((m) => m.id === r.model))
-  ? null
-  : `No video model has a full run yet. Open video evalsets: ${open.join(", ") || "none"}; the rest are waiting for access requests to be approved.`;
+// Video first, as on the dashboard; each model only against the kinds of input it reads.
+const SECTIONS: [Modality, Modality[], string][] = [
+  ["video", ["video", "image"], "Video models"],
+  ["audio_video", ["audio_video"], "Audio-visual models"],
+  ["audio", ["audio"], "Audio models"],
+];
+const count: Record<CellState, number> = { run: 0, guard: 0, na: 0, empty: 0, pending: 0, off: 0 };
+for (const [mod, evMods] of SECTIONS)
+  for (const m of gridModels(mod))
+    for (const g of gridGroups(evMods)) for (const e of g.evs) count[cellState(m, e)] += 1;
 ---
 
 <Base
@@ -21,27 +27,49 @@ const videoNote = D.runs.some((r) => videoModels.some((m) => m.id === r.model))
     <header class="mast">
       <div class="kicker">Models and datasets</div>
       <h1>Coverage</h1>
-      <p class="lede">Every detector against every evalset: AUC, or the estimated single-GPU time for a full run.</p>
+      <p class="lede">
+        Every detector against every evalset it can read: a column per model, a row per evalset, AUC in bands of
+        0.1, or the estimated single-GPU time for a full run.
+      </p>
     </header>
     <section id="coverage" class="panel" data-mode="auc">
+      <div class="tally">
+        <div><b>{int(count.run)}</b><span>pairs scored in full</span></div>
+        <div><b>{int(count.empty)}</b><span>not scored yet</span></div>
+        <div><b>{int(count.guard)}</b><span>refused by the guard</span></div>
+        <div><b>{int(count.pending)}</b><span>waiting for data access</span></div>
+        <div><b>{int(count.off)}</b><span>waiting for an adapter</span></div>
+      </div>
       <div class="toggle" role="group" aria-label="Show in cells">
         <button type="button" data-mode="auc" aria-pressed="true">AUC</button>
         <button type="button" data-mode="time" aria-pressed="false">Estimated GPU time</button>
       </div>
       <div class="legend">
-        <span><i class="cell" style="background: var(--good)">0.99</i><i class="cell" style="background: color-mix(in oklab, var(--bad) 80%, var(--paper))">0.10</i>AUC: blue high, sienna below chance</span>
+        {AUC_BANDS.map((b) => <span><i class="cell" style={`background: ${b.bg}`} />AUC {b.label}</span>)}
+      </div>
+      <div class="legend">
         <span><i>*</i>has a caveat (hover)</span>
         <span><i class="guard">⊘</i>refused: trained on this data</span>
-        <span><i>·</i>not run yet</span>
+        <span><i>·</i>not scored yet</span>
         <span><i class="hatch"></i>waiting for data access</span>
+        <span><i class="off"></i>no adapter yet</span>
         <span><i class="na"></i>can't read this kind of input</span>
       </div>
-      <h3>Audio</h3>
-      <div class="scroll"><CoverageGrid models={["audio"]} evalsets={["audio"]} /></div>
-      <h3>Video and audio-visual</h3>
-      <div class="scroll"><CoverageGrid models={["video", "audio_video"]} evalsets={["video", "image", "audio_video"]} /></div>
-      <p class="note">● adapter written / parity passed · ○ not yet. Italic column names are evalsets waiting for data access.</p>
-      {videoNote && <p class="note" style="font-size: 0.9rem">{videoNote}</p>}
+      {
+        SECTIONS.map(([mod, evMods, label]) => (
+          <>
+            <h3>{label}</h3>
+            <div class="scroll">
+              <CoverageGrid models={mod} evalsets={evMods} />
+            </div>
+          </>
+        ))
+      }
+      <p class="note">
+        Under each model: ● adapter written, then ● parity passed against upstream code; ○ not yet. Italic evalsets
+        are waiting for data access. Hover a cell for its numbers. Quick subsets, stratified samples of sets shown in
+        full, are left out.
+      </p>
     </section>
   </div>
 </Base>

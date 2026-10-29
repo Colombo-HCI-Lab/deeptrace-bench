@@ -72,9 +72,20 @@ def run_flags(
     return flags
 
 
+# Evalset fields added after runs were hashed. Left unset they change nothing a run measured, so a
+# run from before the field existed still counts (``subset`` arrived on 2026-10-27).
+_ADDED_EVALSET_FIELDS = ("subset",)
+
+
+def _evalset_hashes(evalset: EvalsetConfig) -> set[str]:
+    data = evalset.model_dump(mode="json")
+    older = {k: v for k, v in data.items() if not (k in _ADDED_EVALSET_FIELDS and v is None)}
+    return {config_hash(data), config_hash(older)}
+
+
 def _is_current(record: dict[str, Any], model: ModelConfig, evalset: EvalsetConfig) -> bool:
     hashes = record["config_hashes"]
-    return hashes["model"] == config_hash(model) and hashes["evalset"] == config_hash(evalset)
+    return hashes["model"] == config_hash(model) and hashes["evalset"] in _evalset_hashes(evalset)
 
 
 def _run_sources() -> dict[str, tuple[dict[str, Any], dict[str, Any], bool]]:

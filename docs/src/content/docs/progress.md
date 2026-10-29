@@ -22,6 +22,7 @@ Commits after `622bff9`.
 - IndicSynth Bengali and Urdu are scored for all ten audio models; the three models without parity split them, XLS-R + SLS best ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).
 - The first cross-corpus wave scored MLAAD Bengali, Hindi and Sinhala and most of BD-GRF6. The guard refused 15 MLAAD pairs for the five models trained on it. These numbers wait on the shortcut probe.
 - The round was paused with 84 audio pairs left: the three models without parity on the six reproduction sets, 11 retries of earlier failures, the rest of BD-GRF6 and all 50 SpeechFake pairs. A rerun of each wave skips what's done and resumes the interrupted pair from its saved parts.
+- [Coverage](https://colombo-hci-lab.github.io/deeptrace-bench/coverage/) is laid out like the round's dashboard: a column per model, a row per evalset, AUC in bands of 0.1. The site had been dropping 28 audio runs scored before the evalset config gained its `subset` field on 2026-10-27; unset, the field changes nothing a run measured, so they count again.
 
 ### 2026-10-29: five more video adapters scored
 

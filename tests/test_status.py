@@ -65,6 +65,21 @@ def test_latest_current_run_wins(registry, tmp_path, monkeypatch):
     assert row["run_id"] == "aasist__urdu_csalt__new"
 
 
+def test_runs_hashed_before_the_subset_field_still_count(registry, tmp_path, monkeypatch):
+    monkeypatch.setenv("DTB_ROOT", str(tmp_path))
+    monkeypatch.delenv("DTB_NAMESPACE", raising=False)
+    monkeypatch.setattr(status, "PUBLISHED_RESULTS_DIR", tmp_path / "published")
+    _store_run(tmp_path, registry, "aasist__urdu_csalt__old", "2026-10-01", auc=0.7)
+    before = registry.evalset("urdu_csalt").model_dump(mode="json")
+    del before["subset"]
+    record = tmp_path / "scores" / "aasist__urdu_csalt__old" / "run.json"
+    data = json.loads(record.read_text())
+    data["config_hashes"]["evalset"] = config_hash(before)
+    record.write_text(json.dumps(data))
+    [row] = scored_runs(registry)
+    assert row["run_id"] == "aasist__urdu_csalt__old"
+
+
 def test_published_runs_count_when_the_store_lacks_them(registry, tmp_path, monkeypatch):
     monkeypatch.setenv("DTB_ROOT", str(tmp_path / "store"))
     monkeypatch.delenv("DTB_NAMESPACE", raising=False)
