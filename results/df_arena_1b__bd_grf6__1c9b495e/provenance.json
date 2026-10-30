@@ -1,0 +1,25 @@
+{
+  "run_id": "df_arena_1b__bd_grf6__1c9b495e",
+  "model_id": "df_arena_1b",
+  "evalset_id": "bd_grf6",
+  "upstream_commit": "fb6ce85de12c2c5a509d89114adaf827dd75f49f",
+  "weights_sha256": {
+    "pytorch_model.bin": "780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988",
+    "xls-r-1b-config/config.json": "36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "510d972e162bde3a90278faf5c04fc3d5624b03c194dc3cdea9ab764a2a0464d",
+    "model": "1d65ae205f6d634480742f387384bcefab8ffa49bbd696db73be01aafcc71f98"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-30T04:47:22+00:00",
+  "last_started_utc": "2026-10-30T04:47:22+00:00",
+  "repo_commits": [
+    "d7e5ea40eb5c93b174bc3550ccdcf6a453449cad"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

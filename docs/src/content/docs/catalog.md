@@ -72,11 +72,11 @@ AASIST3 (Borodin et al., 2024), built for ASVspoof 5, feeds XLSR-53 features int
 | Paper | [AASIST3: KAN-Enhanced AASIST Speech Deepfake Detection using SSL Features and Additional Regularization for the ASVspoof 2024 Challenge](https://arxiv.org/abs/2408.17352), ASVspoof 2024 Workshop · 44 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; trained on ASVspoof 2019 Logical Access (train split); trained on ASVspoof 5; trained on MLAAD; trained on M-AILABS speech corpus |
 | Reported by the authors | ASVspoof 5 eval, open condition: EER 4.89% (paper); ASVspoof 2019 LA eval: EER 9.44% (model card); In-the-Wild: EER 29.72% (model card) |
-| Our runs | `asvspoof2019_la_eval`: AUC 0.968, EER 9.5%; `bangla_voices`: AUC 0.979, EER 7.9%; `banglafake`: AUC 0.790, EER 27.1%; `in_the_wild`: AUC 0.766, EER 30.8%; `indicsynth_bn`: AUC 0.785, EER 29.3%; `indicsynth_ur`: AUC 0.781, EER 29.5%; `indictts_challenge`: AUC 0.303, EER 67.3%; `mavos_dd_hi_audio`: AUC 0.907, EER 18.2%; `urdu_csalt`: AUC 0.806, EER 28.8% |
+| Our runs | `asvspoof2019_la_eval`: AUC 0.968, EER 9.5%; `bangla_voices`: AUC 0.979, EER 7.9%; `banglafake`: AUC 0.790, EER 27.1%; `bd_grf6`: AUC 0.952, EER 12.1%; `in_the_wild`: AUC 0.766, EER 30.8%; `indicsynth_bn`: AUC 0.785, EER 29.3%; `indicsynth_ur`: AUC 0.781, EER 29.5%; `indictts_challenge`: AUC 0.303, EER 67.3%; `mavos_dd_hi_audio`: AUC 0.907, EER 18.2%; `urdu_csalt`: AUC 0.806, EER 28.8% |
 | Size | 322 M parameters |
 | Cost | 154.1 GFLOPs and 32.5 ms per window on a 24 GB GPU (fp32) |
 | Licence | CC BY-NC-ND 4.0 (repo LICENSE; the model card says CC BY-NC 4.0) |
-| Status here | adapter written, scored on 9 evalsets |
+| Status here | adapter written, scored on 10 evalsets |
 
 <a id="model-antideepfake_mms_300m"></a>
 
@@ -138,11 +138,11 @@ Released by the team behind the Speech DF Arena leaderboard (Speech-Arena-2025).
 | Paper | [Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models](https://arxiv.org/abs/2509.02859), Speech DF Arena 2025 · 36 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; pretrained on VoxPopuli; pretrained on VoxLingua107; trained on ASVspoof 2019 Logical Access; trained on ASVspoof 5; trained on MLAAD; trained on Codecfake; trained on LibriSeVoc; trained on DFADD; trained on CtrSVDD; trained on SpoofCeleb; trained on EnvSDD |
 | Reported by the authors | In-the-Wild: EER 0.91% (model card); ASVspoof 2019 LA: EER 1.14% (model card); ASVspoof 2021 DF eval: EER 1.75% (model card) |
-| Our runs | `bangla_voices`: AUC 0.993, EER 4.3%; `banglafake`: AUC 0.999, EER 0.7%; `in_the_wild`: AUC 0.999, EER 0.7%; `indicsynth_bn`: AUC 1.000, EER 0.6%; `indicsynth_hi`: AUC 0.999, EER 1.7%; `indicsynth_ur`: AUC 1.000, EER 0.5%; `indictts_challenge`: AUC 0.988, EER 5.1%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.995, EER 4.0% |
+| Our runs | `bangla_voices`: AUC 0.993, EER 4.3%; `banglafake`: AUC 0.999, EER 0.7%; `bd_grf6`: AUC 0.547, EER 46.3%; `in_the_wild`: AUC 0.999, EER 0.7%; `indicsynth_bn`: AUC 1.000, EER 0.6%; `indicsynth_hi`: AUC 0.999, EER 1.7%; `indicsynth_ur`: AUC 1.000, EER 0.5%; `indictts_challenge`: AUC 0.988, EER 5.1%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.995, EER 4.0% |
 | Size | 1.15 B parameters |
 | Cost | 484.8 GFLOPs and 49.2 ms per window on a 24 GB GPU (fp32) |
 | Licence | non-commercial (custom LICENSE.txt in the model repo) |
-| Status here | adapter written, parity checked, scored on 9 evalsets |
+| Status here | adapter written, parity checked, scored on 10 evalsets |
 
 <a id="model-df_arena_500m"></a>
 
@@ -160,11 +160,11 @@ Same design and training data as DF Arena 1B (Speech-Arena-2025) with the smalle
 | Paper | [Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models](https://arxiv.org/abs/2509.02859), Speech DF Arena 2025 · 36 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; pretrained on VoxPopuli; pretrained on VoxLingua107; trained on ASVspoof 2019 Logical Access; trained on ASVspoof 5; trained on MLAAD; trained on Codecfake; trained on LibriSeVoc; trained on DFADD; trained on CtrSVDD; trained on SpoofCeleb; trained on EnvSDD |
 | Reported by the authors | In-the-Wild: EER 1.76% (model card); ASVspoof 2019 LA: EER 1.09% (model card); ASVspoof 2021 DF eval: EER 3.30% (model card) |
-| Our runs | `bangla_voices`: AUC 0.998, EER 2.1%; `banglafake`: AUC 0.997, EER 2.2%; `in_the_wild`: AUC 0.999, EER 1.5%; `indicsynth_bn`: AUC 0.995, EER 3.1%; `indicsynth_hi`: AUC 0.997, EER 2.6%; `indicsynth_ur`: AUC 0.999, EER 1.6%; `indictts_challenge`: AUC 0.978, EER 6.9%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.981, EER 7.8% |
+| Our runs | `bangla_voices`: AUC 0.998, EER 2.1%; `banglafake`: AUC 0.997, EER 2.2%; `bd_grf6`: AUC 0.537, EER 46.8%; `in_the_wild`: AUC 0.999, EER 1.5%; `indicsynth_bn`: AUC 0.995, EER 3.1%; `indicsynth_hi`: AUC 0.997, EER 2.6%; `indicsynth_ur`: AUC 0.999, EER 1.6%; `indictts_challenge`: AUC 0.978, EER 6.9%; `mavos_dd_hi_audio`: AUC 1.000, EER 0.1%; `urdu_csalt`: AUC 0.981, EER 7.8% |
 | Size | 436 M parameters |
 | Cost | 193.8 GFLOPs and 22.7 ms per window on a 24 GB GPU (fp32) |
 | Licence | non-commercial (custom LICENSE.txt in the model repo) |
-| Status here | adapter written, parity checked, scored on 9 evalsets |
+| Status here | adapter written, parity checked, scored on 10 evalsets |
 
 <a id="model-xlsr_aasist"></a>
 
@@ -204,11 +204,11 @@ XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with l
 | Paper | [Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier](https://doi.org/10.1145/3664647.3681345), ACM MM 2024 · 136 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; pretrained on VoxPopuli; pretrained on VoxLingua107; trained on ASVspoof 2019 Logical Access (train split) |
 | Reported by the authors | ASVspoof 2021 DF eval: EER 1.92% (repo README); ASVspoof 2021 LA eval: EER 2.87% (repo README); In-the-Wild: EER 7.46% (repo README) |
-| Our runs | `asvspoof2019_la_eval`: AUC 1.000, EER 0.2%; `bangla_voices`: AUC 0.670, EER 37.9%; `banglafake`: AUC 0.806, EER 27.4%; `in_the_wild`: AUC 0.981, EER 6.7%; `indicsynth_bn`: AUC 0.803, EER 27.1%; `indicsynth_ur`: AUC 0.942, EER 13.2%; `indictts_challenge`: AUC 0.900, EER 16.2%; `mavos_dd_hi_audio`: AUC 0.994, EER 3.1%; `mlaad_bn`: AUC 0.791, EER 25.3%; `mlaad_hi`: AUC 0.875, EER 18.1%; `mlaad_si`: AUC 0.997, EER 3.2%; `urdu_csalt`: AUC 0.855, EER 23.3% |
+| Our runs | `asvspoof2019_la_eval`: AUC 1.000, EER 0.2%; `bangla_voices`: AUC 0.670, EER 37.9%; `banglafake`: AUC 0.806, EER 27.4%; `bd_grf6`: AUC 0.555, EER 45.8%; `in_the_wild`: AUC 0.981, EER 6.7%; `indicsynth_bn`: AUC 0.803, EER 27.1%; `indicsynth_ur`: AUC 0.942, EER 13.2%; `indictts_challenge`: AUC 0.900, EER 16.2%; `mavos_dd_hi_audio`: AUC 0.994, EER 3.1%; `mlaad_bn`: AUC 0.791, EER 25.3%; `mlaad_hi`: AUC 0.875, EER 18.1%; `mlaad_si`: AUC 0.997, EER 3.2%; `urdu_csalt`: AUC 0.855, EER 23.3% |
 | Size | 339 M parameters |
 | Cost | 297.6 GFLOPs and 30.0 ms per window on a 24 GB GPU (fp32) |
 | Licence | none declared (code and weights); a Hugging Face mirror re-hosts the weights as MIT |
-| Status here | adapter written, scored on 12 evalsets |
+| Status here | adapter written, scored on 13 evalsets |
 
 <a id="model-xlsr_mamba"></a>
 
@@ -226,11 +226,11 @@ XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention back end with fo
 | Paper | [XLSR-Mamba: A Dual-Column Bidirectional State Space Model for Spoofing Attack Detection](https://arxiv.org/abs/2411.10027), IEEE SPL 2024 · 77 citations |
 | Training | pretrained on Mozilla Common Voice; pretrained on IARPA BABEL; pretrained on Multilingual LibriSpeech; pretrained on VoxPopuli; pretrained on VoxLingua107; trained on ASVspoof 2019 Logical Access (train split) |
 | Reported by the authors | ASVspoof 2021 LA eval: EER 0.93% (paper); ASVspoof 2021 DF eval: EER 1.88% (paper); In-the-Wild: EER 6.71% (paper) |
-| Our runs | `asvspoof2019_la_eval`: AUC 1.000, EER 0.8%; `bangla_voices`: AUC 0.184, EER 78.3%; `banglafake`: AUC 0.574, EER 46.9%; `in_the_wild`: AUC 0.981, EER 6.3%; `indicsynth_bn`: AUC 0.654, EER 42.8%; `indicsynth_ur`: AUC 0.790, EER 29.8%; `indictts_challenge`: AUC 0.661, EER 42.9%; `mavos_dd_hi_audio`: AUC 0.976, EER 6.3%; `mlaad_bn`: AUC 0.521, EER 47.8%; `mlaad_hi`: AUC 0.812, EER 28.0%; `mlaad_si`: AUC 0.944, EER 11.7%; `urdu_csalt`: AUC 0.691, EER 40.7% |
+| Our runs | `asvspoof2019_la_eval`: AUC 1.000, EER 0.8%; `bangla_voices`: AUC 0.184, EER 78.3%; `banglafake`: AUC 0.574, EER 46.9%; `bd_grf6`: AUC 0.526, EER 49.0%; `in_the_wild`: AUC 0.981, EER 6.3%; `indicsynth_bn`: AUC 0.654, EER 42.8%; `indicsynth_ur`: AUC 0.790, EER 29.8%; `indictts_challenge`: AUC 0.661, EER 42.9%; `mavos_dd_hi_audio`: AUC 0.976, EER 6.3%; `mlaad_bn`: AUC 0.521, EER 47.8%; `mlaad_hi`: AUC 0.812, EER 28.0%; `mlaad_si`: AUC 0.944, EER 11.7%; `urdu_csalt`: AUC 0.691, EER 40.7% |
 | Size | 317 M parameters |
 | Cost | 298.3 GFLOPs and 45.6 ms per window on a 24 GB GPU (fp32) |
 | Licence | MIT |
-| Status here | adapter written, scored on 12 evalsets |
+| Status here | adapter written, scored on 13 evalsets |
 
 ### Video (23)
 

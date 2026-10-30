@@ -67,7 +67,7 @@ uv run scripts/setup_datasets.py indicsynth --languages hi bn ur
 | --- | --- |
 | MLAAD, MAVOS-DD, Svarah | accept the terms at <https://huggingface.co/datasets/mueller91/MLAAD>, <https://huggingface.co/datasets/unibuc-cs/MAVOS-DD> and <https://huggingface.co/datasets/ai4bharat/Svarah>, put `HF_TOKEN` in `.env`, then run `setup_datasets.py mlaad` (or `mavos_dd_hi`). Svarah's builder is a stub until its schema can be read |
 | ASVspoof 2019 LA | DataShare is slow (about 0.3 MB/s on 2026-10-05). Fetch with a resumable `curl -C -` into `datasets/asvspoof2019_la/LA.zip`; the setup script then checks and extracts it |
-| SpeechFake | only samples are practical; a full copy is the whole 143 GB |
+| SpeechFake | the multilingual fakes are one 116 GB zip split in three parts. A full fetch downloads them, keeps only the South Asian 8 GB and deletes the parts, then adds Common Voice's 21 GB zip, so it needs about 125 GB free at its peak. `--sample N` reads single clips by range requests instead |
 | IndicSUPERB | can only be sampled from a full copy |
 
 To try a dataset before downloading it, `--sample N` fetches N real and N fake items into the smoke namespace ([Adding a dataset](adding_a_dataset.md#3-sample-it-then-build-the-manifest)).
