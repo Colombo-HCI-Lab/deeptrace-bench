@@ -164,3 +164,53 @@ def test_a_snapshot_copies_matching_files_and_pins_each(tmp_path, lock, monkeypa
     assert sorted(p.name for p in path.iterdir()) == ["config.json", "model.safetensors"]
     assert set(fetch.read_lock()["m"]) == {"clip/config.json", "clip/model.safetensors"}
     assert fetch.is_pinned("m", spec)
+
+
+def test_a_split_archive_keeps_what_the_builder_labels_and_drops_its_parts(
+    tmp_path, registry, monkeypatch
+):
+    import shutil
+    import subprocess
+
+    import numpy as np
+
+    if shutil.which("zip") is None:
+        pytest.skip("Info-ZIP's zip makes the split archive")
+    rng = np.random.default_rng(0)
+    src = tmp_path / "src"
+    members = {}
+    for rel in ["MD/EdgeTTS/hi/v/0.wav", "MD/EdgeTTS/hi/v/1.wav", "MD/EdgeTTS/en/v/2.wav"]:
+        data = rng.integers(0, 256, 40_000, dtype=np.uint8).tobytes()
+        (src / rel).parent.mkdir(parents=True, exist_ok=True)
+        (src / rel).write_bytes(data)
+        members[rel] = data
+    subprocess.run(
+        ["zip", "-q", "-s", "64k", "-r", str(tmp_path / "MD.zip"), "MD"], cwd=src, check=True
+    )
+    parts = sorted(tmp_path.glob("MD.z0*")) + [tmp_path / "MD.zip"]
+    payloads = {p.name: p.read_bytes() for p in parts}
+    payloads["CommonVoice.zip"] = _zip_bytes({"CommonVoice/hi/test/r.wav": b"real"})
+    urls = {name: f"https://example.org/{name}" for name in payloads}
+    config = registry.dataset("speechfake")
+    config = config.model_copy(
+        update={"access": config.access.model_copy(update={"urls": urls, "sha256": {}})}
+    )
+    fetched = []
+
+    def fake_download(url, dest):
+        fetched.append(dest.name)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(payloads[dest.name])
+        return dest
+
+    monkeypatch.setattr(fetch, "download_url", fake_download)
+    dest = tmp_path / "speechfake"
+    fetch.fetch_dataset(config, dest)
+    for rel in ["MD/EdgeTTS/hi/v/0.wav", "MD/EdgeTTS/hi/v/1.wav"]:
+        assert (dest / rel).read_bytes() == members[rel]
+    assert not (dest / "MD/EdgeTTS/en").exists()
+    assert (dest / "CommonVoice/hi/test/r.wav").read_bytes() == b"real"
+    assert not any((dest / p.name).exists() for p in parts)
+    fetched.clear()
+    fetch.fetch_dataset(config, dest)  # extracted: the parts aren't fetched again
+    assert fetched == []

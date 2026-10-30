@@ -17,8 +17,10 @@ from __future__ import annotations
 
 import fnmatch
 import hashlib
+import importlib
 import logging
 import os
+import re
 import shutil
 import tarfile
 import zipfile
@@ -309,7 +311,13 @@ def fetch_dataset(config: DatasetConfig, dest: Path, languages: list[str] | None
             return _fetch_hf_dataset(config, dest, languages)
         case "url":
             assert access.urls is not None
+            split = split_parts(list(access.urls))
             for name, url in access.urls.items():
+                if any(name in parts for parts in split.values()):
+                    continue
+                if split.get(name):
+                    _fetch_split(config, [*split[name], name], dest)
+                    continue
                 archive = ensure_inside(dest, dest / name)
                 if not archive.exists():
                     download_url(url, archive)
@@ -389,6 +397,63 @@ def _check_archive(config: DatasetConfig, name: str, archive: Path) -> None:
         )
     elif digest != expected:
         raise ChecksumMismatchError(f"{config.id}/{name}: sha256 {digest} != expected {expected}")
+
+
+def split_parts(names: list[str]) -> dict[str, list[str]]:
+    """For each ``<stem>.zip`` in ``names``, its split parts (``<stem>.z01``, ...) in order."""
+    return {
+        name: sorted(
+            (n for n in names if re.fullmatch(re.escape(name[:-4]) + r"\.z\d\d", n, re.I)),
+            key=str.lower,
+        )
+        for name in names
+        if name.lower().endswith(".zip")
+    }
+
+
+def _fetch_split(config: DatasetConfig, names: list[str], dest: Path) -> None:
+    """Download a split zip (``names`` in order, the ``.zip`` last) and extract it.
+
+    ``zipfile`` can't read multi-part archives, so ``SplitZip`` does. Only members the builder
+    can label are written: a split set can be far larger than the part a builder reads
+    (SpeechFake's 123 GB multilingual archive holds 8 GB of South Asian clips). The parts are
+    deleted once the marker is written, since nothing else reads them.
+    """
+    from .remote_zip import SplitZip
+
+    marker = dest / f".extracted-{names[-1]}"
+    if marker.exists():
+        return
+    assert config.access.urls is not None
+    paths = []
+    for name in names:
+        archive = ensure_inside(dest, dest / name)
+        if not archive.exists():
+            download_url(config.access.urls[name], archive)
+        _check_archive(config, name, archive)
+        paths.append(archive)
+    label_of = None
+    if config.builder is not None:
+        module = importlib.import_module(config.builder.partition(":")[0])
+        label_of = getattr(module, "label_from_path", None)
+    keep = (lambda n: label_of(n) is not None) if label_of else None
+    log.info("extracting split archive %s (%d parts)", names[-1], len(names))
+    handles = [p.open("rb") for p in paths]
+    try:
+        zf = SplitZip(handles, keep=keep)
+        for member in zf.namelist():
+            target = ensure_inside(dest, dest / member)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            part = target.with_name(target.name + ".part")
+            part.write_bytes(zf.read(member))
+            part.replace(target)
+    finally:
+        for handle in handles:
+            handle.close()
+    log.info("extracted %d members of %s", len(zf.namelist()), names[-1])
+    marker.touch()
+    for path in paths:
+        path.unlink()
 
 
 def _extract(archive: Path, dest: Path) -> None:

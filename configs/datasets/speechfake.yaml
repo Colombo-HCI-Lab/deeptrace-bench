@@ -7,16 +7,21 @@ access:
   kind: url
   page: https://www.modelscope.cn/datasets/inclusionAI/SPEECHFAKE
   urls:
-    # the multilingual part, one split zip; read as one archive by range requests
+    # the multilingual part, one split zip; sampled by range requests, and a full fetch keeps
+    # only the South Asian members (fetch._fetch_split)
     MD.z01: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=MD/MD.z01"
     MD.z02: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=MD/MD.z02"
     MD.zip: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=MD/MD.zip"
     # the real speech, of which Common Voice has Hindi
     CommonVoice.zip: "https://www.modelscope.cn/api/v1/datasets/inclusionAI/SPEECHFAKE/repo?Revision=master&FilePath=Real/CommonVoice.zip"
+  sha256:  # the parts, from the first full download (SPARK, 2026-10-30)
+    MD.z01: fba6c53ebc728b5f6ed6cf1da759e734c84e47e973e6612d6afb3ad1dc2b628c
+    MD.z02: 8144ce0d430312b97f36c3500fbeb587c6ab00bdbc3918ca7d01d956857d159d
+    MD.zip: 319d70b27c50d09416d7ab3791e83573792ad41aefe22b7d4a6baa2ab4494e50
 licence: CC BY 4.0 (README; ModelScope metadata says Apache-2.0)
 contains: [real, fake]
 languages: [hi, bn, ta, mr, ml]
 size_gb: 143
 derived_from: [commonvoice, libritts]
 builder: deeptrace_bench.datasets.speechfake:build_manifest
-notes: SpeechFake (ACL 2025, ModelScope; checked 2026-10-05) in its South Asian languages - Hindi as Edge-TTS (15,382 clips) and SeedVC voice conversion (14,633, LibriTTS speech converted to Common Voice Hindi voices), Bengali, Tamil and Marathi as Edge-TTS (20,000 each), Malayalam (3,726), and 4,630 real Common Voice Hindi clips from its own real part; no Urdu, Nepali or Sinhala. The multilingual part is one 123 GB split zip, sampled by range reads of its 179 MB central directory and single members, so only samples are practical; a full copy means the whole 143 GB.
+notes: SpeechFake (ACL 2025, ModelScope; checked 2026-10-05) in its South Asian languages - Hindi as Edge-TTS (15,382 clips) and SeedVC voice conversion (14,633, LibriTTS speech converted to Common Voice Hindi voices), Bengali, Tamil and Marathi as Edge-TTS (20,000 each), Malayalam (3,726), and 4,630 real Common Voice Hindi clips from its own real part; no Urdu, Nepali or Sinhala. The multilingual part is one 123 GB split zip, sampled by range reads of its 179 MB central directory and single members, so samples need only range reads; a full fetch downloads the 116 GB of parts, extracts the South Asian 8 GB (93,741 clips) and deletes the parts, then adds Common Voice's 21 GB zip.

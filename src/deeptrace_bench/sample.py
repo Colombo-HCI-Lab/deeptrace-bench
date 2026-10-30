@@ -36,14 +36,13 @@ import hashlib
 import importlib
 import json
 import logging
-import re
 import shutil
 from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .fetch import ManualStepRequiredError, ensure_inside, gated_error, hf_patterns
+from .fetch import ManualStepRequiredError, ensure_inside, gated_error, hf_patterns, split_parts
 from .registry import DatasetConfig
 
 log = logging.getLogger(__name__)
@@ -372,13 +371,7 @@ class _ZipSource(_Source):
         urls = config.access.urls or {}
         self.urls = {name: url for name, url in urls.items() if name.lower().endswith(".zip")}
         # a split archive: <stem>.z01, <stem>.z02, ... next to <stem>.zip, read as one
-        self.split_parts = {
-            name: sorted(
-                (n for n in urls if re.fullmatch(re.escape(name[:-4]) + r"\.z\d\d", n, re.I)),
-                key=str.lower,
-            )
-            for name in self.urls
-        }
+        self.split_parts = split_parts(list(urls))
         parts = {n for group in self.split_parts.values() for n in group}
         self.plain = {n: u for n, u in urls.items() if n not in self.urls and n not in parts}
         self.all_urls = dict(urls)
