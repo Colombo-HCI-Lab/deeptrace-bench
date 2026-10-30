@@ -1,0 +1,24 @@
+{
+  "run_id": "antideepfake_mms_300m__in_the_wild__d482f767",
+  "model_id": "antideepfake_mms_300m",
+  "evalset_id": "in_the_wild",
+  "upstream_commit": "0dea622bde8f064c8ee5a557f2598643123fc6b6",
+  "weights_sha256": {
+    "mms-300m-anti-deepfake.safetensors": "9bd5d9785bf72f91dfca8508651354946c4b307921cb358505e1b94035102224"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "e1aedbab0a458b5c26d87934173e6bae3c1ce2b20a7683c797216d34e8b19322",
+    "model": "73b9dff3a5b5c22d6218c9d0f25126251c86eb0da184d96046f07508422a66d9"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-29T20:07:47+00:00",
+  "last_started_utc": "2026-10-29T20:07:47+00:00",
+  "repo_commits": [
+    "d7e5ea40eb5c93b174bc3550ccdcf6a453449cad"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "run_id": "df_arena_500m__indictts_challenge__a72e51a9",
+  "model_id": "df_arena_500m",
+  "evalset_id": "indictts_challenge",
+  "upstream_commit": "8258fa8e74ff9b8ad20d4c939c1a7f694a6e4080",
+  "weights_sha256": {
+    "pytorch_model.bin": "ebd7662047f3b33a6a0fcb9d205bbdcea07220bf42853ae57c6cf4d8e40f66a2",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "6a1a1962be107b59f230534a09320aaf735a0f18e1f53b37c1110cd1fce65df1",
+    "model": "a616c81a80b5bd60c07660ad6785e97809622acda044751f2c949afcdae8c590"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-29T08:22:13+00:00",
+  "last_started_utc": "2026-10-29T08:22:13+00:00",
+  "repo_commits": [
+    "d7e5ea40eb5c93b174bc3550ccdcf6a453449cad"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

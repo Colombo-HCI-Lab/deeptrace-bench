@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_sls__in_the_wild__056c6466",
+  "model_id": "xlsr_sls",
+  "evalset_id": "in_the_wild",
+  "upstream_commit": "89a09ac4404c5687d96d6c123fcf6db20e4e4b38",
+  "weights_sha256": {
+    "MMpaper_model.pth": "0d315184aa8e6f017ea72c4d2458c11bae8f07fd743fe860a3aa932e36135fa6",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "e1aedbab0a458b5c26d87934173e6bae3c1ce2b20a7683c797216d34e8b19322",
+    "model": "e99588695a16e06df4b1beaa0cc97e2c2ba2513534852cb58b8120e4a2a2b287"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-29T22:44:10+00:00",
+  "last_started_utc": "2026-10-29T22:44:10+00:00",
+  "repo_commits": [
+    "d7e5ea40eb5c93b174bc3550ccdcf6a453449cad"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
