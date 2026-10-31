@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_aasist__speechfake_mr__98792721",
+  "model_id": "xlsr_aasist",
+  "evalset_id": "speechfake_mr",
+  "upstream_commit": "4acaa61dcef5f7610f43aa4d0b29c4559b970cd2",
+  "weights_sha256": {
+    "LA_model.pth": "bd6f36097259fe54e7004eb983651e5304d807be81156dbd04faccb70d91e10c",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "c51bd08580b87c3600fdc36ca7a5e54030dce91df4cf8918da920a5d280469e8",
+    "model": "59e0ce6c4ff92a23a74cb19c2b9543afd973c55d34ca6b7a414ffde9e99df3c4"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-31T01:30:20+00:00",
+  "last_started_utc": "2026-10-31T01:30:20+00:00",
+  "repo_commits": [
+    "67b141d345b359c05a6fd0c03fcb1dc0ffc21aab"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

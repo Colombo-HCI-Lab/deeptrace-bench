@@ -1,0 +1,88 @@
+{
+  "run_id": "aasist_l__speechfake_hi__13df5bab",
+  "model": "aasist_l",
+  "evalset": "speechfake_hi",
+  "role": "south_asian",
+  "namespace": null,
+  "pairing": "cross_corpus",
+  "verdict": "clean",
+  "verdict_reasons": [],
+  "score_direction_ok": false,
+  "eval_config_status": "proposed",
+  "parity_passed": true,
+  "overall": {
+    "n": 34645,
+    "n_real": 4630,
+    "n_fake": 30015,
+    "n_failed": 8,
+    "auc": 0.28207091416365443,
+    "eer": 0.66945481205012,
+    "threshold": 0.9381666481494904,
+    "auc_lo": 0.27537106310787773,
+    "auc_hi": 0.28875480274461557,
+    "eer_lo": 0.6634244812746414,
+    "eer_hi": 0.6759872367368702,
+    "fpr": 0.6694750486066104,
+    "fnr": 0.6694548120501199,
+    "acc": 0.3305424834714323,
+    "bal_acc": 0.3305350696716348,
+    "ap": 0.8006996331373328,
+    "tpr_at_fpr01": 0.0,
+    "tpr_at_fpr05": 0.0
+  },
+  "unscored_items": 0,
+  "failures": {
+    "too_short": 8
+  },
+  "compute": {
+    "measured": true,
+    "sessions": 1,
+    "sessions_completed": 1,
+    "wall_s": 342.0,
+    "phases_s": {
+      "build_loader": 0.024,
+      "load_model": 0.269,
+      "score": 341.68
+    },
+    "items_timed": 34645,
+    "items_per_s": 101.396,
+    "load_ms": {
+      "mean": 0.41,
+      "p50": 0.4,
+      "p95": 0.56
+    },
+    "infer_ms": {
+      "mean": 9.38,
+      "p50": 10.26,
+      "p95": 13.04
+    },
+    "windows": 54996,
+    "window_unit": "4.04 s audio window",
+    "windows_per_s": 169.25,
+    "realtime_factor": 649.87,
+    "cuda_max_allocated_gb": 0.777,
+    "cuda_max_reserved_gb": 1.424,
+    "gpu_mem_used_max_gb": 2.245,
+    "peak_rss_gb": 1.405,
+    "gpu_util_mean": 92.9,
+    "power_mean_w": 220.0,
+    "temp_max_c": 87.0,
+    "energy_wh": 20.965,
+    "energy_wh_per_1k_items": 0.605,
+    "env": {
+      "device": "cuda",
+      "python": "3.12.3",
+      "torch": "2.8.0+cu128",
+      "cuda_runtime": "12.8",
+      "cudnn": 91002,
+      "arch": "x86_64",
+      "cpu": "AMD Ryzen 9 3900X 12-Core Processor",
+      "cpu_count": 24,
+      "ram_gb": 135.1,
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_gb": 25.3,
+      "driver": "575.57.08",
+      "compute_capability": "8.6"
+    }
+  }
+}

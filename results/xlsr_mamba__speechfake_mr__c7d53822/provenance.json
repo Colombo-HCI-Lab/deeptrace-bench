@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_mamba__speechfake_mr__c7d53822",
+  "model_id": "xlsr_mamba",
+  "evalset_id": "speechfake_mr",
+  "upstream_commit": "10ec73810d24091028a2aa5454c8dfd1a239e441",
+  "weights_sha256": {
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac",
+    "xlsr_mamba_la.safetensors": "bb8a1af0b3f9ee28dbcfc7c82d733f7cc5fdc77ff3e96b25db7b4ed72f2d1663"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "c51bd08580b87c3600fdc36ca7a5e54030dce91df4cf8918da920a5d280469e8",
+    "model": "fbac2e7d90315803c31ae41be14af6bfb7b6b5fe1541b21df5ea5e7982433ddd"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-31T03:21:17+00:00",
+  "last_started_utc": "2026-10-31T03:21:17+00:00",
+  "repo_commits": [
+    "67b141d345b359c05a6fd0c03fcb1dc0ffc21aab"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

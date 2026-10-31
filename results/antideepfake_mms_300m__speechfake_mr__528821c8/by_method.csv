@@ -1,0 +1,3 @@
+group,n,n_real,n_fake,n_failed,auc,eer,threshold,auc_lo,auc_hi,eer_lo,eer_hi,fpr,fnr,acc,bal_acc,ap,tpr_at_fpr01,tpr_at_fpr05,small
+<null>,4349,4349,0,0,,,0.002532780956244096,,,,,0.032421246263508854,,0.9675787537364912,0.9675787537364912,,,,True
+EdgeTTS,20000,0,20000,0,,,0.002532780956244096,,,,,,0.03235,0.96765,0.96765,,,,True

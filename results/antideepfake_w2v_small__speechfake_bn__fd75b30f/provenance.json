@@ -1,0 +1,24 @@
+{
+  "run_id": "antideepfake_w2v_small__speechfake_bn__fd75b30f",
+  "model_id": "antideepfake_w2v_small",
+  "evalset_id": "speechfake_bn",
+  "upstream_commit": "0dea622bde8f064c8ee5a557f2598643123fc6b6",
+  "weights_sha256": {
+    "wav2vec-small-anti-deepfake.safetensors": "828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "7784bd9139a939f3ef8944161627405ef27c8d98b5c9fb07518c44b6d87c3e1a",
+    "model": "946884cb602854fef4529c668f841a169c24ab7941719043c0ea787cdc9742c0"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-30T20:23:31+00:00",
+  "last_started_utc": "2026-10-30T20:23:31+00:00",
+  "repo_commits": [
+    "67b141d345b359c05a6fd0c03fcb1dc0ffc21aab"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

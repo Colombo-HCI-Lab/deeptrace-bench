@@ -184,7 +184,7 @@ gh run view <run id> --log -R UNIL-DESI/deeptrace-experiments > run.log
 | Passes in seconds, `reports/` unchanged | nothing changed, so DVC skipped the stage; change the setting you meant to |
 | You pushed the tag and no run starts | you tagged one of the bot's commits (they carry `[skip ci]`); make a commit of your own and tag that |
 | Queued for hours | the worker is running someone else's job (up to 24 hours); wait, or `gh run cancel <run id> -R UNIL-DESI/deeptrace-experiments` |
-| `CUDA driver initialization failed`, though Cluster-CI's GPU check passed | a one-off GPU glitch (once, on 2026-10-19; the identical retry passed and matched exactly). Fix the next row, then run again |
+| `CUDA driver initialization failed`, though Cluster-CI's GPU check passed | the job's first process can lose the GPU (2026-10-19, and twice on 2026-10-30 and 31); the next one gets it. The `matrix` stage retries once a score that dies within a minute; for a single `score`, fix the next row and run again |
 | "Workspace Sanitizer" aborts over `dvc.lock` hashes | the bot committed a failed run's reports without the lock. `scripts/exp.py fix-reports` puts back the versions the lock expects; then `scripts/exp.py go` again |
 | `dvc-viewer: command not found` before any stage | the worker's job volume lost a launcher (a Cluster-CI bug); ask Oshan |
 | "The NVIDIA driver on your system is too old" | keep `DOCKER_IMAGE_AMD64=nvcr.io/nvidia/pytorch:25.06-py3`; it's the only image that fits `isipol09`'s driver |

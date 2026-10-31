@@ -9,11 +9,19 @@ As of 2026-10-30:
 
 - **Models.** 30 detectors have adapters and weights (FTCN, GenConViT, RealForensics, the DFDC winner and AVH-Align joined on 2026-10-28, and Effort's weights arrived). 22 pass parity against upstream code ([models.md](models.md#parity)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and 40 same-corpus and 20 cross-corpus audio pairs before it was paused on 2026-10-29. SPARK scored 31 more on 2026-10-30, so every audio model now has its reproductions, all but IndicSynth Hindi of the South Asian sets and all of BD-GRF6; the last 53 pairs (all 50 of SpeechFake, and IndicSynth Hindi for the three models without parity) are still to come ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
+- **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and 40 same-corpus and 20 cross-corpus audio pairs before it was paused on 2026-10-29. SPARK scored 81 more on 2026-10-30 and 31, so every audio model now has its reproductions, all of BD-GRF6 and SpeechFake and all but IndicSynth Hindi of the South Asian sets; the last three pairs (IndicSynth Hindi for the models without parity) are scoring there ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-10-31: SpeechFake done
+
+Commits after `ea65acb` here, and `52303c4` to `f39e6c8` in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments).
+
+- `s3_speechfake` scored 49 of its 50 pairs in 20 hours, about 1.1 million clips and 4.6 kWh; the split-zip fetch held and deleted its parts. The post-trained models score 0.978 or more on all five languages and the other six run from 0.148 to 0.986 ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). It is cross-corpus, so none of this counts until the shortcut probe.
+- AASIST on Bengali lost the GPU at load in `s3_speechfake` and again in a wave of its own, both times as the first process of its job (`CUDA driver initialization failed`), and passed on the next try. The wave stage now retries once a score that dies within a minute.
+- `s4_indicsynth_hi`, the last three pairs, started the same day with SpeechFake's data cleared off the disk.
 
 ### 2026-10-30: BD-GRF6 done, SpeechFake unblocked
 
@@ -130,7 +138,7 @@ Commits `15a2e2c` and `d3a6d03`.
 In order:
 
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
-2. **The rest of the round on SPARK**: `s3_speechfake` (SpeechFake's 50 pairs), running since the evening of 2026-10-30, then the three IndicSynth Hindi pairs in a wave of their own once SpeechFake's data is cleared ([deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments)). Import each wave when it lands.
+2. **The rest of the round on SPARK**: `s4_indicsynth_hi`, the three IndicSynth Hindi pairs, running since 2026-10-31 ([deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments)). Import it when it lands.
 3. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 4. **A generator-level contamination check** of DF Arena and AntiDeepfake, then generators they haven't seen. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean, and their near-ceiling scores on the open South Asian sets (0.978 and up for MMS-300M and both DF Arena models) may be familiarity rather than transfer.
 5. **A language control for the video drop**: the same video models on a non-South-Asian set made with MAVOS-DD's generators (its other-language subsets, if they share Hindi's), to tell "Hindi" apart from "talking head" ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).

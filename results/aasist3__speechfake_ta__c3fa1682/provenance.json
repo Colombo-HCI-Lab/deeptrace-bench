@@ -1,0 +1,26 @@
+{
+  "run_id": "aasist3__speechfake_ta__c3fa1682",
+  "model_id": "aasist3",
+  "evalset_id": "speechfake_ta",
+  "upstream_commit": "33c39c24525c871225ad3abe3c8ec3b0e1ce86de",
+  "weights_sha256": {
+    "aasist3.safetensors": "a06d43d8d4a7e11b62fb4fa833f13a598fee23be7c368c416df4bec2e44e664f",
+    "aasist3_config.json": "0bd97c713c1d4b1f2a9be60cc0eb7183f49789f8af95fa8319b3113e6392ba81",
+    "xlsr-53-config/config.json": "48576e4a1b0f02c7770f57e236747169459db9a8b9a529bbd7a58bbbf52c45b5"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "83ee85e8e117d7653a0c792d4d64b70d38f5b80fb035af419fa7ee12ce6b9303",
+    "model": "c0b6548317655a160731d3ad5388578772fa0538393a25e7acb866e552b7faaf"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-10-31T06:46:20+00:00",
+  "last_started_utc": "2026-10-31T06:46:20+00:00",
+  "repo_commits": [
+    "67b141d345b359c05a6fd0c03fcb1dc0ffc21aab"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
