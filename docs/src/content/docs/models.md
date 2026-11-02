@@ -22,12 +22,13 @@ Checked on 2026-10-12.
 | FTCN                                    | video       | workable         | yes        | not yet   |
 | GenConViT (ED)                          | video       | workable         | yes        | not yet   |
 | DFDC winner (7 x B7)                    | video       | workable         | yes        | not yet   |
-| UnivFD                                  | video       | later            | no adapter |           |
+| UnivFD                                  | video       | workable         | yes        | not yet   |
 | RealForensics                           | video       | workable         | yes        | not yet   |
-| LAA-Net, FakeSTormer                    | video       | later            | no adapter |           |
+| FakeSTormer                             | video       | workable         | yes        | not yet   |
+| LAA-Net                                 | video       | workable         | not yet    | not yet   |
 | TALL                                    | video       | blocked          | no weights |           |
 | AVH-Align                               | audio-video | workable         | yes        | not yet   |
-| AVAD, LipFD                             | audio-video | later            | no adapter |           |
+| AVAD, LipFD                             | audio-video | workable         | not yet    | not yet   |
 | AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   |
 | XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   |
 | XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    |
@@ -44,6 +45,7 @@ Checked on 2026-10-12.
 | AltFreezing (`blocked`) | weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them |
 | Effort's weights | Google Drive refuses scripted downloads over quota; fetched by hand through a signed-in browser on 2026-10-28 ([Effort](#effort)) |
 | Parity for eight adapters | [Parity](#parity) says what each needs |
+| Parity for LipFD, AVAD and LAA-Net | ordered on SPARK on 2026-11-03 ([Added 2026-11-03](#added-2026-11-03-five-more-adapters)) |
 
 **Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus. Each model's own reason, and whether it is a cut candidate, is on its page in the [Model catalog](catalog.md#models).
 
@@ -150,7 +152,21 @@ The seven EfficientNet-B7 checkpoints of Selim Seferbekov's winning DFDC entry (
 
 `lipforensics_ff.pth` from Google Drive. Mouth crops reuse upstream's warp and crop code on 68 FAN landmarks per frame, from the shared detector's boxes (upstream suggests RetinaFace): the first 100 consecutive frames, landmarks smoothed over 12 frames, 96 x 96 grayscale mouth patches, then non-overlapping 25-frame clips centre-cropped to 88. P(fake) is a clip's sigmoid. Users report its FF++ numbers don't reproduce (#9).
 
-### Added 2026-10-28, not adapted yet
+### Added 2026-11-03: five more adapters
+
+Written on 2026-11-03, none scored yet. Parity for LipFD, AVAD and LAA-Net runs on SPARK through the `parity` stage ([Where to run](spark.md)); TALL and AltFreezing stay blocked on weights.
+
+| Model | Worth knowing |
+| --- | --- |
+| UnivFD | One linear layer on CLIP ViT-L/14 features, through transformers on the snapshot GenD pins. Passes parity on 200 items (6,400 crops), largest difference 7.6e-6 |
+| FakeSTormer | The C23 checkpoint. It takes 4 frames per input, not 16: the 32 evenly spaced frames are cut into 8 runs that don't overlap. Passes parity on 100 items (800 runs), largest difference 3.0e-6 |
+| LAA-Net | The SBI checkpoint, on 32 frames with flip testing, in float32 where upstream uses float64. Upstream averages a video's logits before the sigmoid; here each frame gets a sigmoid, which orders videos slightly differently |
+| LipFD | Upstream's reader takes `img[:, 500:, i:i + 500] for i in range(5)`, five crops of the first frame one pixel apart, so only the CLIP branch sees the other frames. The adapter keeps that, since the checkpoint was evaluated that way. Input is BGR on the 0 to 255 scale, unnormalised, and resizing has no antialiasing, as in torchvision 0.16 |
+| AVAD | The delay-distribution score only (`lam` 0, upstream's default), so `pca.pkl` and the feature model stay pinned but unused. Video is mapped to 25 fps, which upstream assumes, and the first 50 windows are read |
+
+LipFD and AVAD learned from LRS clips, which are face tracks, and neither upstream crops faces, so `preprocess/tracks.py` cuts SyncNet's face crop from the shared detector's boxes. That step is a choice of ours, not upstream's. LAA-Net and FakeSTormer take their weights from one zip of each Dropbox folder, so a fetch downloads the whole zip.
+
+### Added 2026-10-28
 
 Eleven video and audio-visual models chosen for the South Asian question, each with weights confirmed reachable on 2026-10-28 except TALL's. They fall into four tests:
 
