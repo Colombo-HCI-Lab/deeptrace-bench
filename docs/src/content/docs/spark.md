@@ -116,6 +116,7 @@ Post the run link and the `overall` numbers to the team. Only aggregates leave t
 | Stage | Order it with | Worker | Settings in `params.yaml` | Report |
 | --- | --- | --- | --- | --- |
 | `score` | `scripts/exp.py score <model> <evalset>` | `isipol09` | `bench.commit`, `score.*` | `reports/score.json`, `reports/score_by_method.csv` |
+| `parity` | `scripts/exp.py parity [model:evalset:items ..]` | `isipol09` | `bench.commit`, `parity.jobs` | `reports/parity.json` |
 | `bench_smoke` | `scripts/exp.py smoke [--models ..] [--sample N]` | `isipol09` | `bench.commit`, `bench.smoke_models`, `bench.sample` | `reports/bench_smoke.json` |
 | `gpu_check` | `scripts/exp.py gpu` | `HEC45801`, `HEC45803` | none | `reports/gpu_check.json` |
 
