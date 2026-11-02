@@ -21,11 +21,11 @@ Access checked on the live pages 2026-10-05; "In hand" as of 2026-10-12. Terms c
 | HiDF                    | video       | South Asian (race labels) | yes | open                                          | CC BY-NC 4.0            |
 | In-the-Wild             | audio       | reproduction | yes        | open                                          | CC BY-SA 4.0            |
 | ASVspoof 2019 LA        | audio       | reproduction | yes        | open (slow server)                            | DataShare licence text  |
-| BD-GRF6                 | audio       | South Asian  | sample     | open                                          | CC BY 4.0               |
+| BD-GRF6                 | audio       | South Asian  | yes        | open                                          | CC BY 4.0               |
 | SpeechFake              | audio       | South Asian  | sample     | open (ModelScope)                             | CC BY 4.0               |
 | LRLspoof                | audio       | South Asian  | deferred   | open, one 462 GB tarball                      | MIT                     |
-| MAVOS-DD (Hindi)        | audio-video | South Asian  | no         | accept Hugging Face terms (anyone)            | CC BY-NC-SA 4.0         |
-| MLAAD                   | audio       | South Asian  | no         | accept Hugging Face terms (anyone)            | CC BY-NC 4.0            |
+| MAVOS-DD (Hindi)        | audio-video | South Asian  | yes        | accept Hugging Face terms (anyone)            | CC BY-NC-SA 4.0         |
+| MLAAD                   | audio       | South Asian  | Hindi, Bengali, Sinhala | accept Hugging Face terms (anyone)            | CC BY-NC 4.0            |
 | Svarah                  | audio       | real reference | no       | accept Hugging Face terms (anyone)            | none declared           |
 | SEA-Spoof               | audio       | South Asian  | no         | email authors, then a form (academic)         | non-commercial academic |
 | InDeepFake              | audio-video | South Asian  | no         | emailed form naming the PI                    | custom                  |
@@ -67,7 +67,7 @@ uv run scripts/setup_datasets.py indicsynth --languages hi bn ur
 | --- | --- |
 | MLAAD, MAVOS-DD, Svarah | accept the terms at <https://huggingface.co/datasets/mueller91/MLAAD>, <https://huggingface.co/datasets/unibuc-cs/MAVOS-DD> and <https://huggingface.co/datasets/ai4bharat/Svarah>, put `HF_TOKEN` in `.env`, then run `setup_datasets.py mlaad` (or `mavos_dd_hi`). Svarah's builder is a stub until its schema can be read |
 | ASVspoof 2019 LA | DataShare is slow (about 0.3 MB/s on 2026-10-05). Fetch with a resumable `curl -C -` into `datasets/asvspoof2019_la/LA.zip`; the setup script then checks and extracts it |
-| SpeechFake | the multilingual fakes are one 116 GB zip split in three parts. A full fetch downloads them, keeps only the South Asian 8 GB and deletes the parts, then adds Common Voice's 21 GB zip, so it needs about 125 GB free at its peak. `--sample N` reads single clips by range requests instead |
+| SpeechFake | the multilingual fakes are one 116 GB zip split in three parts. A full fetch downloads them, keeps only the South Asian 8 GB and deletes the parts, then adds Common Voice's 21 GB zip, so it needs about 125 GB free at its peak. The full set was fetched on SPARK for its 50 pairs and cleared on 2026-10-31. `--sample N` reads single clips by range requests instead |
 | IndicSUPERB | can only be sampled from a full copy |
 
 To try a dataset before downloading it, `--sample N` fetches N real and N fake items into the smoke namespace ([Adding a dataset](adding_a_dataset.md#3-sample-it-then-build-the-manifest)).
