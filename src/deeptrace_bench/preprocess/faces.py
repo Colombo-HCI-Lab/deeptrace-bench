@@ -102,6 +102,18 @@ def rate_frame_indices(n_frames: int, fps: float, rate: float, max_frames: int) 
     return [int(i) for i in indices[:max_frames]]
 
 
+def window_frame_indices(n_frames: int, windows: int, length: int) -> list[int]:
+    """Frames of ``windows`` runs of ``length`` consecutive frames spread over a video.
+
+    LipFD's sampling: starts evenly spaced from 0 to ``n_frames - length - 1``. Windows of a
+    short video overlap, so the indices are returned once each, in order.
+    """
+    if n_frames <= length:
+        return []
+    starts = np.linspace(0, n_frames - length - 1, windows).astype(int)
+    return sorted({int(start) + i for start in starts for i in range(length)})
+
+
 def rate_frame_count(n_frames: int, fps: float, rate: float) -> int:
     """How many frames ``rate`` per second gives over the whole video (before any cap)."""
     if n_frames <= 0 or fps <= 0:
@@ -125,11 +137,16 @@ def read_image(path: Path) -> np.ndarray:
 
 
 def read_video_frames(
-    path: Path, k: int, rate: float | None = None, consecutive: bool = False
+    path: Path,
+    k: int,
+    rate: float | None = None,
+    consecutive: bool = False,
+    windows: tuple[int, int] | None = None,
 ) -> tuple[list[tuple[int, np.ndarray]], int]:
     """Read ``k`` evenly spread frames of a video as RGB uint8; with ``rate`` set, the first
     ``k`` frames at ``rate`` per second (``rate_frame_indices``); with ``consecutive``, the
-    first ``k`` frames.
+    first ``k`` frames; with ``windows`` (count, length), runs of frames spread over the video
+    (``window_frame_indices``).
 
     Frames are decoded in order with ``grab`` and only the wanted ones converted, which is
     robust to formats that seek badly. OpenCV applies the rotation stored in phone videos.
@@ -152,6 +169,8 @@ def read_video_frames(
             cap = cv2.VideoCapture(str(path))
         if consecutive:
             wanted = list(range(min(k, n_frames)))
+        elif windows is not None:
+            wanted = window_frame_indices(n_frames, *windows)
         elif rate is None:
             wanted = sample_frame_indices(n_frames, k)
         else:
@@ -383,6 +402,8 @@ class FaceLoader:
             evenly; for models whose network takes frames at a fixed rate (HAVIC).
         consecutive: if set, the first ``frames_per_clip`` frames, every one of them; for
             models whose network takes runs of consecutive frames (LipForensics).
+        windows: if set, (count, length) runs of consecutive frames spread over the video,
+            for models that sample whole short windows (LipFD).
         min_face_frames: a video needs at least this many frames with a face.
         image_min_face_frames: the same for an image (a one-frame clip).
         video_pad_retry: the same for a video frame with no face (videos of tight face crops,
@@ -403,6 +424,7 @@ class FaceLoader:
         frames_per_clip: int = 32,
         frame_rate: float | None = None,
         consecutive: bool = False,
+        windows: tuple[int, int] | None = None,
         min_face_frames: int = 8,
         image_min_face_frames: int = 1,
         image_pad_retry: float = 0.0,
@@ -419,6 +441,7 @@ class FaceLoader:
         self.frames_per_clip = frames_per_clip
         self.frame_rate = frame_rate
         self.consecutive = consecutive
+        self.windows = windows
         self.min_face_frames = min_face_frames
         self.image_min_face_frames = image_min_face_frames
         self.image_pad_retry = image_pad_retry
@@ -458,7 +481,13 @@ class FaceLoader:
         rate = model.input.get("frame_rate")
         consecutive = model.input.get("frame_sampling") == "consecutive"
         frames_per_clip, min_faces = video["frames_per_clip"], video["min_face_frames"]
-        if consecutive:
+        windows = None
+        if model.input.get("frame_sampling") == "windows":
+            windows = (int(model.input["clip_windows"]), int(model.input["clip_frames"]))
+            frames_per_clip = windows[0] * windows[1]
+            min_faces = int(model.input.get("min_face_frames", min_faces))
+            settings.update(frame_sampling="windows", windows=list(windows))
+        elif consecutive:
             frames_per_clip = int(model.input["max_frames"])
             min_faces = int(model.input.get("min_face_frames", min_faces))
             settings.update(frame_sampling="consecutive", frames_per_clip=frames_per_clip)
@@ -489,6 +518,7 @@ class FaceLoader:
             frames_per_clip=frames_per_clip,
             frame_rate=float(rate) if rate is not None and not consecutive else None,
             consecutive=consecutive,
+            windows=windows,
             min_face_frames=min_faces,
             image_min_face_frames=video["image_min_face_frames"],
             image_pad_retry=video["image_pad_retry"],
@@ -557,7 +587,7 @@ class FaceLoader:
             frames, n_frames = [(0, read_image(path))], 1
         else:
             frames, n_frames = read_video_frames(
-                path, self.frames_per_clip, self.frame_rate, self.consecutive
+                path, self.frames_per_clip, self.frame_rate, self.consecutive, self.windows
             )
 
         cache = self._cache(row["dataset"])

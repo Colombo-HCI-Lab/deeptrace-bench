@@ -1,7 +1,7 @@
 id: avad
 name: AVAD (audio-visual anomaly detection)
 modality: audio_video
-status: later
+status: workable
 licence: MIT
 paper: Feng, Chen and Owens, Self-Supervised Video Forensics by Audio-Visual Anomaly Detection, CVPR 2023
 upstream:
@@ -22,7 +22,13 @@ weights:
     url: https://raw.githubusercontent.com/cfeng16/audio-visual-forensics/b6358e17738869fae3223cdd59e7fc09f0442161/pca.pkl
 training_data:
   - {dataset: lrs2, level: train, note: "real videos only, no fakes; the paper uses LRS2 or LRS3, which one the release used is unverified (checked 2026-10-28)"}
+adapter: deeptrace_bench.models.avad:AVADDetector
 input:
-  inputs: faces
-  needs_audio: true
-notes: Never sees a fake in training; it flags videos whose audio-visual synchronisation an autoregressive model of real speech finds unlikely. A fake-free detector is the cleanest test of whether training-set faces bias detection, and lip-sync is MAVOS-DD's main manipulation. Raw-file paths are verified on the default branch 2026-10-28; check them at the pinned commit on first fetch. No adapter yet.
+  inputs: synced_faces            # preprocess.tracks.SyncedFaceLoader
+  frame_sampling: consecutive
+  max_frames: 100                 # the first 100 frames, sharing LipForensics' detection cache
+  min_face_frames: 6
+  clip_frames: 54                 # 50 windows of five
+  video_fps: 25
+  crop: {size: 224}               # the track crop's side, not a CropSpec box
+notes: Never sees a fake in training; it flags videos whose audio-visual synchronisation an autoregressive model of real speech finds unlikely. A fake-free detector is the cleanest test of whether training-set faces bias detection, and lip-sync is MAVOS-DD's main manipulation. Raw-file paths are verified on the default branch 2026-10-28; check them at the pinned commit on first fetch. The feature branch (lam above 0) is pinned but not run, so pca.pkl and avfeature_regressive_model.pth stay unused.

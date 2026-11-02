@@ -1,7 +1,7 @@
 id: fakestormer
 name: FakeSTormer
 modality: video
-status: later
+status: workable
 licence: SnT academic licence (research use only)
 paper: Nguyen et al., FakeSTormer, ICCV 2025
 upstream:
@@ -9,12 +9,16 @@ upstream:
   commit: c5b5f75100b878212a192c00013275f275f86182
 weights:
   - name: fakestormer.pth
-    kind: manual
-    instructions: The README links a Dropbox folder with the checkpoint; take it into $DTB_ROOT/weights/fakestormer/ and record its hash with setup_models.py --record. Folder page loads, file names unverified (2026-10-28).
+    kind: url                       # the README's Dropbox folder, as one zip of 1.98 GB; C23 because benchmark video is compressed
+    url: "https://www.dropbox.com/scl/fo/elk2szqf0du4l6zm5job9/AAdVmNH--6ywHBZGNQJlR5o?rlkey=j8xesf2fu4ahxdw99w5ndrkb2&st=fe6drzpx&dl=1"
+    member: "TopDownDetector_C23_ViTBase224_ST_hm100_tempLOC0.2_4SBI_SAM_mp0.01_temp2_0vidAug_0.35_temp_normlms_normREAL_model_best.pth"
 training_data:
-  - {dataset: ffpp, level: train, split: train, note: "real videos only, with video-level pseudo-fakes"}
+  - {dataset: imagenet, level: pretrain, note: "ViT-B/16 initialised from the MAE ImageNet-1k pretraining (INIT_WEIGHTS in the config)"}
+  - {dataset: ffpp, level: train, split: train, note: "c23 real videos only, with video-level pseudo-fakes"}
+adapter: deeptrace_bench.models.fakestormer:FakeSTormerDetector
 input:
-  inputs: faces
-  frame_sampling: consecutive
-  clip_frames: 16
-notes: A 2025 spatio-temporal transformer trained like SBI on real videos with synthetic fakes, the temporal counterpart of LAA-Net. No adapter yet.
+  inputs: frame_groups            # preprocess.frame_groups.FrameGroupLoader, not single crops
+  crop: {size: 256, margin: 1.5, align: box}   # upstream's saved crop: the box plus 25% a side, stretched to 256 x 256; the adapter cuts 15 px off each side and warps to 224
+  frames_per_clip: 32             # 32 evenly spaced frames, as upstream's images_crop.py -n 32
+  group_frames: 4                 # NUM_FRAMES: the checkpoint's time_embed holds 4 frames; runs do not overlap
+notes: A 2025 spatio-temporal transformer trained like SBI on real videos with synthetic fakes, the temporal counterpart of LAA-Net. It takes 4 frames per input, not 16 (the checkpoint's time embedding has 4 + 1 entries), and upstream's test cuts a video's 32 evenly spaced face crops into 8 runs of 4, so a run spans seconds of the video; the video score is the mean over runs. The score is the cls logit through a sigmoid; upstream averages logits over a video's runs first, the harness averages probabilities. The shared SCRFD box stands in for RetinaFace's. Adapter written 2026-11-03.

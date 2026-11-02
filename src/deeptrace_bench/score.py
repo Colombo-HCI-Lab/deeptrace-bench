@@ -33,8 +33,10 @@ from .preprocess.audio import load_audio, segment
 from .preprocess.av import AudioVideoLoader, MouthAudioLoader
 from .preprocess.clips import FaceClipLoader
 from .preprocess.faces import FaceLoader
+from .preprocess.frame_groups import FrameGroupLoader
 from .preprocess.mouths import MouthLoader
 from .preprocess.talking_faces import TalkingFaceLoader
+from .preprocess.tracks import LipCompositeLoader, SyncedFaceLoader
 from .registry import Modality, ModelConfig, Registry
 from .upstream import checkout_dir
 
@@ -254,6 +256,17 @@ def build_loader(
         if model.modality == Modality.AUDIO_VIDEO:
             # a lip-sync model gets the audio track beside its mouths
             loader = MouthAudioLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
+    elif model.input.get("inputs") == "lip_composites":
+        # LipFD reads windows of frames stacked under their mel spectrogram
+        loader = LipCompositeLoader(loader, min_faces=int(model.input["min_face_frames"]))
+    elif model.input.get("inputs") == "synced_faces":
+        # AVAD reads a steady face track at a fixed frame rate and the audio under it
+        loader = SyncedFaceLoader(
+            loader,
+            frames=int(model.input["clip_frames"]),
+            fps=float(model.input["video_fps"]),
+            min_faces=int(model.input["min_face_frames"]),
+        )
     elif model.modality == Modality.AUDIO_VIDEO:
         # an audio-visual model gets its faces and the audio track together
         loader = AudioVideoLoader(loader, sample_rate=registry.eval.audio["sample_rate"])
@@ -266,4 +279,7 @@ def build_loader(
             clip_stride=int(model.input["clip_stride"]),
             min_frames=int(model.input["min_face_frames"]),
         )
+    elif model.input.get("inputs") == "frame_groups":
+        # a few-frame model gets non-overlapping runs of the evenly spaced face crops
+        loader = FrameGroupLoader(loader, group_frames=int(model.input["group_frames"]))
     return loader, registry.eval.video["aggregation"]

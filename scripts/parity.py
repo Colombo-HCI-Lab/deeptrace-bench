@@ -56,6 +56,11 @@ REFERENCES = {
     "SSLXLSRDetector": ("ssl_xlsr.py", "<fairseq venv>/bin/python"),
     "AntiDeepfakeDetector": ("antideepfake.py", "<fairseq venv>/bin/python"),
     "FTCNDetector": ("ftcn.py", "<ftcn venv>/bin/python"),
+    "LAANetDetector": ("laa_net.py", "{dtb_root}/parity/envs/snt/bin/python"),
+    "FakeSTormerDetector": ("fakestormer.py", "{dtb_root}/parity/envs/snt/bin/python"),
+    "UnivFDDetector": ("univfd.py", "{dtb_root}/parity/envs/clip/bin/python"),
+    "LipFDDetector": ("lipfd.py", "{dtb_root}/parity/envs/clip/bin/python"),
+    "AVADDetector": ("avad.py", "{dtb_root}/parity/envs/avad/bin/python"),
     "GenConViTDetector": ("genconvit.py", "{dtb_root}/parity/envs/genconvit/bin/python"),
     "DFDCWinnerDetector": ("dfdc_b7.py", "<dfdc venv>/bin/python"),
     "RealForensicsDetector": ("realforensics.py", "<realforensics venv>/bin/python"),
@@ -73,7 +78,14 @@ def _inputs_loader(registry: Registry, model: ModelConfig):
             return segment(wave, audio["segment_samples"], min_samples=min_samples)
 
         return load
-    if model.input.get("inputs") in ("mouths", "face_clips", "faces_150"):
+    if model.input.get("inputs") in (
+        "mouths",
+        "face_clips",
+        "frame_groups",
+        "faces_150",
+        "lip_composites",
+        "synced_faces",
+    ):
         # models fed more than single crops get the loader scoring gives them
         return build_loader(registry, model, "cpu")[0]
     return FaceLoader.from_registry(registry, model)

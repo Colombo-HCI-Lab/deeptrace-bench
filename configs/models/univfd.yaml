@@ -1,7 +1,7 @@
 id: univfd
 name: UnivFD
 modality: video
-status: later
+status: workable
 licence: MIT
 paper: Ojha, Li and Lee, Towards Universal Fake Image Detectors that Generalize Across Generative Models, CVPR 2023
 upstream:
@@ -23,7 +23,8 @@ weights:
 training_data:
   - {dataset: clip_wit, level: pretrain}
   - {dataset: progan_forensynths, level: train, note: "linear probe on ProGAN real and fake images, 20 LSUN classes"}
+adapter: deeptrace_bench.models.univfd:UnivFDDetector
 input:
   crop: {size: 224, margin: 1.3, align: box}
   frames_per_clip: 32
-notes: A linear probe on frozen CLIP features, trained on GAN images, not faces. The roster's test of whether a generic AI-image detector transfers to face video, and a non-face baseline for MAVOS-DD's newer generators. Uses the same pinned CLIP snapshot as GenD. No adapter yet.
+notes: A linear probe on frozen CLIP features, trained on GAN images, not faces. The roster's test of whether a generic AI-image detector transfers to face video, and a non-face baseline for MAVOS-DD's newer generators. Uses the same pinned CLIP snapshot as GenD.

@@ -1,0 +1,32 @@
+{
+  "model": "fakestormer",
+  "checked_utc": "2026-11-02T20:02:24+00:00",
+  "evalset": "hidf_video_quick",
+  "namespace": null,
+  "items": 100,
+  "n": 800,
+  "max_abs_diff": 3.039836883544922e-06,
+  "mean_abs_diff": 2.3535502350569003e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "10Ring/FakeSTormer",
+    "commit": "c5b5f75100b878212a192c00013275f275f86182"
+  },
+  "weights_sha256": {
+    "fakestormer.pth": "761fe9c8fde5c1f02876ccd664fa0b6e833f96153799d8b03846bef3f8fae117"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.8.20",
+    "torch": "1.13.1",
+    "numpy": "1.23.3",
+    "opencv": "4.6.0",
+    "mmcv": "1.6.1"
+  },
+  "reference": "upstream test.py path: build_model, strict load of the original .pth, crop_by_margin 15 + affine warp + Normalize per frame, runs of 4, sigmoid of the cls logit"
+}

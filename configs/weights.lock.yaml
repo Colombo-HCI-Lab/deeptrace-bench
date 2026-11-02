@@ -11,6 +11,11 @@ antideepfake_mms_300m:
   mms-300m-anti-deepfake.safetensors: 9bd5d9785bf72f91dfca8508651354946c4b307921cb358505e1b94035102224
 antideepfake_w2v_small:
   wav2vec-small-anti-deepfake.safetensors: 828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0
+avad:
+  avfeature_regressive_model.pth: 8ee382e4d4dc915fabe78bfc39fd971efa5935b476cd8498a103c47589b79d39
+  dist_regressive_model.pth: e9158714f334688c95ce725e4c56d0bc5b7dc5cd4d7e275cfcb22d69fc873971
+  pca.pkl: 41a6f56615b220fb98ea160aaacf06bf1db4fad5b64a35f51598d504352237f7
+  sync_model.pth: b0df6260483e8b02173be7b9ed161a2f4edc9b68bf4e667aaf4a3ef8cc2585c3
 avh_align:
   2DFAN4-cd938726ad.zip: cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46
   AVH-Align_AV1M.pt: 71f7b4fdfe153a2ed7f8a4f2fa552662af3909aa009c80f089f8aa0cc45eda85
@@ -38,6 +43,8 @@ effort:
   effort_clip_L14_trainOn_FaceForensic.pth: 8d86711f098d16b49c048962fc3e16a906380f7bb17b8a0e89bd545b926943ee
 f3net:
   f3net_best.pth: deee7d25bfc1b8b5ba83054a664880078de51213b1067f1e472c2bed7cc667f9
+fakestormer:
+  fakestormer.pth: 761fe9c8fde5c1f02876ccd664fa0b6e833f96153799d8b03846bef3f8fae117
 ffd:
   ffd_best.pth: 445f5b70f115bf777067a4bc498dd73847964dc23f90e5d516b71d0ebb4f65a7
 ftcn:
@@ -60,6 +67,10 @@ gend_pe_l:
   model.safetensors: e2367f8db3a6b76f8d5cc5857f1ed0ea0993b33c9e1f428d3b06e5ca95de2213
 havic:
   best_ft_model.pth: 7a0e3ddc6effd6813c81d915eb2ea57e7dc7d4711cb39798680ff477de2ca19d
+laa_net:
+  laa_net_sbi.pth: fde726610e778045f65c3fbe839bc463c4d3a9970f72ca109d5911917305c991
+lipfd:
+  ckpt.pth: 156fc8995a2ff7b50b56a1dbafb490b6936d5aa6c18dee5a6c67018853f2d9af
 lipforensics:
   2DFAN4-cd938726ad.zip: cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46
   lipforensics_ff.pth: 4b7790bc8e02d0c25ecfa0d8d6a2907123c2206cc32e2bad6044e50f013c253d
@@ -79,6 +90,11 @@ srm:
   srm_best.pth: 666e8fc7f9938f541a7f5cea7b11d975cc749ec1c8ba6b350ae3eb3d2d34a1e8
 ucf:
   ucf_best.pth: 4afa2517feeb473024e1b73049bfa61ce446eb4da14d17c864f2e2a76b3223e5
+univfd:
+  clip-vit-large-patch14/config.json: 8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a
+  clip-vit-large-patch14/model.safetensors: a2bf730a0c7debf160f7a6b50b3aaf3703e7e88ac73de7a314903141db026dcb
+  clip-vit-large-patch14/preprocessor_config.json: 910e70b3956ac9879ebc90b22fb3bc8a75b6a0677814500101a4c072bd7857bd
+  fc_weights.pth: 477100745713bcc957beb2b40859536859b6483fd6301b3b9293151b194c7847
 xception:
   xception_best.pth: dd61186f9ac8e99aae85982cae338b555dfaeef042f6b699e5a55cae3998ba47
 xlsr_aasist:

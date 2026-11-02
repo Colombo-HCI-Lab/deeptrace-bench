@@ -1,0 +1,32 @@
+{
+  "model": "univfd",
+  "checked_utc": "2026-11-02T20:02:24+00:00",
+  "evalset": "hidf_video_quick",
+  "namespace": null,
+  "items": 200,
+  "n": 6400,
+  "max_abs_diff": 7.569789886474609e-06,
+  "mean_abs_diff": 2.5072682328541875e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "WisconsinAIVision/UniversalFakeDetect",
+    "commit": "030495aea3300a8b54c0ec37ec7fe1dd7e63c619"
+  },
+  "weights_sha256": {
+    "clip-vit-large-patch14/config.json": "8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a",
+    "clip-vit-large-patch14/model.safetensors": "a2bf730a0c7debf160f7a6b50b3aaf3703e7e88ac73de7a314903141db026dcb",
+    "clip-vit-large-patch14/preprocessor_config.json": "910e70b3956ac9879ebc90b22fb3bc8a75b6a0677814500101a4c072bd7857bd",
+    "fc_weights.pth": "477100745713bcc957beb2b40859536859b6483fd6301b3b9293151b194c7847"
+  },
+  "adapter_env": {
+    "python": "3.12.12",
+    "torch": "2.8.0"
+  },
+  "reference_env": {
+    "python": "3.10.18",
+    "torch": "2.1.0"
+  },
+  "reference": "upstream get_model and fc_weights.pth, OpenAI ViT-L-14.pt, RealFakeDataset's transform"
+}
