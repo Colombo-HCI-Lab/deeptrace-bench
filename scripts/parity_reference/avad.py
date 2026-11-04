@@ -80,6 +80,13 @@ class NoFeature(torch.nn.Module):
         return torch.zeros(31, 31)
 
 
+class NoFeatureRegression(torch.nn.Module):
+    """The feature regressor's place: lam 0 multiplies its loss away, but its shape must match."""
+
+    def forward(self, features, mask):
+        return torch.zeros_like(features)
+
+
 vis_enc, _ = detect.select_backbone(network="r18")
 transformer = detect.MP_AViT(
     image_size=14,
@@ -124,7 +131,9 @@ for index in range(len(spec["items"])):
         }
     )
 
-detect.test2(sync, NoFeature(), items, dist_reg_model=regressive, avfeature_reg_model=NoFeature())
+detect.test2(
+    sync, NoFeature(), items, dist_reg_model=regressive, avfeature_reg_model=NoFeatureRegression()
+)
 scores = np.load(Path(output) / "testing_scores.npy")
 np.save(run / "reference.npy", 1 / (1 + np.exp(-scores.astype(np.float64))))
 (run / "reference.json").write_text(
