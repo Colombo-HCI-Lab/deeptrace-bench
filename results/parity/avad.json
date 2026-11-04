@@ -1,0 +1,32 @@
+{
+  "model": "avad",
+  "checked_utc": "2026-11-04T09:53:10+00:00",
+  "evalset": "mavos_dd_hi_av",
+  "namespace": null,
+  "items": 30,
+  "n": 30,
+  "max_abs_diff": 4.4047545721959125e-08,
+  "mean_abs_diff": 1.5968696409629502e-08,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "cfeng16/audio-visual-forensics",
+    "commit": "b6358e17738869fae3223cdd59e7fc09f0442161"
+  },
+  "weights_sha256": {
+    "avfeature_regressive_model.pth": "8ee382e4d4dc915fabe78bfc39fd971efa5935b476cd8498a103c47589b79d39",
+    "dist_regressive_model.pth": "e9158714f334688c95ce725e4c56d0bc5b7dc5cd4d7e275cfcb22d69fc873971",
+    "pca.pkl": "41a6f56615b220fb98ea160aaacf06bf1db4fad5b64a35f51598d504352237f7",
+    "sync_model.pth": "b0df6260483e8b02173be7b9ed161a2f4edc9b68bf4e667aaf4a3ef8cc2585c3"
+  },
+  "adapter_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.9.25",
+    "torch": "1.9.0+cpu"
+  },
+  "reference": "upstream detect.test2 at lam 0, video by video, sigmoid of its score"
+}
