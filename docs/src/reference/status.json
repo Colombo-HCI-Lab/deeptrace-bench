@@ -1,5 +1,5 @@
 {
- "built": "2026-10-31",
+ "built": "2026-11-05",
  "eval_status": "proposed",
  "citations_checked": "2026-10-05",
  "fake_types": [
@@ -870,7 +870,7 @@
    "id": "avad",
    "name": "AVAD",
    "modality": "audio_video",
-   "adapter": false,
+   "adapter": true,
    "blocked": false,
    "licence": "MIT",
    "summary": "Audio-visual synchronisation features from real videos, scored by an autoregressive model of their sequence; anomalies read as fakes.",
@@ -883,7 +883,7 @@
    "cue": "audio-visual synchronisation of real speech",
    "architecture": "Face clip and its audio, audio-visual synchronisation network, PCA, autoregressive regressors over the feature and time-offset sequences, anomaly score",
    "description": "AVAD (Feng, Chen and Owens, CVPR 2023) learns only from real talking faces (LRS2 or LRS3; which one the released weights used is unverified) and scores how surprising a video's audio-visual synchronisation is. Unsupervised, so it carries no bias from fake-side training data. Not adapted yet.",
-   "input": null,
+   "input": "224 px face-box crops, 32 frames per video",
    "training": [
     {
      "name": "LRS2",
@@ -902,7 +902,11 @@
    "trained_on": [
     "LRS2"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_av",
+    "items": 30,
+    "max_abs_diff": 4.4047545721959125e-08
+   },
    "profile": null
   },
   {
@@ -1614,7 +1618,7 @@
    "id": "fakestormer",
    "name": "FakeSTormer",
    "modality": "video",
-   "adapter": false,
+   "adapter": true,
    "blocked": false,
    "licence": "SnT academic licence (research use only)",
    "summary": "Spatio-temporal transformer on face clips, trained on FF++ real videos with video-level pseudo-fakes.",
@@ -1627,8 +1631,13 @@
    "cue": "spatial and temporal artefacts of blending",
    "architecture": "Face clip, spatio-temporal transformer with artefact-focused auxiliary heads, binary head",
    "description": "FakeSTormer (Nguyen et al., ICCV 2025) extends self-blended training to video. Its checkpoint sits in a Dropbox folder that must be fetched by hand, under an academic licence. Not adapted yet.",
-   "input": null,
+   "input": "256 px face-box crops, 32 frames per video",
    "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
     {
      "name": "FaceForensics++",
      "level": "train",
@@ -1640,7 +1649,11 @@
    "trained_on": [
     "FaceForensics++"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "hidf_video_quick",
+    "items": 100,
+    "max_abs_diff": 3.039836883544922e-06
+   },
    "profile": null
   },
   {
@@ -2064,7 +2077,7 @@
    "id": "laa_net",
    "name": "LAA-Net",
    "modality": "video",
-   "adapter": false,
+   "adapter": true,
    "blocked": false,
    "licence": "SnT academic licence (research use only)",
    "summary": "Localised artefact attention with heatmap and self-consistency heads, trained on FF++ real frames with blended pseudo-fakes.",
@@ -2076,8 +2089,13 @@
    "cue": "localised blending artefacts",
    "architecture": "Aligned face crop, EfficientNet backbone with an enhanced feature pyramid, heatmap and self-consistency branches, binary head",
    "description": "LAA-Net (Nguyen et al., CVPR 2024) focuses on small blending artefacts and claims robustness to compression. Its checkpoints are in a Dropbox folder (fetched by hand) under an academic licence, and upstream uses dlib landmarks, which this repo doesn't install. Not adapted yet.",
-   "input": "384 px aligned face crops, 32 frames per video",
+   "input": "256 px face-box crops, 32 frames per video",
    "training": [
+    {
+     "name": "ImageNet-1k",
+     "level": "pretrain",
+     "split": null
+    },
     {
      "name": "FaceForensics++",
      "level": "train",
@@ -2095,14 +2113,18 @@
    "trained_on": [
     "FaceForensics++"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_video",
+    "items": 50,
+    "max_abs_diff": 3.599528632936e-06
+   },
    "profile": null
   },
   {
    "id": "lipfd",
    "name": "LipFD",
    "modality": "audio_video",
-   "adapter": false,
+   "adapter": true,
    "blocked": false,
    "licence": "none stated; code imported from the pinned checkout, never copied",
    "summary": "Audio-visual detector of lip-audio inconsistency, trained on AVLips (Wav2Lip, MakeItTalk and TalkLip fakes over LRS3).",
@@ -2114,7 +2136,7 @@
    "cue": "temporal mismatch between lip motion and audio",
    "architecture": "Mouth crops with the audio spectrogram, global and regional encoders, binary head",
    "description": "LipFD (Liu et al., NeurIPS 2024) compares lip motion with audio over time. Its training set covers three lip-sync generators only, and upstream states no licence. Not adapted yet.",
-   "input": "mouth crops from 25 consecutive frames at a time (up to 100 frames per video)",
+   "input": "500 px face-box crops, 32 frames per video",
    "training": [
     {
      "name": "AVLips",
@@ -2133,7 +2155,11 @@
     "AVLips",
     "LRS3"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_av",
+    "items": 50,
+    "max_abs_diff": 2.0116567611694336e-06
+   },
    "profile": null
   },
   {
@@ -2706,7 +2732,7 @@
    "id": "univfd",
    "name": "UnivFD",
    "modality": "video",
-   "adapter": false,
+   "adapter": true,
    "blocked": false,
    "licence": "MIT",
    "summary": "Linear probe on frozen CLIP ViT-L/14 image features, trained on ProGAN real and fake images.",
@@ -2742,7 +2768,11 @@
    "trained_on": [
     "ProGAN images from ForenSynths"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "hidf_video_quick",
+    "items": 200,
+    "max_abs_diff": 7.569789886474609e-06
+   },
    "profile": null
   },
   {
@@ -5255,7 +5285,7 @@
    "status": "ready",
    "size": {
     "items": 7513,
-    "windows": 7398
+    "windows": 7426
    }
   },
   {
@@ -9347,6 +9377,45 @@
    }
   },
   {
+   "model": "avad",
+   "evalset": "mavos_dd_hi_av",
+   "run_id": "avad__mavos_dd_hi_av__bd4d08a2",
+   "pairing": "same_corpus",
+   "n": 7513,
+   "n_real": 3632,
+   "n_fake": 3881,
+   "n_failed": 87,
+   "auc": 0.43252598699965344,
+   "auc_lo": 0.41907304952848884,
+   "auc_hi": 0.4451709412854461,
+   "eer": 0.5452507705239563,
+   "eer_lo": 0.5348651801918589,
+   "eer_hi": 0.5571720385106882,
+   "acc": 0.4547535685429572,
+   "bal_acc": 0.45475340654512575,
+   "ap": 0.46141623309611884,
+   "tpr_at_fpr01": 0.00311122634171636,
+   "tpr_at_fpr05": 0.019704433497536946,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked",
+    "below chance"
+   ],
+   "wall_s": 76550.1,
+   "windows": 7426,
+   "compute": {
+    "items_per_s": 0.098,
+    "windows_per_s": 1.96,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 1.251,
+    "gpu_util_mean": 5.2,
+    "energy_wh": 3072.28,
+    "energy_wh_per_1k_items": 408.929,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
    "model": "avh_align",
    "evalset": "mavos_dd_hi_av",
    "run_id": "avh_align__mavos_dd_hi_av__d4102f39",
@@ -11116,6 +11185,44 @@
     "gpu_util_mean": 32.1,
     "energy_wh": 37.428,
     "energy_wh_per_1k_items": 15.007,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "fakestormer",
+   "evalset": "mavos_dd_hi_video",
+   "run_id": "fakestormer__mavos_dd_hi_video__c3c217f3",
+   "pairing": "same_corpus",
+   "n": 7513,
+   "n_real": 4463,
+   "n_fake": 3050,
+   "n_failed": 78,
+   "auc": 0.5765941628872112,
+   "auc_lo": 0.5633850332064725,
+   "auc_hi": 0.5893395574545841,
+   "eer": 0.4651797906235776,
+   "eer_lo": 0.452470166860822,
+   "eer_hi": 0.4761591581716541,
+   "acc": 0.5354404841963686,
+   "bal_acc": 0.5355784703573989,
+   "ap": 0.537237519954176,
+   "tpr_at_fpr01": 0.06806971390989806,
+   "tpr_at_fpr05": 0.16113120683985532,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 5105.7,
+   "windows": 58743,
+   "compute": {
+    "items_per_s": 1.472,
+    "windows_per_s": 45.61,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 0.732,
+    "gpu_util_mean": 19.3,
+    "energy_wh": 294.323,
+    "energy_wh_per_1k_items": 39.175,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },

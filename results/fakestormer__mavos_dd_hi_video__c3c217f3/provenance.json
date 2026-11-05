@@ -1,0 +1,25 @@
+{
+  "run_id": "fakestormer__mavos_dd_hi_video__c3c217f3",
+  "model_id": "fakestormer",
+  "evalset_id": "mavos_dd_hi_video",
+  "upstream_commit": "c5b5f75100b878212a192c00013275f275f86182",
+  "weights_sha256": {
+    "fakestormer.pth": "761fe9c8fde5c1f02876ccd664fa0b6e833f96153799d8b03846bef3f8fae117",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "b2a9c179fc993c8d9e7e7240c09a916b77c5b30a369c7d0c656f49506b78d38f",
+    "model": "25d66628fc34af5ae56cd8b372daa35f4c2ed9f25002d792506e94ddb83237ad"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-05T09:40:30+00:00",
+  "last_started_utc": "2026-11-05T09:40:30+00:00",
+  "repo_commits": [
+    "ee96d7e21f664b68b919efdfc22c707401d3ffa8"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

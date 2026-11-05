@@ -1,0 +1,28 @@
+{
+  "run_id": "avad__mavos_dd_hi_av__bd4d08a2",
+  "model_id": "avad",
+  "evalset_id": "mavos_dd_hi_av",
+  "upstream_commit": "b6358e17738869fae3223cdd59e7fc09f0442161",
+  "weights_sha256": {
+    "avfeature_regressive_model.pth": "8ee382e4d4dc915fabe78bfc39fd971efa5935b476cd8498a103c47589b79d39",
+    "dist_regressive_model.pth": "e9158714f334688c95ce725e4c56d0bc5b7dc5cd4d7e275cfcb22d69fc873971",
+    "pca.pkl": "41a6f56615b220fb98ea160aaacf06bf1db4fad5b64a35f51598d504352237f7",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+    "sync_model.pth": "b0df6260483e8b02173be7b9ed161a2f4edc9b68bf4e667aaf4a3ef8cc2585c3"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "52fdc6dee089030821452bf35e6a7f1985f10161fa77189dc3f29edc9a5c2110",
+    "model": "ac5b29d9602bab0cf2fb417797d5b4cfe7d4aa7cf0dfdc355705b40b560a61c6"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-04T12:23:22+00:00",
+  "last_started_utc": "2026-11-04T12:23:22+00:00",
+  "repo_commits": [
+    "ee96d7e21f664b68b919efdfc22c707401d3ffa8"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
