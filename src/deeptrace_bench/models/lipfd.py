@@ -55,7 +55,9 @@ _SCALES = ((28, 196), (61, 163))  # crops[1], 0.65x, and crops[2], 0.45x
 
 
 def _stubs() -> dict[str, types.ModuleType]:
-    import packaging
+    # clip.py reads packaging.version, a submodule that exists only once imported; parity's
+    # export had it from earlier imports, a bare score.py didn't (s5_new_adapters, 2026-11-04)
+    import packaging.version
 
     ftfy = types.ModuleType("ftfy")
     ftfy.fix_text = lambda text: text  # type: ignore[attr-defined]
