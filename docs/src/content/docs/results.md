@@ -20,7 +20,7 @@ Each experiment is a set of model and evalset pairs that answers one question. W
 | E1: reproductions | Do our adapters reproduce the published figures, with scores pointing the right way? | the ten audio models below; video models later | ASVspoof 2019 LA eval, or In-the-Wild where the guard refuses ASVspoof 2019 (DF Arena, AntiDeepfake) | audio done for all ten; video waits on FF++ or Celeb-DF v2 |
 | E2: zero-shot audio | Do detectors trained only on English spoofing data hold up on South Asian speech? Does multilingual pretraining help? Do language and gender shift the scores? | the ten audio models | the eight same-corpus South Asian audio sets below | all ten done on all eight |
 | E3: zero-shot video on HiDF | Does a detector's accuracy, or its false-positive rate on real faces, differ by race? | the 18 video models; the race breakdown so far for Xception, SBI and GenD | `hidf_video` | done, provisional |
-| E4: talking heads on MAVOS-DD Hindi | Do face detectors hold up on Hindi video, including audio-driven talking heads? Do audio-visual detectors catch what they miss? | the 18 video models, HAVIC, AVH-Align | `mavos_dd_hi_video`, `mavos_dd_hi_av` | done, provisional |
+| E4: talking heads on MAVOS-DD Hindi | Do face detectors hold up on Hindi video, including audio-driven talking heads? Do audio-visual detectors catch what they miss? | the 18 video models, HAVIC, AVH-Align, and the five [added in November](#the-2026-11-new-adapters) | `mavos_dd_hi_video`, `mavos_dd_hi_av` | done, provisional |
 | E5: cross-corpus audio | Do the audio detectors hold up when the real and fake clips come from different recordings, and could a trivial classifier tell those apart? | the audio models the guard allows | MLAAD Bengali, Hindi and Sinhala, BD-GRF6, SpeechFake | 75 pairs scored, none a result until the shortcut probe |
 | E6: fine-tuned baselines | How much does training on South Asian data help, on [identity-safe splits](evaluation.md#fine-tuning-splits)? | to be chosen | to be chosen | planned |
 | E7: data from deeptrace | How do the detectors do on what deeptrace collects? | to be chosen | deeptrace's data | planned, once collection starts |
@@ -98,6 +98,11 @@ MAVOS-DD's labels follow the track a model sees. The video set counts the kNN-VC
 | `genconvit` | ConvNeXt and Swin hybrid with an autoencoder branch, the only branch scored | ImageNet | DFDC, FF++, DeepfakeTIMIT |
 | `havic` | Audio and video transformers fused over 16-frame windows | real videos (LRS2) | FakeAVCeleb |
 | `avh_align` | Small network that scores how far lips and voice drift apart | AV-HuBERT large (LRS3, VoxCeleb2), frozen | real AV-Deepfake1M videos only |
+| `laa_net` | CNN (EfficientNet-B4) with a feature pyramid and a heatmap of blending artefacts | ImageNet (AdvProp) | FF++ real frames, with blended pseudo-fakes |
+| `fakestormer` | Video transformer (ViT-B/16) on 4-frame runs of faces | MAE, ImageNet-1k | FF++ c23 real videos, with video-level pseudo-fakes |
+| `univfd` | One linear layer on frozen CLIP image features, a generic AI-image detector | CLIP ViT-L/14 | ProGAN real and fake images |
+| `lipfd` | CLIP and a region-aware network on lip regions next to the audio's spectrogram | CLIP ViT-L/14 | AVLips (Wav2Lip, MakeItTalk and TalkLip over LRS3) |
+| `avad` | Scores how unusual a video's audio-visual time offsets are, never shown a fake | trained on real talking faces (LRS2 or LRS3) | real videos only |
 
 ## Insights
 
@@ -311,6 +316,21 @@ SpeechFake's Bengali, Tamil, Marathi and Malayalam fakes run against real read s
 - **SpeechFake splits the models, and the split is the warning.** All four post-trained models score 0.978 or more on all five languages, 1.000 on most, while the other six run from 0.148 to 0.986 on the same clips. The real and fake clips come from different corpora, so a score of 1.000 here may be the corpus and not the fake.
 - **The same set runs backwards for the classic models.** AASIST, AASIST-L, XLS-R + AASIST and XLSR-Mamba all fall below 0.33 on Hindi and Malayalam, the pattern insight 4 describes.
 - **BD-GRF6 defeats every model but AASIST3**, which scores 0.952 and catches 71% of its fakes at 5% FPR. The next best is AASIST-L at 0.709; the post-trained AntiDeepfake and DF Arena models sit at chance (0.51 to 0.59). The set is cross-corpus, so AASIST3 may be telling the recordings apart rather than the fakes, which the shortcut probe will show.
+
+## The 2026-11 new adapters
+
+UnivFD, LipFD, AVAD, LAA-Net and FakeSTormer, all past parity ([Models](models.md#added-2026-11-03-five-more-adapters)), scored on SPARK on the same full sets as the round above. Snapshot of 2026-11-06; pairs still scoring are marked.
+
+| Model | HiDF AUC | HiDF EER | HiDF TPR@5% | MAVOS-DD AUC | MAVOS-DD EER | MAVOS-DD TPR@5% |
+| ----- | -------: | -------: | ----------: | -----------: | -----------: | --------------: |
+| FakeSTormer | scoring | | | 0.577 | 46.5% | 0.16 |
+| LAA-Net | scoring | | | scoring | | |
+| UnivFD | scoring | | | scoring | | |
+| LipFD (audio and video) | n/a | n/a | n/a | scoring | | |
+| AVAD (audio and video) | n/a | n/a | n/a | 0.433 | 54.5% | 0.02 |
+
+- **AVAD ranks MAVOS-DD's fakes below its real videos.** Its AUC of 0.433 (95% CI 0.419 to 0.445) is below chance, as AVH-Align's 0.520 is near it: both learned only from real talking faces, and neither finds MAVOS-DD Hindi's fakes stranger than its real clips. With no video score direction settled, a flipped score can't be ruled out.
+- **FakeSTormer, built for the SBI-style generalisation that holds up on MAVOS-DD, doesn't.** At 0.577 it sits with the DeepfakeBench detectors, well below SBI (0.777) and FTCN (0.854).
 
 ## What the results can't say yet
 

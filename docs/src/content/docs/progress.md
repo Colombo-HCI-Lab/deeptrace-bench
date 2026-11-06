@@ -5,15 +5,22 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-11-03:
+As of 2026-11-06:
 
-- **Models.** 35 detectors have adapters and weights, the last five, added on 2026-11-03, not scored yet ([Models](models.md#added-2026-11-03-five-more-adapters)). Of the first 30 (FTCN, GenConViT, RealForensics, the DFDC winner and AVH-Align joined on 2026-10-28, and Effort's weights arrived). 22 pass parity against upstream code ([models.md](models.md#parity)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
+- **Models.** 35 detectors have adapters and weights; 27 pass parity against upstream code, the five added on 2026-11-03 among them ([models.md](models.md#parity)). Those five are being scored on SPARK: AVAD and FakeSTormer are done on MAVOS-DD Hindi, the other six pairs are running ([Results](results.md#the-2026-11-new-adapters)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
 - **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and 40 same-corpus and 20 cross-corpus audio pairs before it was paused on 2026-10-29. SPARK scored the last 84 on 2026-10-30 and 31, so every audio model now has its reproductions and every South Asian and cross-corpus set the guard allows ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-06: the new adapters pass parity and start scoring
+
+Commits `ee96d7e` onward here, and the `parity` and `matrix` runs from 41776938824 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments).
+
+- LipFD, AVAD and LAA-Net pass parity on SPARK, with largest differences of 2.0e-6, 4.4e-8 and 3.6e-6 ([Models](models.md#parity)). It took three jobs: the references first failed on a wrong-shaped stand-in in AVAD's reference, a missing matplotlib in LAA-Net's stack, and the container's library path, which made each stack load the image's own torch.
+- Wave `s5_new_adapters` ran out its 24 hours with two pairs done, AVAD taking 21 of them: on MAVOS-DD Hindi, AVAD scores 0.433 and FakeSTormer 0.577 ([Results](results.md#the-2026-11-new-adapters)). LipFD failed to load (`e10dfe3` fixes it), and the other six pairs went to `s5b_new_adapters_rest`, HiDF first and LipFD last.
 
 ### 2026-11-03: the last five adapters
 
@@ -81,7 +88,7 @@ The waves and their ledgers are in [deeptrace-experiments](https://github.com/UN
 
 Config and docs only; no new runs.
 
-- Eleven video and audio-visual models join the registry with weights confirmed reachable, none adapted yet ([Models](models.md#added-2026-10-28-not-adapted-yet)): FTCN, RealForensics, AVAD, AVH-Align, GenConViT, the DFDC winner, LipFD, LAA-Net, FakeSTormer, UnivFD, and TALL (blocked, no weights).
+- Eleven video and audio-visual models join the registry with weights confirmed reachable, none adapted yet ([Models](models.md#added-2026-10-28)): FTCN, RealForensics, AVAD, AVH-Align, GenConViT, the DFDC winner, LipFD, LAA-Net, FakeSTormer, UnivFD, and TALL (blocked, no weights).
 - Ten datasets join it ([Datasets](datasets.md#at-a-glance)). Four are South Asian: HAV-DF (Hindi), DeepFakeX (Urdu), ILLUSION (Indic languages) and INDIFACE, all on request. Counterfactual-Deepfake-Bench is open and has an explicit Indian cell. TalkingHeadBench, KoDF, Celeb-DF++, AV-Deepfake1M and DFDC are anchors and contrasts.
 - Video comes before audio in the work queue from here on.
 
@@ -145,7 +152,7 @@ Commits `15a2e2c` and `d3a6d03`.
 
 In order:
 
-0. **Land the five new adapters:** read the `parity` job, import it, then run wave `s5_new_adapters`.
+0. **Finish the five new adapters:** import wave `s5b_new_adapters_rest` when it lands, and order what's left if its budget runs out.
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 3. **A generator-level contamination check** of DF Arena and AntiDeepfake, then generators they haven't seen. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean, and their near-ceiling scores on the open South Asian sets (0.978 and up for MMS-300M and both DF Arena models) may be familiarity rather than transfer.

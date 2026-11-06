@@ -25,10 +25,10 @@ Checked on 2026-10-12.
 | UnivFD                                  | video       | workable         | yes        | not yet   |
 | RealForensics                           | video       | workable         | yes        | not yet   |
 | FakeSTormer                             | video       | workable         | yes        | not yet   |
-| LAA-Net                                 | video       | workable         | not yet    | not yet   |
+| LAA-Net                                 | video       | workable         | yes        | not yet   |
 | TALL                                    | video       | blocked          | no weights |           |
 | AVH-Align                               | audio-video | workable         | yes        | not yet   |
-| AVAD, LipFD                             | audio-video | workable         | not yet    | not yet   |
+| AVAD, LipFD                             | audio-video | workable         | yes        | not yet   |
 | AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   |
 | XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   |
 | XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    |
@@ -45,7 +45,6 @@ Checked on 2026-10-12.
 | AltFreezing (`blocked`) | weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them |
 | Effort's weights | Google Drive refuses scripted downloads over quota; fetched by hand through a signed-in browser on 2026-10-28 ([Effort](#effort)) |
 | Parity for eight adapters | [Parity](#parity) says what each needs |
-| Parity for LipFD, AVAD and LAA-Net | ordered on SPARK on 2026-11-03 ([Added 2026-11-03](#added-2026-11-03-five-more-adapters)) |
 
 **Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus. Each model's own reason, and whether it is a cut candidate, is on its page in the [Model catalog](catalog.md#models).
 
@@ -66,6 +65,11 @@ Passed, each against upstream run in its original environment (`scripts/parity.p
 | DFDC winner 9.0e-6 (128 crops of 4 HiDF videos, all seven models)                                                                  | 2026-10-28 | upstream `DeepFakeClassifier` x7, `predict_folder.py`'s strict load, fp32 (torch 1.10.0, timm 0.4.12, CPU) |
 | RealForensics 6.4e-6 (63 clips of 20 HiDF videos)                                                                                  | 2026-10-28 | upstream `csn_temporal_no_head` and `MeanLinear`, `eval.py`'s load, the test transform (torch 1.9.0, torchvision 0.10, pytorchvideo 0.1.2, CPU) |
 | GenConViT (ED) 6.4e-6 (640 crops of 20 HiDF videos)                                                                                | 2026-10-28 | upstream `GenConViT(net="ed")` and its own strict load, `pred_func` preprocessing (timm 0.6.5, torch 1.13.1) |
+| UnivFD 7.6e-6 (200 items, 6,400 crops)                                                                                             | 2026-11-02 | upstream CLIP ViT-L/14 and linear head (torch 2.1.0, CPU) |
+| FakeSTormer 3.0e-6 (100 items, 800 runs of 4 frames)                                                                               | 2026-11-02 | upstream network and C23 checkpoint (torch 1.13.1, CPU) |
+| LipFD 2.0e-6 (500 composites of 50 MAVOS-DD audio-visual videos)                                                                                   | 2026-11-04 | upstream `AVLip.__getitem__` and `validate`'s two calls, `ckpt.pth` strict (torch 2.1.0, torchvision 0.16, CPU) |
+| AVAD 4.4e-8 (30 MAVOS-DD audio-visual videos)                                                                                      | 2026-11-04 | upstream `detect.test2` at `lam` 0 (torch 1.9.0, CPU) |
+| LAA-Net 3.6e-6 (1,596 crops of 50 MAVOS-DD videos)                                                                                        | 2026-11-04 | upstream `test.py` path for `efn4_fpn_sbi_adv.yaml`, float64, flip test (torch 1.13.1, CPU) |
 
 DeepfakeBench's reference shares the adapter's import stand-ins (and RECCE's and FFD's build stand-ins), so a pass there covers weights, numerics and transform, not upstream's imports; the strict load covers the architecture.
 
@@ -154,7 +158,7 @@ The seven EfficientNet-B7 checkpoints of Selim Seferbekov's winning DFDC entry (
 
 ### Added 2026-11-03: five more adapters
 
-Written on 2026-11-03, none scored yet. Parity for LipFD, AVAD and LAA-Net runs on SPARK through the `parity` stage ([Where to run](spark.md)); TALL and AltFreezing stay blocked on weights.
+Written on 2026-11-03. All five pass parity: UnivFD and FakeSTormer on 2026-11-02, LipFD, AVAD and LAA-Net on SPARK through the `parity` stage on 2026-11-04 ([Where to run](spark.md)). Scores are in [Results](results.md#the-2026-11-new-adapters). TALL and AltFreezing stay blocked on weights.
 
 | Model | Worth knowing |
 | --- | --- |

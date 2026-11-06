@@ -67,15 +67,16 @@ const SPEECH: Group[] = [
 ];
 const FACES: Group[] = [
   { label: "Foundation", title: "Vision foundation models, lightly tuned on FF++", kind: "mid", models: ["gend", "gend_pe_l", "effort"] },
-  { label: "Temporal", title: "Face or mouth clips over time, trained on FF++", kind: "mid", models: ["realforensics", "ftcn", "lipforensics"] },
+  { label: "Temporal", title: "Face or mouth clips over time, trained on FF++", kind: "mid", models: ["realforensics", "ftcn", "lipforensics", "fakestormer"] },
   {
     label: "Frame CNN",
     title: "Single face crops, CNNs trained on FF++",
     kind: "mid",
-    models: ["sbi", "xception", "efficientnet_b4", "ucf", "core", "recce", "f3net", "ffd", "srm", "spsl"],
+    models: ["sbi", "laa_net", "xception", "efficientnet_b4", "ucf", "core", "recce", "f3net", "ffd", "srm", "spsl"],
   },
   { label: "DFDC", title: "Trained on DFDC instead of FF++", kind: "mid", models: ["dfdc_b7", "genconvit"] },
-  { label: "Audio-visual", title: "Read the voice and the face together", kind: "mid", models: ["havic", "avh_align"] },
+  { label: "Audio-visual", title: "Read the voice and the face together", kind: "mid", models: ["havic", "avh_align", "avad", "lipfd"] },
+  { label: "AI images", title: "A generic AI-image detector, trained on GAN images", kind: "mid", models: ["univfd"] },
 ];
 
 const fmt3 = (x: number) => x.toFixed(3);
