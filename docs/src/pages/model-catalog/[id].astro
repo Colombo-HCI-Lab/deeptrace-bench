@@ -15,7 +15,7 @@ const { m } = Astro.props as { m: Model };
 const base = import.meta.env.BASE_URL;
 const runs = modelRuns(m.id);
 const datasetOf = (evalset: string) => DATASETS.find((d) => d.evalsets.includes(evalset));
-const ROLE_GROUP: Record<string, string> = { reproduction: "Reproduction", south_asian: "South Asian" };
+const ROLE_GROUP: Record<string, string> = { reproduction: "Reproduction", south_asian: "South Asian", control: "Control" };
 // One line per level: pretraining corpora run long.
 const training = Object.keys(LEVEL).flatMap((lv) => {
   const names = m.training.filter((t) => t.level === lv).map((t) => t.name + (t.split ? ` (${t.split} split)` : ""));

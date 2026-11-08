@@ -797,14 +797,14 @@ What each kind of fake changes and what it tends to leave behind. A detector tra
 
 | Kind | Track | What's changed | What it leaves | Datasets |
 | --- | --- | --- | --- | --- |
-| Face swap | video | The whole face is replaced with another person's; head motion, expression, lighting and background stay from the original. | A blending boundary at the jaw and hairline, skin tone or lighting that differs between face and neck, identity flicker across frames. | Celeb-DF (v2), Celeb-DF++, DF-Platter, DFDC (Deepfake Detection Challenge), DeePhy, DeepFakeX (South Asian and Urdu subset), Deepfake-Eval-2024, FaceForensics++, FakeAVCeleb, HAV-DF (Hindi audio-video deepfakes), HiDF (human-indistinguishable deepfakes), videos, IAV-DF, ILLUSION, INDIFACE, InDeepFake, KoDF (Korean deepfakes), MAVOS-DD, Hindi subset |
-| Reenactment | video | The same person, with expression and head pose driven by someone else's performance. | Warping around moving features, smeared texture under fast motion, unnatural pose transitions. | Celeb-DF++, FaceForensics++, IAV-DF, ILLUSION, KoDF (Korean deepfakes), MAVOS-DD, Hindi subset, TalkingHeadBench |
+| Face swap | video | The whole face is replaced with another person's; head motion, expression, lighting and background stay from the original. | A blending boundary at the jaw and hairline, skin tone or lighting that differs between face and neck, identity flicker across frames. | Celeb-DF (v2), Celeb-DF++, DF-Platter, DFDC (Deepfake Detection Challenge), DeePhy, DeepFakeX (South Asian and Urdu subset), Deepfake-Eval-2024, FaceForensics++, FakeAVCeleb, HAV-DF (Hindi audio-video deepfakes), HiDF (human-indistinguishable deepfakes), videos, IAV-DF, ILLUSION, INDIFACE, InDeepFake, KoDF (Korean deepfakes), MAVOS-DD, German subset, MAVOS-DD, Hindi subset |
+| Reenactment | video | The same person, with expression and head pose driven by someone else's performance. | Warping around moving features, smeared texture under fast motion, unnatural pose transitions. | Celeb-DF++, FaceForensics++, IAV-DF, ILLUSION, KoDF (Korean deepfakes), MAVOS-DD, German subset, MAVOS-DD, Hindi subset, TalkingHeadBench |
 | Lip-sync | video | The same person and footage; only the mouth is regenerated to match new audio, often a cloned voice. | Mouth motion out of step with the sounds, blurry teeth and inner mouth, a seam around the lower face. Face-swap cues mostly don't apply. | AV-Deepfake1M, DeepFakeX (South Asian and Urdu subset), Deepfake-Eval-2024, FakeAVCeleb, HAV-DF (Hindi audio-video deepfakes), IAV-DF, ILLUSION, InDeepFake, KoDF (Korean deepfakes) |
-| Talking head | video | A single still photo is animated into a speaking video, driven by audio; no real footage exists. | Stiff or repeating head and shoulder motion, a background that barely moves, identity drift over long clips. | Celeb-DF++, Counterfactual-Deepfake-Bench, ILLUSION, MAVOS-DD, Hindi subset, TalkingHeadBench |
+| Talking head | video | A single still photo is animated into a speaking video, driven by audio; no real footage exists. | Stiff or repeating head and shoulder motion, a background that barely moves, identity drift over long clips. | Celeb-DF++, Counterfactual-Deepfake-Bench, ILLUSION, MAVOS-DD, German subset, MAVOS-DD, Hindi subset, TalkingHeadBench |
 | Attribute edit | video | The same person and video, with age, expression, hair or makeup changed. | Flicker in the edited region and texture that doesn't track the face. | none |
 | Fully synthetic | video | Everything is generated from a text or image prompt (Sora, Veo, Kling); nobody real was filmed. | Physics and continuity errors, objects that morph. There is no pasted face or source footage, so face-forensics detectors have little to find. | Counterfactual-Deepfake-Bench, Deepfake-Eval-2024, ILLUSION |
 | Text to speech | audio | Speech generated from text, often in a cloned voice. | Vocoder artefacts in the high frequencies, regular prosody, missing breaths and room noise. | ASVspoof 2019 Logical Access, AV-Deepfake1M, BanglaFake, DeepFakeX (South Asian and Urdu subset), FakeAVCeleb, ILLUSION, InDeepFake, IndicSynth, IndicTTS Deepfake Challenge data, IndieFake, LRLspoof (low-resource language spoofs), MLAAD, SEA-Spoof (Hindi and Tamil parts), SpeechFake (South Asian languages), Urdu Deepfake Audio (CSALT-LUMS) |
-| Voice conversion | audio | A real recording re-voiced as another speaker; the words and timing stay. | Timbre and pitch artefacts; natural prosody survives, so it is harder to catch than text to speech. | ASVspoof 2019 Logical Access, DFDC (Deepfake Detection Challenge), DeepFakeX (South Asian and Urdu subset), HAV-DF (Hindi audio-video deepfakes), IndicSynth, MAVOS-DD, Hindi subset, SpeechFake (South Asian languages) |
+| Voice conversion | audio | A real recording re-voiced as another speaker; the words and timing stay. | Timbre and pitch artefacts; natural prosody survives, so it is harder to catch than text to speech. | ASVspoof 2019 Logical Access, DFDC (Deepfake Detection Challenge), DeepFakeX (South Asian and Urdu subset), HAV-DF (Hindi audio-video deepfakes), IndicSynth, MAVOS-DD, German subset, MAVOS-DD, Hindi subset, SpeechFake (South Asian languages) |
 | Codec resynthesis | audio | Real speech encoded and decoded by a neural audio codec; voice and words are unchanged. | Codec quantisation artefacts only. | Indic-CodecFake |
 | Not stated | any | The authors don't say how the fakes were made. | Unknown. | BD-GRF6 (Bangladeshi real and fake speech, three genders), Bangla Audio Dataset, original and deepfake voices (Mendeley), In-the-Wild (Müller et al. 2022) |
 
@@ -831,7 +831,7 @@ Which features each built dataset records per clip, read from its manifest, so t
 | [UniDataPro deepfake videos (free Hugging Face preview)](#dataset-unidatapro_videos) |  |  |  |  |  |  |  |  |  |
 | [Urdu Deepfake Audio (CSALT-LUMS)](#dataset-urdu_csalt) | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |
 
-Not built yet, so not in the table: AV-Deepfake1M, Casual Conversations v2, Celeb-DF (v2), Celeb-DF++, Counterfactual-Deepfake-Bench, DF-Platter, DFDC (Deepfake Detection Challenge), DeePhy, DeepFakeX (South Asian and Urdu subset), Deepfake-Eval-2024, FaceForensics++, FakeAVCeleb, HAV-DF (Hindi audio-video deepfakes), IAV-DF, ILLUSION, INDIFACE, InDeepFake, Indic-CodecFake, IndieFake, KoDF (Korean deepfakes), LRLspoof (low-resource language spoofs), SEA-Spoof (Hindi and Tamil parts), Svarah (Indian-accented English), TalkingHeadBench. Their sections below list what the dataset itself provides.
+Not built yet, so not in the table: AV-Deepfake1M, Casual Conversations v2, Celeb-DF (v2), Celeb-DF++, Counterfactual-Deepfake-Bench, DF-Platter, DFDC (Deepfake Detection Challenge), DeePhy, DeepFakeX (South Asian and Urdu subset), Deepfake-Eval-2024, FaceForensics++, FakeAVCeleb, HAV-DF (Hindi audio-video deepfakes), IAV-DF, ILLUSION, INDIFACE, InDeepFake, Indic-CodecFake, IndieFake, KoDF (Korean deepfakes), LRLspoof (low-resource language spoofs), MAVOS-DD, German subset, SEA-Spoof (Hindi and Tamil parts), Svarah (Indian-accented English), TalkingHeadBench. Their sections below list what the dataset itself provides.
 
 ### South Asian (24)
 
@@ -1604,6 +1604,30 @@ Talking-head fakes from six recent generators over FFHQ, CelebV-HQ and FF++ iden
 | Access | Open download |
 
 Note: Its FF++-derived real videos overlap every FF++ model's training data.
+
+### Control (1)
+
+<a id="dataset-mavos_dd_de"></a>
+
+#### MAVOS-DD, German subset
+
+German YouTube videos and fakes from the same eight generators as the Hindi subset, plus freevc voice conversion; scored only as a control, never as a result.
+
+| | |
+| --- | --- |
+| Why it's here | The language control for MAVOS-DD Hindi: the same generators on German speakers, so a video model's drop on Hindi can be told apart from the talking heads that make the set hard. |
+| Media | Audio-visual, real and fake |
+| Languages | de |
+| Size | 4,366 real and 5,935 fake videos |
+| Kinds of fake | Face swap, Talking head, Reenactment, Voice conversion |
+| How fakes were made | inswapper (face swap); hififace (face swap); roop (face swap); echomimic (talking head); sonic (talking head); memo (talking head); liveportrait (reenactment); knnvc (voice conversion); freevc (voice conversion) |
+| Labels it ships | generator; which track was manipulated: video, audio; language: German |
+| Format | MP4, as the Hindi subset |
+| Features in our manifest | not built yet |
+| Paper | [MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark](https://arxiv.org/abs/2505.11109), arXiv 2025 · 11 citations |
+| Licence | CC BY-NC-SA 4.0 |
+| Access | Accept terms online, then download |
+| Used in evalsets | `mavos_dd_de_video_quick` |
 
 ### Real reference (4)
 

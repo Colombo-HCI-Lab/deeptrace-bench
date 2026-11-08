@@ -1,0 +1,19 @@
+id: mavos_dd_de
+name: MAVOS-DD, German subset
+modality: audio_video
+role: control
+status: click_through
+access:
+  kind: hf_gated
+  page: https://huggingface.co/datasets/unibuc-cs/MAVOS-DD
+  repo: unibuc-cs/MAVOS-DD
+  revision: 3ea7e6dbf0ed7e4f279bb8e6340bf55f0f2e55a5
+  allow_patterns: [german/*, data-00000-of-00001.arrow, dataset_info.json, state.json, README.md]
+licence: CC BY-NC-SA 4.0
+licence_terms:
+  - Non-commercial, share-alike. Accept the terms on Hugging Face first (its form asks for name, affiliation and purpose).
+contains: [real, fake]
+languages: [de]
+size_gb: 27.7
+builder: deeptrace_bench.datasets.mavos_dd_de:build_manifest
+notes: The language control for MAVOS-DD Hindi (added 2026-11-08). 4,366 real and 5,935 fake German videos from the same eight generators as the Hindi subset plus freevc (voice conversion, 200), so a drop from German to Hindi on the same generators points at language and faces rather than the kind of fake. The smallest of MAVOS-DD's languages that has every Hindi generator (English is 47.8 GB). Not South Asian, never a headline number. Real videos come from YouTube.

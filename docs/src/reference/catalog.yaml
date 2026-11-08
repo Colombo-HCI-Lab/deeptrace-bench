@@ -1546,6 +1546,32 @@ datasets:
     notes: >-
       The paper says face swaps keep their source audio, but the repo leaves the audio label of non-knnvc
       fakes null until the metadata confirms it.
+  mavos_dd_de:
+    fakes: [face_swap, talking_head, reenactment, vc]
+    why: >-
+      The language control for MAVOS-DD Hindi: the same generators on German speakers, so a video
+      model's drop on Hindi can be told apart from the talking heads that make the set hard.
+    s2_id: ARXIV:2505.11109
+    venue: arXiv 2025
+    summary: >-
+      German YouTube videos and fakes from the same eight generators as the Hindi subset, plus freevc
+      voice conversion; scored only as a control, never as a result.
+    scale: 4,366 real and 5,935 fake videos
+    generators:
+    - inswapper (face swap)
+    - hififace (face swap)
+    - roop (face swap)
+    - echomimic (talking head)
+    - sonic (talking head)
+    - memo (talking head)
+    - liveportrait (reenactment)
+    - knnvc (voice conversion)
+    - freevc (voice conversion)
+    annotations:
+    - generator
+    - 'which track was manipulated: video, audio'
+    - 'language: German'
+    format: MP4, as the Hindi subset
   mendeley_roop_akool:
     fakes: [face_swap]
     why: >-

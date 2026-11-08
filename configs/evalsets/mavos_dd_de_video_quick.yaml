@@ -1,0 +1,14 @@
+id: mavos_dd_de_video_quick
+modality: video
+role: control
+pairing: same_corpus
+components:
+  - dataset: mavos_dd_de
+    label: from_video
+group_by: [method]
+status: ready
+subset:
+  per_stratum: 300
+  strata: [method]
+  seed: 0
+notes: The language control for mavos_dd_hi_video_quick (2026-11-08). The same cap of 300 videos per method over MAVOS-DD's German subset, about 3,000 videos; real is 300 YouTube videos plus the knnvc (300) and freevc (200) ones, whose video is untouched. Compare each model with its mavos_dd_hi_video_quick run, generator by generator in by_method.csv.

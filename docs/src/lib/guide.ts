@@ -347,13 +347,14 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) 
   const evalset = (id: string) => D.evalsets.find((x) => x.id === id);
   const kindOf = (id: string) => {
     const e = evalset(id);
-    return e?.role === "reproduction" ? "repro" : e?.pairing === "cross_corpus" ? "cross" : "zero";
+    return e?.role === "reproduction" ? "repro" : e?.role === "control" ? "control" : e?.pairing === "cross_corpus" ? "cross" : "zero";
   };
   // Column groups in reading order; a group nobody has scored goes last.
   const COL_GROUPS: Record<string, [number, string]> = {
     repro: [0, "Reproduction"],
     zero: [1, "Zero-shot"],
     cross: [2, "Cross-corpus · not results until the shortcut probe"],
+    control: [3, "Control · not South Asian"],
   };
   const scored = new Set(D.runs.map((r) => r.evalset));
   const rank = (id: string) => (scored.has(id) ? COL_GROUPS[kindOf(id)][0] : 9);
@@ -509,9 +510,9 @@ export function buildResults(body: string) {
   const evOf = (r: Run) => D.evalsets.find((x) => x.id === r.evalset);
   const grp = (r: Run) => {
     const e = evOf(r);
-    return e?.role === "reproduction" ? "repro" : e?.modality !== "audio" ? "video" : "sa";
+    return e?.role === "reproduction" ? "repro" : e?.role === "control" ? "control" : e?.modality !== "audio" ? "video" : "sa";
   };
-  const ord: Record<string, number> = { repro: 0, sa: 1, video: 2 };
+  const ord: Record<string, number> = { repro: 0, sa: 1, video: 2, control: 3 };
   const all = D.runs
     .slice()
     .sort((a, b) => ord[grp(a)] - ord[grp(b)] || a.evalset.localeCompare(b.evalset) || b.auc - a.auc);
@@ -521,6 +522,7 @@ export function buildResults(body: string) {
       ["repro", "Reproductions"],
       ["sa", "South Asian audio"],
       ["video", "Video"],
+      ["control", "Control"],
     ] as const
   ).map(([id, label]) => ({ id, label, n: id === "all" ? all.length : all.filter((r) => grp(r) === id).length }));
 

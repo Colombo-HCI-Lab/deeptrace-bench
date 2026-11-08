@@ -6,10 +6,11 @@ import { D, evalsets, type Dataset, type FakeType, type Model, type Run } from "
 const base = import.meta.env.BASE_URL;
 
 export const MODALITIES = ["audio", "video", "audio_video"] as const;
-export const ROLES = ["south_asian", "reproduction", "real_reference", "in_the_wild", "pipeline_test"] as const;
+export const ROLES = ["south_asian", "reproduction", "control", "real_reference", "in_the_wild", "pipeline_test"] as const;
 export const ROLE_LABEL: Record<string, string> = {
   south_asian: "South Asian",
   reproduction: "Reproduction",
+  control: "Control",
   real_reference: "Real reference",
   in_the_wild: "In the wild",
   pipeline_test: "Pipeline tests only",
@@ -18,6 +19,7 @@ export const ROLE_LABEL: Record<string, string> = {
 export const ROLE_ABOUT: Record<string, string> = {
   south_asian: "The target: South Asian languages, faces or both.",
   reproduction: "Not South Asian: they check our adapters against published numbers and settle score direction.",
+  control: "Not South Asian: the same generators in another language, to tell a South Asian drop apart from a hard kind of fake.",
   real_reference: "Real speech or faces only, as the real half for fake-only sets or to count false alarms.",
   in_the_wild: "Deepfakes collected where they circulated.",
   pipeline_test: "Prove the code runs; never reported.",

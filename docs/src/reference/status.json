@@ -4579,6 +4579,61 @@
    "evalsets": []
   },
   {
+   "id": "mavos_dd_de",
+   "name": "MAVOS-DD, German subset",
+   "modality": "audio_video",
+   "role": "control",
+   "status": "click_through",
+   "languages": [
+    "de"
+   ],
+   "licence": "CC BY-NC-SA 4.0",
+   "summary": "German YouTube videos and fakes from the same eight generators as the Hindi subset, plus freevc voice conversion; scored only as a control, never as a result.",
+   "why": "The language control for MAVOS-DD Hindi: the same generators on German speakers, so a video model's drop on Hindi can be told apart from the talking heads that make the set hard.",
+   "cut": false,
+   "scale": "4,366 real and 5,935 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "fakes": [
+    "face_swap",
+    "talking_head",
+    "reenactment",
+    "vc"
+   ],
+   "generators": [
+    "inswapper (face swap)",
+    "hififace (face swap)",
+    "roop (face swap)",
+    "echomimic (talking head)",
+    "sonic (talking head)",
+    "memo (talking head)",
+    "liveportrait (reenactment)",
+    "knnvc (voice conversion)",
+    "freevc (voice conversion)"
+   ],
+   "annotations": [
+    "generator",
+    "which track was manipulated: video, audio",
+    "language: German"
+   ],
+   "format": "MP4, as the Hindi subset",
+   "notes": null,
+   "recorded": null,
+   "languages_held": null,
+   "paper": {
+    "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
+    "year": 2025,
+    "citations": 11,
+    "venue": "arXiv 2025",
+    "url": "https://arxiv.org/abs/2505.11109"
+   },
+   "evalsets": [
+    "mavos_dd_de_video_quick"
+   ]
+  },
+  {
    "id": "mavos_dd_hi",
    "name": "MAVOS-DD, Hindi subset",
    "modality": "audio_video",
@@ -5267,6 +5322,14 @@
    }
   },
   {
+   "id": "mavos_dd_de_video_quick",
+   "modality": "video",
+   "role": "control",
+   "pairing": "same_corpus",
+   "status": "ready",
+   "size": null
+  },
+  {
    "id": "mavos_dd_hi_audio",
    "modality": "audio",
    "role": "south_asian",
@@ -5431,6 +5494,7 @@
   "aasist|hidf_video": "na",
   "aasist|hidf_video_quick": "na",
   "aasist|indeepfake": "na",
+  "aasist|mavos_dd_de_video_quick": "na",
   "aasist|mavos_dd_hi_video": "na",
   "aasist|mavos_dd_hi_video_quick": "na",
   "aasist3|celeb_df_v2_test": "na",
@@ -5441,6 +5505,7 @@
   "aasist3|hidf_video": "na",
   "aasist3|hidf_video_quick": "na",
   "aasist3|indeepfake": "na",
+  "aasist3|mavos_dd_de_video_quick": "na",
   "aasist3|mavos_dd_hi_video": "na",
   "aasist3|mavos_dd_hi_video_quick": "na",
   "aasist3|mlaad_bn": "guard",
@@ -5454,6 +5519,7 @@
   "aasist_l|hidf_video": "na",
   "aasist_l|hidf_video_quick": "na",
   "aasist_l|indeepfake": "na",
+  "aasist_l|mavos_dd_de_video_quick": "na",
   "aasist_l|mavos_dd_hi_video": "na",
   "aasist_l|mavos_dd_hi_video_quick": "na",
   "altfreezing|asvspoof2019_la_eval": "na",
@@ -5486,6 +5552,7 @@
   "antideepfake_mms_300m|hidf_video": "na",
   "antideepfake_mms_300m|hidf_video_quick": "na",
   "antideepfake_mms_300m|indeepfake": "na",
+  "antideepfake_mms_300m|mavos_dd_de_video_quick": "na",
   "antideepfake_mms_300m|mavos_dd_hi_video": "na",
   "antideepfake_mms_300m|mavos_dd_hi_video_quick": "na",
   "antideepfake_mms_300m|mlaad_bn": "guard",
@@ -5500,6 +5567,7 @@
   "antideepfake_w2v_small|hidf_video": "na",
   "antideepfake_w2v_small|hidf_video_quick": "na",
   "antideepfake_w2v_small|indeepfake": "na",
+  "antideepfake_w2v_small|mavos_dd_de_video_quick": "na",
   "antideepfake_w2v_small|mavos_dd_hi_video": "na",
   "antideepfake_w2v_small|mavos_dd_hi_video_quick": "na",
   "antideepfake_w2v_small|mlaad_bn": "guard",
@@ -5522,6 +5590,7 @@
   "avad|indicsynth_hi": "na",
   "avad|indicsynth_ur": "na",
   "avad|indictts_challenge": "na",
+  "avad|mavos_dd_de_video_quick": "na",
   "avad|mavos_dd_hi_audio": "na",
   "avad|mavos_dd_hi_video": "na",
   "avad|mavos_dd_hi_video_quick": "na",
@@ -5553,6 +5622,7 @@
   "avh_align|indicsynth_hi": "na",
   "avh_align|indicsynth_ur": "na",
   "avh_align|indictts_challenge": "na",
+  "avh_align|mavos_dd_de_video_quick": "na",
   "avh_align|mavos_dd_hi_audio": "na",
   "avh_align|mavos_dd_hi_video": "na",
   "avh_align|mavos_dd_hi_video_quick": "na",
@@ -5597,6 +5667,7 @@
   "df_arena_1b|hidf_video": "na",
   "df_arena_1b|hidf_video_quick": "na",
   "df_arena_1b|indeepfake": "na",
+  "df_arena_1b|mavos_dd_de_video_quick": "na",
   "df_arena_1b|mavos_dd_hi_video": "na",
   "df_arena_1b|mavos_dd_hi_video_quick": "na",
   "df_arena_1b|mlaad_bn": "guard",
@@ -5611,6 +5682,7 @@
   "df_arena_500m|hidf_video": "na",
   "df_arena_500m|hidf_video_quick": "na",
   "df_arena_500m|indeepfake": "na",
+  "df_arena_500m|mavos_dd_de_video_quick": "na",
   "df_arena_500m|mavos_dd_hi_video": "na",
   "df_arena_500m|mavos_dd_hi_video_quick": "na",
   "df_arena_500m|mlaad_bn": "guard",
@@ -5844,6 +5916,7 @@
   "havic|indicsynth_hi": "na",
   "havic|indicsynth_ur": "na",
   "havic|indictts_challenge": "na",
+  "havic|mavos_dd_de_video_quick": "na",
   "havic|mavos_dd_hi_audio": "na",
   "havic|mavos_dd_hi_video": "na",
   "havic|mavos_dd_hi_video_quick": "na",
@@ -5896,6 +5969,7 @@
   "lipfd|indicsynth_hi": "na",
   "lipfd|indicsynth_ur": "na",
   "lipfd|indictts_challenge": "na",
+  "lipfd|mavos_dd_de_video_quick": "na",
   "lipfd|mavos_dd_hi_audio": "na",
   "lipfd|mavos_dd_hi_video": "na",
   "lipfd|mavos_dd_hi_video_quick": "na",
@@ -6128,6 +6202,7 @@
   "xlsr_aasist|hidf_video": "na",
   "xlsr_aasist|hidf_video_quick": "na",
   "xlsr_aasist|indeepfake": "na",
+  "xlsr_aasist|mavos_dd_de_video_quick": "na",
   "xlsr_aasist|mavos_dd_hi_video": "na",
   "xlsr_aasist|mavos_dd_hi_video_quick": "na",
   "xlsr_mamba|celeb_df_v2_test": "na",
@@ -6138,6 +6213,7 @@
   "xlsr_mamba|hidf_video": "na",
   "xlsr_mamba|hidf_video_quick": "na",
   "xlsr_mamba|indeepfake": "na",
+  "xlsr_mamba|mavos_dd_de_video_quick": "na",
   "xlsr_mamba|mavos_dd_hi_video": "na",
   "xlsr_mamba|mavos_dd_hi_video_quick": "na",
   "xlsr_sls|celeb_df_v2_test": "na",
@@ -6148,6 +6224,7 @@
   "xlsr_sls|hidf_video": "na",
   "xlsr_sls|hidf_video_quick": "na",
   "xlsr_sls|indeepfake": "na",
+  "xlsr_sls|mavos_dd_de_video_quick": "na",
   "xlsr_sls|mavos_dd_hi_video": "na",
   "xlsr_sls|mavos_dd_hi_video_quick": "na"
  },

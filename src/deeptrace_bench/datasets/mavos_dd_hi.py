@@ -20,65 +20,23 @@ demographic labels. Hindi is an open-set language in MAVOS-DD: test only in the 
 
 from __future__ import annotations
 
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 import pandas as pd
 
-from . import iter_files
+from . import mavos_dd
 
 DATASET = "mavos_dd_hi"
-# method -> (label_video, label_audio, method_family); None where unchecked
-_METHODS: dict[str, tuple[str, str | None, str | None]] = {
-    "real": ("real", "real", None),
-    "knnvc": ("real", "fake", "vc"),
-    "inswapper": ("fake", None, "face_swap"),
-    "hififace": ("fake", None, "face_swap"),
-    "roop": ("fake", None, "face_swap"),
-    "echomimic": ("fake", None, "talking_head"),
-    "sonic": ("fake", None, "talking_head"),
-    "memo": ("fake", None, "talking_head"),
-    "liveportrait": ("fake", None, "reenactment"),
-}
+# Hindi has no freevc folder; the others' methods are mavos_dd.METHODS.
+_METHODS = frozenset(mavos_dd.METHODS) - {"freevc"}
+sample_stratum = mavos_dd.sample_stratum
 
 
 def label_from_path(rel_path: str) -> str | None:
     """``real`` under ``hindi/real/``, ``fake`` under a known generator folder."""
-    path = PurePosixPath(rel_path)
-    if len(path.parts) != 3 or path.parts[0] != "hindi" or path.suffix.lower() != ".mp4":
-        return None
-    method = _METHODS.get(path.parts[1])
-    if method is None:
-        return None
-    return "real" if path.parts[1] == "real" else "fake"
-
-
-def sample_stratum(rel_path: str) -> str:
-    """Sample per method, so every generator (and the only fakes with known audio) shows up."""
-    return PurePosixPath(rel_path).parts[1]
+    return mavos_dd.label_from_path(rel_path, "hindi", _METHODS)
 
 
 def build_manifest(root: Path) -> pd.DataFrame:
     """One row per video found under ``root``."""
-    rows = []
-    for rel in iter_files(root):
-        label = label_from_path(rel)
-        if label is None:
-            continue
-        path = PurePosixPath(rel)
-        method = path.parts[1]
-        video, audio, family = _METHODS[method]
-        rows.append(
-            {
-                "item_id": f"{DATASET}/{method}/{path.stem}",
-                "dataset": DATASET,
-                "rel_path": rel,
-                "modality": "audio_video",
-                "label": label,
-                "label_video": video,
-                "label_audio": audio,
-                "method": None if method == "real" else method,
-                "method_family": family,
-                "language": "hi",
-            }
-        )
-    return pd.DataFrame(rows)
+    return mavos_dd.build_manifest(root, DATASET, "hindi", "hi", _METHODS)

@@ -157,6 +157,7 @@ export const GROUPS: [string, string, string][] = [
   ["reproduction", "same_corpus", "Reproduction"],
   ["south_asian", "same_corpus", "South Asian · same corpus"],
   ["south_asian", "cross_corpus", "South Asian · cross corpus"],
+  ["control", "same_corpus", "Control"],
 ];
 
 // AUC in bands of 0.1 for the coverage grid, each its own hue so neighbouring bands read apart at
@@ -242,7 +243,7 @@ export const ACCESS: Record<string, string> = {
   deferred: "Deferred", dead: "Unavailable",
 };
 export const ROLE: Record<string, string> = {
-  south_asian: "South Asian", reproduction: "Reproduction", real_reference: "Real reference",
+  south_asian: "South Asian", reproduction: "Reproduction", control: "Control", real_reference: "Real reference",
   in_the_wild: "In the wild",
 };
 export const MOD: Record<string, string> = {

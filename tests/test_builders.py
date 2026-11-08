@@ -10,6 +10,7 @@ from deeptrace_bench.datasets import (
     banglafake,
     celeb_df_v2,
     in_the_wild,
+    mavos_dd_de,
     mavos_dd_hi,
     mendeley_roop_akool,
     mlaad,
@@ -300,6 +301,27 @@ def test_mavos_manifest_labels_each_track(tmp_path):
     assert tracks.loc["inswapper", "label_video"] == "fake"
     assert pd.isna(tracks.loc["inswapper", "label_audio"])
     assert set(df["language"]) == {"hi"} and set(df["modality"]) == {"audio_video"}
+
+
+def test_mavos_german_shares_the_hindi_labels(tmp_path):
+    _tree(
+        tmp_path,
+        [
+            "german/real/0001-aa.mp4",
+            "german/freevc/0002-bb.mp4",
+            "german/sonic/0003-cc.mp4",
+            "hindi/real/0004-dd.mp4",
+        ],
+    )
+    df = mavos_dd_de.build_manifest(tmp_path)
+    validate_manifest(df, "mavos_dd_de")
+    assert len(df) == 3 and set(df["language"]) == {"de"}
+    tracks = df.set_index("method")[["label_video", "label_audio"]]
+    # freevc, like knnvc, changes only the voice.
+    assert tracks.loc["freevc"].tolist() == ["real", "fake"]
+    assert tracks.loc["sonic", "label_video"] == "fake"
+    assert mavos_dd_hi.label_from_path("hindi/freevc/0005-ee.mp4") is None
+    assert mavos_dd_de.label_from_path("hindi/real/0004-dd.mp4") is None
 
 
 @pytest.mark.parametrize(

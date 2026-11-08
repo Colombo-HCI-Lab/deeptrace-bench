@@ -32,6 +32,7 @@ ACCESS = {
 ROLES = {
     "south_asian": "South Asian",
     "reproduction": "Reproduction",
+    "control": "Control",
     "real_reference": "Real reference",
     "in_the_wild": "In the wild",
     "pipeline_test": "Pipeline tests only",

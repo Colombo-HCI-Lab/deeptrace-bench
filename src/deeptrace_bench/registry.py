@@ -171,7 +171,7 @@ class ModelConfig(_Strict):
 AccessKind = Literal["hf", "hf_gated", "url", "manual", "modelscope", "none"]
 DatasetStatus = Literal["open", "click_through", "request", "deferred", "dead"]
 DatasetRole = Literal[
-    "reproduction", "south_asian", "real_reference", "in_the_wild", "pipeline_test"
+    "reproduction", "south_asian", "control", "real_reference", "in_the_wild", "pipeline_test"
 ]
 
 
@@ -264,7 +264,7 @@ class EvalsetConfig(_Strict):
 
     id: str
     modality: Modality
-    role: Literal["reproduction", "south_asian", "pipeline_test"]
+    role: Literal["reproduction", "south_asian", "control", "pipeline_test"]
     pairing: Literal["same_corpus", "cross_corpus"]
     components: list[Component] = Field(min_length=1)
     match_on: list[str] = []
