@@ -33,6 +33,7 @@ $DTB_ROOT/
 ├── splits/                                  identity-safe fine-tuning splits
 ├── parity/<model>/<UTC time>/               a parity run: inputs.npz, parity.json, adapter.npy,
 │                                            reference.npy, reference.json
+├── shortcut/<evalset>/                      the shortcut probe: features.parquet (per item), summary.json
 │
 └── smoke/                                   the smoke namespace: same layout as above
     ├── README.txt                           "pipeline tests; never reported; safe to delete"

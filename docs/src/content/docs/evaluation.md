@@ -12,7 +12,7 @@ An evalset (`configs/evalsets/<id>.yaml`) combines one or more datasets, a filte
 | Pairing | Real and fake come from | Examples | In headline numbers |
 | --- | --- | --- | --- |
 | `same_corpus` | the same recordings or speakers | Urdu CSALT, BanglaFake, FakeAVCeleb, IndicSynth with its source IndicSUPERB | yes |
-| `cross_corpus` | different corpora, so microphone, noise, loudness or sample rate can give the label away | MLAAD fakes with real speech from elsewhere | never; each gets a [shortcut probe](#shortcut-probe-planned) |
+| `cross_corpus` | different corpora, so microphone, noise, loudness or sample rate can give the label away | MLAAD fakes with real speech from elsewhere | never; each gets a [shortcut probe](#shortcut-probe) |
 
 ### Quick subsets
 
@@ -83,9 +83,20 @@ It currently refuses HAVIC on FakeAVCeleb, AASIST3 and DF Arena on MLAAD, and DF
 
 Its blind spot: it compares datasets, not generators, so a model that trained (through some other dataset) on the TTS system behind an evalset's fakes still gets `clean`. Our own fine-tuned checkpoints list their training items (`items_file`), so the guard covers them exactly.
 
-## Shortcut probe (planned)
+## Shortcut probe
 
-For every cross-corpus evalset: a cross-validated logistic regression on trivial features only (duration, loudness, silence ratio, spectral rolloff and bandwidth, original sample rate), its AUC reported next to the detectors'. If the probe alone scores high, the evalset measures the corpus, not fakeness.
+For every cross-corpus evalset: a cross-validated logistic regression on trivial features only, its AUC reported next to the detectors'. If the probe alone scores high, the evalset measures the corpus, not fakeness. Built 2026-11-08 (`src/deeptrace_bench/eval/shortcut.py`, `scripts/shortcut.py`); it runs on SPARK as deeptrace-experiments' `shortcut` stage.
+
+| Feature | What it is |
+| --- | --- |
+| `duration_s` | clip length |
+| `rms_db` | overall loudness |
+| `silence_ratio` | share of 25 ms frames more than 40 dB below the loudest |
+| `spectral_rolloff_hz` | mean 85% rolloff of the non-silent frames, at 16 kHz |
+| `spectral_bandwidth_hz` | mean spread around the spectral centroid, same frames |
+| `original_sample_rate` | the file's rate before resampling to 16 kHz |
+
+Five stratified folds (seed 0), standardised features, out-of-fold scores, a 95% bootstrap interval, and each feature's own AUC (as max(AUC, 1 − AUC)) so the giveaway can be named. Unreadable clips are counted by status. Per-item features stay in the store (`DTB_ROOT/shortcut/<evalset>/`); `--publish` writes the aggregates to `results/shortcut/<evalset>.json`. Same-corpus sets can be probed too, as a baseline for what a low probe score looks like.
 
 ## Fine-tuning splits
 
