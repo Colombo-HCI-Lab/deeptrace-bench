@@ -785,8 +785,9 @@ LipFD (Liu et al., NeurIPS 2024) compares lip motion with audio over time. Its t
 | Input | 500 px face-box crops, 32 frames per video |
 | Paper | no paper |
 | Training | trained on AVLips; trained on LRS3 |
+| Our runs | `mavos_dd_hi_av`: AUC 0.544, EER 46.9% |
 | Licence | none stated; code imported from the pinned checkout, never copied |
-| Status here | adapter written, parity checked |
+| Status here | adapter written, parity checked, scored on 1 evalset |
 
 ## Datasets
 

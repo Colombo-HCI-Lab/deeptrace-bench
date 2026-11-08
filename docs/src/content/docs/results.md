@@ -319,18 +319,19 @@ SpeechFake's Bengali, Tamil, Marathi and Malayalam fakes run against real read s
 
 ## The 2026-11 new adapters
 
-UnivFD, LipFD, AVAD, LAA-Net and FakeSTormer, all past parity ([Models](models.md#added-2026-11-03-five-more-adapters)), scored on SPARK on the same full sets as the round above. Snapshot of 2026-11-08; LipFD is still scoring.
+UnivFD, LipFD, AVAD, LAA-Net and FakeSTormer, all past parity ([Models](models.md#added-2026-11-03-five-more-adapters)), scored on SPARK on the same full sets as the round above. Snapshot of 2026-11-08.
 
 | Model | HiDF AUC | HiDF EER | HiDF TPR@5% | MAVOS-DD AUC | MAVOS-DD EER | MAVOS-DD TPR@5% |
 | ----- | -------: | -------: | ----------: | -----------: | -----------: | --------------: |
 | FakeSTormer | 0.772 | 30.2% | 0.30 | 0.577 | 46.5% | 0.16 |
 | LAA-Net | 0.839 | 23.7% | 0.41 | 0.633 | 39.7% | 0.18 |
 | UnivFD | 0.685 | 36.8% | 0.16 | 0.710 | 36.0% | 0.31 |
-| LipFD (audio and video) | n/a | n/a | n/a | scoring | | |
+| LipFD (audio and video) | n/a | n/a | n/a | 0.544 | 46.9% | 0.07 |
 | AVAD (audio and video) | n/a | n/a | n/a | 0.433 | 54.5% | 0.02 |
 
 - **AVAD ranks MAVOS-DD's fakes below its real videos.** Its AUC of 0.433 (95% CI 0.419 to 0.445) is below chance, as AVH-Align's 0.520 is near it: both learned only from real talking faces, and neither finds MAVOS-DD Hindi's fakes stranger than its real clips. With no video score direction settled, a flipped score can't be ruled out.
 - **The SBI-style detectors don't carry SBI's lead onto MAVOS-DD.** LAA-Net, trained like SBI on self-blended FF++ faces, scores 0.839 on HiDF but 0.633 on MAVOS-DD, and FakeSTormer 0.772 and 0.577, against SBI's 0.877 and 0.777.
+- **LipFD, the lip-sync specialist, barely separates MAVOS-DD's fakes (0.544) and misses the lip-sync ones most.** At its equal-error threshold it flags 82% of LivePortrait and 84% of Roop fakes but only 15% of EchoMimic, 33% of Sonic and 40% of MEMO, the audio-driven talking heads it was built for; it learned Wav2Lip-style mouth edits over English LRS3, not diffusion talking heads in Hindi.
 - **UnivFD is the one model better on MAVOS-DD than on HiDF.** The generic AI-image detector, which never saw a face swap, scores 0.685 on HiDF and 0.710 on MAVOS-DD, where many fakes are fully generated talking heads rather than swapped faces.
 
 ## What the results can't say yet

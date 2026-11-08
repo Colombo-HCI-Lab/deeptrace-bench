@@ -12035,6 +12035,44 @@
    }
   },
   {
+   "model": "lipfd",
+   "evalset": "mavos_dd_hi_av",
+   "run_id": "lipfd__mavos_dd_hi_av__a1abd552",
+   "pairing": "same_corpus",
+   "n": 7513,
+   "n_real": 3632,
+   "n_fake": 3881,
+   "n_failed": 58,
+   "auc": 0.5442870223364908,
+   "auc_lo": 0.5319912420728765,
+   "auc_hi": 0.5572018422120095,
+   "eer": 0.46919431279620855,
+   "eer_lo": 0.4570837642192348,
+   "eer_hi": 0.48034569277948147,
+   "acc": 0.5309188464118042,
+   "bal_acc": 0.5309147360527747,
+   "ap": 0.5499397376001809,
+   "tpr_at_fpr01": 0.012409513960703205,
+   "tpr_at_fpr05": 0.06592554291623579,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 62160.3,
+   "windows": 74550,
+   "compute": {
+    "items_per_s": 0.047,
+    "windows_per_s": 18.43,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 2.198,
+    "gpu_util_mean": 5.5,
+    "energy_wh": 2618.765,
+    "energy_wh_per_1k_items": 901.468,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
    "model": "lipforensics",
    "evalset": "hidf_video",
    "run_id": "lipforensics__hidf_video__fdd2629c",
