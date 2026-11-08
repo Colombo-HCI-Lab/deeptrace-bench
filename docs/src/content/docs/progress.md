@@ -159,7 +159,7 @@ Commits `15a2e2c` and `d3a6d03`.
 
 In order:
 
-0. **Finish the five new adapters:** import LipFD's wave `s5c_lipfd` when it lands.
+0. **Finish the five new adapters:** LipFD on MAVOS-DD Hindi is ordered as wave `s5c_lipfd` (deeptrace-experiments run 42455272481, about 17 hours of scoring). When its report lands, `scripts/exp.py import --build-site` there, then fill LipFD's row in [Results](results.md#the-2026-11-new-adapters). If it is cut off again, split it with `score.py --shard`, since 24 hours is the cap per job.
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 3. **A generator-level contamination check** of DF Arena and AntiDeepfake, then generators they haven't seen. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean, and their near-ceiling scores on the open South Asian sets (0.978 and up for MMS-300M and both DF Arena models) may be familiarity rather than transfer.
