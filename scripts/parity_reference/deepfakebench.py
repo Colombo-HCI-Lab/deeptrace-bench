@@ -9,6 +9,8 @@ resize to the yaml's resolution, torchvision ``ToTensor`` and ``Normalize``. So 
 weights, the numerics of an old torch and the transform, but not upstream's package imports, which
 pull in every detector.
 
+Effort (``effort``) also needs transformers (4.30.2 with torch 1.13) and fetches its CLIP snapshot.
+
 Usage: $DTB_ROOT/parity/envs/dfb/bin/python scripts/parity_reference/deepfakebench.py <run dir>
 """
 
@@ -69,6 +71,26 @@ with helper.scoped_modules(stubs, purge=["metrics", "networks", "detectors", "lo
         "networks." + ("efficientnetb4" if name == "efficientnetb4" else "xception")
     )
     detector = importlib.import_module(f"detectors.{name}_detector")
+    if name == "effort":
+        # Upstream calls CLIPModel.from_pretrained on a hard-coded local snapshot of
+        # openai/clip-vit-large-patch14 at 32bd642 (Effort issue 15); the same call on that
+        # snapshot, fetched here. The adapter builds the bare network instead, so this checks
+        # that the checkpoint replaces every weight it needs.
+        from huggingface_hub import snapshot_download
+
+        snapshot = snapshot_download(
+            "openai/clip-vit-large-patch14",
+            revision="32bd64288804d66eefd0ccbe215aa642df71cc41",
+            allow_patterns=["config.json", "model.safetensors"],
+        )
+        upstream_clip = detector.CLIPModel
+
+        class SnapshotCLIP:
+            @staticmethod
+            def from_pretrained(path, **kwargs):
+                return upstream_clip.from_pretrained(snapshot, **kwargs)
+
+        detector.CLIPModel = SnapshotCLIP
     if name == "recce":  # timm's xception(pretrained=True) would download what the .pth replaces
         import functools
 
