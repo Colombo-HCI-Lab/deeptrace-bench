@@ -57,18 +57,40 @@ def pick_items(items: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
     return picked.sort_values("_rank").drop(columns="_rank").reset_index(drop=True)
 
 
-def pack_inputs(per_item: Sequence[np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
-    """Stack each item's inputs (windows or crops) into one array, plus each unit's item index.
+def pack_inputs(
+    per_item: Sequence[Sequence[np.ndarray]],
+) -> tuple[np.ndarray | list[np.ndarray], np.ndarray]:
+    """Each item's inputs (windows or crops) as one sequence of units, plus each unit's item index.
 
-    Raises:
-        ParityError: if inputs differ in shape (native-size crops aren't supported yet).
+    Inputs of one shape stack into one array. Native-size face crops (GenD's) differ in shape, so
+    they stay a list, which ``save_inputs`` writes one array per unit.
     """
-    shapes = {np.asarray(unit).shape for units in per_item for unit in units}
-    if len(shapes) != 1:
-        raise ParityError(f"inputs differ in shape ({sorted(shapes)}); export needs one shape")
-    units = np.concatenate([np.asarray(units) for units in per_item])
     index = np.concatenate([np.full(len(units), i) for i, units in enumerate(per_item)])
-    return units, index
+    shapes = {np.asarray(unit).shape for units in per_item for unit in units}
+    if len(shapes) == 1:
+        return np.concatenate([np.asarray(units) for units in per_item]), index
+    return [np.asarray(unit) for units in per_item for unit in units], index
+
+
+def save_inputs(path, units: np.ndarray | list[np.ndarray], item_index: np.ndarray) -> None:
+    """``inputs.npz``: ``units`` when they share a shape, else ``unit_<j>`` and ``n_units``.
+
+    Reference scripts read it with ``load_units``'s logic, which they copy, since they run outside
+    this package.
+    """
+    if isinstance(units, np.ndarray):
+        np.savez(path, units=units, item_index=item_index)
+        return
+    arrays = {f"unit_{j}": u for j, u in enumerate(units)}
+    np.savez(path, n_units=np.int64(len(units)), item_index=item_index, **arrays)
+
+
+def load_units(path) -> np.ndarray | list[np.ndarray]:
+    """The units ``save_inputs`` wrote, an array or a list of arrays of different shapes."""
+    z = np.load(path)
+    if "units" in z:
+        return z["units"]
+    return [z[f"unit_{j}"] for j in range(int(z["n_units"]))]
 
 
 def compare(adapter: np.ndarray, reference: np.ndarray, tol: float = TOLERANCE) -> dict:

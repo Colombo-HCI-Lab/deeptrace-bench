@@ -50,6 +50,8 @@ log = logging.getLogger("parity")
 # adapter class -> reference script under scripts/parity_reference/, and the Python that runs it
 REFERENCES = {
     "AASISTDetector": ("aasist.py", "uv run python"),
+    "AASIST3Detector": ("aasist3.py", "{dtb_root}/parity/envs/aasist3/bin/python"),
+    "GenDDetector": ("gend.py", "uv run python"),
     "DFArenaDetector": ("df_arena.py", "uv run python"),
     "DeepfakeBenchDetector": ("deepfakebench.py", "{dtb_root}/parity/envs/dfb/bin/python"),
     "SBIDetector": ("sbi.py", "{dtb_root}/parity/envs/dfb/bin/python"),
@@ -120,7 +122,7 @@ def export(args: argparse.Namespace) -> int:
         units, item_index = None, None
     else:
         units, item_index = parity.pack_inputs(per_item)
-        np.savez(run / parity.INPUTS, units=units, item_index=item_index)
+        parity.save_inputs(run / parity.INPUTS, units, item_index)
     detector = load_detector(model)
     reference, python = REFERENCES[type(detector).__name__]
     spec = {
@@ -141,7 +143,12 @@ def export(args: argparse.Namespace) -> int:
     if units is None:
         scores = [detector.score(d) for d in per_item]
     else:
-        scores = [detector.score(units[item_index == i]) for i in range(len(kept))]
+        scores = [
+            detector.score([units[j] for j in np.flatnonzero(item_index == i)])
+            if isinstance(units, list)
+            else detector.score(units[item_index == i])
+            for i in range(len(kept))
+        ]
     np.save(run / parity.ADAPTER_SCORES, np.concatenate(scores).astype(np.float64))
     command = python.format(dtb_root=dtb_root())
     print(f"{len(kept)} items, {len(units) if units is not None else len(kept)} inputs in {run}")

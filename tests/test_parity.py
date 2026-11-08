@@ -6,7 +6,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from deeptrace_bench.parity import ParityError, compare, pack_inputs, pick_items
+from deeptrace_bench.parity import (
+    ParityError,
+    compare,
+    load_units,
+    pack_inputs,
+    pick_items,
+    save_inputs,
+)
 
 
 def _items(n_real: int, n_fake: int) -> pd.DataFrame:
@@ -28,9 +35,16 @@ def test_inputs_pack_into_one_array_with_an_item_index():
     assert units.shape == (3, 8) and index.tolist() == [0, 0, 1]
 
 
-def test_inputs_of_different_shapes_are_refused():
-    with pytest.raises(ParityError, match="shape"):
-        pack_inputs([np.zeros((1, 8)), np.zeros((1, 9))])
+def test_inputs_of_different_shapes_stay_a_list_and_round_trip(tmp_path):
+    units, index = pack_inputs([np.zeros((1, 8)), np.ones((2, 9))])
+    assert isinstance(units, list) and [u.shape for u in units] == [(8,), (9,), (9,)]
+    assert index.tolist() == [0, 1, 1]
+    save_inputs(tmp_path / "inputs.npz", units, index)
+    back = load_units(tmp_path / "inputs.npz")
+    assert [u.tolist() for u in back] == [u.tolist() for u in units]
+    same, _ = pack_inputs([np.zeros((2, 8))])
+    save_inputs(tmp_path / "same.npz", same, np.zeros(2))
+    assert load_units(tmp_path / "same.npz").shape == (2, 8)
 
 
 def test_scores_within_tolerance_pass():
