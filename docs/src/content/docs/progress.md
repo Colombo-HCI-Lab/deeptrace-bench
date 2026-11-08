@@ -15,6 +15,15 @@ As of 2026-11-08:
 
 ## Timeline
 
+### 2026-11-08: the generator check, the shortcut probe and the language control
+
+Commits `ed4bab6` to `e1bf16f` here.
+
+- The generator-level contamination check of DF Arena and AntiDeepfake is written up ([Results](results.md#generator-level-contamination-check)). Few exact generator matches; voice-conversion systems found in no training corpus are caught as well as XTTS-v2, so familiarity alone doesn't explain their ceiling.
+- The [shortcut probe](evaluation.md#shortcut-probe) is built, with a `shortcut` stage on SPARK; it waits for the worker.
+- MAVOS-DD German joins as a language control for the video drop on Hindi, with a new `control` role; wave `s6_language_control` is scoring it on SPARK.
+- Parity references for AASIST3, XLS-R + SLS, GenD, GenD PE-L and Effort are written, with their stacks in the SPARK `parity` stage; the job waits for the worker.
+
 ### 2026-11-08: LipFD scored, the new adapters done
 
 Run 42455272481 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments), at `e10dfe3` here.
@@ -168,10 +177,10 @@ In order:
 
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
-3. **A generator-level contamination check** of DF Arena and AntiDeepfake, then generators they haven't seen. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean, and their near-ceiling scores on the open South Asian sets (0.978 and up for MMS-300M and both DF Arena models) may be familiarity rather than transfer.
-4. **A language control for the video drop**: the same video models on a non-South-Asian set made with MAVOS-DD's generators (its other-language subsets, if they share Hindi's), to tell "Hindi" apart from "talking head" ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).
-5. **The shortcut probe**, then the cross-corpus sets that wait on it (E5: MLAAD, SpeechFake, BD-GRF6, `mlaad_si`, the only Sinhala fakes).
-6. **Parity still owed:** GenD (the letterbox crop added for the DFDC winner may unblock its export), XLS-R + SLS (needs the fairseq zip its checkout ships), XLSR-Mamba, AASIST3, GenD PE-L, HAVIC, LipForensics, Effort.
+3. **Generators they haven't seen.** The desk check is done ([Results](results.md#generator-level-contamination-check)): few exact matches, and unseen voice conversion is caught as well as seen TTS. Next, per-generator numbers on MLAAD Hindi's 2026 systems, once the team agrees the guard carve-out below, or on SEA-Spoof once its request is granted.
+4. **A language control for the video drop**: MAVOS-DD German, the same generators as Hindi, is scoring on SPARK as wave `s6_language_control` (every video model on its quick share, and the Hindi quick share for the eight models that lacked it). Compare each model's German and Hindi runs generator by generator.
+5. **The shortcut probe**, built 2026-11-08 ([Evaluation](evaluation.md#shortcut-probe)): run it on SPARK on the cross-corpus sets (E5: MLAAD, SpeechFake, BD-GRF6, `mlaad_si`, the only Sinhala fakes) and two same-corpus baselines, then decide which of their numbers count.
+6. **Parity still owed:** AASIST3, XLS-R + SLS, GenD, GenD PE-L and Effort have references and SPARK stacks (2026-11-08) and run next; XLSR-Mamba (mamba-ssm's CUDA kernels), HAVIC and LipForensics (upstream's face and landmark pipelines) have none yet.
 7. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
 8. **deeptrace's own data** (E7), once collection starts.
 
@@ -180,6 +189,7 @@ In order:
 - **Decision 4**, the rule for keeping an attribute. As proposed it uses AUC only. On HiDF one group's AUC barely moves while its false-positive rate doubles ([Results](results.md#video-hidf)), so a false-positive-rate rule at a fixed threshold may be needed too ([the rule](evaluation.md#metrics)).
 - **Decision 5**, the evaluation setup in [`configs/eval/default.yaml`](/configs/eval/default.yaml): due 2026-10-09, still open. The settings in question are in [Evaluation](evaluation.md#settings-still-open).
 - **`group_gap`**, the headline fairness number, is still undefined ([evaluation.md](evaluation.md#metrics)).
+- **A per-generator guard carve-out** (proposed 2026-11-08): let a model trained on MLAAD be scored on MLAAD systems released after its training (Voxtral, OmniVoice and VoxCPM2 in Hindi), as a diagnostic outside the headline numbers. The guard refuses the whole dataset today ([Results](results.md#generator-level-contamination-check)).
 - **Cut candidates** (proposed 2026-10-26): AASIST-L, AASIST3, DF Arena 500M, EfficientNet-B4 and Deepfake-Eval-2024 add little the others don't show for South Asia. Each is marked in the [Model catalog](catalog.md#models) and [Dataset catalog](catalog.md#datasets) with its reason; the team decides whether to drop them.
 
 ## Adding an entry

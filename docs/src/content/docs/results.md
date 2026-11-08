@@ -334,6 +334,24 @@ UnivFD, LipFD, AVAD, LAA-Net and FakeSTormer, all past parity ([Models](models.m
 - **LipFD, the lip-sync specialist, barely separates MAVOS-DD's fakes (0.544) and misses the lip-sync ones most.** At its equal-error threshold it flags 82% of LivePortrait and 84% of Roop fakes but only 15% of EchoMimic, 33% of Sonic and 40% of MEMO, the audio-driven talking heads it was built for; it learned Wav2Lip-style mouth edits over English LRS3, not diffusion talking heads in Hindi.
 - **UnivFD is the one model better on MAVOS-DD than on HiDF.** The generic AI-image detector, which never saw a face swap, scores 0.685 on HiDF and 0.710 on MAVOS-DD, where many fakes are fully generated talking heads rather than swapped faces.
 
+## Generator-level contamination check
+
+DF Arena (500M, 1B) and AntiDeepfake (MMS-300M, wav2vec 2.0 small) score 0.978 or more on almost every open South Asian audio set. The [contamination guard](evaluation.md#metrics) compares datasets, so a set made with a TTS system these models trained on still counts as clean. Desk check of 2026-11-08: each evalset's generators, from its paper or card, against the generators in every corpus the four models list ([Models](models.md#per-model)).
+
+| Evalset | Generators | Seen in training |
+| --- | --- | --- |
+| IndicSynth (bn, hi, ur) | XTTS-v2 (base, and fine-tuned on IndicSUPERB for bn and ur), Coqui VITS (bn), FreeVC24 | XTTS-v2 exactly (MLAAD, ASVspoof 5 A29); Bengali VITS probably (MLAAD `bn` VITS); FreeVC24 not found |
+| BanglaFake | VITS trained on the SUST corpus | family only (VITS in MLAAD, ASVspoof 5, SpoofCeleb) |
+| Urdu CSALT | Tacotron and VITS trained on PRUS | family only |
+| MAVOS-DD Hindi audio | kNN-VC | not found |
+| SpeechFake (5 languages) | Edge-TTS; SeedVC in Hindi | Edge-TTS is in MLAAD, version unknown; SeedVC not found |
+| MLAAD (bn, hi, si) | Bark, XTTS-v2, Coqui `bn` VITS, Edge-TTS (si), and in Hindi IndicF5, Veena, Indri, Ringg Squirrel, Voxtral, OmniVoice, VoxCPM2 | the older systems likely; the store holds MLAAD v11 (2026-08), the models saw about v5 to v8, and Voxtral, OmniVoice and VoxCPM2 (March and April 2026) postdate both models |
+| Bangla voices, IndicTTS challenge, BD-GRF6 | unstated | can't be judged |
+
+- **Exact matches are few; family matches are everywhere.** XTTS-v2 in IndicSynth is the clear case. Most other sets share only an architecture (VITS, Tacotron) with something in training, trained on other speakers and languages.
+- **Familiarity doesn't explain the ceiling by itself.** The generators found in no training corpus are caught as well as XTTS-v2: at its EER threshold DF Arena 1B misses 0% of IndicSynth Bengali's XTTS-v2 fakes, 0.9% of FreeVC24's and 0.7% of VITS's; DF Arena 500M misses 1.6% of SpeechFake Hindi's SeedVC and 13% of its Edge-TTS; DF Arena 1B misses 0.1% of MAVOS-DD's kNN-VC (`by_method.csv` of each run). The voice-conversion lists of four AntiDeepfake corpora (DSD, CVoiceFake, DECRO, DiffSSD) couldn't be read, so "not found" is provisional there. Every fake here still passes through a neural vocoder of a kind these models trained on.
+- **The clean test is on disk but behind the guard.** MLAAD Hindi's Voxtral, OmniVoice and VoxCPM2 folders are systems no model here can have seen, scored against the same real speech as the older ones. The guard refuses MLAAD for all four models, rightly at the dataset level, so per-generator numbers need the team to agree a documented carve-out ([Progress](progress.md#open-decisions-that-shape-the-results)). SEA-Spoof (Hindi and Tamil, ten named generators, five of them likely unseen, on request) is the other route.
+
 ## What the results can't say yet
 
 - **Lip-sync with cloned voices**, v1's focus: only MAVOS-DD Hindi so far, and with no video score direction settled ([above](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).
