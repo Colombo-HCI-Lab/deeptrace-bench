@@ -5,15 +5,22 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-11-06:
+As of 2026-11-08:
 
-- **Models.** 35 detectors have adapters and weights; 27 pass parity against upstream code, the five added on 2026-11-03 among them ([models.md](models.md#parity)). Those five are being scored on SPARK: AVAD and FakeSTormer are done on MAVOS-DD Hindi, the other six pairs are running ([Results](results.md#the-2026-11-new-adapters)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
+- **Models.** 35 detectors have adapters and weights; 27 pass parity against upstream code, the five added on 2026-11-03 among them ([models.md](models.md#parity)). Seven of their eight pairs are scored on SPARK; LipFD on MAVOS-DD Hindi is running ([Results](results.md#the-2026-11-new-adapters)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
 - **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and 40 same-corpus and 20 cross-corpus audio pairs before it was paused on 2026-10-29. SPARK scored the last 84 on 2026-10-30 and 31, so every audio model now has its reproductions and every South Asian and cross-corpus set the guard allows ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-08: seven of the eight new pairs scored
+
+Run 42106621881 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments), at `e10dfe3` here.
+
+- Wave `s5b_new_adapters_rest` scored FakeSTormer, LAA-Net and UnivFD on HiDF and LAA-Net and UnivFD on MAVOS-DD Hindi ([Results](results.md#the-2026-11-new-adapters)). LAA-Net is the strongest of the five on HiDF (0.839); UnivFD, the generic AI-image detector, is the only one of the 21 models scored on both sets to do better on MAVOS-DD than on HiDF.
+- LipFD ran out of budget at 4,811 of 7,513 videos, at 0.12 a second, and runs again in a wave of its own.
 
 ### 2026-11-06: the new adapters pass parity and start scoring
 
@@ -152,7 +159,7 @@ Commits `15a2e2c` and `d3a6d03`.
 
 In order:
 
-0. **Finish the five new adapters:** import wave `s5b_new_adapters_rest` when it lands, and order what's left if its budget runs out.
+0. **Finish the five new adapters:** import LipFD's wave `s5c_lipfd` when it lands.
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 3. **A generator-level contamination check** of DF Arena and AntiDeepfake, then generators they haven't seen. The guard compares datasets, so a model trained on an evalset's TTS systems still counts as clean, and their near-ceiling scores on the open South Asian sets (0.978 and up for MMS-300M and both DF Arena models) may be familiarity rather than transfer.
