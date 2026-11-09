@@ -1,3 +1,6 @@
+<!-- instruction-subtraction-20261109 -->
+> Technical reference and historical context. Current global and project `CLAUDE.md` files govern. Older planning, delegation, review and testing checklists here are historical, not a required agent workflow; consult relevant technical details as needed.
+
 # CLAUDE.md
 
 Guidance for Claude Code when working in this repo.
