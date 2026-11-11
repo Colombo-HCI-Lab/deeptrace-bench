@@ -1,0 +1,25 @@
+{
+  "run_id": "laa_net__mavos_dd_de_video_quick__8d84bd30",
+  "model_id": "laa_net",
+  "evalset_id": "mavos_dd_de_video_quick",
+  "upstream_commit": "a33446ab94b3bc0d176a879d43e0700adc52c817",
+  "weights_sha256": {
+    "laa_net_sbi.pth": "fde726610e778045f65c3fbe839bc463c4d3a9970f72ca109d5911917305c991",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "9900bf9d9d8389bc7b56956edc8c8324eaaa17486095dc2e84a1ec95e42bfb13",
+    "model": "ee7be82c2e2161b72ca55d8d3488243ab52d4bfa403f7cf29199abffc4972ed7"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-08T23:58:58+00:00",
+  "last_started_utc": "2026-11-08T23:58:58+00:00",
+  "repo_commits": [
+    "ed4bab6b3036b0257677a8530f1f249d07ae6ec5"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

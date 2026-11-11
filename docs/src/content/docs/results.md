@@ -21,6 +21,7 @@ Each experiment is a set of model and evalset pairs that answers one question. W
 | E2: zero-shot audio | Do detectors trained only on English spoofing data hold up on South Asian speech? Does multilingual pretraining help? Do language and gender shift the scores? | the ten audio models | the eight same-corpus South Asian audio sets below | all ten done on all eight |
 | E3: zero-shot video on HiDF | Does a detector's accuracy, or its false-positive rate on real faces, differ by race? | the 18 video models; the race breakdown so far for Xception, SBI and GenD | `hidf_video` | done, provisional |
 | E4: talking heads on MAVOS-DD Hindi | Do face detectors hold up on Hindi video, including audio-driven talking heads? Do audio-visual detectors catch what they miss? | the 18 video models, HAVIC, AVH-Align, and the five [added in November](#the-2026-11-new-adapters) | `mavos_dd_hi_video`, `mavos_dd_hi_av` | done, provisional |
+| E4b: the language control | Is the drop on MAVOS-DD Hindi about Hindi, or about the set's fakes? | 17 of the 21 video models so far | `mavos_dd_de_video_quick`, the same generators on German speakers | 17 scored; 12 pairs left, [below](#the-language-control-mavos-dd-german) |
 | E5: cross-corpus audio | Do the audio detectors hold up when the real and fake clips come from different recordings, and could a trivial classifier tell those apart? | the audio models the guard allows | MLAAD Bengali, Hindi and Sinhala, BD-GRF6, SpeechFake | 75 pairs scored, none a result until the shortcut probe |
 | E6: fine-tuned baselines | How much does training on South Asian data help, on [identity-safe splits](evaluation.md#fine-tuning-splits)? | to be chosen | to be chosen | planned |
 | E7: data from deeptrace | How do the detectors do on what deeptrace collects? | to be chosen | deeptrace's data | planned, once collection starts |
@@ -333,6 +334,35 @@ UnivFD, LipFD, AVAD, LAA-Net and FakeSTormer, all past parity ([Models](models.m
 - **The SBI-style detectors don't carry SBI's lead onto MAVOS-DD.** LAA-Net, trained like SBI on self-blended FF++ faces, scores 0.839 on HiDF but 0.633 on MAVOS-DD, and FakeSTormer 0.772 and 0.577, against SBI's 0.877 and 0.777.
 - **LipFD, the lip-sync specialist, barely separates MAVOS-DD's fakes (0.544) and misses the lip-sync ones most.** At its equal-error threshold it flags 82% of LivePortrait and 84% of Roop fakes but only 15% of EchoMimic, 33% of Sonic and 40% of MEMO, the audio-driven talking heads it was built for; it learned Wav2Lip-style mouth edits over English LRS3, not diffusion talking heads in Hindi.
 - **UnivFD is the one model better on MAVOS-DD than on HiDF.** The generic AI-image detector, which never saw a face swap, scores 0.685 on HiDF and 0.710 on MAVOS-DD, where many fakes are fully generated talking heads rather than swapped faces.
+
+## The language control: MAVOS-DD German
+
+MAVOS-DD's German subset has the same eight generators as its Hindi one, so it tells "Hindi" apart from "a hard set of fakes". Wave `s6_language_control` (SPARK, 2026-11-08 and 09) scored 17 video models on its quick share, up to 300 videos per generator (3,001 in all). Snapshot of 2026-11-09; Hindi is the quick share where a model has one (same cap and seed), else the full set.
+
+| Model | German AUC (95% CI) | Hindi AUC | HiDF AUC |
+| ----- | ------------------: | --------: | -------: |
+| GenD PE-L | 0.712 (0.694 to 0.732) | 0.764 | 0.940 |
+| FTCN | 0.705 (0.684 to 0.723) | 0.854 (full) | 0.865 |
+| SBI | 0.693 (0.673 to 0.713) | 0.760 | 0.877 |
+| RealForensics | 0.642 (0.620 to 0.662) | 0.779 (full) | 0.931 |
+| GenD | 0.610 (0.589 to 0.630) | 0.702 | 0.952 |
+| LAA-Net | 0.596 (0.575 to 0.616) | 0.633 (full) | 0.839 |
+| UnivFD | 0.547 (0.524 to 0.568) | 0.710 (full) | 0.685 |
+| Xception | 0.435 (0.415 to 0.456) | 0.622 | 0.804 |
+| SPSL | 0.429 (0.407 to 0.452) | 0.597 | 0.680 |
+| CORE | 0.423 (0.399 to 0.445) | 0.533 | 0.777 |
+| EfficientNet-B4 | 0.414 (0.392 to 0.435) | 0.570 | 0.742 |
+| F3Net | 0.414 (0.392 to 0.435) | 0.511 | 0.761 |
+| RECCE | 0.397 (0.376 to 0.417) | 0.536 | 0.770 |
+| SRM | 0.387 (0.367 to 0.409) | 0.547 | 0.716 |
+| GenConViT | 0.365 (0.345 to 0.385) | 0.541 (full) | 0.779 |
+| UCF | 0.358 (0.338 to 0.377) | 0.539 | 0.782 |
+| FFD | 0.353 (0.331 to 0.374) | 0.546 | 0.760 |
+
+- **The drop isn't about Hindi.** Every one of the 17 models scores lower on German than on Hindi, by 0.04 (LAA-Net) to 0.19 (FFD). What makes MAVOS-DD hard is the set's fakes and its real YouTube clips, not South Asian speakers. HiDF stays the only sign of a South Asian effect in video.
+- **On German the frame detectors rank fakes below real videos.** All eight DeepfakeBench detectors, GenConViT and Xception score 0.35 to 0.44, below chance with their confidence intervals clear of 0.5. Each flags 54 to 67% of German real videos at its equal-error threshold, against 43 to 49% of Hindi's: the German real clips look faker to them than the fakes do. With no video score direction settled (FF++ or Celeb-DF v2), this is a pattern, not proof of inverted scores.
+- **The generator pattern holds in both languages.** Averaged over EchoMimic, Sonic and MEMO, the frame detectors miss 72 to 93% of German talking heads (54 to 83% in Hindi) while catching most face swaps; FTCN and RealForensics still catch nearly every LivePortrait reenactment (3 to 4% missed). The ranking at the top is the same: GenD PE-L, FTCN and SBI lead in both.
+- **Still to score:** FakeSTormer (interrupted at the budget), the DFDC winner and LipForensics on German, and the Hindi quick share for the eight models that only have the full Hindi set. Effort can't run there yet: Google Drive refuses gdown its weights on SPARK, as it did elsewhere, so they have to be placed on the worker by hand.
 
 ## Generator-level contamination check
 

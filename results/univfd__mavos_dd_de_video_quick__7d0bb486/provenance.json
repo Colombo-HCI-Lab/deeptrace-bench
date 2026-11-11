@@ -1,0 +1,28 @@
+{
+  "run_id": "univfd__mavos_dd_de_video_quick__7d0bb486",
+  "model_id": "univfd",
+  "evalset_id": "mavos_dd_de_video_quick",
+  "upstream_commit": "030495aea3300a8b54c0ec37ec7fe1dd7e63c619",
+  "weights_sha256": {
+    "clip-vit-large-patch14/config.json": "8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a",
+    "clip-vit-large-patch14/model.safetensors": "a2bf730a0c7debf160f7a6b50b3aaf3703e7e88ac73de7a314903141db026dcb",
+    "clip-vit-large-patch14/preprocessor_config.json": "910e70b3956ac9879ebc90b22fb3bc8a75b6a0677814500101a4c072bd7857bd",
+    "fc_weights.pth": "477100745713bcc957beb2b40859536859b6483fd6301b3b9293151b194c7847",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "9900bf9d9d8389bc7b56956edc8c8324eaaa17486095dc2e84a1ec95e42bfb13",
+    "model": "88e83a44b89929def5a32ea36cd5c18a991650711eda3755b644c9f942278f40"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-08T23:23:56+00:00",
+  "last_started_utc": "2026-11-08T23:23:56+00:00",
+  "repo_commits": [
+    "ed4bab6b3036b0257677a8530f1f249d07ae6ec5"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
