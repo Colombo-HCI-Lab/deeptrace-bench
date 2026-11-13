@@ -394,7 +394,7 @@ Run on SPARK on 2026-11-13 (deeptrace-experiments' `shortcut` stage; aggregates 
 | --- | --- | --: | --- | --- | --: |
 | MLAAD Bengali | cross-corpus | 1.000 | 22.05 / 44.1 kHz | duration 0.829 | 0.791 |
 | MLAAD Sinhala | cross-corpus | 1.000 | 22.05 / 16 kHz | bandwidth 0.963 | 0.997 |
-| MLAAD Hindi | cross-corpus | pending | | | |
+| MLAAD Hindi | cross-corpus | 1.000 | 22.05 / 44.1 kHz | duration 0.752 | 0.877 |
 | BD-GRF6 | cross-corpus | 1.000 | 8 / 37.5 kHz | bandwidth 0.770 | 0.952 |
 | SpeechFake Bengali | cross-corpus | 1.000 | 16 / 44.1 kHz | silence 0.878 | 1.000 |
 | SpeechFake Malayalam | cross-corpus | 1.000 | 16 / 44.1 kHz | duration 0.988 | 1.000 |
@@ -405,7 +405,7 @@ Run on SPARK on 2026-11-13 (deeptrace-experiments' `shortcut` stage; aggregates 
 | Urdu CSALT | same-corpus | 0.945 | 18 / 16.1 kHz | loudness 0.935 | 0.998 |
 
 - **On every cross-corpus set but SpeechFake Hindi, the file's sample rate alone separates real from fake.** The detectors hear everything resampled to 16 kHz, so a rate above that leaves little direct trace; an 8 kHz original does: BD-GRF6's fakes carry nothing above 4 kHz, which bandwidth partly picks up (0.770).
-- **What the detectors can hear separates them almost as well.** Leaving the sample rate out, one feature alone reaches 0.77 to 1.00 on every cross-corpus set: clip length on SpeechFake Marathi and Malayalam, bandwidth on MLAAD Sinhala, silence on SpeechFake Tamil. A near-perfect detector score on these sets may measure the corpora, not the fakes. A probe on the audible features alone hasn't been run; the strongest single feature is its lower bound.
+- **What the detectors can hear separates them almost as well.** Leaving the sample rate out, one feature alone reaches 0.75 to 1.00 on every cross-corpus set: clip length on SpeechFake Marathi and Malayalam, bandwidth on MLAAD Sinhala, silence on SpeechFake Tamil. A near-perfect detector score on these sets may measure the corpora, not the fakes. A probe on the audible features alone hasn't been run; the strongest single feature is its lower bound.
 - **The same-corpus baselines are high too** (0.953 and 0.945), so a high probe score doesn't by itself mark a set unusable, and no cut-off follows from the probe alone. Urdu CSALT's loudness gap fits the classic detectors' outlying 0.86 there ([insight 8](#insights)).
 - **Which E5 numbers count is the team's call** ([Progress](progress.md#next)): drop the sets a trivial feature separates as well as the detectors do, report each detector beside the probe, or match length, loudness and bandwidth before scoring.
 
