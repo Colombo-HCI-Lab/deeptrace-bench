@@ -1,0 +1,32 @@
+{
+  "model": "aasist3",
+  "checked_utc": "2026-11-13T04:26:48+00:00",
+  "evalset": "urdu_csalt",
+  "namespace": null,
+  "items": 200,
+  "n": 519,
+  "max_abs_diff": 8.530914783477783e-07,
+  "mean_abs_diff": 1.1319427361607781e-08,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "lab260ru/AASIST3",
+    "commit": "33c39c24525c871225ad3abe3c8ec3b0e1ce86de"
+  },
+  "weights_sha256": {
+    "aasist3.safetensors": "a06d43d8d4a7e11b62fb4fa833f13a598fee23be7c368c416df4bec2e44e664f",
+    "aasist3_config.json": "0bd97c713c1d4b1f2a9be60cc0eb7183f49789f8af95fa8319b3113e6392ba81",
+    "xlsr-53-config/config.json": "48576e4a1b0f02c7770f57e236747169459db9a8b9a529bbd7a58bbbf52c45b5"
+  },
+  "adapter_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.11.18",
+    "torch": "2.6.0+cpu",
+    "transformers": "4.52.4"
+  },
+  "reference": "upstream aasist3.from_pretrained on the Hub files, torchaudio preemphasis"
+}

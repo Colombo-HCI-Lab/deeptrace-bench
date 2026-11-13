@@ -1,0 +1,40 @@
+{
+  "model": "gend",
+  "checked_utc": "2026-11-13T05:38:24+00:00",
+  "evalset": "mavos_dd_hi_video",
+  "namespace": null,
+  "items": 50,
+  "n": 1596,
+  "max_abs_diff": 2.384185791015625e-06,
+  "mean_abs_diff": 2.3947827947468386e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "yermandy/GenD",
+    "commit": "387a42266dd385fbe8f7626c5d3aa03eea3bfaab"
+  },
+  "weights_sha256": {
+    "clip-vit-large-patch14/config.json": "8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a",
+    "clip-vit-large-patch14/merges.txt": "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a",
+    "clip-vit-large-patch14/model.safetensors": "a2bf730a0c7debf160f7a6b50b3aaf3703e7e88ac73de7a314903141db026dcb",
+    "clip-vit-large-patch14/preprocessor_config.json": "910e70b3956ac9879ebc90b22fb3bc8a75b6a0677814500101a4c072bd7857bd",
+    "clip-vit-large-patch14/special_tokens_map.json": "f8c0d6c39aee3f8431078ef6646567b0aba7f2246e9c54b8b99d55c22b707cbf",
+    "clip-vit-large-patch14/tokenizer.json": "a83e0809aa4c3af7208b2df632a7a69668c6d48775b3c3fe4e1b1199d1f8b8f4",
+    "clip-vit-large-patch14/tokenizer_config.json": "deef455e52fa5e8151e339add0582e4235f066009601360999d3a9cda83b1129",
+    "clip-vit-large-patch14/vocab.json": "3f0c4f7d2086b61b38487075278ea9ed04edb53a03cbb045b86c27190fa8fb69",
+    "config.json": "7f2761e13678191774a152121f1630d19baa33a74216dd264d54445d96b16229",
+    "model.safetensors": "d76f0bdfd74a29fe1b1c1b84a80ac92486993e426878e8c7a3944281fbb96833"
+  },
+  "adapter_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128",
+    "transformers": "4.56.2",
+    "timm": "1.0.30"
+  },
+  "reference": "upstream GenD.from_pretrained on the weights folder, its own preprocess"
+}
