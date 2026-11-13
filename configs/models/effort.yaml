@@ -10,12 +10,17 @@ upstream:
   repo: SCLBD/DeepfakeBench
   commit: f188b1c105465e2e5377eb536a95022ae0e4522d
 weights:
-  # Effort's checkpoints folder 19kQwGDjF18uk78EnnypxxOLaG4Aa4v1h. Google Drive refuses gdown
-  # with "Quota exceeded" (2026-10-05 to 2026-10-28 at least) but serves a signed-in browser:
-  # download the file there, put it in DTB_ROOT/weights/effort/, then run setup_models.py
+  # From Effort's checkpoints folder 19kQwGDjF18uk78EnnypxxOLaG4Aa4v1h (file
+  # 1m4fyJecABU-Yk3bJ4b1WhUwQa0xCkMLI), which Google Drive refuses to gdown ("Quota exceeded",
+  # 2026-10-05 to 2026-11-08 at least). Since 2026-11-13 the same file comes from a private mirror
+  # under Oshan's Hugging Face account (upstream publishes no licence, so it isn't public): fetching
+  # it needs an HF_TOKEN from that account; anyone else downloads it from Drive in a browser.
   - name: effort_clip_L14_trainOn_FaceForensic.pth
-    kind: gdrive
-    drive_id: 1m4fyJecABU-Yk3bJ4b1WhUwQa0xCkMLI
+    kind: hf
+    repo: ivantha/effort-clip-l14-ffpp
+    filename: effort_clip_L14_trainOn_FaceForensic.pth
+    revision: 3dc192f5a2b8fc5f9473571ee57216c7a6a0d8ae
+    size_bytes: 1213769519
   - name: clip-vit-large-patch14-config
     kind: hf_snapshot
     repo: openai/clip-vit-large-patch14
@@ -30,4 +35,4 @@ input:
   backbone_config: clip-vit-large-patch14-config
   crop: {size: 224, margin: 1.3, align: five_point}
   frames_per_clip: 32
-notes: Adapter written 2026-10-05 (DeepfakeBench's Effort detector, CLIP built from a pinned config); its network builds offline, but the weights can't be fetched while Google Drive reports the file over quota. Reported issues upstream - a reproduction gap (CDF-v2 AUC 0.885 against 0.956, issue 19) and keys reported missing from the FF++ checkpoint (issue 18) - get checked by the strict load once the file arrives.
+notes: Adapter written 2026-10-05 (DeepfakeBench's Effort detector, CLIP built from a pinned config); its network builds offline, and since 2026-11-13 the checkpoint comes from a private Hugging Face mirror because Google Drive refuses automated downloads. Reported issues upstream - a reproduction gap (CDF-v2 AUC 0.885 against 0.956, issue 19) and keys reported missing from the FF++ checkpoint (issue 18) - get checked by the strict load once the file arrives.
