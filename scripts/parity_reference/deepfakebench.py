@@ -107,6 +107,11 @@ with helper.scoped_modules(stubs, purge=["metrics", "networks", "detectors", "lo
 checkpoint = next(n for n in spec["weights"] if n.endswith(".pth"))
 state = torch.load(Path(spec["weights_dir"]) / checkpoint, map_location="cpu", weights_only=True)
 state = {k[len("module.") :] if k.startswith("module.") else k: v for k, v in state.items()}
+# older transformers (this venv's) keep CLIP's position_ids, a fixed arange, in the state dict;
+# Effort's checkpoint, saved with a newer one, doesn't
+for key, value in model.state_dict().items():
+    if key.endswith("embeddings.position_ids"):
+        state.setdefault(key, value)
 model.load_state_dict(state, strict=True)
 model.eval()
 
