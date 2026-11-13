@@ -66,7 +66,9 @@ REFERENCES = {
     "AVADDetector": ("avad.py", "{dtb_root}/parity/envs/avad/bin/python"),
     "GenConViTDetector": ("genconvit.py", "{dtb_root}/parity/envs/genconvit/bin/python"),
     "DFDCWinnerDetector": ("dfdc_b7.py", "<dfdc venv>/bin/python"),
+    "LipForensicsDetector": ("lipforensics.py", "{dtb_root}/parity/envs/lipforensics/bin/python"),
     "RealForensicsDetector": ("realforensics.py", "<realforensics venv>/bin/python"),
+    "HAVICDetector": ("havic.py", "{dtb_root}/parity/envs/havic/bin/python"),
     "AVHAlignDetector": ("avh_align.py", "<av_hubert venv>/bin/python"),
 }
 
@@ -81,7 +83,7 @@ def _inputs_loader(registry: Registry, model: ModelConfig):
             return segment(wave, audio["segment_samples"], min_samples=min_samples)
 
         return load
-    if model.input.get("inputs") in (
+    if model.modality == Modality.AUDIO_VIDEO or model.input.get("inputs") in (
         "mouths",
         "face_clips",
         "frame_groups",
@@ -116,11 +118,17 @@ def export(args: argparse.Namespace) -> int:
     run.mkdir(parents=True)
     if per_item and isinstance(per_item[0], dict):
         # several arrays per item (a lip-sync model's mouths and audio): saved as
-        # "<item>__<name>", and the adapter scores each item's dict
-        np.savez(
-            run / parity.INPUTS,
-            **{f"{i}__{k}": np.asarray(v) for i, d in enumerate(per_item) for k, v in d.items()},
-        )
+        # "<item>__<name>", and the adapter scores each item's dict; a list of arrays that differ
+        # in shape (HAVIC's raw face boxes) as "<item>__<name>__<j>" with "<item>__<name>__n"
+        arrays = {}
+        for i, d in enumerate(per_item):
+            for k, v in d.items():
+                if isinstance(v, list) and len({np.shape(x) for x in v}) > 1:
+                    arrays.update({f"{i}__{k}__{j}": np.asarray(x) for j, x in enumerate(v)})
+                    arrays[f"{i}__{k}__n"] = np.int64(len(v))
+                else:
+                    arrays[f"{i}__{k}"] = np.asarray(v)
+        np.savez(run / parity.INPUTS, **arrays)
         units, item_index = None, None
     else:
         units, item_index = parity.pack_inputs(per_item)
