@@ -123,7 +123,7 @@ models:
       MLAAD and M-AILABS on a front end pretrained on Common Voice, BABEL and Multilingual LibriSpeech,
       so the contamination guard refuses it on MLAAD-based evalsets. The repository says these are
       not the weights behind the paper's numbers, and the model card's Speech Arena re-scoring puts
-      them far lower, so treat it as a weak multilingual baseline; parity is not checked yet.
+      them far lower, so treat it as a weak multilingual baseline. Passes parity against upstream's own loader.
   aasist_l:
     catches: [tts, vc]
     cue: spectral and temporal artefacts in the raw waveform
@@ -378,8 +378,8 @@ models:
     catches: [face_swap, reenactment]
     cue: foundation-model features (CLIP)
     why: >-
-      The probe's original foundation-model video detector, the partner to Xception. Blocked on
-      weights; GenD holds its place until they arrive.
+      The probe's original foundation-model video detector, the partner to Xception. Its weights
+      were blocked until 2026-10-28, so GenD took its place in the first round; it now runs beside it.
     s2_id: ARXIV:2411.15633
     venue: ICML 2025
     published:
@@ -388,7 +388,7 @@ models:
       - {test: "DFDC", metric: AUC, value: "0.843", source: paper, cite: "Table 1, video-level"}
     summary: >-
       CLIP ViT-L/14 adapted by SVD: principal singular components frozen, residual tuned; DeepfakeBench
-      detector on FF++ c23. Blocked on weights.
+      detector on FF++ c23.
     architecture: >-
       Aligned 224 px face crop, CLIP ViT-L/14 image encoder with SVD-split weights (principal part
       frozen, residual part tuned), linear head
@@ -397,9 +397,10 @@ models:
       and trains only the residual, which the authors argue stops fine-tuning from collapsing the
       feature space onto a few fake patterns. The paper targets AI-generated images broadly; here
       DeepfakeBench's Effort detector, trained on FaceForensics++ (c23) after CLIP pretraining on
-      OpenAI's private data, scores face frames. Blocked since Google Drive refused the weight file
-      as over quota on 2026-10-05; upstream also reports a Celeb-DF v2 reproduction gap and has no
-      licence file.
+      OpenAI's private data, scores face frames. Google Drive refuses scripted downloads of the
+      weight file as over quota, so it comes from a private Hugging Face mirror (upstream has no
+      licence file, so the mirror isn't public). Passes parity against the original code; upstream
+      reports a Celeb-DF v2 reproduction gap.
   f3net:
     catches: [face_swap, reenactment]
     cue: frequency bands
@@ -526,7 +527,7 @@ models:
       model), constrains features to the hypersphere with L2 normalisation and metric learning, and
       averages per-frame P(fake) over the video. The released weights were trained on FaceForensics++
       only, after CLIP pretraining on OpenAI's private image-text data. The main generalisation-first
-      video model here; the adapter runs end to end but parity is not checked yet.
+      video model here. Passes parity against upstream's own loader and preprocessing.
   gend_pe_l:
     catches: [face_swap, reenactment]
     cue: foundation-model features (Perception Encoder)
@@ -912,8 +913,8 @@ models:
       since different layers carry different spoofing cues, before two linear layers. The front end
       was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the network
       trained on the ASVspoof 2019 LA training split alone, making it a clean zero-shot probe on every
-      South Asian set. The repository declares no licence, so its code is imported, never copied;
-      parity is not checked yet.
+      South Asian set. The repository declares no licence, so its code is imported, never copied.
+      Passes parity against the original code with fairseq.
 datasets:
   asvspoof2019_la:
     fakes: [tts, vc]

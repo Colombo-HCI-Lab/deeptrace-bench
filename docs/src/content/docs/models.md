@@ -7,16 +7,16 @@ The configs (`configs/models/<id>.yaml`) are the source of truth, and `uv run sc
 
 ## Status
 
-Checked on 2026-10-12.
+Checked on 2026-10-12; parity updated 2026-11-13.
 
 | Model                                   | Modality    | Status           | Parity     | Direction |
 | --------------------------------------- | ----------- | ---------------- | ---------- | --------- |
 | Xception, EfficientNet-B4               | video       | ready, wave 1    | yes        | not yet   |
 | SBI                                     | video       | ready, wave 1    | yes        | not yet   |
-| GenD (CLIP L/14)                        | video       | ready, wave 1    | not yet    | not yet   |
-| GenD (PE L/14)                          | video       | workable         | not yet    | not yet   |
+| GenD (CLIP L/14)                        | video       | ready, wave 1    | yes        | not yet   |
+| GenD (PE L/14)                          | video       | workable         | yes        | not yet   |
 | UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD | video       | workable         | yes        | not yet   |
-| Effort                                  | video       | workable         | not yet    | not yet   |
+| Effort                                  | video       | workable         | yes        | not yet   |
 | LipForensics                            | video       | workable         | not yet    | not yet   |
 | AltFreezing                             | video       | blocked          | no adapter |           |
 | FTCN                                    | video       | workable         | yes        | not yet   |
@@ -31,8 +31,9 @@ Checked on 2026-10-12.
 | AVAD, LipFD                             | audio-video | workable         | yes        | not yet   |
 | AASIST, AASIST-L                        | audio       | ready, wave 1    | yes        | settled   |
 | XLS-R + AASIST                          | audio       | workable, wave 1 | yes        | settled   |
-| XLS-R + SLS, XLSR-Mamba                 | audio       | workable         | not yet    | sanity    |
-| AASIST3                                 | audio       | workable         | not yet    | sanity    |
+| XLS-R + SLS                             | audio       | workable         | yes        | sanity    |
+| XLSR-Mamba                              | audio       | workable         | not yet    | sanity    |
+| AASIST3                                 | audio       | workable         | yes        | sanity    |
 | AntiDeepfake MMS-300M, w2v2 small       | audio       | workable         | yes        | settled   |
 | DF Arena 500M, 1B                       | audio       | workable         | yes        | settled   |
 | HAVIC                                   | audio-video | workable         | not yet    | not yet   |
@@ -43,8 +44,8 @@ Checked on 2026-10-12.
 | --- | --- |
 | Video score direction | waits on FF++ test or Celeb-DF v2, both on request ([Datasets](datasets.md#requests-to-send)) |
 | AltFreezing (`blocked`) | weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them |
-| Effort's weights | Google Drive refuses scripted downloads over quota; fetched by hand through a signed-in browser on 2026-10-28 ([Effort](#effort)) |
-| Parity for eight adapters | [Parity](#parity) says what each needs |
+| Effort's weights | Google Drive refuses scripted downloads over quota; since 2026-11-13 the checkpoint comes from a private Hugging Face mirror ([Effort](#effort)) |
+| Parity for three adapters | [Parity](#parity) says what each needs |
 
 **Why these models.** Classic detectors sit beside foundation-model ones (GenD; the XLS-R family, AntiDeepfake, DF Arena), so a failure both kinds share points at the data. The DeepfakeBench detectors each read a different cue: texture (Xception, EfficientNet-B4), content-free forgery features (UCF), frequency (F3Net), phase (SPSL), reconstruction (RECCE), noise residuals (SRM), consistent representations (CORE), manipulation attention (FFD). LipForensics and HAVIC target lip-sync fakes, v1's focus. Each model's own reason, and whether it is a cut candidate, is on its page in the [Model catalog](catalog.md#models).
 
@@ -70,6 +71,10 @@ Passed, each against upstream run in its original environment (`scripts/parity.p
 | LipFD 2.0e-6 (500 composites of 50 MAVOS-DD audio-visual videos)                                                                                   | 2026-11-04 | upstream `AVLip.__getitem__` and `validate`'s two calls, `ckpt.pth` strict (torch 2.1.0, torchvision 0.16, CPU) |
 | AVAD 4.4e-8 (30 MAVOS-DD audio-visual videos)                                                                                      | 2026-11-04 | upstream `detect.test2` at `lam` 0 (torch 1.9.0, CPU) |
 | LAA-Net 3.6e-6 (1,596 crops of 50 MAVOS-DD videos)                                                                                        | 2026-11-04 | upstream `test.py` path for `efn4_fpn_sbi_adv.yaml`, float64, flip test (torch 1.13.1, CPU) |
+| AASIST3 8.5e-7 (519 windows of 200 Urdu CSALT clips)                                                                              | 2026-11-13 | upstream `aasist3.from_pretrained` on the Hub files, torchaudio pre-emphasis (torch 2.6, CPU) |
+| XLS-R + SLS 1.0e-4 (519 windows of 200 Urdu CSALT clips)                                                                          | 2026-11-13 | upstream `model.py` with fairseq's `xlsr2_300m.pt` and `MMpaper_model.pth` (torch 1.8.1, CPU) |
+| GenD 2.4e-6, GenD PE-L 1.8e-7 (1,596 crops of 50 MAVOS-DD videos)                                                                 | 2026-11-13 | upstream `GenD.from_pretrained` on the weights folder, its own preprocess (torch 2.8) |
+| Effort 2.0e-6 (1,596 crops of 50 MAVOS-DD videos)                                                                                 | 2026-11-13 | upstream detector, release `.pth`, DeepfakeBench test transform (torch 1.13.1, CPU); CLIP's fixed `position_ids` buffer, absent from the checkpoint, filled in |
 
 DeepfakeBench's reference shares the adapter's import stand-ins (and RECCE's and FFD's build stand-ins), so a pass there covers weights, numerics and transform, not upstream's imports; the strict load covers the architecture.
 
@@ -77,12 +82,8 @@ Not checked yet (strict loads, tests and the pipeline check only):
 
 | Model | What parity needs |
 | --- | --- |
-| AASIST3, GenD PE-L | nothing special; upstream runs in our environment, so these are the cheapest next |
-| GenD (CLIP) | `parity.py export` to handle its native-size crops, which differ in shape |
-| XLS-R + SLS | the patched fairseq zip in its checkout; the vendored commit returns no per-layer outputs |
 | XLSR-Mamba | mamba-ssm's CUDA kernels on a GPU |
 | HAVIC, LipForensics | upstream's face and landmark pipelines |
-| Effort | its weights |
 
 ## Per model
 
@@ -134,7 +135,7 @@ NII Yamagishi Lab (`nii-yamagishilab/*-anti-deepfake`), post-trained on 74k hour
 
 ### Effort
 
-Runs through the DeepfakeBench adapter, with `loralib` stubbed and CLIP built from a pinned config. Its Google Drive folder answered "Quota exceeded" on 2026-10-05; retry `setup_models.py effort`. Upstream reports a reproduction gap (CDF-v2 AUC 0.885 against 0.956, #19) and missing checkpoint keys (#18), which the strict load will settle. No licence file (#3).
+Runs through the DeepfakeBench adapter, with `loralib` stubbed and CLIP built from a pinned config. Its Google Drive folder has answered "Quota exceeded" since 2026-10-05, so since 2026-11-13 the checkpoint comes from a private Hugging Face mirror under Oshan's account (no upstream licence, so not public), which needs an `HF_TOKEN` from that account; anyone else downloads it from Drive in a browser. Passes parity (2.0e-6); the strict load needs only CLIP's `position_ids` buffer, which newer transformers no longer save. Upstream reports a reproduction gap (CDF-v2 AUC 0.885 against 0.956, #19) and missing checkpoint keys (#18), which the strict load will settle. No licence file (#3).
 
 ### HAVIC
 

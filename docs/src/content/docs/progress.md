@@ -5,15 +5,24 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-11-11:
+As of 2026-11-13:
 
-- **Models.** 35 detectors have adapters and weights; 27 pass parity against upstream code, the five added on 2026-11-03 among them ([models.md](models.md#parity)). All eight of their pairs are scored on SPARK ([Results](results.md#the-2026-11-new-adapters)), and 17 video models on the MAVOS-DD German language control ([Results](results.md#the-language-control-mavos-dd-german)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
+- **Models.** 35 detectors have adapters and weights; 32 pass parity against upstream code, all but XLSR-Mamba, HAVIC and LipForensics ([models.md](models.md#parity)). All eight pairs of the five added on 2026-11-03 are scored on SPARK ([Results](results.md#the-2026-11-new-adapters)), and all 21 video models with weights on the MAVOS-DD German language control ([Results](results.md#the-language-control-mavos-dd-german)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and 40 same-corpus and 20 cross-corpus audio pairs before it was paused on 2026-10-29. SPARK scored the last 84 on 2026-10-30 and 31, so every audio model now has its reproductions and every South Asian and cross-corpus set the guard allows ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
+- **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and 40 same-corpus and 20 cross-corpus audio pairs before it was paused on 2026-10-29. SPARK scored the last 84 on 2026-10-30 and 31, so every audio model now has its reproductions and every South Asian and cross-corpus set the guard allows ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-13: the language control finished, parity and the shortcut probe
+
+Commits `d1c3034` to `3245781` here, and the `matrix`, `parity` and `shortcut` runs after 42492073467, up to 43470925926, in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments).
+
+- Waves `s6b_language_control_rest`, `s6c_language_control_hi` and `s6d_effort` scored the twelve pairs `s6_language_control` left, so all 21 video models with weights have both MAVOS-DD German and Hindi's quick share ([Results](results.md#the-language-control-mavos-dd-german)). The drop is still the set's, not Hindi's.
+- Effort's checkpoint, which Google Drive refuses to scripts, now comes from a private Hugging Face mirror under Oshan's account that SPARK's token can read (`809479f`). Moving a weight's host no longer drops a model's earlier runs from the site: weights count by name in the config hash, and `weights.lock.yaml` still pins each file.
+- AASIST3, XLS-R + SLS, GenD, GenD PE-L and Effort pass parity on SPARK ([Models](models.md#parity)), after a stage fix that mapped each model to its reference script and Effort's reference filling CLIP's `position_ids` buffer.
+- The shortcut probe ran on the nine cross-corpus audio sets and two same-corpus baselines ([Results](results.md#the-shortcut-probe)); MLAAD Hindi hit Hugging Face's rate limit and runs again on its own.
 
 ### 2026-11-09: the language control lands
 
@@ -185,11 +194,10 @@ In order:
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 3. **Generators they haven't seen.** The desk check is done ([Results](results.md#generator-level-contamination-check)): few exact matches, and unseen voice conversion is caught as well as seen TTS. Next, per-generator numbers on MLAAD Hindi's 2026 systems, once the team agrees the guard carve-out below, or on SEA-Spoof once its request is granted.
-4. **Finish the language control**: 17 of 29 pairs of `s6_language_control` are scored and the drop isn't Hindi's ([Results](results.md#the-language-control-mavos-dd-german)). Order the wave again for the other twelve (FakeSTormer, the DFDC winner and LipForensics on German, the Hindi quick share for eight models), and put Effort's weights on the worker by hand, since Google Drive refuses gdown there.
-5. **The shortcut probe**, built 2026-11-08 ([Evaluation](evaluation.md#shortcut-probe)): run it on SPARK on the cross-corpus sets (E5: MLAAD, SpeechFake, BD-GRF6, `mlaad_si`, the only Sinhala fakes) and two same-corpus baselines, then decide which of their numbers count.
-6. **Parity still owed:** AASIST3, XLS-R + SLS, GenD, GenD PE-L and Effort have references and SPARK stacks (2026-11-08) and run next; XLSR-Mamba (mamba-ssm's CUDA kernels), HAVIC and LipForensics (upstream's face and landmark pipelines) have none yet.
-7. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
-8. **deeptrace's own data** (E7), once collection starts.
+4. **Decide which cross-corpus audio numbers count** (E5). The shortcut probe ran on 2026-11-13: trivial features, sample rate first, separate every cross-corpus set, and the two same-corpus baselines score high too ([Results](results.md#the-shortcut-probe)). The options are there.
+5. **Parity still owed:** XLSR-Mamba (mamba-ssm's CUDA kernels), HAVIC and LipForensics (upstream's face and landmark pipelines) have no reference yet.
+6. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
+7. **deeptrace's own data** (E7), once collection starts.
 
 ## Open decisions that shape the results
 
