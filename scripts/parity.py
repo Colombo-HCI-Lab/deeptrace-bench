@@ -56,6 +56,7 @@ REFERENCES = {
     "DeepfakeBenchDetector": ("deepfakebench.py", "{dtb_root}/parity/envs/dfb/bin/python"),
     "SBIDetector": ("sbi.py", "{dtb_root}/parity/envs/dfb/bin/python"),
     "SSLXLSRDetector": ("ssl_xlsr.py", "<fairseq venv>/bin/python"),
+    "XLSRMambaDetector": ("xlsr_mamba.py", "{dtb_root}/parity/envs/mamba/bin/python"),
     "AntiDeepfakeDetector": ("antideepfake.py", "<fairseq venv>/bin/python"),
     "FTCNDetector": ("ftcn.py", "<ftcn venv>/bin/python"),
     "LAANetDetector": ("laa_net.py", "{dtb_root}/parity/envs/snt/bin/python"),
