@@ -1,0 +1,32 @@
+{
+  "model": "gend_pe_l",
+  "checked_utc": "2026-11-13T08:00:37+00:00",
+  "evalset": "mavos_dd_hi_video",
+  "namespace": null,
+  "items": 50,
+  "n": 1596,
+  "max_abs_diff": 1.7881393432617188e-07,
+  "mean_abs_diff": 7.77750633152804e-09,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "yermandy/GenD",
+    "commit": "387a42266dd385fbe8f7626c5d3aa03eea3bfaab"
+  },
+  "weights_sha256": {
+    "config.json": "c04ccdd62714a25884a65dde2086fd740006159455be4afb200c78808bc8ea67",
+    "model.safetensors": "e2367f8db3a6b76f8d5cc5857f1ed0ea0993b33c9e1f428d3b06e5ca95de2213"
+  },
+  "adapter_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128",
+    "transformers": "4.56.2",
+    "timm": "1.0.30"
+  },
+  "reference": "upstream GenD.from_pretrained on the weights folder, its own preprocess"
+}
