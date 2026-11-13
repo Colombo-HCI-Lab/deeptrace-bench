@@ -103,7 +103,8 @@ def export(args: argparse.Namespace) -> int:
     for _, row in items.iterrows():
         try:
             inputs = loader(row)
-            per_item.append(inputs if isinstance(inputs, dict) else np.asarray(inputs))
+            # a list as the loader gives it: native-size crops (GenD's) differ in shape
+            per_item.append(inputs)
             kept.append(row["item_id"])
         except PreprocessError as exc:
             log.info("%s skipped: %s", row["item_id"], exc.reason)

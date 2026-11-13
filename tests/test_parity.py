@@ -47,6 +47,13 @@ def test_inputs_of_different_shapes_stay_a_list_and_round_trip(tmp_path):
     assert load_units(tmp_path / "same.npz").shape == (2, 8)
 
 
+def test_native_size_crops_of_one_item_pack_as_a_list():
+    crops = [[np.zeros((3, 4, 3)), np.zeros((5, 6, 3))], [np.zeros((4, 4, 3))]]
+    units, index = pack_inputs(crops)
+    assert [u.shape for u in units] == [(3, 4, 3), (5, 6, 3), (4, 4, 3)]
+    assert index.tolist() == [0, 0, 1]
+
+
 def test_scores_within_tolerance_pass():
     adapter = np.array([0.1, 0.5, 0.9])
     result = compare(adapter, adapter + 5e-4)
