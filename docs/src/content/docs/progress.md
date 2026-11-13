@@ -22,7 +22,7 @@ Commits `d1c3034` to `3245781` here, and the `matrix`, `parity` and `shortcut` r
 - Waves `s6b_language_control_rest`, `s6c_language_control_hi` and `s6d_effort` scored the twelve pairs `s6_language_control` left, so all 21 video models with weights have both MAVOS-DD German and Hindi's quick share ([Results](results.md#the-language-control-mavos-dd-german)). The drop is still the set's, not Hindi's.
 - Effort's checkpoint, which Google Drive refuses to scripts, now comes from a private Hugging Face mirror under Oshan's account that SPARK's token can read (`809479f`). Moving a weight's host no longer drops a model's earlier runs from the site: weights count by name in the config hash, and `weights.lock.yaml` still pins each file.
 - AASIST3, XLS-R + SLS, GenD, GenD PE-L and Effort pass parity on SPARK ([Models](models.md#parity)), after a stage fix that mapped each model to its reference script and Effort's reference filling CLIP's `position_ids` buffer.
-- The shortcut probe ran on all ten cross-corpus audio sets and two same-corpus baselines ([Results](results.md#the-shortcut-probe)); MLAAD Hindi hit Hugging Face's rate limit the first time and passed in a job of its own.
+- The shortcut probe ran on all nine cross-corpus audio sets and two same-corpus baselines ([Results](results.md#the-shortcut-probe)); MLAAD Hindi hit Hugging Face's rate limit the first time and passed in a job of its own.
 
 ### 2026-11-09: the language control lands
 
