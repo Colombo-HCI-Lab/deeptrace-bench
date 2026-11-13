@@ -1,0 +1,50 @@
+{
+  "evalset": "mlaad_bn",
+  "pairing": "cross_corpus",
+  "checked_utc": "2026-11-13T10:28:48+00:00",
+  "n": 8589,
+  "n_real": 4589,
+  "n_fake": 4000,
+  "n_failed": 0,
+  "failed_by_status": {},
+  "probe_auc": 1.0,
+  "probe_auc_lo": 0.9999999999999999,
+  "probe_auc_hi": 1.0,
+  "folds": 5,
+  "seed": 0,
+  "model": "standardised logistic regression, out-of-fold scores",
+  "features": [
+    "duration_s",
+    "rms_db",
+    "silence_ratio",
+    "spectral_rolloff_hz",
+    "spectral_bandwidth_hz",
+    "original_sample_rate"
+  ],
+  "feature_auc": {
+    "duration_s": 0.8287968239267814,
+    "rms_db": 0.5369834386576596,
+    "silence_ratio": 0.7619267541948137,
+    "spectral_rolloff_hz": 0.6388980714752669,
+    "spectral_bandwidth_hz": 0.6487140444541294,
+    "original_sample_rate": 1.0
+  },
+  "class_means": {
+    "fake": {
+      "duration_s": 12.6896,
+      "rms_db": -23.7944,
+      "silence_ratio": 0.2531,
+      "spectral_rolloff_hz": 1245.4046,
+      "spectral_bandwidth_hz": 593.1681,
+      "original_sample_rate": 22050.0
+    },
+    "real": {
+      "duration_s": 6.47,
+      "rms_db": -23.3559,
+      "silence_ratio": 0.1438,
+      "spectral_rolloff_hz": 1100.2389,
+      "spectral_bandwidth_hz": 532.0099,
+      "original_sample_rate": 44100.0
+    }
+  }
+}
