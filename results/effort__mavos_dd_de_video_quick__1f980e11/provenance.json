@@ -1,0 +1,26 @@
+{
+  "run_id": "effort__mavos_dd_de_video_quick__1f980e11",
+  "model_id": "effort",
+  "evalset_id": "mavos_dd_de_video_quick",
+  "upstream_commit": "f188b1c105465e2e5377eb536a95022ae0e4522d",
+  "weights_sha256": {
+    "clip-vit-large-patch14-config/config.json": "8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a",
+    "effort_clip_L14_trainOn_FaceForensic.pth": "8d86711f098d16b49c048962fc3e16a906380f7bb17b8a0e89bd545b926943ee",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "9900bf9d9d8389bc7b56956edc8c8324eaaa17486095dc2e84a1ec95e42bfb13",
+    "model": "d88c827297c1f52cfa4c4b46e3c0ef866f72face1bc70c352649a971664c9d07"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-13T14:49:22+00:00",
+  "last_started_utc": "2026-11-13T14:49:22+00:00",
+  "repo_commits": [
+    "a247e0e0ddb17701d81b05e6c86ad5d24dfc00be"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
