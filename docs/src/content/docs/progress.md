@@ -5,15 +5,21 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-11-13:
+As of 2026-11-14:
 
-- **Models.** 35 detectors have adapters and weights; 32 pass parity against upstream code, all but XLSR-Mamba, HAVIC and LipForensics ([models.md](models.md#parity)). All eight pairs of the five added on 2026-11-03 are scored on SPARK ([Results](results.md#the-2026-11-new-adapters)), and all 21 video models with weights on the MAVOS-DD German language control ([Results](results.md#the-language-control-mavos-dd-german)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
+- **Models.** 35 detectors have adapters and weights; all 35 pass parity against upstream code ([models.md](models.md#parity)). All eight pairs of the five added on 2026-11-03 are scored on SPARK ([Results](results.md#the-2026-11-new-adapters)), and all 21 video models with weights on the MAVOS-DD German language control ([Results](results.md#the-language-control-mavos-dd-german)). Seven more video and audio-visual models are in the registry without adapters ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
 - **Runs.** The first full benchmark round (2026-10-27 to 29) scored all 18 video models with weights on all of HiDF and MAVOS-DD Hindi and both audio-visual models on MAVOS-DD, and 40 same-corpus and 20 cross-corpus audio pairs before it was paused on 2026-10-29. SPARK scored the last 84 on 2026-10-30 and 31, so every audio model now has its reproductions and every South Asian and cross-corpus set the guard allows ([Results](results.md#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)). The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model with a parity check has a settled score direction; no video model does yet (that needs FF++ or Celeb-DF v2).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-13, later: every adapter passes parity
+
+Parity run 43495906113 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments), at bench commit `b16fb4b`.
+
+- XLSR-Mamba passes against mamba-ssm 1.1.4's own CUDA kernels on SPARK's RTX 3090 (max difference 4.2e-5 over 519 windows), LipForensics against upstream's network and transform (exactly equal over 200 clips) and HAVIC against upstream's own inference (1.3e-8 over 444 windows), so all 35 adapters pass ([Models](models.md#parity)). The last two start from the adapter's crops, not upstream's landmark and RetinaFace pipelines.
 
 ### 2026-11-13: the language control finished, parity and the shortcut probe
 
@@ -195,9 +201,8 @@ In order:
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 3. **Generators they haven't seen.** The desk check is done ([Results](results.md#generator-level-contamination-check)): few exact matches, and unseen voice conversion is caught as well as seen TTS. Next, per-generator numbers on MLAAD Hindi's 2026 systems, once the team agrees the guard carve-out below, or on SEA-Spoof once its request is granted.
 4. **Decide which cross-corpus audio numbers count** (E5). The shortcut probe ran on 2026-11-13: trivial features, sample rate first, separate every cross-corpus set, and the two same-corpus baselines score high too ([Results](results.md#the-shortcut-probe)). The options are there.
-5. **Parity still owed:** XLSR-Mamba (mamba-ssm's CUDA kernels), HAVIC and LipForensics (upstream's face and landmark pipelines) have no reference yet.
-6. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
-7. **deeptrace's own data** (E7), once collection starts.
+5. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
+6. **deeptrace's own data** (E7), once collection starts.
 
 ## Open decisions that shape the results
 

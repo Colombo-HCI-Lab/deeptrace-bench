@@ -1,0 +1,31 @@
+{
+  "model": "havic",
+  "checked_utc": "2026-11-13T22:12:50+00:00",
+  "evalset": "mavos_dd_hi_av",
+  "namespace": null,
+  "items": 30,
+  "n": 444,
+  "max_abs_diff": 1.30385160446167e-08,
+  "mean_abs_diff": 7.131749445253664e-11,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "tuffy-studio/HAVIC",
+    "commit": "66f4908552e1781c27a31d7dd8dfeb3cccccc69c"
+  },
+  "weights_sha256": {
+    "best_ft_model.pth": "7a0e3ddc6effd6813c81d915eb2ea57e7dc7d4711cb39798680ff477de2ca19d"
+  },
+  "adapter_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.10.22",
+    "torch": "2.3.1+cpu",
+    "torchaudio": "2.3.1+cpu",
+    "timm": "0.4.5"
+  },
+  "reference": "upstream HAVIC_FT and best_ft_model.pth as sliding_window_infer.py loads them, its resize and audio windows; encoders drop use_mask"
+}

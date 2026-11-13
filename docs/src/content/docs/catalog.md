@@ -214,7 +214,7 @@ XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with l
 
 #### XLSR-Mamba
 
-XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention back end with forward and backward Mamba state space blocks over XLS-R features. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the released network trained on the ASVspoof 2019 LA training split alone. Here mamba-ssm's CUDA kernels are replaced by slower pure-PyTorch stand-ins, and parity against the kernels is not checked yet.
+XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention back end with forward and backward Mamba state space blocks over XLS-R features. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the released network trained on the ASVspoof 2019 LA training split alone. Here mamba-ssm's CUDA kernels are replaced by slower pure-PyTorch stand-ins, which pass parity against the kernels.
 
 | | |
 | --- | --- |
@@ -503,7 +503,7 @@ LAA-Net (Nguyen et al., CVPR 2024) focuses on small blending artefacts and claim
 
 #### LipForensics
 
-LipForensics (Haliassos et al., CVPR 2021) is pretrained for lipreading on LRW, then its temporal network is fine-tuned on FaceForensics++ (c23, all four manipulations) to separate real from forged mouth motion, a high-level cue the authors argue survives unseen manipulations and compression. Central here because lip-sync fakes are a focus. Caveats: users report its FF++ numbers do not reproduce, it needs 25 consecutive frames with a detectable face, and parity is not checked yet.
+LipForensics (Haliassos et al., CVPR 2021) is pretrained for lipreading on LRW, then its temporal network is fine-tuned on FaceForensics++ (c23, all four manipulations) to separate real from forged mouth motion, a high-level cue the authors argue survives unseen manipulations and compression. Central here because lip-sync fakes are a focus. Caveats: users report its FF++ numbers do not reproduce, it needs 25 consecutive frames with a detectable face. It passes parity against upstream's network and transform.
 
 | | |
 | --- | --- |
@@ -752,7 +752,7 @@ AVH-Align (Smeu et al., CVPR 2025) trains only on 45,000 real AV-Deepfake1M vide
 
 #### HAVIC
 
-HAVIC (CVPR 2026 Findings) pretrains its audio and video encoders on real videos only (LRS2) to model temporal and cross-modal coherence, then fuses them to score clips whose lips, voice or expression disagree. It was fine-tuned on a random 70% of FakeAVCeleb with an unpublished item list, so the contamination guard refuses it on FakeAVCeleb. The only open audio-visual detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long for HiDF), and parity is not checked yet.
+HAVIC (CVPR 2026 Findings) pretrains its audio and video encoders on real videos only (LRS2) to model temporal and cross-modal coherence, then fuses them to score clips whose lips, voice or expression disagree. It was fine-tuned on a random 70% of FakeAVCeleb with an unpublished item list, so the contamination guard refuses it on FakeAVCeleb. The only open audio-visual detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long for HiDF), and it passes parity against upstream's own inference.
 
 | | |
 | --- | --- |

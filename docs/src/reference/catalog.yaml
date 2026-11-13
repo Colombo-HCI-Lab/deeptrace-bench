@@ -578,7 +578,7 @@ models:
       or expression disagree. It was fine-tuned on a random 70% of FakeAVCeleb with an unpublished
       item list, so the contamination guard refuses it on FakeAVCeleb. The only open audio-visual
       detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long
-      for HiDF), and parity is not checked yet.
+      for HiDF), and it passes parity against upstream's own inference.
   laa_net:
     catches: [face_swap]
     cue: localised blending artefacts
@@ -635,8 +635,8 @@ models:
       network is fine-tuned on FaceForensics++ (c23, all four manipulations) to separate real from
       forged mouth motion, a high-level cue the authors argue survives unseen manipulations and compression.
       Central here because lip-sync fakes are a focus. Caveats: users report its FF++ numbers do not
-      reproduce, it needs 25 consecutive frames with a detectable face, and parity is not checked
-      yet.
+      reproduce, it needs 25 consecutive frames with a detectable face. It passes parity against
+      upstream's network and transform.
   realforensics:
     catches: [face_swap, reenactment]
     cue: mouth and face motion learned from real talking faces
@@ -888,7 +888,7 @@ models:
       Mamba state space blocks over XLS-R features. The front end was pretrained on real speech (Common
       Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the released network trained on the ASVspoof
       2019 LA training split alone. Here mamba-ssm's CUDA kernels are replaced by slower pure-PyTorch
-      stand-ins, and parity against the kernels is not checked yet.
+      stand-ins, which pass parity against the kernels.
   xlsr_sls:
     catches: [tts, vc]
     cue: self-supervised speech features from every layer (XLS-R)

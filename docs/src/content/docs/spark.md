@@ -157,7 +157,7 @@ Some of these need deeptrace-bench changed before an order can name them, so tal
 
 | You want to | What's needed |
 | --- | --- |
-| score a pair with no published run | nothing: `scripts/exp.py score <model> <evalset> --no-reference`, or any pair the site has no run for. Proved on 2026-10-19 with XLS-R + SLS on Urdu CSALT; that model's number doesn't count yet (no parity) |
+| score a pair with no published run | nothing: `scripts/exp.py score <model> <evalset> --no-reference`, or any pair the site has no run for. Proved on 2026-10-19 with XLS-R + SLS on Urdu CSALT; that model has passed parity since 2026-11-13 |
 | use an evalset outside the five above (IndicSynth, HiDF, MAVOS-DD) | the stage reads an evalset's datasets from deeptrace-bench's registry and fetches each, only the languages it needs. HiDF and MAVOS-DD Hindi have run in waves; request-only datasets need their files first ([Datasets](datasets.md)) |
 | run a video model | nothing: every video model with weights has run on full HiDF and MAVOS-DD Hindi in waves (2026-10-28) |
 | add a model or a dataset | an adapter or builder in deeptrace-bench, and a parity check before any number counts ([Adding a model](adding_a_model.md), [Adding a dataset](adding_a_dataset.md)) |

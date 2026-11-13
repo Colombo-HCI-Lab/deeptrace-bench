@@ -1,0 +1,31 @@
+{
+  "model": "lipforensics",
+  "checked_utc": "2026-11-13T21:04:15+00:00",
+  "evalset": "mavos_dd_hi_video",
+  "namespace": null,
+  "items": 50,
+  "n": 200,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "ahaliassos/LipForensics",
+    "commit": "d0bf5553bfb9676f1771d590472b26a3a76de894"
+  },
+  "weights_sha256": {
+    "2DFAN4-cd938726ad.zip": "cd938726adb1f15f361263cce2db9cb820c42585fa8796ec72ce19107f369a46",
+    "lipforensics_ff.pth": "4b7790bc8e02d0c25ecfa0d8d6a2907123c2206cc32e2bad6044e50f013c253d"
+  },
+  "adapter_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.9.25",
+    "torch": "1.9.0+cpu",
+    "torchvision": "0.10.0+cpu"
+  },
+  "reference": "upstream get_model and lipforensics_ff.pth strict, evaluate.py's transform"
+}

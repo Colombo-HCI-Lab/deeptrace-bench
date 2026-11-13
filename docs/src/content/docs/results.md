@@ -9,7 +9,7 @@ description: "What each experiment asked, what the zero-shot runs so far show, a
 - **Zero-shot.** No model was trained or fine-tuned on these evalsets.
 - **Provisional rules.** The evaluation setup isn't settled ([decision 5](progress.md#open-decisions-that-shape-the-results)), so even published numbers can move.
 - **`clean` isn't proof the data is new to a model.** The guard compares datasets, not the generators behind them ([verdicts](evaluation.md#contamination-verdicts)).
-- **Video is provisional.** No video model has a settled score direction, and LipForensics and HAVIC have no parity check ([Models](models.md#status)).
+- **Video is provisional.** No video model has a settled score direction ([Models](models.md#status)). Every adapter now passes parity.
 
 ## Experiments
 
@@ -138,7 +138,7 @@ MAVOS-DD's labels follow the track a model sees. The video set counts the kNN-VC
 | AASIST3                 | ASVspoof 2019 LA eval | 9.47% (9.21 to 9.75)  | 0.968  | weights aren't the paper's |
 | AASIST3                 | In-the-Wild           | 30.8% (30.3 to 31.3)  | 0.766  | 28 to 32% (Speech DF Arena) |
 
-Every score direction here is settled. XLS-R + SLS and XLSR-Mamba land slightly better than their papers on In-the-Wild, and AASIST3's released weights match what the Speech DF Arena measured for them, so all three adapters behave; XLS-R + SLS and AASIST3 have since passed parity against the authors' code, and XLSR-Mamba still lacks it ([Models](models.md#parity)). The gaps to the published figures come from protocol differences, explained per model in [Models](models.md#per-model).
+Every score direction here is settled. XLS-R + SLS and XLSR-Mamba land slightly better than their papers on In-the-Wild, and AASIST3's released weights match what the Speech DF Arena measured for them, so all three adapters behave; all three have since passed parity against the authors' code ([Models](models.md#parity)). The gaps to the published figures come from protocol differences, explained per model in [Models](models.md#per-model).
 
 ## Audio: South Asian speech
 
@@ -154,7 +154,7 @@ Each cell is AUC (EER). * marks a run from 2026-10-05 under the previous setup v
 | DF Arena 500M           | 0.981 (7.8%)* | 0.997 (2.2%)* so | 0.998 (2.1%)  | 0.978 (6.9%)    | 0.997 (2.6%)     |
 | DF Arena 1B             | 0.995 (4.0%)* | 0.999 (0.7%)* so | 0.993 (4.3%)  | 0.988 (5.1%)    | 0.999 (1.7%)     |
 | AASIST3                 | 0.806 (29%)   | 0.790 (27%) so   | 0.979 (7.9%)  | 0.303 (67%)     | 0.763 (30%)      |
-| XLSR-Mamba, no parity   | 0.691 (41%)   | 0.574 (47%) so   | 0.184 (78%)   | 0.661 (43%)     | 0.799 (28%)      |
+| XLSR-Mamba              | 0.691 (41%)   | 0.574 (47%) so   | 0.184 (78%)   | 0.661 (43%)     | 0.799 (28%)      |
 | XLS-R + SLS             | 0.855 (23%)   | 0.806 (27%) so   | 0.670 (38%)   | 0.900 (16%)     | 0.947 (13%)      |
 
 The seven models above the line were scored on IndicTTS again on SPARK on 2026-10-29 and matched their 2026-10-12 runs within 0.001.
@@ -222,12 +222,12 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 
 | Model | Parity | HiDF AUC | HiDF EER | HiDF TPR@5% | MAVOS-DD AUC | MAVOS-DD EER | MAVOS-DD TPR@5% |
 | ----- | :----: | -------: | -------: | ----------: | -----------: | -----------: | --------------: |
-| GenD | no | 0.952 | 11.5% | 0.78 | 0.741 | 33.4% | 0.48 |
-| GenD PE-L | no | 0.940 | 13.4% | 0.70 | 0.798 | 28.7% | 0.48 |
+| GenD | yes | 0.952 | 11.5% | 0.78 | 0.741 | 33.4% | 0.48 |
+| GenD PE-L | yes | 0.940 | 13.4% | 0.70 | 0.798 | 28.7% | 0.48 |
 | RealForensics | yes | 0.931 | 14.5% | 0.64 | 0.779 | 29.3% | 0.36 |
-| Effort | no | 0.919 | 15.8% | 0.69 | 0.603 | 42.7% | 0.42 |
+| Effort | yes | 0.919 | 15.8% | 0.69 | 0.603 | 42.7% | 0.42 |
 | SBI | yes | 0.877 | 20.0% | 0.45 | 0.777 | 29.3% | 0.29 |
-| LipForensics | no | 0.870 | 21.6% | 0.50 | 0.703 | 35.4% | 0.32 |
+| LipForensics | yes | 0.870 | 21.6% | 0.50 | 0.703 | 35.4% | 0.32 |
 | FTCN | yes | 0.865 | 21.8% | 0.40 | **0.854** | 22.6% | 0.54 |
 | DFDC winner (7 × EfficientNet-B7) | yes | 0.859 | 21.8% | 0.49 | 0.390 | 59.2% | 0.12 |
 | Xception | yes | 0.804 | 27.2% | 0.31 | 0.628 | 41.5% | 0.19 |
@@ -240,7 +240,7 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 | EfficientNet-B4 | yes | 0.742 | 32.1% | 0.22 | 0.583 | 43.7% | 0.14 |
 | SRM | yes | 0.716 | 34.4% | 0.22 | 0.556 | 46.5% | 0.11 |
 | SPSL | yes | 0.680 | 36.6% | 0.15 | 0.598 | 43.4% | 0.09 |
-| HAVIC (audio and video) | no | n/a | n/a | n/a | 0.692 | 37.5% | 0.27 |
+| HAVIC (audio and video) | yes | n/a | n/a | n/a | 0.692 | 37.5% | 0.27 |
 | AVH-Align (audio and video) | yes | n/a | n/a | n/a | 0.520 | 48.4% | 0.05 |
 
 - **MAVOS-DD Hindi is the hard set.** Every model but FTCN drops from HiDF to MAVOS-DD, by 0.08 (SPSL) to 0.47 (the DFDC winner); FTCN loses 0.01. The eight DeepfakeBench detectors fall to 0.53 to 0.63, close to chance. Its fakes include audio-driven talking heads and lip-sync, which frame-level face-swap detectors weren't trained on.
@@ -262,7 +262,7 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
 
   Every model misses more talking heads than face swaps on average, and 16 of the 18 miss each talking-head generator more often than any face swap. MAVOS-DD's fakes are mostly talking heads, so this round can't yet separate "Hindi" from "talking head": that needs the same models on a non-South-Asian set with the same generators ([Progress](progress.md#next)).
 - **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
-- **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2), and the models marked "no" haven't passed parity, so their numbers don't count as results yet.
+- **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2); parity passed for every model on 2026-11-13.
 
 The round's other same-corpus audio pairs, AUC (the rest are in [the table above](#audio-south-asian-speech)):
 
@@ -275,13 +275,13 @@ The round's other same-corpus audio pairs, AUC (the rest are in [the table above
 | AntiDeepfake MMS-300M | yes | 0.998 | 1.000 (0.1%) | 0.999 | 1.000 |
 | DF Arena 500M | yes | 0.981 | 1.000 (0.1%) | 0.995 | 0.999 |
 | DF Arena 1B | yes | 0.995 | 1.000 (0.1%) | 1.000 | 1.000 |
-| AASIST3 | no | 0.806 | 0.907 (18.2%) | 0.785 | 0.781 |
-| XLSR-Mamba | no | 0.691 | 0.976 (6.3%) | 0.654 | 0.790 |
-| XLS-R + SLS | no | 0.855 | 0.994 (3.1%) | 0.803 | 0.942 |
+| AASIST3 | yes | 0.806 | 0.907 (18.2%) | 0.785 | 0.781 |
+| XLSR-Mamba | yes | 0.691 | 0.976 (6.3%) | 0.654 | 0.790 |
+| XLS-R + SLS | yes | 0.855 | 0.994 (3.1%) | 0.803 | 0.942 |
 
 - **Urdu CSALT reproduces.** All seven models with parity matched their 2026-10-12 runs (AUC and EER within 0.001, same counts) on a different GPU.
 - **MAVOS-DD's audio is easy for the post-trained models.** AntiDeepfake and DF Arena separate it almost perfectly, while the ASVspoof-only AASIST pair stays near 0.64. This is insight 6's ceiling again: their training collections may share MAVOS-DD's voice generators, which the guard can't check.
-- **IndicSynth Bengali and Urdu repeat the Hindi picture.** The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34 for both); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more. Of the three models without parity, XLS-R + SLS does best (0.80 and 0.94).
+- **IndicSynth Bengali and Urdu repeat the Hindi picture.** The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34 for both); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more. Of the three models that passed parity last, XLS-R + SLS does best (0.80 and 0.94).
 - **Bengali scores lowest on IndicSynth, mostly because of VITS.** IndicSynth makes its Hindi and Urdu fakes with XTTS-v2 and FreeVC24, and its Bengali fakes with those two plus VITS. On the two shared generators alone (each generator's fakes against all the real clips, from the [archived](store_layout.md#archive) per-item scores), the ASVspoof-only AASIST pair still does worst on Bengali: AASIST 0.25 against 0.34 (Urdu) and 0.39 (Hindi), AASIST-L 0.29 against 0.34 and 0.39. The multilingual models barely differ there: XLS-R + AASIST 0.75 against 0.78 and 0.83, XLSR-Mamba 0.78 against 0.79, AASIST3 0.79 against 0.78, and XLS-R + SLS scores Bengali above Urdu (0.95 against 0.94). Their low Bengali totals come from VITS, where they score 0.41 to 0.51.
 - **VITS is the hardest generator wherever it appears**, so the Bengali sets may look hard as much for their generators as for their language. In Urdu CSALT, XLS-R + AASIST scores 0.70 on VITS against 0.91 on Tacotron, and XLSR-Mamba 0.47 against 0.92. BanglaFake is all VITS and MLAAD Bengali half. XLS-R + AASIST scores 0.39 to 0.65 on all five Bengali sets and 0.78 to 0.89 on all five Hindi and Urdu ones (three of the ten are cross-corpus), a gap that generator and language both feed.
 
