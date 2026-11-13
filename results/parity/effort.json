@@ -1,0 +1,32 @@
+{
+  "model": "effort",
+  "checked_utc": "2026-11-13T18:43:09+00:00",
+  "evalset": "mavos_dd_hi_video",
+  "namespace": null,
+  "items": 50,
+  "n": 1596,
+  "max_abs_diff": 1.9669532775878906e-06,
+  "mean_abs_diff": 1.9144047434467422e-07,
+  "tolerance": 0.001,
+  "passed": true,
+  "upstream": {
+    "host": "github",
+    "repo": "SCLBD/DeepfakeBench",
+    "commit": "f188b1c105465e2e5377eb536a95022ae0e4522d"
+  },
+  "weights_sha256": {
+    "clip-vit-large-patch14-config/config.json": "8a09b467700c58138c29d53c605b34ebc69beaadd13274a8a2af8ad2c2f4032a",
+    "effort_clip_L14_trainOn_FaceForensic.pth": "8d86711f098d16b49c048962fc3e16a906380f7bb17b8a0e89bd545b926943ee"
+  },
+  "adapter_env": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128"
+  },
+  "reference_env": {
+    "python": "3.9.25",
+    "torch": "1.13.1+cpu",
+    "torchvision": "0.14.1+cpu",
+    "opencv": "4.6.0"
+  },
+  "reference": "upstream detector, original release .pth, DeepfakeBench test transform"
+}
