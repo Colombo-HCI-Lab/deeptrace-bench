@@ -28,12 +28,11 @@ const TRACK: Record<string, string> = { video: "video", audio: "audio", any: "ei
     {
       rows.map(({ t, southAsian, other, models }) => (
         <tr id={`kind-${t.id}`}>
-          <td class="nowrap">
+          <td class="nowrap" title={TRACK[t.modality]}>
             <span class={`kind ${t.modality}`}>{t.label}</span>
-            <span class="track">{TRACK[t.modality]}</span>
           </td>
-          <td class="prose-cell">{t.changed}</td>
-          <td class="prose-cell">{t.trace}</td>
+          <td class="prose-cell clip" title={t.changed}>{t.changed}</td>
+          <td class="prose-cell clip" title={t.trace}>{t.trace}</td>
           {[southAsian, other].map((list) => (
             <td class="dlist">
               {list.length ? (

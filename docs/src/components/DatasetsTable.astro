@@ -34,12 +34,11 @@ const langs = (codes: string[]) => {
             const n = datasetRuns(d).length;
             return (
               <tr>
-                <td class="wide">
+                <td class="wide" title={d.why}>
                   <a class="name" href={datasetHref(d.id)}>
                     {d.name}
                   </a>
                   {d.cut && <span class="flagtag cut">cut candidate</span>}
-                  {d.why && <span class="sum">{d.why}</span>}
                 </td>
                 <td class="nowrap">{MOD[d.modality] || d.modality}</td>
                 <td>
@@ -48,8 +47,8 @@ const langs = (codes: string[]) => {
                 <td title={d.languages.map((l) => LANG[l] || l).join(", ")}>
                   {d.languages.length ? langs(d.languages) : <span class="dim">·</span>}
                 </td>
-                <td class="size">{d.scale || <span class="dim">·</span>}</td>
-                <td class="lic" title={d.licence}>{shortLicence(d.licence)}</td>
+                <td class="size clip" title={d.scale}>{d.scale || <span class="dim">·</span>}</td>
+                <td class="lic clip" title={d.licence}>{shortLicence(d.licence)}</td>
                 <td class="nowrap">
                   <span class={`hold ${h.key}`}>{h.label}</span>
                 </td>

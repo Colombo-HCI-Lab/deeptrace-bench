@@ -131,7 +131,7 @@ const sections = [
               R.datasets.rows.map((r) => (
                 <tr>
                   {r.map((c, i) => (
-                    <td class={i === 0 ? "name" : i === 4 ? "num" : undefined}>{c}</td>
+                    <td class={i === 0 ? "name" : i === 4 ? "num" : "clip"} title={c}>{c}</td>
                   ))}
                 </tr>
               ))
@@ -418,9 +418,8 @@ const sections = [
             {
               R.runs.rows.map((r) => (
                 <tr title={r.title} data-group={r.group}>
-                  <td>
-                    <span class="nowrap">{r.evalset}</span>
-                    <span class="id">{r.evalsetId}</span>
+                  <td class="nowrap" title={r.evalsetId}>
+                    {r.evalset}
                   </td>
                   <td class="nowrap">{r.model}</td>
                   <td class="auc">

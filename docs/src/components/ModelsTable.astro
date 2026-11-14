@@ -30,21 +30,20 @@ const trained = (m: Model) =>
           </tr>
           {rows.map((m) => (
             <tr>
-              <td class="wide">
+              <td class="wide" title={m.why}>
                 <a class="name" href={modelHref(m.id)}>
                   {m.name}
                 </a>
                 {m.paper && <span class="venue">{m.paper.venue || m.paper.year}</span>}
                 {m.cut && <span class="flagtag cut">cut candidate</span>}
-                {m.why && <span class="sum">{m.why}</span>}
               </td>
               <td>
                 <Kinds ids={m.catches} />
               </td>
-              <td class="cue">{m.cue || <span class="dim">·</span>}</td>
+              <td class="cue clip" title={m.cue}>{m.cue || <span class="dim">·</span>}</td>
               <td title={m.trained_on.join(", ")}>{m.trained_on.length ? trained(m) : <span class="dim">·</span>}</td>
               <td class="num">{m.profile ? params(m.profile.params) : <span class="dim">·</span>}</td>
-              <td class="lic" title={m.licence}>{shortLicence(m.licence)}</td>
+              <td class="lic clip" title={m.licence}>{shortLicence(m.licence)}</td>
               <td class="nowrap">
                 {m.blocked ? <span class="dim">no weights</span> : m.parity ? "✓ passed" : <span class="dim">pending</span>}
               </td>

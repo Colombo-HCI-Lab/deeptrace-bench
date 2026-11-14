@@ -135,9 +135,8 @@ const facts: [string, string | string[] | null][] = [
                     <td>{x.test}</td>
                     <td>{x.metric}</td>
                     <td class="num">{x.value}</td>
-                    <td>
+                    <td title={x.cite}>
                       {x.source}
-                      <span class="sum">{x.cite}</span>
                     </td>
                   </tr>
                 ))}
