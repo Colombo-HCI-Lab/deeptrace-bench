@@ -550,8 +550,8 @@ models:
     description: >-
       GenD's second released backbone (Yermakov et al., WACV 2026): identical training on Perception
       Encoder, so the pair isolates the effect of the foundation model. Trained on FaceForensics++
-      only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Parity
-      is not checked yet.
+      only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Passes
+      parity against upstream's own loader and preprocessing.
   havic:
     catches: [face_swap, lip_sync, tts]
     cue: whether voice and lips agree

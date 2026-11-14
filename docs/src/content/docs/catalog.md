@@ -60,7 +60,7 @@ AASIST-L is the reduced configuration from the AASIST paper (Jung et al., ICASSP
 
 #### AASIST3
 
-AASIST3 (Borodin et al., 2024), built for ASVspoof 5, feeds XLSR-53 features into AASIST and replaces some layers with KAN layers. The released weights saw ASVspoof 2019 LA, ASVspoof 5, MLAAD and M-AILABS on a front end pretrained on Common Voice, BABEL and Multilingual LibriSpeech, so the contamination guard refuses it on MLAAD-based evalsets. The repository says these are not the weights behind the paper's numbers, and the model card's Speech Arena re-scoring puts them far lower, so treat it as a weak multilingual baseline; parity is not checked yet.
+AASIST3 (Borodin et al., 2024), built for ASVspoof 5, feeds XLSR-53 features into AASIST and replaces some layers with KAN layers. The released weights saw ASVspoof 2019 LA, ASVspoof 5, MLAAD and M-AILABS on a front end pretrained on Common Voice, BABEL and Multilingual LibriSpeech, so the contamination guard refuses it on MLAAD-based evalsets. The repository says these are not the weights behind the paper's numbers, and the model card's Speech Arena re-scoring puts them far lower, so treat it as a weak multilingual baseline. Passes parity against upstream's own loader.
 
 | | |
 | --- | --- |
@@ -192,7 +192,7 @@ XLS-R + AASIST (Tak et al., Odyssey 2022) fine-tunes the SSL front end jointly w
 
 #### XLS-R 300M + SLS
 
-XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with learned attention, since different layers carry different spoofing cues, before two linear layers. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the network trained on the ASVspoof 2019 LA training split alone, making it a clean zero-shot probe on every South Asian set. The repository declares no licence, so its code is imported, never copied; parity is not checked yet.
+XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with learned attention, since different layers carry different spoofing cues, before two linear layers. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the network trained on the ASVspoof 2019 LA training split alone, making it a clean zero-shot probe on every South Asian set. The repository declares no licence, so its code is imported, never copied. Passes parity against the original code with fairseq.
 
 | | |
 | --- | --- |
@@ -440,7 +440,7 @@ GenConViT (Wodajo et al., 2023) pairs a convolutional-transformer classifier wit
 
 #### GenD (CLIP ViT-L/14)
 
-GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 0.03% of the model), constrains features to the hypersphere with L2 normalisation and metric learning, and averages per-frame P(fake) over the video. The released weights were trained on FaceForensics++ only, after CLIP pretraining on OpenAI's private image-text data. The main generalisation-first video model here; the adapter runs end to end but parity is not checked yet.
+GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 0.03% of the model), constrains features to the hypersphere with L2 normalisation and metric learning, and averages per-frame P(fake) over the video. The released weights were trained on FaceForensics++ only, after CLIP pretraining on OpenAI's private image-text data. The main generalisation-first video model here. Passes parity against upstream's own loader and preprocessing.
 
 | | |
 | --- | --- |
@@ -462,7 +462,7 @@ GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 
 
 #### GenD (Perception Encoder L/14)
 
-GenD's second released backbone (Yermakov et al., WACV 2026): identical training on Perception Encoder, so the pair isolates the effect of the foundation model. Trained on FaceForensics++ only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Parity is not checked yet.
+GenD's second released backbone (Yermakov et al., WACV 2026): identical training on Perception Encoder, so the pair isolates the effect of the foundation model. Trained on FaceForensics++ only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Passes parity against upstream's own loader and preprocessing.
 
 | | |
 | --- | --- |
