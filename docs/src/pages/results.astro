@@ -178,12 +178,8 @@ const sections = [
                       </tr>
                       {g.rows.map((m) => (
                         <tr>
-                          <th scope="row">
+                          <th scope="row" title={[m.type, `Backbone: ${m.built}`, `Trained on: ${m.trained}`, m.noParity && "No parity check yet, so not a result"].filter(Boolean).join("\n")}>
                             <span class="dname">{m.name}</span>
-                            {m.type && <span class="dtype">{m.type}</span>}
-                            <span class="dtype">Backbone: {m.built}</span>
-                            <span class="dtype">Trained on: {m.trained}</span>
-                            {m.noParity && <span class="dtype dflag">No parity check yet, so not a result</span>}
                           </th>
                           {m.cells.map((c) => (
                             <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>
