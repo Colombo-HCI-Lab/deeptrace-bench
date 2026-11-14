@@ -201,7 +201,7 @@ In order:
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 3. **Generators they haven't seen.** The desk check is done ([Results](results.md#generator-level-contamination-check)): few exact matches, and unseen voice conversion is caught as well as seen TTS. Next, per-generator numbers on MLAAD Hindi's 2026 systems, once the team agrees the guard carve-out below, or on SEA-Spoof once its request is granted.
 4. **Decide which cross-corpus audio numbers count** (E5). The shortcut probe ran on 2026-11-13: trivial features, sample rate first, separate every cross-corpus set, and the two same-corpus baselines score high too ([Results](results.md#the-shortcut-probe)). The options are there.
-5. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits).
+5. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits). Waits on the team choosing the models and training data (Oshan, 2026-11-14); no training code exists yet.
 6. **deeptrace's own data** (E7), once collection starts.
 
 ## Open decisions that shape the results
