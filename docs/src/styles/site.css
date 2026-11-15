@@ -141,13 +141,11 @@ a.card:hover { border-color: var(--ink); }
 .tierhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
 .tierhead span:last-child { font-size: 0.95rem; line-height: 1.35; }
 
-/* Toggles and filters */
+/* Toggles */
 .toggle { display: inline-flex; border: 1px solid var(--ink); justify-self: start; max-width: 100%; }
 .toggle button { font: 500 12px/1 var(--mono); padding: 9px 14px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
 .toggle button + button { border-left: 1px solid var(--ink); }
-.toggle button[aria-pressed="true"], .filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-.filters { display: flex; flex-wrap: wrap; gap: 8px; }
-.filters button { font: 500 12px/1 var(--mono); padding: 8px 12px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; white-space: nowrap; }
+.toggle button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 
 /* The bar of a page's sections, for pages whose sections the nav doesn't list */
 nav.index { min-width: 0; background: var(--paper); border-block: 1px solid var(--rule); margin-block: -28px; }
@@ -216,9 +214,9 @@ nav.index a:hover { color: var(--ink); }
 .heat.grid td sup { font-size: 10px; margin-left: 3px; }
 .heat.grid td.home { outline: 2px dashed var(--ink); outline-offset: -5px; }
 .heat.grid .eer { display: none; }
-#at-a-glance[data-metric="eer"] .heat.grid td.g-run { background: var(--bg-eer); color: var(--fg-eer); }
-#at-a-glance[data-metric="eer"] .heat.grid .auc { display: none; }
-#at-a-glance[data-metric="eer"] .heat.grid .eer { display: inline; }
+[data-metric="eer"] .heat.grid td.g-run { background: var(--bg-eer); color: var(--fg-eer); }
+[data-metric="eer"] .heat.grid .auc { display: none; }
+[data-metric="eer"] .heat.grid .eer { display: inline; }
 .g-trained { background: repeating-linear-gradient(45deg, var(--tint), var(--tint) 5px, var(--tint-2) 5px, var(--tint-2) 10px); color: var(--muted); font-weight: 400; }
 .g-na, .g-todo { color: var(--muted); }
 .gridkey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font: 400 12px/1.4 var(--mono); color: var(--muted); }
@@ -286,9 +284,6 @@ nav.index a:hover { color: var(--ink); }
 .tbl.race th, .tbl.race td { padding-left: 6px; padding-right: 12px; }
 .tbl.race td { padding-block: 9px; white-space: nowrap; }
 .tbl.race td.hot { background: color-mix(in oklab, var(--bad) 18%, var(--paper)); font-weight: 600; }
-.tbl.runs { min-width: 920px; }
-.tbl.runs td { padding-block: 8px; }
-.tbl.runs td.auc { padding-block: 6px; text-align: right; }
 .tbl.models { min-width: 1360px; }
 .tbl.models td.wide { min-width: 280px; width: 24%; }
 .tbl td.cue { font-size: 0.86rem; line-height: 1.45; color: var(--ink-2); min-width: 150px; }
@@ -594,6 +589,6 @@ a.kind:hover { border-color: var(--ink); color: var(--ink); }
   .menu { display: block; }
 }
 @media print {
-  .site, .side, nav.index, .toggle, .filters, .pager { display: none; }
+  .site, .side, nav.index, .toggle, .pager { display: none; }
   .shell { grid-template-columns: minmax(0, 1fr); }
 }

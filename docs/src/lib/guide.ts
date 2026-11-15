@@ -4,7 +4,7 @@
 import { markdownToHtml } from "satteri";
 import { links } from "./links.mjs";
 import { mdLabels } from "./nav";
-import { D, dur, int, type Run } from "./status";
+import { D, dur, int } from "./status";
 
 const base = import.meta.env.BASE_URL;
 
@@ -33,12 +33,18 @@ export const EV: Record<string, [string, string]> = {
   mlaad_bn: ["MLAAD Bengali", "Bengali"],
   mlaad_hi: ["MLAAD Hindi", "Hindi"],
   mlaad_si: ["MLAAD Sinhala", "Sinhala"],
+  speechfake_bn: ["SpeechFake Bengali", "Bengali"],
+  speechfake_hi: ["SpeechFake Hindi", "Hindi"],
+  speechfake_ml: ["SpeechFake Malayalam", "Malayalam"],
+  speechfake_mr: ["SpeechFake Marathi", "Marathi"],
+  speechfake_ta: ["SpeechFake Tamil", "Tamil"],
   bd_grf6: ["BD-GRF6", "Bengali"],
   asvspoof2019_la_eval: ["ASVspoof 2019 LA", "English"],
   in_the_wild: ["In-the-Wild", "English"],
   hidf_video: ["HiDF", "Faces"],
   mavos_dd_hi_video: ["MAVOS-DD video", "Hindi"],
   mavos_dd_hi_av: ["MAVOS-DD audio-visual", "Hindi"],
+  mavos_dd_de_video: ["MAVOS-DD German video", "German"],
 };
 
 type Kind = "bad" | "mid" | "good";
@@ -300,7 +306,15 @@ export interface GridCell {
   home?: boolean;
 }
 
-function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) {
+// A quick subset takes its full set's name, marked "quick".
+const colName = (ev: string): [string, string] => {
+  const full = ev.replace(/_quick$/, "");
+  if (full !== ev && GRID_NAMES[full]) return [GRID_NAMES[full][0], "quick"];
+  return GRID_NAMES[ev] ?? [ev, ""];
+};
+
+// quick: keep quick subsets beside their full sets (the all-runs matrix) instead of hiding them.
+function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined, { quick = false } = {}) {
   const facts = new Map((detectors?.rows ?? []).map((r) => [plain(r[0]), r.slice(1).map(plain)]));
   const trainedOn = (modelId: string, ev: string) => {
     const m = D.models.find((x) => x.id === modelId);
@@ -323,10 +337,19 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) 
         style: `--bg-auc: ${t.bg}; --fg-auc: ${t.fg}; --bg-eer: ${e.bg}; --fg-eer: ${e.fg}`,
         overlap: r.flags.includes("source overlap"),
         home: trained,
-        title:
-          `AUC ${fmt3(r.auc)} (${fmt3(r.auc_lo)}–${fmt3(r.auc_hi)}), EER ${pct(r.eer)}, ${int(r.n)} clips` +
-          (trained ? " · trained on its train split, scored on the held-out eval split" : "") +
-          (r.flags.length ? " · " + r.flags.join(", ") : ""),
+        title: [
+          `${name(id)} on ${colName(ev)[0]}${colName(ev)[1] ? ` (${colName(ev)[1]})` : ""}`,
+          `AUC ${fmt3(r.auc)} (95% ${fmt3(r.auc_lo)}–${fmt3(r.auc_hi)})`,
+          `EER ${pct(r.eer)} (95% ${pct(r.eer_lo)}–${pct(r.eer_hi)})`,
+          `${int(r.n_real)} real / ${int(r.n_fake)} fake, ${int(r.n_failed)} failed`,
+          r.wall_s ? `Wall time ${dur(r.wall_s)}` : "",
+          trained ? "Trained on its train split, scored on the held-out eval split" : "",
+          r.flags.length ? `Caveats: ${r.flags.join(", ")}` : "",
+          ...r.reasons,
+          r.run_id,
+        ]
+          .filter(Boolean)
+          .join("\n"),
       };
     }
     if (trained || D.cells[`${id}|${ev}`] === "guard")
@@ -358,15 +381,20 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) 
   };
   const scored = new Set(D.runs.map((r) => r.evalset));
   const rank = (id: string) => (scored.has(id) ? COL_GROUPS[kindOf(id)][0] : 9);
-  const at = (id: string) => (COL_ORDER.includes(id) ? COL_ORDER.indexOf(id) : COL_ORDER.length);
+  const at = (id: string) => {
+    const full = id.replace(/_quick$/, "");
+    return COL_ORDER.includes(full) ? COL_ORDER.indexOf(full) : COL_ORDER.length;
+  };
+  // Sorts by full set, so a quick subset lands right after it.
+  const full = (id: string) => id.replace(/_quick$/, "");
 
   return GRIDS.map((grid) => {
     const mine = (modality?: string) => (modality === "audio") === grid.audio;
-    // A quick subset gives way to its full set; its runs stay in the all-runs table.
+    // Here a quick subset gives way to its full set; the all-runs matrix (quick) keeps both.
     const cols = [...new Set([...D.runs.map((r) => r.evalset), ...GRID_PINNED])]
       .filter((id) => mine(evalset(id)?.modality))
-      .filter((id) => !(id.endsWith("_quick") && scored.has(id.replace(/_quick$/, ""))))
-      .sort((a, b) => rank(a) - rank(b) || at(a) - at(b) || a.localeCompare(b));
+      .filter((id) => quick || !(id.endsWith("_quick") && scored.has(full(id))))
+      .sort((a, b) => rank(a) - rank(b) || at(a) - at(b) || full(a).localeCompare(full(b)) || a.localeCompare(b));
     const colGroups: { label: string; span: number }[] = [];
     for (const id of cols) {
       const label = COL_GROUPS[kindOf(id)][1];
@@ -382,7 +410,7 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined) 
       id: grid.id,
       title: grid.title,
       colGroups,
-      cols: cols.map((ev) => ({ id: ev, name: (GRID_NAMES[ev] ?? [ev, ""])[0], sub: (GRID_NAMES[ev] ?? [ev, ""])[1] })),
+      cols: cols.map((ev) => ({ id: ev, name: colName(ev)[0], sub: colName(ev)[1] })),
       groups: groups
         .map((g) => ({
           label: g.label,
@@ -437,7 +465,9 @@ export function buildResults(body: string) {
     rows: (dsTable?.rows ?? []).map((r) => r.map(plain)),
     note: md(prose(dsT)),
   };
-  const grids = buildGrid(tables(get(/^The detectors/))[0]);
+  const detectors = tables(get(/^The detectors/))[0];
+  const grids = buildGrid(detectors);
+  const allGrids = buildGrid(detectors, { quick: true });
   const insights = items(get(/^Insights/))
     .map(lead)
     .map((b, i) => ({ n: i + 1, label: b.label, body: md(b.rest) }));
@@ -507,25 +537,6 @@ export function buildResults(body: string) {
       : { head: [] as string[], rows: [] as { text: string; hot: boolean }[][] },
   };
 
-  const evOf = (r: Run) => D.evalsets.find((x) => x.id === r.evalset);
-  const grp = (r: Run) => {
-    const e = evOf(r);
-    return e?.role === "reproduction" ? "repro" : e?.role === "control" ? "control" : e?.modality !== "audio" ? "video" : "sa";
-  };
-  const ord: Record<string, number> = { repro: 0, sa: 1, video: 2, control: 3 };
-  const all = D.runs
-    .slice()
-    .sort((a, b) => ord[grp(a)] - ord[grp(b)] || a.evalset.localeCompare(b.evalset) || b.auc - a.auc);
-  const filters = (
-    [
-      ["all", "All"],
-      ["repro", "Reproductions"],
-      ["sa", "South Asian audio"],
-      ["video", "Video"],
-      ["control", "Control"],
-    ] as const
-  ).map(([id, label]) => ({ id, label, n: id === "all" ? all.length : all.filter((r) => grp(r) === id).length }));
-
   // Each row of the experiments table becomes a card: solid once it has runs, dashed while planned.
   const expT = get(/^Experiments/);
   const expRows = tables(expT)[0]?.rows ?? [];
@@ -547,6 +558,7 @@ export function buildResults(body: string) {
     first,
     datasets,
     grids,
+    allGrids,
     insights,
     lang: { title: plain(langS.title), ...heat(tables(langS.text)[0]), intro: md(langP[0] ?? ""), after: md(langP.slice(1).join("\n\n")) },
     pre: { title: plain(preS.title), ...heat(tables(preS.text)[0]), body: md(prose(preS.text)) },
@@ -554,28 +566,6 @@ export function buildResults(body: string) {
     repro,
     reproBody: md(prose(repT)),
     video,
-    runs: {
-      filters,
-      rows: all.map((r) => {
-        const t = tone(r.auc);
-        return {
-          group: grp(r),
-          evalset: evName(r.evalset),
-          evalsetId: r.evalset,
-          model: name(r.model),
-          realFake: `${int(r.n_real)} / ${int(r.n_fake)}`,
-          failed: int(r.n_failed),
-          auc: fmt3(r.auc),
-          bg: t.bg,
-          fg: t.fg,
-          ci: `${fmt3(r.auc_lo)}–${fmt3(r.auc_hi)}`,
-          eer: pct(r.eer),
-          wall: r.wall_s ? dur(r.wall_s) : "·",
-          flags: r.flags,
-          title: [r.run_id, ...r.reasons].join("\n"),
-        };
-      }),
-    },
     gaps: md(get(/^What the results can/)),
     more,
   };

@@ -1,0 +1,51 @@
+---
+// One detector × evalset heat table from buildGrid: the Results page's glance grid and its all-runs
+// matrix. Each run cell's title carries the run's full detail for hover.
+import type { buildResults } from "../lib/guide";
+
+interface Props {
+  grid: ReturnType<typeof buildResults>["grids"][number];
+  prefix: string;
+}
+const { grid, prefix } = Astro.props;
+---
+
+<h3 class="sub" id={`${prefix}-${grid.id}`}>{grid.title}</h3>
+<div class="scroll">
+  <table class="heat grid">
+    <thead>
+      <tr class="cg">
+        <th></th>
+        {grid.colGroups.map((g) => <th colspan={g.span}>{g.label}</th>)}
+      </tr>
+      <tr>
+        <th>Detector</th>
+        {grid.cols.map((c) => <th><span>{c.name}</span><span>{c.sub}</span></th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {grid.groups.map((g) => (
+        <Fragment>
+          <tr class="tierrow">
+            <td colspan={grid.span}>
+              <div class="tierhead"><span class={g.badge}>{g.label}</span><span>{g.title}</span></div>
+            </td>
+          </tr>
+          {g.rows.map((m) => (
+            <tr>
+              <th scope="row" title={[m.type, `Backbone: ${m.built}`, `Trained on: ${m.trained}`, m.noParity && "No parity check yet, so not a result"].filter(Boolean).join("\n")}>
+                <span class="dname">{m.name}</span>
+              </th>
+              {m.cells.map((c) => (
+                <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>
+                  {c.eer ? <Fragment><span class="auc">{c.text}</span><span class="eer">{c.eer}</span></Fragment> : c.text}
+                  {c.overlap && <sup>so</sup>}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </Fragment>
+      ))}
+    </tbody>
+  </table>
+</div>

@@ -6,6 +6,7 @@ import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { panels } from "../lib/figures";
 import { buildResults } from "../lib/guide";
+import RunGrid from "../components/RunGrid.astro";
 
 const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
 // The page's sections, in the bar above them.
@@ -152,51 +153,7 @@ const sections = [
         <button type="button" data-metric="auc" aria-pressed="true">AUC · higher is better</button>
         <button type="button" data-metric="eer" aria-pressed="false">EER · lower is better</button>
       </div>
-      {
-        R.grids.map((grid) => (
-          <Fragment>
-            <h3 class="sub" id={`grid-${grid.id}`}>{grid.title}</h3>
-            <div class="scroll">
-              <table class="heat grid">
-                <thead>
-                  <tr class="cg">
-                    <th></th>
-                    {grid.colGroups.map((g) => <th colspan={g.span}>{g.label}</th>)}
-                  </tr>
-                  <tr>
-                    <th>Detector</th>
-                    {grid.cols.map((c) => <th><span>{c.name}</span><span>{c.sub}</span></th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {grid.groups.map((g) => (
-                    <Fragment>
-                      <tr class="tierrow">
-                        <td colspan={grid.span}>
-                          <div class="tierhead"><span class={g.badge}>{g.label}</span><span>{g.title}</span></div>
-                        </td>
-                      </tr>
-                      {g.rows.map((m) => (
-                        <tr>
-                          <th scope="row" title={[m.type, `Backbone: ${m.built}`, `Trained on: ${m.trained}`, m.noParity && "No parity check yet, so not a result"].filter(Boolean).join("\n")}>
-                            <span class="dname">{m.name}</span>
-                          </th>
-                          {m.cells.map((c) => (
-                            <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>
-                              {c.eer ? <Fragment><span class="auc">{c.text}</span><span class="eer">{c.eer}</span></Fragment> : c.text}
-                              {c.overlap && <sup>so</sup>}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Fragment>
-        ))
-      }
+      {R.grids.map((grid) => <RunGrid grid={grid} prefix="grid" />)}
       <ul class="gridkey">
         <li><span class="sw g-trained"></span>trained on it, so not scored</li>
         <li><span class="sw home"></span>scored on the held-out part of its own training set</li>
@@ -394,51 +351,20 @@ const sections = [
       <header>
         <div class="kicker">Every countable run</div>
         <h2>All runs</h2>
-        <p>One row per detector and evalset scored in full. Failed clips (e.g. no face found) are counted, not dropped. Wall time includes I/O.</p>
+        <p>Every scored run, quick subsets included, one cell per detector and evalset. Failed clips (e.g. no face found) are counted, not dropped. Hover a cell for its interval, clip counts, failed clips, wall time and caveats.</p>
       </header>
-      <div class="filters" role="group" aria-label="Filter runs">
-        {
-          R.runs.filters.map((f) => (
-            <button type="button" data-filter={f.id} aria-pressed={String(f.id === "all")}>
-              {f.label} · {f.n}
-            </button>
-          ))
-        }
+      <div class="toggle" role="group" aria-label="Metric">
+        <button type="button" data-metric="auc" aria-pressed="true">AUC · higher is better</button>
+        <button type="button" data-metric="eer" aria-pressed="false">EER · lower is better</button>
       </div>
-      <div class="scroll">
-        <table class="tbl runs">
-          <thead>
-            <tr>
-              <th>Evalset</th><th>Detector</th><th class="num">AUC</th><th class="num">95% interval</th><th
-                class="num">EER</th
-              ><th class="num">Real / fake</th><th class="num">Failed</th><th class="num">Wall time</th><th>Caveats</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              R.runs.rows.map((r) => (
-                <tr title={r.title} data-group={r.group}>
-                  <td class="nowrap" title={r.evalsetId}>
-                    {r.evalset}
-                  </td>
-                  <td class="nowrap">{r.model}</td>
-                  <td class="auc">
-                    <span class="auc-pill" style={`background: ${r.bg}; color: ${r.fg}`}>{r.auc}</span>
-                  </td>
-                  <td class="num dim">{r.ci}</td>
-                  <td class="num">{r.eer}</td>
-                  <td class="num">{r.realFake}</td>
-                  <td class="num">{r.failed}</td>
-                  <td class="num">{r.wall}</td>
-                  <td>
-                    <div class="flaglist">{r.flags.map((f) => <span class="flagtag">{f}</span>)}</div>
-                  </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
+      {R.allGrids.map((grid) => <RunGrid grid={grid} prefix="runs" />)}
+      <ul class="gridkey">
+        <li><span class="sw g-trained"></span>trained on it, so not scored</li>
+        <li><span class="sw home"></span>scored on the held-out part of its own training set</li>
+        <li><sup>so</sup> source overlap: the detector's pretraining shares a corpus with this set</li>
+        <li><span class="sw g-na">–</span>it can't read this set</li>
+        <li><span class="sw g-todo">·</span>not run yet</li>
+      </ul>
       <dl class="terms-dl">
         <div><dt>below chance</dt><dd>AUC under 0.5: a score-reading bug on a reproduction set, a real finding on a South Asian one.</dd></div>
         <div><dt>source overlap</dt><dd>Pretraining used a corpus the evalset draws on. Kept out of headline numbers.</dd></div>
@@ -458,22 +384,14 @@ const sections = [
 </Base>
 
 <script>
-  // AUC or EER in the grid. Both are in the page; this only switches.
-  const glance = document.getElementById("at-a-glance")!;
-  for (const b of glance.querySelectorAll<HTMLButtonElement>(".toggle button")) {
-    b.addEventListener("click", () => {
-      glance.dataset.metric = b.dataset.metric;
-      for (const o of glance.querySelectorAll(".toggle button")) o.setAttribute("aria-pressed", String(o === b));
-    });
-  }
-
-  // Which runs the table at the bottom shows. Every row is in the page; this only switches.
-  const runs = document.getElementById("all-runs")!;
-  for (const b of runs.querySelectorAll<HTMLButtonElement>(".filters button")) {
-    b.addEventListener("click", () => {
-      const f = b.dataset.filter;
-      for (const o of runs.querySelectorAll(".filters button")) o.setAttribute("aria-pressed", String(o === b));
-      for (const tr of runs.querySelectorAll<HTMLTableRowElement>("tbody tr")) tr.hidden = f !== "all" && tr.dataset.group !== f;
-    });
+  // AUC or EER in the grids. Both are in the page; this only switches.
+  for (const id of ["at-a-glance", "all-runs"]) {
+    const sec = document.getElementById(id)!;
+    for (const b of sec.querySelectorAll<HTMLButtonElement>(".toggle button")) {
+      b.addEventListener("click", () => {
+        sec.dataset.metric = b.dataset.metric;
+        for (const o of sec.querySelectorAll(".toggle button")) o.setAttribute("aria-pressed", String(o === b));
+      });
+    }
   }
 </script>

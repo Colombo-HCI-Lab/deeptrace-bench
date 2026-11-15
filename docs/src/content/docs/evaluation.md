@@ -104,7 +104,7 @@ Five stratified folds (seed 0), standardised features, out-of-fold scores, a 95%
 
 ## Flags on each run
 
-Beside the verdict, the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) flags:
+Beside the verdict, the [all-runs matrix](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) shows these flags on hover over each cell:
 
 | Flag | Means |
 | --- | --- |
