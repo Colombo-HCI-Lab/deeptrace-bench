@@ -1,5 +1,5 @@
 {
- "built": "2026-11-11",
+ "built": "2026-11-15",
  "eval_status": "proposed",
  "citations_checked": "2026-10-05",
  "fake_types": [
@@ -153,7 +153,7 @@
    ],
    "cue": "self-supervised speech features (XLSR-53)",
    "architecture": "Pre-emphasised 16 kHz window, wav2vec 2.0 XLSR-53 features, KAN bridge and residual encoder, spectral and temporal graph attention, four inference branches, KAN output layer, two-way classifier",
-   "description": "AASIST3 (Borodin et al., 2024), built for ASVspoof 5, feeds XLSR-53 features into AASIST and replaces some layers with KAN layers. The released weights saw ASVspoof 2019 LA, ASVspoof 5, MLAAD and M-AILABS on a front end pretrained on Common Voice, BABEL and Multilingual LibriSpeech, so the contamination guard refuses it on MLAAD-based evalsets. The repository says these are not the weights behind the paper's numbers, and the model card's Speech Arena re-scoring puts them far lower, so treat it as a weak multilingual baseline; parity is not checked yet.",
+   "description": "AASIST3 (Borodin et al., 2024), built for ASVspoof 5, feeds XLSR-53 features into AASIST and replaces some layers with KAN layers. The released weights saw ASVspoof 2019 LA, ASVspoof 5, MLAAD and M-AILABS on a front end pretrained on Common Voice, BABEL and Multilingual LibriSpeech, so the contamination guard refuses it on MLAAD-based evalsets. The repository says these are not the weights behind the paper's numbers, and the model card's Speech Arena re-scoring puts them far lower, so treat it as a weak multilingual baseline. Passes parity against upstream's own loader.",
    "input": "4.04 s windows of raw 16 kHz audio",
    "training": [
     {
@@ -230,7 +230,11 @@
     "M-AILABS speech corpus",
     "MLAAD"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "urdu_csalt",
+    "items": 200,
+    "max_abs_diff": 8.530914783477783e-07
+   },
    "profile": {
     "params": 321621908,
     "gflops_per_unit": 154.067552512,
@@ -882,7 +886,7 @@
    ],
    "cue": "audio-visual synchronisation of real speech",
    "architecture": "Face clip and its audio, audio-visual synchronisation network, PCA, autoregressive regressors over the feature and time-offset sequences, anomaly score",
-   "description": "AVAD (Feng, Chen and Owens, CVPR 2023) learns only from real talking faces (LRS2 or LRS3; which one the released weights used is unverified) and scores how surprising a video's audio-visual synchronisation is. Unsupervised, so it carries no bias from fake-side training data. Not adapted yet.",
+   "description": "AVAD (Feng, Chen and Owens, CVPR 2023) learns only from real talking faces (LRS2 or LRS3; which one the released weights used is unverified) and scores how surprising a video's audio-visual synchronisation is. Unsupervised, so it carries no bias from fake-side training data.",
    "input": "224 px face-box crops, 32 frames per video",
    "training": [
     {
@@ -925,7 +929,7 @@
    ],
    "cue": "audio-visual alignment in AV-HuBERT features",
    "architecture": "Mouth-region video and audio, AV-HuBERT large encoder (frozen), per-frame alignment head, mean misalignment score",
-   "description": "AVH-Align (Smeu et al., CVPR 2025) trains only on 45,000 real AV-Deepfake1M videos over AV-HuBERT features pretrained on LRS3 and VoxCeleb2. AV-HuBERT is a fairseq model, which this repo doesn't install, so the adapter needs a stand-in. Not adapted yet.",
+   "description": "AVH-Align (Smeu et al., CVPR 2025) trains only on 45,000 real AV-Deepfake1M videos over AV-HuBERT features pretrained on LRS3 and VoxCeleb2. AV-HuBERT is a fairseq model, which this repo doesn't install, so the adapter rebuilds its encoder.",
    "input": "mouth crops from 25 consecutive frames at a time (up to 100 frames per video)",
    "training": [
     {
@@ -1357,7 +1361,7 @@
    ],
    "cue": "face texture, frame by frame",
    "architecture": "380 px face crops (30% margin), EfficientNet-B7 backbone, binary head, mean over frames",
-   "description": "Selim Seferbekov's winning DFDC entry averaged seven EfficientNet-B7 classifiers trained on DFDC face crops with heavy augmentation. One checkpoint is pinned so far; the full ensemble is the other six from the same release. Not adapted yet.",
+   "description": "Selim Seferbekov's winning DFDC entry averaged seven EfficientNet-B7 classifiers trained on DFDC face crops with heavy augmentation. All seven checkpoints are pinned and averaged.",
    "input": "380 px face-box crops, 32 frames per video",
    "training": [
     {
@@ -1472,8 +1476,8 @@
    "adapter": true,
    "blocked": false,
    "licence": "none published (README badge says CC BY-NC 4.0; issue 3 asks for a licence file)",
-   "summary": "CLIP ViT-L/14 adapted by SVD: principal singular components frozen, residual tuned; DeepfakeBench detector on FF++ c23. Blocked on weights.",
-   "why": "The probe's original foundation-model video detector, the partner to Xception. Blocked on weights; GenD holds its place until they arrive.",
+   "summary": "CLIP ViT-L/14 adapted by SVD: principal singular components frozen, residual tuned; DeepfakeBench detector on FF++ c23.",
+   "why": "The probe's original foundation-model video detector, the partner to Xception. Its weights were blocked until 2026-10-28, so GenD took its place in the first round; it now runs beside it.",
    "cut": false,
    "catches": [
     "face_swap",
@@ -1481,7 +1485,7 @@
    ],
    "cue": "foundation-model features (CLIP)",
    "architecture": "Aligned 224 px face crop, CLIP ViT-L/14 image encoder with SVD-split weights (principal part frozen, residual part tuned), linear head",
-   "description": "Effort (Yan et al., ICML 2025) splits each weight matrix by SVD, freezes the principal subspace and trains only the residual, which the authors argue stops fine-tuning from collapsing the feature space onto a few fake patterns. The paper targets AI-generated images broadly; here DeepfakeBench's Effort detector, trained on FaceForensics++ (c23) after CLIP pretraining on OpenAI's private data, scores face frames. Blocked since Google Drive refused the weight file as over quota on 2026-10-05; upstream also reports a Celeb-DF v2 reproduction gap and has no licence file.",
+   "description": "Effort (Yan et al., ICML 2025) splits each weight matrix by SVD, freezes the principal subspace and trains only the residual, which the authors argue stops fine-tuning from collapsing the feature space onto a few fake patterns. The paper targets AI-generated images broadly; here DeepfakeBench's Effort detector, trained on FaceForensics++ (c23) after CLIP pretraining on OpenAI's private data, scores face frames. Google Drive refuses scripted downloads of the weight file as over quota, so it comes from a private Hugging Face mirror (upstream has no licence file, so the mirror isn't public). Passes parity against the original code; upstream reports a Celeb-DF v2 reproduction gap.",
    "input": "224 px aligned face crops, 32 frames per video",
    "training": [
     {
@@ -1529,7 +1533,11 @@
    "trained_on": [
     "FaceForensics++"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_video",
+    "items": 50,
+    "max_abs_diff": 1.9669532775878906e-06
+   },
    "profile": null
   },
   {
@@ -1630,7 +1638,7 @@
    ],
    "cue": "spatial and temporal artefacts of blending",
    "architecture": "Face clip, spatio-temporal transformer with artefact-focused auxiliary heads, binary head",
-   "description": "FakeSTormer (Nguyen et al., ICCV 2025) extends self-blended training to video. Its checkpoint sits in a Dropbox folder that must be fetched by hand, under an academic licence. Not adapted yet.",
+   "description": "FakeSTormer (Nguyen et al., ICCV 2025) extends self-blended training to video. Its checkpoint sits in a Dropbox folder that must be fetched by hand, under an academic licence.",
    "input": "256 px face-box crops, 32 frames per video",
    "training": [
     {
@@ -1754,7 +1762,7 @@
    ],
    "cue": "temporal incoherence of the face over time",
    "architecture": "Face clip, 3D ResNet-50 with spatial kernel size 1, temporal transformer, binary head",
-   "description": "FTCN (Zheng et al., ICCV 2021) removes spatial convolution so the network must use temporal coherence. The FTCN+TT weights were trained on FF++ c23. Upstream targets PyTorch 1.4 and states no licence. Not adapted yet.",
+   "description": "FTCN (Zheng et al., ICCV 2021) removes spatial convolution so the network must use temporal coherence. The FTCN+TT weights were trained on FF++ c23. Upstream targets PyTorch 1.4 and states no licence.",
    "input": "224 px face clips of 32 consecutive frames, one alignment per clip, every 16 frames (up to 100 per video)",
    "training": [
     {
@@ -1857,7 +1865,7 @@
    ],
    "cue": "foundation-model features (CLIP)",
    "architecture": "Aligned face crop at native size, CLIP ViT-L/14 image encoder with only LayerNorm parameters tuned, L2-normalised features, linear head",
-   "description": "GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 0.03% of the model), constrains features to the hypersphere with L2 normalisation and metric learning, and averages per-frame P(fake) over the video. The released weights were trained on FaceForensics++ only, after CLIP pretraining on OpenAI's private image-text data. The main generalisation-first video model here; the adapter runs end to end but parity is not checked yet.",
+   "description": "GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 0.03% of the model), constrains features to the hypersphere with L2 normalisation and metric learning, and averages per-frame P(fake) over the video. The released weights were trained on FaceForensics++ only, after CLIP pretraining on OpenAI's private image-text data. The main generalisation-first video model here. Passes parity against upstream's own loader and preprocessing.",
    "input": "native-size aligned face crops, 32 frames per video",
    "training": [
     {
@@ -1905,7 +1913,11 @@
    "trained_on": [
     "FaceForensics++"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_video",
+    "items": 50,
+    "max_abs_diff": 2.384185791015625e-06
+   },
    "profile": {
     "params": 303968258,
     "gflops_per_unit": 162.023968768,
@@ -1934,7 +1946,7 @@
    ],
    "cue": "foundation-model features (Perception Encoder)",
    "architecture": "Aligned face crop at native size resized to 224, Meta Perception Encoder L/14 with only LayerNorm parameters tuned, L2-normalised features, linear head",
-   "description": "GenD's second released backbone (Yermakov et al., WACV 2026): identical training on Perception Encoder, so the pair isolates the effect of the foundation model. Trained on FaceForensics++ only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Parity is not checked yet.",
+   "description": "GenD's second released backbone (Yermakov et al., WACV 2026): identical training on Perception Encoder, so the pair isolates the effect of the foundation model. Trained on FaceForensics++ only; Meta's pretraining data are not public, so overlap with our data cannot be checked. Passes parity against upstream's own loader and preprocessing.",
    "input": "native-size aligned face crops, 32 frames per video",
    "training": [
     {
@@ -1982,7 +1994,11 @@
    "trained_on": [
     "FaceForensics++"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_video",
+    "items": 50,
+    "max_abs_diff": 1.7881393432617188e-07
+   },
    "profile": {
     "params": 316104706,
     "gflops_per_unit": 163.123929088,
@@ -2012,7 +2028,7 @@
    ],
    "cue": "whether voice and lips agree",
    "architecture": "16-frame windows of 224 px face frames plus 128-bin audio filterbank, audio and video transformer encoders pretrained on real videos, audio-visual interaction module, MLP classifier, one logit per window",
-   "description": "HAVIC (CVPR 2026 Findings) pretrains its audio and video encoders on real videos only (LRS2) to model temporal and cross-modal coherence, then fuses them to score clips whose lips, voice or expression disagree. It was fine-tuned on a random 70% of FakeAVCeleb with an unpublished item list, so the contamination guard refuses it on FakeAVCeleb. The only open audio-visual detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long for HiDF), and parity is not checked yet.",
+   "description": "HAVIC (CVPR 2026 Findings) pretrains its audio and video encoders on real videos only (LRS2) to model temporal and cross-modal coherence, then fuses them to score clips whose lips, voice or expression disagree. It was fine-tuned on a random 70% of FakeAVCeleb with an unpublished item list, so the contamination guard refuses it on FakeAVCeleb. The only open audio-visual detector here; it needs at least 3.2 s of video with a face in all 16 sampled frames (too long for HiDF), and it passes parity against upstream's own inference.",
    "input": "native-size face-box crops at 5 frames per second (up to 50), with the audio under them",
    "training": [
     {
@@ -2060,7 +2076,11 @@
    "trained_on": [
     "FakeAVCeleb"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_av",
+    "items": 30,
+    "max_abs_diff": 1.30385160446167e-08
+   },
    "profile": {
     "params": 214663189,
     "gflops_per_unit": 536.393276416,
@@ -2135,7 +2155,7 @@
    ],
    "cue": "temporal mismatch between lip motion and audio",
    "architecture": "Mouth crops with the audio spectrogram, global and regional encoders, binary head",
-   "description": "LipFD (Liu et al., NeurIPS 2024) compares lip motion with audio over time. Its training set covers three lip-sync generators only, and upstream states no licence. Not adapted yet.",
+   "description": "LipFD (Liu et al., NeurIPS 2024) compares lip motion with audio over time. Its training set covers three lip-sync generators only, and upstream states no licence.",
    "input": "500 px face-box crops, 32 frames per video",
    "training": [
     {
@@ -2178,7 +2198,7 @@
    ],
    "cue": "mouth motion over time",
    "architecture": "25-frame clips of 96 px grayscale mouth crops (88 px centre crop), ResNet-18 with 3D stem, multi-scale temporal convolutional network, one logit per clip",
-   "description": "LipForensics (Haliassos et al., CVPR 2021) is pretrained for lipreading on LRW, then its temporal network is fine-tuned on FaceForensics++ (c23, all four manipulations) to separate real from forged mouth motion, a high-level cue the authors argue survives unseen manipulations and compression. Central here because lip-sync fakes are a focus. Caveats: users report its FF++ numbers do not reproduce, it needs 25 consecutive frames with a detectable face, and parity is not checked yet.",
+   "description": "LipForensics (Haliassos et al., CVPR 2021) is pretrained for lipreading on LRW, then its temporal network is fine-tuned on FaceForensics++ (c23, all four manipulations) to separate real from forged mouth motion, a high-level cue the authors argue survives unseen manipulations and compression. Central here because lip-sync fakes are a focus. Caveats: users report its FF++ numbers do not reproduce, it needs 25 consecutive frames with a detectable face. It passes parity against upstream's network and transform.",
    "input": "mouth crops from 25 consecutive frames at a time (up to 100 frames per video)",
    "training": [
     {
@@ -2226,7 +2246,11 @@
    "trained_on": [
     "FaceForensics++"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "mavos_dd_hi_video",
+    "items": 50,
+    "max_abs_diff": 0.0
+   },
    "profile": {
     "params": 35990785,
     "gflops_per_unit": 17.83982848,
@@ -2255,7 +2279,7 @@
    ],
    "cue": "mouth and face motion learned from real talking faces",
    "architecture": "Face or mouth clip, CSN video backbone from audio-visual self-supervision, binary head",
-   "description": "RealForensics (Haliassos et al., CVPR 2022) first learns from real talking faces and their audio, then fine-tunes on FF++. The released FF++ checkpoint scores from video alone. Leave-one-manipulation-out checkpoints are also released. Not adapted yet.",
+   "description": "RealForensics (Haliassos et al., CVPR 2022) first learns from real talking faces and their audio, then fine-tunes on FF++. The released FF++ checkpoint scores from video alone. Leave-one-manipulation-out checkpoints are also released.",
    "input": "150 px whole-face patches from 25 consecutive frames at a time (up to 100 frames per video)",
    "training": [
     {
@@ -2743,7 +2767,7 @@
    ],
    "cue": "frozen CLIP features, not faces",
    "architecture": "224 px frame or face crop, frozen CLIP ViT-L/14 image encoder, one linear layer, mean over frames",
-   "description": "UnivFD (Ojha, Li and Lee, CVPR 2023) shows a linear probe on CLIP features generalises across image generators. It never saw a face swap, so it is a floor for face-specific models. Not adapted yet.",
+   "description": "UnivFD (Ojha, Li and Lee, CVPR 2023) shows a linear probe on CLIP features generalises across image generators. It never saw a face swap, so it is a floor for face-specific models.",
    "input": "224 px face-box crops, 32 frames per video",
    "training": [
     {
@@ -2966,7 +2990,7 @@
    ],
    "cue": "self-supervised speech features (XLS-R) over time",
    "architecture": "Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, dual-column bidirectional Mamba back end (six blocks per direction), two-way classifier",
-   "description": "XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention back end with forward and backward Mamba state space blocks over XLS-R features. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the released network trained on the ASVspoof 2019 LA training split alone. Here mamba-ssm's CUDA kernels are replaced by slower pure-PyTorch stand-ins, and parity against the kernels is not checked yet.",
+   "description": "XLSR-Mamba (Xiao and Das, IEEE SPL 2024) replaces the attention back end with forward and backward Mamba state space blocks over XLS-R features. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the released network trained on the ASVspoof 2019 LA training split alone. Here mamba-ssm's CUDA kernels are replaced by slower pure-PyTorch stand-ins, which pass parity against the kernels.",
    "input": "4.04 s windows of raw 16 kHz audio",
    "training": [
     {
@@ -3034,7 +3058,11 @@
    "trained_on": [
     "ASVspoof 2019 Logical Access"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "urdu_csalt",
+    "items": 200,
+    "max_abs_diff": 4.214048385620117e-05
+   },
    "profile": {
     "params": 317375670,
     "gflops_per_unit": 298.31939808,
@@ -3063,7 +3091,7 @@
    ],
    "cue": "self-supervised speech features from every layer (XLS-R)",
    "architecture": "Raw 16 kHz waveform in 64,600-sample windows, fine-tuned XLS-R 300M front end, learned attention over all 24 layers (SLS), two linear layers, two-way classifier",
-   "description": "XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with learned attention, since different layers carry different spoofing cues, before two linear layers. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the network trained on the ASVspoof 2019 LA training split alone, making it a clean zero-shot probe on every South Asian set. The repository declares no licence, so its code is imported, never copied; parity is not checked yet.",
+   "description": "XLS-R + SLS (Zhang et al., ACM Multimedia 2024) weights every XLS-R layer with learned attention, since different layers carry different spoofing cues, before two linear layers. The front end was pretrained on real speech (Common Voice, BABEL, MLS, VoxPopuli, VoxLingua107) and the network trained on the ASVspoof 2019 LA training split alone, making it a clean zero-shot probe on every South Asian set. The repository declares no licence, so its code is imported, never copied. Passes parity against the original code with fairseq.",
    "input": "4.04 s windows of raw 16 kHz audio",
    "training": [
     {
@@ -3131,7 +3159,11 @@
    "trained_on": [
     "ASVspoof 2019 Logical Access"
    ],
-   "parity": null,
+   "parity": {
+    "evalset": "urdu_csalt",
+    "items": 200,
+    "max_abs_diff": 0.00010246038436889648
+   },
    "profile": {
     "params": 338838149,
     "gflops_per_unit": 297.609132032,
@@ -6970,9 +7002,7 @@
    "tpr_at_fpr05": 0.8715777409907042,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 4669.5,
    "windows": 86129,
    "compute": {
@@ -7008,9 +7038,7 @@
    "tpr_at_fpr05": 0.8648888888888889,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 288.4,
    "windows": 5052,
    "compute": {
@@ -7049,8 +7077,7 @@
     "aasist3 pretrain data commonvoice shares ['commonvoice'] with banglafake"
    ],
    "flags": [
-    "source overlap",
-    "no parity check"
+    "source overlap"
    ],
    "wall_s": 2350.5,
    "windows": 50954,
@@ -7088,8 +7115,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1158.7,
    "windows": 24368,
@@ -7126,9 +7152,7 @@
    "tpr_at_fpr05": 0.1381505376344086,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 2309.8,
    "windows": 48385,
    "compute": {
@@ -7164,9 +7188,7 @@
    "tpr_at_fpr05": 0.3844,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 1742.4,
    "windows": 42198,
    "compute": {
@@ -7202,9 +7224,7 @@
    "tpr_at_fpr05": 0.3604,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 1303.2,
    "windows": 29806,
    "compute": {
@@ -7240,9 +7260,7 @@
    "tpr_at_fpr05": 0.47624762476247623,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 1286.9,
    "windows": 29577,
    "compute": {
@@ -7279,7 +7297,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "below chance"
    ],
    "wall_s": 2967.6,
@@ -7317,9 +7334,7 @@
    "tpr_at_fpr05": 0.6963855421686747,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 924.7,
    "windows": 14987,
    "compute": {
@@ -7360,7 +7375,6 @@
    "flags": [
     "source overlap",
     "cross-corpus",
-    "no parity check",
     "below chance"
    ],
    "wall_s": 2019.4,
@@ -7402,8 +7416,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 2653.1,
    "windows": 54996,
@@ -7444,8 +7457,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 636.1,
    "windows": 13039,
@@ -7486,8 +7498,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1670.0,
    "windows": 29477,
@@ -7528,8 +7539,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1908.6,
    "windows": 39550,
@@ -7566,9 +7576,7 @@
    "tpr_at_fpr05": 0.3802191294047972,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 689,
    "windows": 17745,
    "compute": {
@@ -10885,6 +10893,45 @@
   },
   {
    "model": "dfdc_b7",
+   "evalset": "mavos_dd_de_video_quick",
+   "run_id": "dfdc_b7__mavos_dd_de_video_quick__ec631461",
+   "pairing": "same_corpus",
+   "n": 2701,
+   "n_real": 800,
+   "n_fake": 1901,
+   "n_failed": 7,
+   "auc": 0.3239643221573141,
+   "auc_lo": 0.30432491471859613,
+   "auc_hi": 0.3443045396455332,
+   "eer": 0.641688654353562,
+   "eer_lo": 0.6221635883905013,
+   "eer_hi": 0.658329210986028,
+   "acc": 0.35820341499628805,
+   "bal_acc": 0.35812938996965205,
+   "ap": 0.6626529803260709,
+   "tpr_at_fpr01": 0.044854881266490766,
+   "tpr_at_fpr05": 0.0891820580474934,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked",
+    "below chance"
+   ],
+   "wall_s": 8781.0,
+   "windows": 85974,
+   "compute": {
+    "items_per_s": 0.308,
+    "windows_per_s": 11.12,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 3.169,
+    "gpu_util_mean": 87.6,
+    "energy_wh": 583.335,
+    "energy_wh_per_1k_items": 215.97,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "dfdc_b7",
    "evalset": "mavos_dd_hi_video",
    "run_id": "dfdc_b7__mavos_dd_hi_video__d231cade",
    "pairing": "same_corpus",
@@ -10919,6 +10966,45 @@
     "gpu_util_mean": 93.0,
     "energy_wh": 1352.398,
     "energy_wh_per_1k_items": 180.008,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "dfdc_b7",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "dfdc_b7__mavos_dd_hi_video_quick__4e3234ad",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 17,
+   "auc": 0.37286067307415616,
+   "auc_lo": 0.3498651792394464,
+   "auc_hi": 0.3940560163736295,
+   "eer": 0.601018675721562,
+   "eer_lo": 0.5823429541595926,
+   "eer_hi": 0.6230899830220713,
+   "acc": 0.40088817117480824,
+   "bal_acc": 0.40023218756294776,
+   "ap": 0.7532617115137009,
+   "tpr_at_fpr01": 0.0826271186440678,
+   "tpr_at_fpr05": 0.1128177966101695,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked",
+    "below chance"
+   ],
+   "wall_s": 8482.4,
+   "windows": 78752,
+   "compute": {
+    "items_per_s": 0.294,
+    "windows_per_s": 11.04,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 3.169,
+    "gpu_util_mean": 83.5,
+    "energy_wh": 559.453,
+    "energy_wh_per_1k_items": 224.32,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },
@@ -11136,7 +11222,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 4576.0,
@@ -11149,6 +11234,44 @@
     "gpu_util_mean": 90.9,
     "energy_wh": 253.472,
     "energy_wh_per_1k_items": 29.061,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "effort",
+   "evalset": "mavos_dd_de_video_quick",
+   "run_id": "effort__mavos_dd_de_video_quick__1f980e11",
+   "pairing": "same_corpus",
+   "n": 2701,
+   "n_real": 800,
+   "n_fake": 1901,
+   "n_failed": 7,
+   "auc": 0.5874176493704202,
+   "auc_lo": 0.5661220985334571,
+   "auc_hi": 0.6095132933317042,
+   "eer": 0.42110817941952505,
+   "eer_lo": 0.40105540897097625,
+   "eer_hi": 0.4395910290237467,
+   "acc": 0.5783221974758723,
+   "bal_acc": 0.5779315172989984,
+   "ap": 0.8161746062204347,
+   "tpr_at_fpr01": 0.1741424802110818,
+   "tpr_at_fpr05": 0.23588390501319262,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 2136.6,
+   "windows": 85974,
+   "compute": {
+    "items_per_s": 1.3,
+    "windows_per_s": 79.52,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 1.781,
+    "gpu_util_mean": 49.7,
+    "energy_wh": 149.79,
+    "energy_wh_per_1k_items": 55.457,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },
@@ -11175,7 +11298,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 4785,
@@ -11188,6 +11310,44 @@
     "gpu_util_mean": 73.0,
     "energy_wh": 390.576,
     "energy_wh_per_1k_items": 51.987,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "effort",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "effort__mavos_dd_hi_video_quick__680a4bb3",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 17,
+   "auc": 0.5367084760150787,
+   "auc_lo": 0.514144669398003,
+   "auc_hi": 0.5584503413570833,
+   "eer": 0.4872881355932204,
+   "eer_lo": 0.46519524617996605,
+   "eer_hi": 0.5042444821731749,
+   "acc": 0.5123132821962051,
+   "bal_acc": 0.5118737590285172,
+   "ap": 0.8455318300249127,
+   "tpr_at_fpr01": 0.2807203389830508,
+   "tpr_at_fpr05": 0.3463983050847458,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 2309.5,
+   "windows": 78752,
+   "compute": {
+    "items_per_s": 1.106,
+    "windows_per_s": 83.11,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 1.781,
+    "gpu_util_mean": 40.7,
+    "energy_wh": 156.505,
+    "energy_wh_per_1k_items": 62.753,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },
@@ -11422,6 +11582,44 @@
   },
   {
    "model": "fakestormer",
+   "evalset": "mavos_dd_de_video_quick",
+   "run_id": "fakestormer__mavos_dd_de_video_quick__aa94ce40",
+   "pairing": "same_corpus",
+   "n": 2701,
+   "n_real": 800,
+   "n_fake": 1901,
+   "n_failed": 7,
+   "auc": 0.5636167901169338,
+   "auc_lo": 0.5408244309344463,
+   "auc_hi": 0.5846764260074433,
+   "eer": 0.46057571964956195,
+   "eer_lo": 0.43903693931398424,
+   "eer_hi": 0.4817941952506596,
+   "acc": 0.5397178916109874,
+   "bal_acc": 0.5396329845023958,
+   "ap": 0.7702141492413676,
+   "tpr_at_fpr01": 0.049604221635883905,
+   "tpr_at_fpr05": 0.14089709762532981,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 12182.0,
+   "windows": 21486,
+   "compute": {
+    "items_per_s": 0.222,
+    "windows_per_s": 38.29,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 0.732,
+    "gpu_util_mean": 4.0,
+    "energy_wh": 509.784,
+    "energy_wh_per_1k_items": 188.739,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "fakestormer",
    "evalset": "mavos_dd_hi_video",
    "run_id": "fakestormer__mavos_dd_hi_video__c3c217f3",
    "pairing": "same_corpus",
@@ -11455,6 +11653,44 @@
     "gpu_util_mean": 19.3,
     "energy_wh": 294.323,
     "energy_wh_per_1k_items": 39.175,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "fakestormer",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "fakestormer__mavos_dd_hi_video_quick__eecb117a",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 17,
+   "auc": 0.541533876722972,
+   "auc_lo": 0.5161151837357199,
+   "auc_hi": 0.5660943884708354,
+   "eer": 0.499151103565365,
+   "eer_lo": 0.47368421052631576,
+   "eer_hi": 0.5180084745762712,
+   "acc": 0.5010092854259185,
+   "bal_acc": 0.5009541092342666,
+   "ap": 0.8062022580539888,
+   "tpr_at_fpr01": 0.034957627118644065,
+   "tpr_at_fpr05": 0.11016949152542373,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 1712.6,
+   "windows": 19657,
+   "compute": {
+    "items_per_s": 1.459,
+    "windows_per_s": 45.54,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 0.732,
+    "gpu_util_mean": 19.4,
+    "energy_wh": 99.643,
+    "energy_wh_per_1k_items": 39.953,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },
@@ -11764,6 +12000,44 @@
    }
   },
   {
+   "model": "ftcn",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "ftcn__mavos_dd_hi_video_quick__88d67b6e",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 21,
+   "auc": 0.8313709212123185,
+   "auc_lo": 0.8134198015522046,
+   "auc_hi": 0.8467530670602342,
+   "eer": 0.26126126126126126,
+   "eer_lo": 0.2437731849496555,
+   "eer_hi": 0.278749337572867,
+   "acc": 0.7379700768297615,
+   "bal_acc": 0.7371168096424069,
+   "ap": 0.9443100453620372,
+   "tpr_at_fpr01": 0.38844727080021196,
+   "tpr_at_fpr05": 0.4933757286698463,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 1614.7,
+   "windows": 12299,
+   "compute": {
+    "items_per_s": 1.545,
+    "windows_per_s": 12.89,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 4.686,
+    "gpu_util_mean": 58.7,
+    "energy_wh": 110.371,
+    "energy_wh_per_1k_items": 44.255,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
    "model": "genconvit",
    "evalset": "hidf_video",
    "run_id": "genconvit__hidf_video__200f6afc",
@@ -11879,6 +12153,44 @@
    }
   },
   {
+   "model": "genconvit",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "genconvit__mavos_dd_hi_video_quick__7331c9f4",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 17,
+   "auc": 0.5365888751402837,
+   "auc_lo": 0.5119094144772812,
+   "auc_hi": 0.5623903808523495,
+   "eer": 0.49470338983050843,
+   "eer_lo": 0.4772245762711864,
+   "eer_hi": 0.5158898305084746,
+   "acc": 0.5026241421073879,
+   "bal_acc": 0.4996771675635233,
+   "ap": 0.8146937966412475,
+   "tpr_at_fpr01": 0.07415254237288135,
+   "tpr_at_fpr05": 0.15148305084745764,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 10959.4,
+   "windows": 78752,
+   "compute": {
+    "items_per_s": 0.228,
+    "windows_per_s": 368.43,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 0.716,
+    "gpu_util_mean": 2.1,
+    "energy_wh": 425.669,
+    "energy_wh_per_1k_items": 170.677,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
    "model": "gend",
    "evalset": "hidf_video",
    "run_id": "gend__hidf_video__56f1ab47",
@@ -11901,7 +12213,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 26249,
@@ -11940,7 +12251,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 949,
@@ -11979,7 +12289,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 2273.0,
@@ -12018,7 +12327,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 5674.1,
@@ -12057,7 +12365,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 3016,
@@ -12096,7 +12403,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 5619,
@@ -12135,7 +12441,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 951,
@@ -12174,7 +12479,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 2486.5,
@@ -12213,7 +12517,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 16122.3,
@@ -12252,7 +12555,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 1665,
@@ -12291,7 +12593,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 12651,
@@ -12330,7 +12631,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 5745,
@@ -12461,6 +12761,44 @@
    }
   },
   {
+   "model": "laa_net",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "laa_net__mavos_dd_hi_video_quick__ae9a4889",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 17,
+   "auc": 0.5907572803660327,
+   "auc_lo": 0.5659682679994821,
+   "auc_hi": 0.6175539687706828,
+   "eer": 0.4295415959252971,
+   "eer_lo": 0.4074702886247878,
+   "eer_hi": 0.4533106960950764,
+   "acc": 0.5708518368994752,
+   "bal_acc": 0.5707164901729447,
+   "ap": 0.827856718657105,
+   "tpr_at_fpr01": 0.07097457627118645,
+   "tpr_at_fpr05": 0.1329449152542373,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 2559.6,
+   "windows": 78752,
+   "compute": {
+    "items_per_s": 0.275,
+    "windows_per_s": 74.89,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 0.686,
+    "gpu_util_mean": 32.4,
+    "energy_wh": 168.75,
+    "energy_wh_per_1k_items": 240.385,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
    "model": "lipfd",
    "evalset": "mavos_dd_hi_av",
    "run_id": "lipfd__mavos_dd_hi_av__a1abd552",
@@ -12521,7 +12859,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 22274,
@@ -12560,7 +12897,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 4939,
@@ -12573,6 +12909,44 @@
     "gpu_util_mean": 22.8,
     "energy_wh": 283.719,
     "energy_wh_per_1k_items": 141.084,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "lipforensics",
+   "evalset": "mavos_dd_de_video_quick",
+   "run_id": "lipforensics__mavos_dd_de_video_quick__343b3743",
+   "pairing": "same_corpus",
+   "n": 2701,
+   "n_real": 800,
+   "n_fake": 1901,
+   "n_failed": 11,
+   "auc": 0.5558149777398078,
+   "auc_lo": 0.5340737478310242,
+   "auc_hi": 0.5762157043135424,
+   "eer": 0.46409714889123543,
+   "eer_lo": 0.44772967265047514,
+   "eer_hi": 0.48468848996832103,
+   "acc": 0.5356877323420074,
+   "bal_acc": 0.5355393652528747,
+   "ap": 0.7949272485025762,
+   "tpr_at_fpr01": 0.12777191129883844,
+   "tpr_at_fpr05": 0.24287222808870115,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 42317.6,
+   "windows": 10756,
+   "compute": {
+    "items_per_s": 0.064,
+    "windows_per_s": 268.59,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 4.654,
+    "gpu_util_mean": 5.0,
+    "energy_wh": 1624.977,
+    "energy_wh_per_1k_items": 601.621,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },
@@ -12599,7 +12973,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 31166,
@@ -12638,7 +13011,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "score direction unchecked"
    ],
    "wall_s": 11234,
@@ -12765,6 +13137,44 @@
     "gpu_util_mean": 72.7,
     "energy_wh": 7.042,
     "energy_wh_per_1k_items": 79.124,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "realforensics",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "realforensics__mavos_dd_hi_video_quick__50e3b60d",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 25,
+   "auc": 0.7332310469641249,
+   "auc_lo": 0.7113499353837732,
+   "auc_hi": 0.7548859111250473,
+   "eer": 0.332979288369623,
+   "eer_lo": 0.314922995220393,
+   "eer_hi": 0.35475305363781195,
+   "acc": 0.6658566221142163,
+   "bal_acc": 0.6645683762930042,
+   "ap": 0.901925920648009,
+   "tpr_at_fpr01": 0.17100371747211895,
+   "tpr_at_fpr05": 0.2979288369622942,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 36397.5,
+   "windows": 9869,
+   "compute": {
+    "items_per_s": 0.069,
+    "windows_per_s": 55.16,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 4.593,
+    "gpu_util_mean": 5.7,
+    "energy_wh": 1414.17,
+    "energy_wh_per_1k_items": 567.029,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },
@@ -13837,6 +14247,44 @@
    }
   },
   {
+   "model": "univfd",
+   "evalset": "mavos_dd_hi_video_quick",
+   "run_id": "univfd__mavos_dd_hi_video_quick__ba5a1843",
+   "pairing": "same_corpus",
+   "n": 2494,
+   "n_real": 600,
+   "n_fake": 1894,
+   "n_failed": 17,
+   "auc": 0.702962684527064,
+   "auc_lo": 0.6802858865572214,
+   "auc_hi": 0.7230797090371499,
+   "eer": 0.3617584745762712,
+   "eer_lo": 0.3421610169491526,
+   "eer_hi": 0.38200339558573854,
+   "acc": 0.6378683891804602,
+   "bal_acc": 0.6374569256999798,
+   "ap": 0.8923402838149876,
+   "tpr_at_fpr01": 0.19120762711864406,
+   "tpr_at_fpr05": 0.3199152542372881,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 2300.4,
+   "windows": 78752,
+   "compute": {
+    "items_per_s": 1.086,
+    "windows_per_s": 83.43,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 1.788,
+    "gpu_util_mean": 41.9,
+    "energy_wh": 158.758,
+    "energy_wh_per_1k_items": 63.656,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
    "model": "xception",
    "evalset": "hidf_video",
    "run_id": "xception__hidf_video__5a5a2b71",
@@ -14776,9 +15224,7 @@
    "tpr_at_fpr05": 0.9997771552273017,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 11887.4,
    "windows": 86129,
    "compute": {
@@ -14815,7 +15261,6 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "no parity check",
     "below chance"
    ],
    "wall_s": 756.0,
@@ -14856,8 +15301,7 @@
     "xlsr_mamba pretrain data commonvoice shares ['commonvoice'] with banglafake"
    ],
    "flags": [
-    "source overlap",
-    "no parity check"
+    "source overlap"
    ],
    "wall_s": 4933.4,
    "windows": 50954,
@@ -14895,8 +15339,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 2535.0,
    "windows": 24368,
@@ -14933,9 +15376,7 @@
    "tpr_at_fpr05": 0.9236989247311828,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 5551.2,
    "windows": 48385,
    "compute": {
@@ -14971,9 +15412,7 @@
    "tpr_at_fpr05": 0.2396,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 3294.1,
    "windows": 42198,
    "compute": {
@@ -15009,9 +15448,7 @@
    "tpr_at_fpr05": 0.4206,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 2888.3,
    "windows": 29806,
    "compute": {
@@ -15047,9 +15484,7 @@
    "tpr_at_fpr05": 0.36443644364436445,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 2475.6,
    "windows": 29577,
    "compute": {
@@ -15085,9 +15520,7 @@
    "tpr_at_fpr05": 0.34140529400399305,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 6115.2,
    "windows": 66541,
    "compute": {
@@ -15123,9 +15556,7 @@
    "tpr_at_fpr05": 0.9253012048192771,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 1152.3,
    "windows": 14987,
    "compute": {
@@ -15162,8 +15593,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1123,
    "windows": 24386,
@@ -15201,8 +15631,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1625,
    "windows": 34508,
@@ -15240,8 +15669,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1128,
    "windows": 19970,
@@ -15282,8 +15710,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 4579.3,
    "windows": 43623,
@@ -15325,7 +15752,6 @@
    "flags": [
     "source overlap",
     "cross-corpus",
-    "no parity check",
     "below chance"
    ],
    "wall_s": 6198.8,
@@ -15368,7 +15794,6 @@
    "flags": [
     "source overlap",
     "cross-corpus",
-    "no parity check",
     "below chance"
    ],
    "wall_s": 1319.9,
@@ -15410,8 +15835,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 4172.3,
    "windows": 29477,
@@ -15452,8 +15876,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 4454.7,
    "windows": 39550,
@@ -15490,9 +15913,7 @@
    "tpr_at_fpr05": 0.27657684335208765,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 871,
    "windows": 17745,
    "compute": {
@@ -15528,9 +15949,7 @@
    "tpr_at_fpr05": 0.9999840825162358,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 4167.8,
    "windows": 86129,
    "compute": {
@@ -15566,9 +15985,7 @@
    "tpr_at_fpr05": 0.15422222222222223,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 215.4,
    "windows": 5052,
    "compute": {
@@ -15607,8 +16024,7 @@
     "xlsr_sls pretrain data commonvoice shares ['commonvoice'] with banglafake"
    ],
    "flags": [
-    "source overlap",
-    "no parity check"
+    "source overlap"
    ],
    "wall_s": 2365.2,
    "windows": 50954,
@@ -15646,8 +16062,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1126.0,
    "windows": 24368,
@@ -15684,9 +16099,7 @@
    "tpr_at_fpr05": 0.9078709677419354,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 2244.3,
    "windows": 48385,
    "compute": {
@@ -15722,9 +16135,7 @@
    "tpr_at_fpr05": 0.5394,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 1335.5,
    "windows": 42198,
    "compute": {
@@ -15760,9 +16171,7 @@
    "tpr_at_fpr05": 0.7807,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 1321.0,
    "windows": 29806,
    "compute": {
@@ -15798,9 +16207,7 @@
    "tpr_at_fpr05": 0.7545754575457546,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 976.0,
    "windows": 29577,
    "compute": {
@@ -15836,9 +16243,7 @@
    "tpr_at_fpr05": 0.6601404005925162,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 2901.6,
    "windows": 66541,
    "compute": {
@@ -15874,9 +16279,7 @@
    "tpr_at_fpr05": 0.9783132530120482,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 697.4,
    "windows": 14987,
    "compute": {
@@ -15913,8 +16316,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 842,
    "windows": 24386,
@@ -15952,8 +16354,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1210,
    "windows": 34508,
@@ -15991,8 +16392,7 @@
    "verdict": "clean",
    "reasons": [],
    "flags": [
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 735,
    "windows": 19970,
@@ -16033,8 +16433,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1994.0,
    "windows": 43623,
@@ -16075,8 +16474,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 2631.6,
    "windows": 54996,
@@ -16117,8 +16515,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 552.9,
    "windows": 13039,
@@ -16159,8 +16556,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1401.7,
    "windows": 29477,
@@ -16201,8 +16597,7 @@
    ],
    "flags": [
     "source overlap",
-    "cross-corpus",
-    "no parity check"
+    "cross-corpus"
    ],
    "wall_s": 1849.3,
    "windows": 39550,
@@ -16239,9 +16634,7 @@
    "tpr_at_fpr05": 0.5632217944921528,
    "verdict": "clean",
    "reasons": [],
-   "flags": [
-    "no parity check"
-   ],
+   "flags": [],
    "wall_s": 645,
    "windows": 17745,
    "compute": {

@@ -239,7 +239,7 @@ models:
       AVAD (Feng, Chen and Owens, CVPR 2023) learns only from real talking faces (LRS2 or LRS3;
       which one the released weights used is unverified) and scores how surprising a video's
       audio-visual synchronisation is. Unsupervised, so it carries no bias from fake-side
-      training data. Not adapted yet.
+      training data.
   avh_align:
     catches: [lip_sync, talking_head]
     cue: audio-visual alignment in AV-HuBERT features
@@ -258,7 +258,7 @@ models:
     description: >-
       AVH-Align (Smeu et al., CVPR 2025) trains only on 45,000 real AV-Deepfake1M videos over
       AV-HuBERT features pretrained on LRS3 and VoxCeleb2. AV-HuBERT is a fairseq model, which this
-      repo doesn't install, so the adapter needs a stand-in. Not adapted yet.
+      repo doesn't install, so the adapter rebuilds its encoder.
   core:
     catches: [face_swap, reenactment]
     cue: face texture, consistent across augmentations
@@ -349,8 +349,7 @@ models:
       380 px face crops (30% margin), EfficientNet-B7 backbone, binary head, mean over frames
     description: >-
       Selim Seferbekov's winning DFDC entry averaged seven EfficientNet-B7 classifiers trained on
-      DFDC face crops with heavy augmentation. One checkpoint is pinned so far; the full
-      ensemble is the other six from the same release. Not adapted yet.
+      DFDC face crops with heavy augmentation. All seven checkpoints are pinned and averaged.
   efficientnet_b4:
     catches: [face_swap, reenactment]
     cue: face texture
@@ -442,7 +441,6 @@ models:
     description: >-
       FakeSTormer (Nguyen et al., ICCV 2025) extends self-blended training to video. Its
       checkpoint sits in a Dropbox folder that must be fetched by hand, under an academic licence.
-      Not adapted yet.
   ffd:
     catches: [face_swap, reenactment]
     cue: where on the face the edit is
@@ -484,7 +482,7 @@ models:
     description: >-
       FTCN (Zheng et al., ICCV 2021) removes spatial convolution so the network must use
       temporal coherence. The FTCN+TT weights were trained on FF++ c23. Upstream targets PyTorch
-      1.4 and states no licence. Not adapted yet.
+      1.4 and states no licence.
   genconvit:
     catches: [face_swap, reenactment]
     cue: face texture and its reconstruction error
@@ -611,7 +609,7 @@ models:
       Mouth crops with the audio spectrogram, global and regional encoders, binary head
     description: >-
       LipFD (Liu et al., NeurIPS 2024) compares lip motion with audio over time. Its training
-      set covers three lip-sync generators only, and upstream states no licence. Not adapted yet.
+      set covers three lip-sync generators only, and upstream states no licence.
   lipforensics:
     catches: [face_swap, reenactment]
     cue: mouth motion over time
@@ -654,7 +652,7 @@ models:
     description: >-
       RealForensics (Haliassos et al., CVPR 2022) first learns from real talking faces and their
       audio, then fine-tunes on FF++. The released FF++ checkpoint scores from video alone.
-      Leave-one-manipulation-out checkpoints are also released. Not adapted yet.
+      Leave-one-manipulation-out checkpoints are also released.
   recce:
     catches: [face_swap, reenactment]
     cue: how badly a real-face decoder rebuilds it
@@ -816,7 +814,7 @@ models:
     description: >-
       UnivFD (Ojha, Li and Lee, CVPR 2023) shows a linear probe on CLIP features generalises
       across image generators. It never saw a face swap, so it is a floor for face-specific
-      models. Not adapted yet.
+      models.
   xception:
     catches: [face_swap, reenactment]
     cue: face texture
