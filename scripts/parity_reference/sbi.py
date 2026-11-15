@@ -1,7 +1,7 @@
 """Reference scores for SBI, in an old PyTorch generation.
 
 Runs in the DeepfakeBench reference virtualenv (Python 3.9, torch 1.13, efficientnet-pytorch 0.7.1;
-docs/src/content/docs/adding_a_model.md says how to make it), not in this repo's environment, and
+docs/src/content/docs/models.md says how to make it), not in this repo's environment, and
 doesn't import this package. It builds upstream's own ``Detector`` from ``src/inference/model.py``
 in the checkout, loads the original ``FFc23.tar`` (its ``"model"`` entry, not the converted
 safetensors) with every key matching, and scores the exported crops as

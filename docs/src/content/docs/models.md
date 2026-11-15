@@ -17,10 +17,11 @@ Checked on 2026-11-15 against the configs and the published runs. All 35 models 
 | AASIST, AASIST-L | audio | ready, wave 1 | settled |
 | XLS-R + AASIST | audio | workable, wave 1 | settled |
 | XLS-R + SLS, XLSR-Mamba, AASIST3, AntiDeepfake MMS-300M and w2v2 small, DF Arena 500M and 1B | audio | workable | settled |
-| AltFreezing | video | blocked, no adapter | weights only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05). Someone with a working session has to fetch them |
-| TALL | video | blocked, no adapter | no weights released |
+| AltFreezing, TALL | video | blocked, no adapter | |
 
 A score direction is settled once the model scores above chance on a reproduction evalset. Every video model's waits on FF++ test or Celeb-DF v2, both on request ([Datasets](datasets.md#requests-to-send)).
+
+Both blocked models wait on weights. AltFreezing's are only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05); someone with a working session has to fetch them. TALL has released none.
 
 ## Why these models
 
@@ -265,7 +266,7 @@ What a reader of each adapter's scores should know: where the weights come from,
 | | |
 | --- | --- |
 | Weights | `lipforensics_ff.pth` from Google Drive |
-| Input | mouth crops reuse upstream's warp and crop code on 68 FAN landmarks per frame, from the shared detector's boxes (upstream suggests RetinaFace): the first 100 consecutive frames, landmarks smoothed over 12 frames, 96 x 96 grayscale mouth patches, then non-overlapping 25-frame clips centre-cropped to 88 |
+| Input | `preprocess/mouths.py`: mouth crops reuse upstream's warp and crop code on 68 FAN landmarks per frame, from the shared detector's boxes (upstream suggests RetinaFace): the first 100 consecutive frames, landmarks smoothed over 12 frames, 96 x 96 grayscale mouth patches, then non-overlapping 25-frame clips centre-cropped to 88 |
 | P(fake) | a clip's sigmoid |
 | Known issues | users report its FF++ numbers don't reproduce (#9) |
 
@@ -275,7 +276,7 @@ What a reader of each adapter's scores should know: where the weights come from,
 | --- | --- |
 | Weights | `JielunPeng/HAVIC`, fine-tuned on an unpublished 70% of FakeAVCeleb |
 | Patches | two (`patches/HAVIC/`) fix timm 1.x and a `use_mask` bug in upstream's own inference |
-| Input | up to 50 frames at 5 per second, raw face boxes resized to 224, in 16-frame windows at stride 2, with the audio under each window as 128-bin Kaldi filterbanks |
+| Input | `preprocess/av.py`: up to 50 frames at 5 per second, raw face boxes resized to 224, in 16-frame windows at stride 2, with the audio under each window as 128-bin Kaldi filterbanks |
 | P(fake) | each window's sigmoid |
 | Differs from upstream | a frame without a face drops out (upstream skips the video) |
 | Limits | it needs at least 3.2 s with a face in 16 sampled frames, so HiDF's 3 s clips are too short; MAVOS-DD Hindi is its South Asian set |

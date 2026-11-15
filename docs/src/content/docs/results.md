@@ -64,7 +64,7 @@ Every evalset a detector was scored on, plus FF++, the training set of most vide
 | SpeechFake Malayalam | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Malayalam | 2,983 / 3,726 | Edge-TTS | generator |
 | SpeechFake Marathi | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Marathi | 4,349 / 20,000 | Edge-TTS | generator |
 | SpeechFake Tamil | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Tamil | 4,401 / 20,000 | Edge-TTS | generator |
-| MAVOS-DD German, video (quick share) | Video · face swap, talking heads, reenactment | Language control, not South Asian | German | 800 / 1,901 | the seven of MAVOS-DD Hindi, video | generator |
+| MAVOS-DD German, video (quick share) | Video · face swap, talking heads, reenactment | Language control, not South Asian | German | 800 / 1,901 | the same generators as the Hindi subset | generator |
 | FF++ | Video · face swap and reenactment | Training set only | n/a | 1,000 / 4,000 | Deepfakes, Face2Face, FaceSwap, NeuralTextures | none |
 
 IndicSynth's fakes are a seeded sample of 5,000 per generator (from 205,938 in Hindi): all of them would outnumber the real clips about 40 to 1 and cost about a day of GPU time per large model, without changing AUC or EER.
@@ -196,7 +196,7 @@ Every video model with weights on all of HiDF (8,722 clips) and all of MAVOS-DD 
 
 ## The language control: MAVOS-DD German
 
-MAVOS-DD's German subset has the same eight generators as its Hindi one, so it tells "Hindi" apart from "a hard set of fakes". Waves `s6_language_control` to `s6d_effort` (SPARK, 2026-11-08 to 13) scored all 21 video models with weights on its quick share, up to 300 videos per generator (3,001 in all), and on MAVOS-DD Hindi's quick share with the same cap and seed. Both are columns of the grid, marked quick.
+MAVOS-DD's German subset has the same eight generators as its Hindi one, so it tells "Hindi" apart from "a hard set of fakes". Waves `s6_language_control` to `s6d_effort` (SPARK, 2026-11-08 to 13) scored all 21 video models with weights on its quick share, up to 300 videos per generator (2,701 scored), and on MAVOS-DD Hindi's quick share with the same cap and seed (2,494). Both are columns of the grid, marked quick.
 
 - **The drop isn't about Hindi.** 18 of the 21 models score lower on German than on Hindi, by 0.05 (GenD PE-L, the DFDC winner) to 0.19 (FFD). LAA-Net scores the same, and two score higher on German: FakeSTormer by 0.02, inside the intervals, and Effort by 0.05. What makes MAVOS-DD hard is the set's fakes and its real YouTube clips, not South Asian speakers. HiDF stays the only sign of a South Asian effect in video.
 - **On German the frame detectors rank fakes below real videos.** The nine DeepfakeBench detectors released with v1.0.1 and GenConViT score 0.35 to 0.44, below chance with their confidence intervals clear of 0.5, and each flags 54 to 67% of German real videos at its equal-error threshold, against 43 to 49% of Hindi's: the German real clips look faker to them than the fakes do. The DFDC winner, 0.859 on HiDF, is below chance in both languages (0.324 and 0.373). A pattern, not proof of inverted scores, while video direction is unsettled.
