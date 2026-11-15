@@ -11,6 +11,7 @@ The scripts are the same everywhere; only storage and job submission differ. As 
 | Any Linux machine with an NVIDIA GPU and CUDA 12 drivers | works | [below](#any-linux-gpu-machine) |
 | UNIL's Curnagl cluster | set up, never run: the team has no compute project yet | [Curnagl](#curnagl) |
 | An Apple Silicon laptop | tests and the smoke test only | [Getting started](getting_started.md) |
+| ARM Linux (SPARK's GB10 workers, Curnagl's GH200) | not supported: `uv.lock` has no ARM Linux wheels | |
 
 ## SPARK
 
@@ -147,7 +148,7 @@ scripts/exp.py progress            # live: each pair's phase, items scored, spee
 scripts/exp.py import --build-site # when it lands: the runs and their ledger rows into this repo
 ```
 
-Every pair is measured as it is scored, and the numbers land in its summary's `compute` block ([Evaluation](evaluation.md#metrics)): time per phase, load and inference time per item, items per second, peak GPU memory, GPU utilisation, power and energy. The job's ledger (`reports/matrix.json` there, `results/ledger.csv` here once imported) also keeps pairs the contamination guard refused, pairs whose data couldn't be fetched, and the gap to the published run where one exists. A wave that runs out of time stops cleanly and resumes when ordered again.
+Every pair is measured as it is scored, and the numbers land in its summary's `compute` block ([Evaluation](evaluation.md#metrics)). The job's ledger (`reports/matrix.json` there, `results/ledger.csv` here once imported) also keeps pairs the contamination guard refused, pairs whose data couldn't be fetched, and the gap to the published run where one exists. A wave that runs out of time stops cleanly and resumes when ordered again.
 
 **The same stage off the cluster.** `stages/matrix.py --commit local --out <dir>` runs a wave on any GPU with a checkout of this repo (`DTB_LOCAL_CHECKOUT` and `DTB_ROOT` set), and `scripts/exp.py import --from <dir>` brings its runs here. Their per-item scores stay in that machine's store, so after the round `scripts/archive.py` copies them into the [archive](store_layout.md#archive). The 2026-10-28 round ran this way on two 24 GB GPUs next to SPARK. Change such a queue only between pairs: a pair stopped mid-run scores again from the start. The experiments repo's README has the commands.
 
@@ -162,16 +163,17 @@ Some of these need deeptrace-bench changed before an order can name them, so tal
 | run a video model | nothing: every video model with weights has run on full HiDF and MAVOS-DD Hindi in waves (2026-10-28) |
 | add a model or a dataset | an adapter or builder in deeptrace-bench, and a parity check before any number counts ([Adding a model](adding_a_model.md), [Adding a dataset](adding_a_dataset.md)) |
 | fine-tune a model | not built yet; planned after the evaluation setup is settled ([Progress](progress.md#next)) |
-| use the ARM workers' larger memory | not yet: `uv.lock` has no ARM Linux wheels ([Workers and limits](#workers-and-limits)) |
 
 ### Rules
 
-- **Aggregates only.** `reports/` gets pass or fail, counts, timings and metric tables, never per-item scores, crops or anything from a licensed dataset ([data_policy.md](data_policy.md)). Don't declare those as DVC `outs` either: Cluster-CI backs outputs up to Google Drive.
-- **Pull with `--rebase` before every edit.** The bot commits after each run and rewrites `dvc.yaml`.
-- **One run at a time.** Runs share `main`, and a worker runs one job at a time. Tell the team before a long one.
-- **This repo's rules still hold:** score through evalsets, keep the contamination guard on, publish nothing from the smoke namespace.
-- **Secrets** live in the repo's GitHub secrets and reach stages as environment variables. Never write one to a file or print it.
-- **Don't edit Cluster-CI's files:** `.github/workflows/cluster-ci.yml`, `.cluster-ci-tools/`, `.dvc-viewer/`, and the managed block in `AGENTS.md`.
+| Rule | Detail |
+| --- | --- |
+| Aggregates only | `reports/` gets pass or fail, counts, timings and metric tables, never per-item scores, crops or anything from a licensed dataset ([data_policy.md](data_policy.md)). Don't declare those as DVC `outs` either: Cluster-CI backs outputs up to Google Drive |
+| Pull with `--rebase` before every edit | the bot commits after each run and rewrites `dvc.yaml` |
+| One run at a time | runs share `main`, and a worker runs one job at a time. Tell the team before a long one |
+| This repo's rules still hold | score through evalsets, keep the contamination guard on, publish nothing from the smoke namespace |
+| Secrets stay secret | they live in the repo's GitHub secrets and reach stages as environment variables. Never write one to a file or print it |
+| Don't edit Cluster-CI's files | `.github/workflows/cluster-ci.yml`, `.cluster-ci-tools/`, `.dvc-viewer/`, and the managed block in `AGENTS.md` |
 
 ### When a run fails
 
@@ -199,7 +201,7 @@ gh run view <run id> --log -R UNIL-DESI/deeptrace-experiments > run.log
 | Worker | GPU | Runs deeptrace-bench |
 | --- | --- | --- |
 | `isipol09` (x86) | RTX 3090, 24 GB | yes |
-| `HEC45801`, `HEC45803` (ARM) | NVIDIA GB10, about 120 GB shared with the CPU | not yet: `uv.lock` has no ARM Linux wheels |
+| `HEC45801`, `HEC45803` (ARM) | NVIDIA GB10, about 120 GB shared with the CPU | not yet (ARM) |
 
 - **Every job stops at 24 hours.** `score.py` resumes, so a long run can be restarted.
 - **The GB10s have more memory, not more speed.** They matter for models that don't fit in 24 GB, once the lock supports ARM.
@@ -226,13 +228,16 @@ uv run scripts/score.py --model aasist --evalset urdu_csalt --device cuda
 | `gpu` | 14 x A100 40 GB | inference, fine-tuning |
 | `gpu-h100` | 8 x H100 94 GB | anything bigger |
 | `interactive` | 20 GB A100 slices, 8 h | setup and debugging only |
-| `gpu-gh` | GH200 (ARM) | not supported: `uv.lock` has no ARM wheels |
+| `gpu-gh` | GH200 (ARM) | not supported |
 
-**Storage.** Put `DTB_ROOT` at `/work/<project>/deeptrace-bench/` (no backup) and use `$TMPDIR/dtb-cache/` (fast node-local disk, wiped after each job) as `DTB_CACHE`. The tree is in [store_layout.md](store_layout.md).
+**Storage.** The tree itself is in [store_layout.md](store_layout.md).
 
-- `/users` holds only 50 GB: the repo clone fits there, the venv and uv cache don't. Set `UV_CACHE_DIR` and `UV_PROJECT_ENVIRONMENT` to folders under `/work`, and `UV_LINK_MODE=copy`.
-- `/scratch` is purged when it fills, so nothing that must survive goes there.
-- Don't write millions of small files (frames, crops) to `/work`; keep them in `$TMPDIR` during a job.
+| Path | Use for | Catch |
+| --- | --- | --- |
+| `/work/<project>/deeptrace-bench/` | `DTB_ROOT` | no backup. Don't write millions of small files (frames, crops) here; keep them in `$TMPDIR` during a job |
+| `$TMPDIR/dtb-cache/` | `DTB_CACHE` | fast node-local disk, wiped after each job |
+| `/users` | the repo clone | only 50 GB, so the venv and uv cache don't fit: set `UV_CACHE_DIR` and `UV_PROJECT_ENVIRONMENT` to folders under `/work`, and `UV_LINK_MODE=copy` |
+| `/scratch` | nothing that must survive | purged when it fills |
 
 **Setup.** As for [any Linux GPU machine](#any-linux-gpu-machine), plus `mkdir -p logs` for SLURM's logs. Downloads need internet, which compute nodes may not have, so run `setup_models.py` and `setup_datasets.py` on the login node; jobs set `HF_HUB_OFFLINE=1`.
 

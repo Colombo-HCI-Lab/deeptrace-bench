@@ -9,7 +9,7 @@ deeptrace-bench runs published, open deepfake detectors on South Asian audio and
 
 Many groups have published deepfake detectors: programs that take a clip and say how likely it is to be fake. Nearly all were trained and tested on Western, mostly English data. This benchmark asks whether they still work on South Asian faces, voices and languages, and whether they work equally well for everyone. That is only a fair question if every detector is tested the same way, so the harness works like a conveyor belt: each detector and each test set is described once in a config, and every run passes through the same stations below, from download to a published summary.
 
-A result counts only once it gets past three guards. Parity asks whether our wrapper scores exactly like the authors' own code, so a weak number means a weak model and not a bug of ours. The contamination guard stops a model being tested on data it saw in training. The publish guard keeps test runs and per-clip data out of the repo. Everything large (datasets, weights, per-clip scores) lives in a store outside git ([Data policy](data_policy.md)). The two numbers every run reports, AUC and EER, are explained under [Metrics](evaluation.md#metrics).
+A result counts only once it gets past the three checks along the pipeline below. Everything large (datasets, weights, per-clip scores) lives in a store outside git ([Data policy](data_policy.md)). The two numbers every run reports, AUC and EER, are explained under [Metrics](evaluation.md#metrics).
 
 ## The pipeline
 
@@ -36,9 +36,9 @@ The store's full tree is in [The store](store_layout.md).
 
 | Check | What it stops |
 | --- | --- |
-| Parity | an adapter that scores differently from the authors' code: it must agree within 1e-3 on about 200 items |
-| Contamination guard | a model scored on a dataset it trained on |
-| Publish guard | pipeline tests, smoke runs and per-item data reaching the repo |
+| Parity | an adapter that scores differently from the authors' code, so a weak number means a weak model and not a bug of ours: it must agree within 1e-3 on about 200 items |
+| Contamination guard | a model scored on a dataset it trained on. It compares datasets, not the generators behind them ([verdicts](evaluation.md#contamination-verdicts)) |
+| Publish guard | pipeline tests, smoke runs and per-item data reaching the repo: `evaluate.py --publish` refuses them |
 
 ## Key terms
 
@@ -62,12 +62,12 @@ The store's full tree is in [The store](store_layout.md).
 | Term | Meaning |
 | --- | --- |
 | Adapter | the wrapper that runs a detector's upstream code in this repo's one environment |
-| Parity | the adapter and the authors' code score the same items within 1e-3 |
+| Parity | the adapter scores the same items as the authors' code; the first of the checks above |
 | Reproduction | a detector scored on its own paper's test set and compared with the published number |
 | Score direction | settled once a reproduction lands above chance, so a high score really means fake |
-| Contamination guard | refuses a model on data it trained on. It compares datasets, not the generators behind them ([verdicts](evaluation.md#contamination-verdicts)) |
+| Contamination guard | refuses to score a model on data it trained on; the second check |
 | Provisional | a run whose model lacks a parity check or a settled score direction |
-| Publish guard | `evaluate.py --publish` refuses pipeline tests, the smoke namespace and per-item tables |
+| Publish guard | keeps pipeline tests, the smoke namespace and per-item tables out of the repo; the third check |
 | Wave | the batch a model is scored in; wave 1 went first |
 | Decision 4, decision 5 | choices the team hasn't settled yet ([Progress](progress.md#open-decisions-that-shape-the-results)) |
 

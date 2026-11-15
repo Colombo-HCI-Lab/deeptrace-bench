@@ -5,11 +5,11 @@ description: "What each experiment asked, what the zero-shot runs so far show, a
 
 ## Read this first
 
-- **Two snapshots.** The first zero-shot round (2026-10-12) and the first full benchmark round (2026-10-27 to 29, [below](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)), paused on 2026-10-29 and finished on SPARK: the last 84 audio pairs landed there on 2026-10-30 and 31. The latest number for every run is in the [all-runs table](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs).
+- **The grid is the record.** Every run's AUC and EER is in [the grid](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs), built from the published runs; this page's text holds what they show and the breakdowns the grid can't. The [Timeline](progress.md) dates each round.
 - **Zero-shot.** No model was trained or fine-tuned on these evalsets.
 - **Provisional rules.** The evaluation setup isn't settled ([decision 5](progress.md#open-decisions-that-shape-the-results)), so even published numbers can move.
 - **`clean` isn't proof the data is new to a model.** The guard compares datasets, not the generators behind them ([verdicts](evaluation.md#contamination-verdicts)).
-- **Video is provisional.** No video model has a settled score direction ([Models](models.md#status)). Every adapter now passes parity.
+- **Video is provisional.** No video model has a settled score direction ([Models](models.md#status)). Every adapter passes parity.
 
 ## Experiments
 
@@ -17,12 +17,12 @@ Each experiment is a set of model and evalset pairs that answers one question. W
 
 | Experiment | Question | Models | Evalsets | Status |
 | --- | --- | --- | --- | --- |
-| E1: reproductions | Do our adapters reproduce the published figures, with scores pointing the right way? | the ten audio models below; video models later | ASVspoof 2019 LA eval, or In-the-Wild where the guard refuses ASVspoof 2019 (DF Arena, AntiDeepfake) | audio done for all ten; video waits on FF++ or Celeb-DF v2 |
+| E1: reproductions | Do our adapters reproduce the published figures, with scores pointing the right way? | the ten audio models; video models later | ASVspoof 2019 LA eval, or In-the-Wild where the guard refuses ASVspoof 2019 (DF Arena, AntiDeepfake) | audio done for all ten; video waits on FF++ or Celeb-DF v2 |
 | E2: zero-shot audio | Do detectors trained only on English spoofing data hold up on South Asian speech? Does multilingual pretraining help? Do language and gender shift the scores? | the ten audio models | the eight same-corpus South Asian audio sets below | all ten done on all eight |
-| E3: zero-shot video on HiDF | Does a detector's accuracy, or its false-positive rate on real faces, differ by race? | the 18 video models; the race breakdown so far for Xception, SBI and GenD | `hidf_video` | done, provisional |
-| E4: talking heads on MAVOS-DD Hindi | Do face detectors hold up on Hindi video, including audio-driven talking heads? Do audio-visual detectors catch what they miss? | the 18 video models, HAVIC, AVH-Align, and the five [added in November](#the-2026-11-new-adapters) | `mavos_dd_hi_video`, `mavos_dd_hi_av` | done, provisional |
+| E3: zero-shot video on HiDF | Does a detector's accuracy, or its false-positive rate on real faces, differ by race? | the 21 video models with weights; the race breakdown so far for Xception, SBI and GenD | `hidf_video` | done, provisional |
+| E4: talking heads on MAVOS-DD Hindi | Do face detectors hold up on Hindi video, including audio-driven talking heads? Do audio-visual detectors catch what they miss? | the 21 video models with weights and the four audio-visual ones (HAVIC, AVH-Align, LipFD, AVAD) | `mavos_dd_hi_video`, `mavos_dd_hi_av` | done, provisional, [below](#faces-and-talking-heads-mavos-dd-hindi) |
 | E4b: the language control | Is the drop on MAVOS-DD Hindi about Hindi, or about the set's fakes? | the 21 video models with weights | `mavos_dd_de_video_quick`, the same generators on German speakers, against `mavos_dd_hi_video_quick` | done: the drop is the set's, not Hindi's, [below](#the-language-control-mavos-dd-german) |
-| E5: cross-corpus audio | Do the audio detectors hold up when the real and fake clips come from different recordings, and could a trivial classifier tell those apart? | the audio models the guard allows | MLAAD Bengali, Hindi and Sinhala, BD-GRF6, SpeechFake | 75 pairs scored; the shortcut probe separates every set by trivial features ([below](#the-shortcut-probe)), so which numbers count is the team's call |
+| E5: cross-corpus audio | Do the audio detectors hold up when the real and fake clips come from different recordings, and could a trivial classifier tell those apart? | the audio models the guard allows | MLAAD Bengali, Hindi and Sinhala, BD-GRF6, SpeechFake | 75 pairs scored ([below](#cross-corpus-audio)); the shortcut probe separates every set by trivial features ([below](#the-shortcut-probe)), so which numbers count is the team's call |
 | E6: fine-tuned baselines | How much does training on South Asian data help, on [identity-safe splits](evaluation.md#fine-tuning-splits)? | to be chosen | to be chosen | planned |
 | E7: data from deeptrace | How do the detectors do on what deeptrace collects? | to be chosen | deeptrace's data | planned, once collection starts |
 
@@ -38,81 +38,47 @@ On one 24 GB GPU with two shards, XLS-R-sized audio models score about 30 clips 
 
 ## The datasets
 
-Every evalset a detector was scored on, plus FF++, the training set of most video detectors. The cross-corpus sets take their fakes and their real clips from different recordings, so they don't count as results until the [shortcut probe](evaluation.md#shortcut-probe) runs.
+Every evalset a detector was scored on, plus FF++, the training set of most video detectors. The cross-corpus sets take their fakes and their real clips from different recordings, so a detector can score well there by telling the recordings apart: they are scored and recorded, but don't count as results ([the shortcut probe](#the-shortcut-probe)). Licences and access are in the [Dataset catalog](catalog.md#datasets).
 
-| Dataset | Type | Role | Language | Real / fake | Fakes made by | Groups | Licence |
-| ------- | ---- | ---- | -------- | ----------: | ------------- | ------ | ------- |
-| ASVspoof 2019 LA (eval) | Audio · TTS and voice conversion | Reproduction | English | 7,355 / 63,882 | 13 attack systems (A07 to A19) | attack | open |
-| In-the-Wild | Audio · real-world deepfakes | Reproduction | English | 19,963 / 11,816 | collected from the web | none | CC BY-SA 4.0 |
-| Urdu CSALT | Audio · TTS | South Asian | Urdu | 3,398 / 3,396 | VITS, Tacotron | generator | CC BY-NC |
-| BanglaFake | Audio · TTS | South Asian | Bengali | 12,796 / 12,796 | VITS | sub-corpus | none declared |
-| Bangla voices | Audio · TTS, each fake paired with its real twin | South Asian | Bengali | 2,250 / 2,250 | not named | gender | CC BY 4.0 |
-| IndicTTS challenge | Audio · TTS | South Asian | 16 Indian languages, Nepali among them | 15,558 / 15,544 | not named | language, gender | CC BY 4.0 |
-| IndicSynth Hindi | Audio · TTS and voice conversion | South Asian | Hindi | 5,059 / 10,000 | XTTS-v2, FreeVC24 | generator, gender | CC BY-NC |
-| IndicSynth Bengali | Audio · TTS and voice conversion | South Asian | Bengali | 4,589 / 15,000 | XTTS-v2, VITS, FreeVC24 | generator, gender | CC BY-NC |
-| IndicSynth Urdu | Audio · TTS and voice conversion | South Asian | Urdu | 5,129 / 10,000 | XTTS-v2, FreeVC24 | generator, gender | CC BY-NC |
-| MAVOS-DD Hindi, audio | Audio · voice conversion | South Asian | Hindi | 3,632 / 831 | kNN-VC | generator | CC BY-NC-SA 4.0 |
-| HiDF | Video · face swap | Race-labelled, not South Asian | n/a | 4,361 / 4,361 | a commercial face-swap tool | race, gender, age | CC BY-NC 4.0 |
-| MAVOS-DD Hindi, video | Video · face swap, talking heads, reenactment | South Asian | Hindi | 4,463 / 3,050 | InSwapper, HifiFace, Roop, EchoMimic, Sonic, MEMO, LivePortrait | generator | CC BY-NC-SA 4.0 |
-| MAVOS-DD Hindi, audio-visual | Video and audio · either track changed | South Asian | Hindi | 3,632 / 3,881 | the seven above and kNN-VC | generator | CC BY-NC-SA 4.0 |
-| MLAAD Bengali | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Bengali | 4,589 / 4,000 | four TTS systems (IndicF5, Bark, two VITS voices) | generator | CC BY-NC (fakes), CC BY 4.0 (real) |
-| MLAAD Hindi | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Hindi | 5,059 / 9,000 | nine TTS systems (XTTS-v2, Bark, IndicF5 and six more) | generator | CC BY-NC (fakes), CC BY 4.0 (real) |
-| MLAAD Sinhala | Audio · TTS, real speech from OpenSLR | South Asian, cross-corpus | Sinhala | 11,550 / 1,000 | Edge-TTS | generator | CC BY-NC (fakes), CC BY-SA 4.0 (real) |
-| BD-GRF6 | Audio · not stated | South Asian, cross-corpus | Bengali | 6,783 / 6,783 | not stated | gender, third gender included | CC BY 4.0 |
-| FF++ | Video · face swap and reenactment | Training set only | n/a | 1,000 / 4,000 | Deepfakes, Face2Face, FaceSwap, NeuralTextures | none | on request |
+| Dataset | Type | Role | Language | Real / fake | Fakes made by | Groups |
+| ------- | ---- | ---- | -------- | ----------: | ------------- | ------ |
+| ASVspoof 2019 LA (eval) | Audio · TTS and voice conversion | Reproduction | English | 7,355 / 63,882 | 13 attack systems (A07 to A19) | attack |
+| In-the-Wild | Audio · real-world deepfakes | Reproduction | English | 19,963 / 11,816 | collected from the web | none |
+| Urdu CSALT | Audio · TTS | South Asian | Urdu | 3,398 / 3,396 | VITS, Tacotron | generator |
+| BanglaFake | Audio · TTS | South Asian | Bengali | 12,796 / 12,796 | VITS | sub-corpus |
+| Bangla voices | Audio · TTS, each fake paired with its real twin | South Asian | Bengali | 2,250 / 2,250 | not named | gender |
+| IndicTTS challenge | Audio · TTS | South Asian | 16 Indian languages, Nepali among them | 15,558 / 15,544 | not named | language, gender |
+| IndicSynth Hindi | Audio · TTS and voice conversion | South Asian | Hindi | 5,059 / 10,000 | XTTS-v2, FreeVC24 | generator, gender |
+| IndicSynth Bengali | Audio · TTS and voice conversion | South Asian | Bengali | 4,589 / 15,000 | XTTS-v2, VITS, FreeVC24 | generator, gender |
+| IndicSynth Urdu | Audio · TTS and voice conversion | South Asian | Urdu | 5,129 / 10,000 | XTTS-v2, FreeVC24 | generator, gender |
+| MAVOS-DD Hindi, audio | Audio · voice conversion | South Asian | Hindi | 3,632 / 831 | kNN-VC | generator |
+| HiDF | Video · face swap | Race-labelled, not South Asian | n/a | 4,361 / 4,361 | a commercial face-swap tool | race, gender, age |
+| MAVOS-DD Hindi, video | Video · face swap, talking heads, reenactment | South Asian | Hindi | 4,463 / 3,050 | InSwapper, HifiFace, Roop, EchoMimic, Sonic, MEMO, LivePortrait | generator |
+| MAVOS-DD Hindi, audio-visual | Video and audio · either track changed | South Asian | Hindi | 3,632 / 3,881 | the seven above and kNN-VC | generator |
+| MLAAD Bengali | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Bengali | 4,589 / 4,000 | four TTS systems (IndicF5, Bark, two VITS voices) | generator |
+| MLAAD Hindi | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Hindi | 5,059 / 9,000 | nine TTS systems (XTTS-v2, Bark, IndicF5 and six more) | generator |
+| MLAAD Sinhala | Audio · TTS, real speech from OpenSLR | South Asian, cross-corpus | Sinhala | 11,550 / 1,000 | Edge-TTS | generator |
+| BD-GRF6 | Audio · not stated | South Asian, cross-corpus | Bengali | 6,783 / 6,783 | not stated | gender, third gender included |
+| SpeechFake Bengali | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Bengali | 4,589 / 20,000 | Edge-TTS | generator |
+| SpeechFake Hindi | Audio · TTS and voice conversion, real speech from its own Common Voice | South Asian, cross-corpus | Hindi | 4,630 / 30,015 | Edge-TTS, SeedVC | generator |
+| SpeechFake Malayalam | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Malayalam | 2,983 / 3,726 | Edge-TTS | generator |
+| SpeechFake Marathi | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Marathi | 4,349 / 20,000 | Edge-TTS | generator |
+| SpeechFake Tamil | Audio · TTS, real speech from IndicSUPERB | South Asian, cross-corpus | Tamil | 4,401 / 20,000 | Edge-TTS | generator |
+| MAVOS-DD German, video (quick share) | Video · face swap, talking heads, reenactment | Language control, not South Asian | German | 800 / 1,901 | the seven of MAVOS-DD Hindi, video | generator |
+| FF++ | Video · face swap and reenactment | Training set only | n/a | 1,000 / 4,000 | Deepfakes, Face2Face, FaceSwap, NeuralTextures | none |
 
 IndicSynth's fakes are a seeded sample of 5,000 per generator (from 205,938 in Hindi): all of them would outnumber the real clips about 40 to 1 and cost about a day of GPU time per large model, without changing AUC or EER.
 
 MAVOS-DD's labels follow the track a model sees. The video set counts the kNN-VC clips, whose video is untouched, as real; the audio-visual set counts them as fake; and the audio set scores only real and kNN-VC clips, the only ones whose audio label is settled so far.
 
-## The detectors
-
-| Detector | Type | Backbone | Trained on |
-| -------- | ---- | -------- | ---------- |
-| `aasist` | Graph attention network, 0.3 M parameters | none, trained from scratch | ASVspoof 2019 LA |
-| `aasist_l` | Graph attention network, 85 K parameters | none, trained from scratch | ASVspoof 2019 LA |
-| `xlsr_aasist` | Speech foundation model with a graph attention head | XLS-R 300M, 128 languages | ASVspoof 2019 LA |
-| `xlsr_sls` | Speech foundation model with attention over all 24 of its layers (SLS) | XLS-R 300M, 128 languages | ASVspoof 2019 LA |
-| `xlsr_mamba` | Speech foundation model with a bidirectional Mamba head | XLS-R 300M, 128 languages | ASVspoof 2019 LA |
-| `aasist3` | Graph attention network with KAN layers, on speech foundation model features | wav2vec 2.0 XLSR-53, 53 languages | ASVspoof 2019 and 5, MLAAD, M-AILABS |
-| `antideepfake_w2v_small` | Speech foundation model with a linear head | wav2vec 2.0 base, English only | 74k hours of real and fake speech, 100+ languages |
-| `antideepfake_mms_300m` | Speech foundation model with a linear head | MMS 300M, about 1,400 languages | 74k hours of real and fake speech, 100+ languages |
-| `df_arena_500m` | Speech foundation model with a conformer head | XLS-R 300M | ASVspoof 2019 and 5, MLAAD and six more |
-| `df_arena_1b` | Speech foundation model with a conformer head | XLS-R 1B | ASVspoof 2019 and 5, MLAAD and six more |
-| `xception` | CNN, 22 M parameters | ImageNet | FF++ |
-| `sbi` | CNN (EfficientNet-B4), 18 M parameters | ImageNet | FF++ real videos, with fakes made by blending each face into itself |
-| `gend` | Vision foundation model, only its LayerNorms tuned | CLIP ViT-L/14 | FF++ |
-| `gend_pe_l` | Vision foundation model, only its LayerNorms tuned | Perception Encoder L/14 | FF++ |
-| `effort` | Vision foundation model, its weights split by SVD and only the residual tuned | CLIP ViT-L/14 | FF++ |
-| `realforensics` | Video network (CSN) on face clips | self-supervised on real talking faces and their audio (LRW) | FF++ |
-| `ftcn` | 3D CNN with no spatial reach, plus a temporal transformer, on face clips | none | FF++ |
-| `lipforensics` | ResNet-18 and a temporal CNN on grayscale mouth clips | lipreading (LRW) | FF++ |
-| `efficientnet_b4` | CNN (EfficientNet-B4), 18 M parameters | ImageNet | FF++ |
-| `ucf` | CNN (Xception) scoring only the forgery traces every method shares, 47 M parameters | ImageNet | FF++ |
-| `core` | CNN (Xception) trained to agree across augmented views, 22 M parameters | ImageNet | FF++ |
-| `recce` | CNN (Xception) that reconstructs real faces and attends to what it can't, 48 M parameters | ImageNet | FF++ |
-| `f3net` | CNN (Xception) on DCT frequency bands, 23 M parameters | ImageNet | FF++ |
-| `ffd` | CNN (Xception) with an attention map over manipulated regions, 22 M parameters | ImageNet | FF++ |
-| `srm` | Two-stream CNN (Xception), colour and high-frequency noise residuals, 55 M parameters | ImageNet | FF++ |
-| `spsl` | CNN (Xception) with the phase spectrum as a fourth channel, 22 M parameters | ImageNet | FF++ |
-| `dfdc_b7` | Seven CNNs (EfficientNet-B7) averaged, the DFDC challenge winner | ImageNet | DFDC |
-| `genconvit` | ConvNeXt and Swin hybrid with an autoencoder branch, the only branch scored | ImageNet | DFDC, FF++, DeepfakeTIMIT |
-| `havic` | Audio and video transformers fused over 16-frame windows | real videos (LRS2) | FakeAVCeleb |
-| `avh_align` | Small network that scores how far lips and voice drift apart | AV-HuBERT large (LRS3, VoxCeleb2), frozen | real AV-Deepfake1M videos only |
-| `laa_net` | CNN (EfficientNet-B4) with a feature pyramid and a heatmap of blending artefacts | ImageNet (AdvProp) | FF++ real frames, with blended pseudo-fakes |
-| `fakestormer` | Video transformer (ViT-B/16) on 4-frame runs of faces | MAE, ImageNet-1k | FF++ c23 real videos, with video-level pseudo-fakes |
-| `univfd` | One linear layer on frozen CLIP image features, a generic AI-image detector | CLIP ViT-L/14 | ProGAN real and fake images |
-| `lipfd` | CLIP and a region-aware network on lip regions next to the audio's spectrogram | CLIP ViT-L/14 | AVLips (Wav2Lip, MakeItTalk and TalkLip over LRS3) |
-| `avad` | Scores how unusual a video's audio-visual time offsets are, never shown a fake | trained on real talking faces (LRS2 or LRS3) | real videos only |
-
 ## Insights
 
-1. **Multilingual pretraining helps, with training held fixed.** The two AntiDeepfake models share their post-training data and differ only in pretraining. Going from English only (w2v2 small) to about 1,400 languages (MMS-300M) cuts the remaining error (1 minus AUC) by 15 to 45 times, lifting IndicTTS from 0.895 to 0.997. This is the cleanest comparison in the grid.
+1. **Multilingual pretraining helps, with training held fixed.** The two AntiDeepfake models share their post-training data and differ only in pretraining. Going from English only (w2v2 small) to about 1,400 languages (MMS-300M) cuts the remaining error (1 minus AUC) by 15 to 45 times: IndicTTS goes from 0.895 to 0.997, BanglaFake from 0.955 to 0.999, Urdu CSALT from 0.969 to 0.998. This is the cleanest comparison in the grid.
 2. **Language matters only for the detectors trained on ASVspoof.** Across the 16 IndicTTS languages, XLS-R + AASIST runs from 0.49 (Gujarati) to 0.86 (English, its training language) and AASIST from 0.23 to 0.52, while MMS-300M stays at 0.996 or above. Under [decision 4's proposed rule](evaluation.md#metrics), language counts for the classic pair only.
-3. **In faces, ranking is even but false alarms aren't.** On HiDF, GenD scores 0.952, SBI 0.877 and Xception 0.804; SBI beats Xception without seeing a real deepfake in training. Across race groups AUC barely moves, yet at its global threshold GenD flags 28% of real Indian faces as fake, against 6 to 13% for the other groups. Provisional (see the HiDF section).
+3. **In faces, ranking is even but false alarms aren't.** On HiDF, GenD scores 0.952, SBI 0.877 and Xception 0.804; SBI beats Xception without seeing a real deepfake in training. Across race groups AUC barely moves, yet at its global threshold GenD flags 28% of real Indian faces as fake, against 6 to 13% for the other groups ([by race](#video-hidf)).
 4. **Doing well on its home set says nothing about South Asian speech.** AASIST scores 0.999 on ASVspoof, 0.578 on In-the-Wild and 0.048 on Bangla voices, where it is confidently backwards. It most likely learned studio-clean audio as a sign of real speech, which flips on crowd-sourced recordings.
 5. **Training data sorts the audio detectors into three tiers, and matters more than size.** Trained on ASVspoof 2019 LA only, AASIST and AASIST-L fall below chance on every same-corpus South Asian set except Urdu CSALT (0.86) and MAVOS-DD's Hindi voice conversions (0.64). XLS-R + AASIST, a 300M multilingual backbone with the same training, is uneven: 0.80 on Urdu and 0.83 on IndicSynth Hindi, but 0.467 on BanglaFake and 0.389 on Bangla voices. XLS-R + SLS, XLSR-Mamba and AASIST3, added in the October round, are just as uneven: XLS-R + SLS is the steadiest (0.67 on Bangla voices to 0.99 on MAVOS-DD's Hindi audio), XLSR-Mamba is confidently backwards on Bangla voices (0.18), and AASIST3 scores 0.98 there but 0.30 on IndicTTS. Post-trained on large multilingual collections of real and fake speech, AntiDeepfake w2v2 small, a third of XLS-R's size, scores 0.955 and 1.000 on BanglaFake and Bangla voices. AASIST-L, at 85K parameters, moves no same-corpus score of AASIST's by more than 0.03 (on the cross-corpus BD-GRF6 and MLAAD Sinhala, by about 0.1).
-6. **The open South Asian sets no longer separate the top tier.** MMS-300M and both DF Arena models score 0.978 or more on all eight same-corpus sets, w2v2 small 0.895 or more. Only BD-GRF6 pulls all four down, to near chance (0.51 to 0.59), and it is cross-corpus, so not a result yet. Their training collections, such as MLAAD, likely share generators (VITS, XTTS) with these sets, which the guard can't see, so part of the ceiling may be familiarity. The dataset track is moving to harder material: lip-sync with cloned voices, in-the-wild clips, Sinhala and Nepali.
+6. **The open South Asian sets no longer separate the top tier.** MMS-300M and both DF Arena models score 0.978 or more on all eight same-corpus sets, w2v2 small 0.895 or more. Only BD-GRF6 pulls all four down, to near chance (0.51 to 0.59), and it is cross-corpus. Part of the ceiling may be familiarity with the generators, though the [generator check](#generator-level-contamination-check) finds unseen ones caught as well. The dataset track is moving to harder material: lip-sync with cloned voices, in-the-wild clips, Sinhala and Nepali.
 7. **Past a point, bigger doesn't help.** DF Arena 1B beats 500M on IndicTTS (0.988 against 0.978) and loses on Bangla voices (0.993 against 0.998).
 8. **Urdu CSALT is the odd one out, a warning about dataset artefacts.** The classic detectors score 0.86 on Urdu CSALT, 0.21 to 0.40 on the IndicSynth, BanglaFake and IndicTTS sets and 0.05 on Bangla voices. IndicSynth's Urdu, the same language from another corpus, gets 0.34, so the gap comes from the corpus, its recordings or its generators (VITS and Tacotron against XTTS-v2 and FreeVC24), not from the language. The [shortcut probe](#the-shortcut-probe) agrees: loudness alone separates Urdu CSALT's real clips from its fakes at 0.935.
 9. **Voice conversion is the classic detectors' blind spot.** On IndicSynth Hindi, at the overall EER threshold, XLS-R + AASIST misses 46% of FreeVC24 voice conversions but 3% of XTTS-v2 clips; AASIST misses 92% against 27%. XLSR-Mamba (52% against 4%) and XLS-R + SLS (23% against 2%) lean the same way, AASIST3 the other (2% against 59%). The post-trained detectors miss at most 5% of either.
@@ -138,36 +104,11 @@ MAVOS-DD's labels follow the track a model sees. The video set counts the kNN-VC
 | AASIST3                 | ASVspoof 2019 LA eval | 9.47% (9.21 to 9.75)  | 0.968  | weights aren't the paper's |
 | AASIST3                 | In-the-Wild           | 30.8% (30.3 to 31.3)  | 0.766  | 28 to 32% (Speech DF Arena) |
 
-Every score direction here is settled. XLS-R + SLS and XLSR-Mamba land slightly better than their papers on In-the-Wild, and AASIST3's released weights match what the Speech DF Arena measured for them, so all three adapters behave; all three have since passed parity against the authors' code ([Models](models.md#parity)). The gaps to the published figures come from protocol differences, explained per model in [Models](models.md#per-model).
+Every score direction here is settled. XLS-R + SLS and XLSR-Mamba land slightly better than their papers on In-the-Wild, and AASIST3's released weights match what the Speech DF Arena measured for them. The gaps to the published figures come from protocol differences, explained per model in [Models](models.md#per-model).
+
+Reruns on other machines matched the first round: seven audio models on Urdu CSALT and on IndicTTS within 0.001 with the same counts, GenD, SBI and Xception on HiDF, and Effort on MAVOS-DD across two GPUs within 1e-4.
 
 ## Audio: South Asian speech
-
-Each cell is AUC (EER). * marks a run from 2026-10-05 under the previous setup version, which differs only in a video setting. "so" marks a `source_overlap` verdict ([verdicts](evaluation.md#contamination-verdicts)).
-
-| Model                   | Urdu CSALT    | BanglaFake       | Bangla voices | IndicTTS        | IndicSynth Hindi |
-| ----------------------- | ------------- | ---------------- | ------------- | --------------- | ---------------- |
-| AASIST                  | 0.863 (22%)*  | 0.365 (60%)*     | 0.048 (87%)   | 0.403 (58%)     | 0.393 (59%)      |
-| AASIST-L                | 0.861 (23%)*  | 0.379 (58%)*     | 0.055 (87%)   | 0.377 (59%)     | 0.390 (59%)      |
-| XLS-R + AASIST          | 0.802 (28%)   | 0.467 (55%) so   | 0.389 (58%)   | 0.581 (46%)     | 0.828 (25%)      |
-| AntiDeepfake w2v2 small | 0.969 (9.3%)  | 0.955 (11%)      | 1.000 (0.2%)  | 0.895 (17%) so  | 0.997 (2.5%)     |
-| AntiDeepfake MMS-300M   | 0.998 (2.2%)  | 0.999 (1.1%) so  | 1.000 (0.5%)  | 0.997 (2.3%) so | 1.000 (0.1%)     |
-| DF Arena 500M           | 0.981 (7.8%)* | 0.997 (2.2%)* so | 0.998 (2.1%)  | 0.978 (6.9%)    | 0.997 (2.6%)     |
-| DF Arena 1B             | 0.995 (4.0%)* | 0.999 (0.7%)* so | 0.993 (4.3%)  | 0.988 (5.1%)    | 0.999 (1.7%)     |
-| AASIST3                 | 0.806 (29%)   | 0.790 (27%) so   | 0.979 (7.9%)  | 0.303 (67%)     | 0.763 (30%)      |
-| XLSR-Mamba              | 0.691 (41%)   | 0.574 (47%) so   | 0.184 (78%)   | 0.661 (43%)     | 0.799 (28%)      |
-| XLS-R + SLS             | 0.855 (23%)   | 0.806 (27%) so   | 0.670 (38%)   | 0.900 (16%)     | 0.947 (13%)      |
-
-The seven models above the line were scored on IndicTTS again on SPARK on 2026-10-29 and matched their 2026-10-12 runs within 0.001.
-
-### Multilingual pretraining helps
-
-The two AntiDeepfake models, AUC.
-
-| Evalset    | w2v2 small (English pretraining) | MMS-300M (about 1,400 languages) |
-| ---------- | -------------------------------: | -------------------------------: |
-| IndicTTS   | 0.895                            | 0.997                            |
-| BanglaFake | 0.955                            | 0.999                            |
-| Urdu CSALT | 0.969                            | 0.998                            |
 
 ### Language matters for the classic models only
 
@@ -192,17 +133,27 @@ AUC by language on the IndicTTS challenge set.
 | Tamil      | 0.297  | 0.686          | 0.928                   | 0.999                 | 0.996       |
 | Telugu     | 0.388  | 0.680          | 0.935                   | 1.000                 | 0.999       |
 
+### IndicSynth Bengali and Urdu repeat the Hindi picture
+
+The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34 for both); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more. Of the three models that passed parity last, XLS-R + SLS does best (0.80 and 0.94).
+
+### Bengali is lowest on IndicSynth, mostly because of VITS
+
+IndicSynth makes its Hindi and Urdu fakes with XTTS-v2 and FreeVC24, and its Bengali fakes with those two plus VITS. On the two shared generators alone (each generator's fakes against all the real clips, from the [archived](store_layout.md#archive) per-item scores), the ASVspoof-only AASIST pair still does worst on Bengali: AASIST 0.25 against 0.34 (Urdu) and 0.39 (Hindi), AASIST-L 0.29 against 0.34 and 0.39. The multilingual models barely differ there: XLS-R + AASIST 0.75 against 0.78 and 0.83, XLSR-Mamba 0.78 against 0.79, AASIST3 0.79 against 0.78, and XLS-R + SLS scores Bengali above Urdu (0.95 against 0.94). Their low Bengali totals come from VITS, where they score 0.41 to 0.51.
+
+### VITS is the hardest generator wherever it appears
+
+So the Bengali sets may look hard as much for their generators as for their language. In Urdu CSALT, XLS-R + AASIST scores 0.70 on VITS against 0.91 on Tacotron, and XLSR-Mamba 0.47 against 0.92. BanglaFake is all VITS and MLAAD Bengali half. XLS-R + AASIST scores 0.39 to 0.65 on all five Bengali sets and 0.78 to 0.89 on all five Hindi and Urdu ones (three of the ten are cross-corpus), a gap that generator and language both feed.
+
+### MAVOS-DD's audio is easy for the post-trained models
+
+AntiDeepfake and DF Arena separate MAVOS-DD's Hindi voice conversions almost perfectly, while the ASVspoof-only AASIST pair stays near 0.64. This is insight 6's ceiling again.
+
 ## Video: HiDF
 
-All three detectors trained on FF++, so HiDF's commercial face swaps are a cross-dataset test.
+Nearly every detector here trained on FF++ and none on HiDF, so its commercial face swaps are a cross-dataset test.
 
-| Model    | AUC (95% interval)    | EER   |
-| -------- | --------------------- | ----: |
-| GenD     | 0.952 (0.948 to 0.956) | 11.5% |
-| SBI      | 0.877 (0.870 to 0.884) | 20.0% |
-| Xception | 0.804 (0.794 to 0.812) | 27.2% |
-
-By race: AUC, and the false-positive rate (FPR) on real faces at each model's global threshold.
+By race, for GenD, SBI and Xception: AUC, and the false-positive rate (FPR) on real faces at each model's global threshold.
 
 | Group  | Real / fake | GenD AUC | GenD FPR | SBI AUC | SBI FPR | Xception AUC | Xception FPR |
 | ------ | ----------: | -------: | -------: | ------: | ------: | -----------: | -----------: |
@@ -214,41 +165,18 @@ By race: AUC, and the false-positive rate (FPR) on real faces at each model's gl
 
 - **Ranking barely moves.** "Indian" has the lowest AUC for all three models, but its intervals are wide (GenD 0.901 to 0.972) and overlap the rest. Across groups GenD spreads 2.6 points and SBI 3.2, so race doesn't meet decision 4's AUC rule.
 - **False alarms do.** GenD's 28% on real Indian faces is 25 of 90, where the white group's rate would predict about 10. AUC can't show this. SBI is the most even, about 21% for every group.
-- **Provisional.** The group is small, the score direction is unchecked and HiDF isn't South Asian. It is a reason to measure false-positive rates on real South Asian faces once the request-only sets arrive, not a result in itself.
+- **Provisional.** The group is small and HiDF isn't South Asian. It is a reason to measure false-positive rates on real South Asian faces once the request-only sets arrive, not a result in itself.
 
-## The 2026-10-28 round: full HiDF and MAVOS-DD Hindi
+## Faces and talking heads: MAVOS-DD Hindi
 
-Every video model with weights was scored on all of HiDF (8,722 clips) and all of MAVOS-DD Hindi video (7,513 clips), the audio-visual models on MAVOS-DD's audio and video together, through `evaluate.py --publish`, on one RTX 3090 on SPARK and two 24 GB GPUs outside it. Every pair's time, memory and energy are in `results/ledger.csv`. TPR at 5% FPR is the share of fakes caught when 5% of real clips are flagged.
-
-| Model | Parity | HiDF AUC | HiDF EER | HiDF TPR@5% | MAVOS-DD AUC | MAVOS-DD EER | MAVOS-DD TPR@5% |
-| ----- | :----: | -------: | -------: | ----------: | -----------: | -----------: | --------------: |
-| GenD | yes | 0.952 | 11.5% | 0.78 | 0.741 | 33.4% | 0.48 |
-| GenD PE-L | yes | 0.940 | 13.4% | 0.70 | 0.798 | 28.7% | 0.48 |
-| RealForensics | yes | 0.931 | 14.5% | 0.64 | 0.779 | 29.3% | 0.36 |
-| Effort | yes | 0.919 | 15.8% | 0.69 | 0.603 | 42.7% | 0.42 |
-| SBI | yes | 0.877 | 20.0% | 0.45 | 0.777 | 29.3% | 0.29 |
-| LipForensics | yes | 0.870 | 21.6% | 0.50 | 0.703 | 35.4% | 0.32 |
-| FTCN | yes | 0.865 | 21.8% | 0.40 | **0.854** | 22.6% | 0.54 |
-| DFDC winner (7 × EfficientNet-B7) | yes | 0.859 | 21.8% | 0.49 | 0.390 | 59.2% | 0.12 |
-| Xception | yes | 0.804 | 27.2% | 0.31 | 0.628 | 41.5% | 0.19 |
-| UCF | yes | 0.782 | 29.0% | 0.29 | 0.546 | 47.9% | 0.19 |
-| GenConViT (ED branch) | yes | 0.779 | 29.1% | 0.31 | 0.541 | 49.1% | 0.17 |
-| CORE | yes | 0.777 | 29.6% | 0.28 | 0.534 | 48.2% | 0.10 |
-| RECCE | yes | 0.770 | 29.7% | 0.29 | 0.539 | 47.4% | 0.15 |
-| F3Net | yes | 0.761 | 30.6% | 0.25 | 0.527 | 48.1% | 0.15 |
-| FFD | yes | 0.760 | 30.5% | 0.24 | 0.554 | 46.5% | 0.09 |
-| EfficientNet-B4 | yes | 0.742 | 32.1% | 0.22 | 0.583 | 43.7% | 0.14 |
-| SRM | yes | 0.716 | 34.4% | 0.22 | 0.556 | 46.5% | 0.11 |
-| SPSL | yes | 0.680 | 36.6% | 0.15 | 0.598 | 43.4% | 0.09 |
-| HAVIC (audio and video) | yes | n/a | n/a | n/a | 0.692 | 37.5% | 0.27 |
-| AVH-Align (audio and video) | yes | n/a | n/a | n/a | 0.520 | 48.4% | 0.05 |
+Every video model with weights on all of HiDF (8,722 clips) and all of MAVOS-DD Hindi video (7,513 clips), the audio-visual models on MAVOS-DD's audio and video together: 18 video models, HAVIC and AVH-Align in the 2026-10-28 round, then FakeSTormer, LAA-Net, UnivFD, LipFD and AVAD by 2026-11-08. Every pair's time, memory and energy are in `results/ledger.csv`. TPR at 5% FPR is the share of fakes caught when 5% of real clips are flagged.
 
 - **MAVOS-DD Hindi is the hard set.** Every model but FTCN drops from HiDF to MAVOS-DD, by 0.08 (SPSL) to 0.47 (the DFDC winner); FTCN loses 0.01. The eight DeepfakeBench detectors fall to 0.53 to 0.63, close to chance. Its fakes include audio-driven talking heads and lip-sync, which frame-level face-swap detectors weren't trained on.
-- **Motion over time is what holds up.** FTCN, which looks at short clips rather than single frames, leads MAVOS-DD (0.854, with parity) and is the only model there that catches more than half the fakes at a 5% false-alarm rate (0.54). RealForensics, also temporal, is second on HiDF (0.931, behind GenD) and keeps 0.779 on MAVOS-DD. Of the frame-level models, GenD PE-L (0.798) and SBI (0.777) do best.
+- **Motion over time is what holds up.** FTCN, which looks at short clips rather than single frames, leads MAVOS-DD (0.854) and is the only model there that catches more than half the fakes at a 5% false-alarm rate (0.54). RealForensics, also temporal, is second on HiDF (0.931, behind GenD) and keeps 0.779 on MAVOS-DD. Of the frame-level models, GenD PE-L (0.798) and SBI (0.777) do best.
 - **The DFDC winner is backwards on MAVOS-DD.** It scores 0.859 on HiDF but 0.390 on MAVOS-DD: at its EER threshold it flags 59% of real Hindi videos and misses 98% of EchoMimic's and 94% of Sonic's talking heads. It matches upstream within 1e-5 per face crop, so this is the model, not the adapter. GenConViT also falls to chance (0.541).
 - **AVH-Align doesn't transfer.** The audio-visual alignment model, trained on AV-Deepfake1M (English), sits at chance on MAVOS-DD (0.520): it catches 92% of Roop face swaps and 87% of MEMO talking heads, but misses 76% of Sonic's and 61% of LivePortrait's. Its parity check passes, so this is how it behaves on Hindi.
 - **Talking heads are the frame models' blind spot, and the temporal and audio-visual models' strength.** At each model's EER threshold, GenD PE-L misses 78% of EchoMimic's audio-driven talking heads while catching 82 to 95% of face swaps. FTCN catches every EchoMimic clip and 98% of LivePortrait's, though it still misses about half of MEMO's and Sonic's. HAVIC, which reads audio and video together, misses only 4 to 6% of the talking heads but about half the swaps, so it sits mid-table overall (0.692) with LipForensics (0.703). The two cover each other's gaps (miss rates per generator are in each run's `by_method.csv`).
-- **The pattern holds across all 18 video models.** Share of each generator's fakes missed at each model's own EER threshold on MAVOS-DD Hindi, averaged over the 18:
+- **The pattern holds across the 18 video models of the 2026-10-28 round.** Share of each generator's fakes missed at each model's own EER threshold on MAVOS-DD Hindi, averaged over the 18:
 
   | Generator | Type | Mean miss | Worst model |
   | --------- | ---- | --------: | ----------- |
@@ -260,117 +188,24 @@ Every video model with weights was scored on all of HiDF (8,722 clips) and all o
   | InSwapper | face swap | 26% | SPSL, 47% |
   | LivePortrait | face reenactment | 15% | Effort, 57% |
 
-  Every model misses more talking heads than face swaps on average, and 16 of the 18 miss each talking-head generator more often than any face swap. MAVOS-DD's fakes are mostly talking heads, so this round can't yet separate "Hindi" from "talking head": that needs the same models on a non-South-Asian set with the same generators ([Progress](progress.md#next)).
-- **Reproducible across machines.** The 2026-10-12 HiDF numbers for GenD, SBI and Xception came out the same, and Effort on MAVOS-DD scored on two different GPUs agreed within 1e-4.
-- **Provisional.** No video model has a settled score direction (that needs FF++ or Celeb-DF v2); parity passed for every model on 2026-11-13.
-
-The round's other same-corpus audio pairs, AUC (the rest are in [the table above](#audio-south-asian-speech)):
-
-| Model | Parity | Urdu CSALT | MAVOS-DD Hindi audio (EER) | IndicSynth Bengali | IndicSynth Urdu |
-| ----- | :----: | ---------: | -------------------------: | -----------------: | --------------: |
-| AASIST | yes | 0.863 | 0.635 (38.2%) | 0.214 | 0.343 |
-| AASIST-L | yes | 0.861 | 0.644 (38.4%) | 0.234 | 0.336 |
-| XLS-R + AASIST | yes | 0.802 | 0.886 (16.9%) | 0.654 | 0.777 |
-| AntiDeepfake w2v2 small | yes | 0.969 | 0.999 (1.3%) | 0.998 | 0.996 |
-| AntiDeepfake MMS-300M | yes | 0.998 | 1.000 (0.1%) | 0.999 | 1.000 |
-| DF Arena 500M | yes | 0.981 | 1.000 (0.1%) | 0.995 | 0.999 |
-| DF Arena 1B | yes | 0.995 | 1.000 (0.1%) | 1.000 | 1.000 |
-| AASIST3 | yes | 0.806 | 0.907 (18.2%) | 0.785 | 0.781 |
-| XLSR-Mamba | yes | 0.691 | 0.976 (6.3%) | 0.654 | 0.790 |
-| XLS-R + SLS | yes | 0.855 | 0.994 (3.1%) | 0.803 | 0.942 |
-
-- **Urdu CSALT reproduces.** All seven models with parity matched their 2026-10-12 runs (AUC and EER within 0.001, same counts) on a different GPU.
-- **MAVOS-DD's audio is easy for the post-trained models.** AntiDeepfake and DF Arena separate it almost perfectly, while the ASVspoof-only AASIST pair stays near 0.64. This is insight 6's ceiling again: their training collections may share MAVOS-DD's voice generators, which the guard can't check.
-- **IndicSynth Bengali and Urdu repeat the Hindi picture.** The ASVspoof-only AASIST pair is confidently backwards on Bengali (0.21 and 0.23) and Urdu (0.34 for both); XLS-R + AASIST is in between (0.65 and 0.78); every post-trained model scores 0.995 or more. Of the three models that passed parity last, XLS-R + SLS does best (0.80 and 0.94).
-- **Bengali scores lowest on IndicSynth, mostly because of VITS.** IndicSynth makes its Hindi and Urdu fakes with XTTS-v2 and FreeVC24, and its Bengali fakes with those two plus VITS. On the two shared generators alone (each generator's fakes against all the real clips, from the [archived](store_layout.md#archive) per-item scores), the ASVspoof-only AASIST pair still does worst on Bengali: AASIST 0.25 against 0.34 (Urdu) and 0.39 (Hindi), AASIST-L 0.29 against 0.34 and 0.39. The multilingual models barely differ there: XLS-R + AASIST 0.75 against 0.78 and 0.83, XLSR-Mamba 0.78 against 0.79, AASIST3 0.79 against 0.78, and XLS-R + SLS scores Bengali above Urdu (0.95 against 0.94). Their low Bengali totals come from VITS, where they score 0.41 to 0.51.
-- **VITS is the hardest generator wherever it appears**, so the Bengali sets may look hard as much for their generators as for their language. In Urdu CSALT, XLS-R + AASIST scores 0.70 on VITS against 0.91 on Tacotron, and XLSR-Mamba 0.47 against 0.92. BanglaFake is all VITS and MLAAD Bengali half. XLS-R + AASIST scores 0.39 to 0.65 on all five Bengali sets and 0.78 to 0.89 on all five Hindi and Urdu ones (three of the ten are cross-corpus), a gap that generator and language both feed.
-
-Cross-corpus pairs, where the real and fake clips come from different recordings, so a model can score well by telling the sources apart. They are scored and recorded but don't count as results until the shortcut probe runs. AUC, then TPR at 5% FPR; "guard" means the model trained on MLAAD, so the contamination guard refused the pair, and every pair is scored:
-
-| Model | MLAAD Bengali | MLAAD Hindi | MLAAD Sinhala | BD-GRF6 |
-| ----- | ------------: | ----------: | ------------: | ------: |
-| AASIST | 0.195 (0.02) | 0.378 (0.04) | 0.900 (0.30) | 0.608 (0.19) |
-| AASIST-L | 0.185 (0.02) | 0.406 (0.05) | 0.812 (0.03) | 0.709 (0.22) |
-| XLS-R + AASIST | 0.527 (0.07) | 0.877 (0.53) | 0.941 (0.77) | 0.509 (0.07) |
-| XLSR-Mamba | 0.521 (0.13) | 0.812 (0.48) | 0.944 (0.65) | 0.526 (0.11) |
-| XLS-R + SLS | 0.791 (0.35) | 0.875 (0.61) | **0.997** (0.99) | 0.555 (0.08) |
-| AntiDeepfake w2v2 small, MMS-300M | guard | guard | guard | 0.592, 0.512 |
-| DF Arena 500M, 1B; AASIST3 | guard | guard | guard | 0.537, 0.547; **0.952** (0.71) |
-
-- **XLS-R + SLS carries over best**, and is the only model that catches more than a third of MLAAD Bengali's fakes at a 5% false-alarm rate.
-- **The ASVspoof-only AASIST pair is backwards on MLAAD Bengali and Hindi** (0.19 to 0.41), as on IndicSynth Bengali, but not on Sinhala. MLAAD Sinhala has 11,550 real clips to 1,000 fakes, and AASIST-L's 0.812 there catches only 3% of fakes at 5% FPR.
-SpeechFake's Bengali, Tamil, Marathi and Malayalam fakes run against real read speech from IndicSUPERB, because SpeechFake has no real speech in those languages; its Hindi fakes run against its own Common Voice Hindi. Same reading, AUC then TPR at 5% FPR:
-
-| Model | Bengali | Hindi | Malayalam | Marathi | Tamil |
-| ----- | ------: | ----: | --------: | ------: | ----: |
-| AASIST | 0.170 (0.00) | 0.291 (0.00) | 0.171 (0.00) | 0.645 (0.30) | 0.604 (0.12) |
-| AASIST-L | 0.224 (0.00) | 0.282 (0.00) | 0.218 (0.01) | 0.808 (0.48) | 0.600 (0.11) |
-| XLS-R + AASIST | 0.586 (0.17) | 0.262 (0.01) | 0.148 (0.04) | 0.382 (0.14) | 0.949 (0.83) |
-| XLSR-Mamba | 0.809 (0.45) | 0.323 (0.13) | 0.320 (0.09) | 0.619 (0.10) | 0.967 (0.80) |
-| XLS-R + SLS | 0.986 (0.93) | 0.847 (0.32) | 0.870 (0.37) | 0.917 (0.41) | 0.986 (0.95) |
-| AASIST3 | 0.355 (0.01) | 0.527 (0.13) | 0.887 (0.52) | 0.959 (0.77) | 0.576 (0.42) |
-| AntiDeepfake w2v2 small | 0.999 (1.00) | 0.992 (0.97) | 0.999 (1.00) | 0.997 (0.98) | 1.000 (1.00) |
-| AntiDeepfake MMS-300M | 1.000 (1.00) | 0.997 (0.99) | 0.999 (0.99) | 0.995 (0.98) | 1.000 (1.00) |
-| DF Arena 500M | 1.000 (1.00) | 0.978 (0.88) | 1.000 (1.00) | 0.994 (0.99) | 1.000 (1.00) |
-| DF Arena 1B | 1.000 (1.00) | 0.999 (1.00) | 1.000 (1.00) | 1.000 (1.00) | 1.000 (1.00) |
-
-- **SpeechFake splits the models, and the split is the warning.** All four post-trained models score 0.978 or more on all five languages, 1.000 on most, while the other six run from 0.148 to 0.986 on the same clips. The real and fake clips come from different corpora, so a score of 1.000 here may be the corpus and not the fake.
-- **The same set runs backwards for the classic models.** AASIST, AASIST-L, XLS-R + AASIST and XLSR-Mamba all fall below 0.33 on Hindi and Malayalam, the pattern insight 4 describes.
-- **BD-GRF6 defeats every model but AASIST3**, which scores 0.952 and catches 71% of its fakes at 5% FPR. The next best is AASIST-L at 0.709; the post-trained AntiDeepfake and DF Arena models sit at chance (0.51 to 0.59). The set is cross-corpus, so AASIST3 may be telling the recordings apart rather than the fakes, which the shortcut probe will show.
-
-## The 2026-11 new adapters
-
-UnivFD, LipFD, AVAD, LAA-Net and FakeSTormer, all past parity ([Models](models.md#added-2026-11-03-five-more-adapters)), scored on SPARK on the same full sets as the round above. Snapshot of 2026-11-08.
-
-| Model | HiDF AUC | HiDF EER | HiDF TPR@5% | MAVOS-DD AUC | MAVOS-DD EER | MAVOS-DD TPR@5% |
-| ----- | -------: | -------: | ----------: | -----------: | -----------: | --------------: |
-| FakeSTormer | 0.772 | 30.2% | 0.30 | 0.577 | 46.5% | 0.16 |
-| LAA-Net | 0.839 | 23.7% | 0.41 | 0.633 | 39.7% | 0.18 |
-| UnivFD | 0.685 | 36.8% | 0.16 | 0.710 | 36.0% | 0.31 |
-| LipFD (audio and video) | n/a | n/a | n/a | 0.544 | 46.9% | 0.07 |
-| AVAD (audio and video) | n/a | n/a | n/a | 0.433 | 54.5% | 0.02 |
-
-- **AVAD ranks MAVOS-DD's fakes below its real videos.** Its AUC of 0.433 (95% CI 0.419 to 0.445) is below chance, as AVH-Align's 0.520 is near it: both learned only from real talking faces, and neither finds MAVOS-DD Hindi's fakes stranger than its real clips. With no video score direction settled, a flipped score can't be ruled out.
+  Every model misses more talking heads than face swaps on average, and 16 of the 18 miss each talking-head generator more often than any face swap. MAVOS-DD's fakes are mostly talking heads, so this set alone can't separate "Hindi" from "talking head"; the [language control](#the-language-control-mavos-dd-german) does.
+- **AVAD ranks MAVOS-DD's fakes below its real videos.** Its AUC of 0.433 (95% CI 0.419 to 0.445) is below chance. Like AVH-Align it learned only from real talking faces, and neither finds MAVOS-DD Hindi's fakes stranger than its real clips.
 - **The SBI-style detectors don't carry SBI's lead onto MAVOS-DD.** LAA-Net, trained like SBI on self-blended FF++ faces, scores 0.839 on HiDF but 0.633 on MAVOS-DD, and FakeSTormer 0.772 and 0.577, against SBI's 0.877 and 0.777.
 - **LipFD, the lip-sync specialist, barely separates MAVOS-DD's fakes (0.544) and misses the lip-sync ones most.** At its equal-error threshold it flags 82% of LivePortrait and 84% of Roop fakes but only 15% of EchoMimic, 33% of Sonic and 40% of MEMO, the audio-driven talking heads it was built for; it learned Wav2Lip-style mouth edits over English LRS3, not diffusion talking heads in Hindi.
 - **UnivFD is the one model better on MAVOS-DD than on HiDF.** The generic AI-image detector, which never saw a face swap, scores 0.685 on HiDF and 0.710 on MAVOS-DD, where many fakes are fully generated talking heads rather than swapped faces.
 
 ## The language control: MAVOS-DD German
 
-MAVOS-DD's German subset has the same eight generators as its Hindi one, so it tells "Hindi" apart from "a hard set of fakes". Waves `s6_language_control` to `s6d_effort` (SPARK, 2026-11-08 to 13) scored all 21 video models with weights on its quick share, up to 300 videos per generator (3,001 in all), and on MAVOS-DD Hindi's quick share with the same cap and seed.
-
-| Model | German AUC (95% CI) | Hindi AUC | HiDF AUC |
-| ----- | ------------------: | --------: | -------: |
-| GenD PE-L | 0.712 (0.694 to 0.732) | 0.764 | 0.940 |
-| FTCN | 0.705 (0.684 to 0.723) | 0.831 | 0.865 |
-| SBI | 0.693 (0.673 to 0.713) | 0.760 | 0.877 |
-| RealForensics | 0.642 (0.620 to 0.662) | 0.733 | 0.931 |
-| GenD | 0.610 (0.589 to 0.630) | 0.702 | 0.952 |
-| LAA-Net | 0.596 (0.575 to 0.616) | 0.591 | 0.839 |
-| Effort | 0.587 (0.566 to 0.610) | 0.537 | 0.919 |
-| FakeSTormer | 0.564 (0.541 to 0.585) | 0.542 | 0.772 |
-| LipForensics | 0.556 (0.534 to 0.576) | 0.661 | 0.870 |
-| UnivFD | 0.547 (0.524 to 0.568) | 0.703 | 0.685 |
-| Xception | 0.435 (0.415 to 0.456) | 0.622 | 0.804 |
-| SPSL | 0.429 (0.407 to 0.452) | 0.597 | 0.680 |
-| CORE | 0.423 (0.399 to 0.445) | 0.533 | 0.777 |
-| EfficientNet-B4 | 0.414 (0.392 to 0.435) | 0.570 | 0.742 |
-| F3Net | 0.414 (0.392 to 0.435) | 0.511 | 0.761 |
-| RECCE | 0.397 (0.376 to 0.417) | 0.536 | 0.770 |
-| SRM | 0.387 (0.367 to 0.409) | 0.547 | 0.716 |
-| GenConViT | 0.365 (0.345 to 0.385) | 0.537 | 0.779 |
-| UCF | 0.358 (0.338 to 0.377) | 0.539 | 0.782 |
-| FFD | 0.353 (0.331 to 0.374) | 0.546 | 0.760 |
-| DFDC winner | 0.324 (0.304 to 0.344) | 0.373 | 0.859 |
+MAVOS-DD's German subset has the same eight generators as its Hindi one, so it tells "Hindi" apart from "a hard set of fakes". Waves `s6_language_control` to `s6d_effort` (SPARK, 2026-11-08 to 13) scored all 21 video models with weights on its quick share, up to 300 videos per generator (3,001 in all), and on MAVOS-DD Hindi's quick share with the same cap and seed. Both are columns of the grid, marked quick.
 
 - **The drop isn't about Hindi.** 18 of the 21 models score lower on German than on Hindi, by 0.05 (GenD PE-L, the DFDC winner) to 0.19 (FFD). LAA-Net scores the same, and two score higher on German: FakeSTormer by 0.02, inside the intervals, and Effort by 0.05. What makes MAVOS-DD hard is the set's fakes and its real YouTube clips, not South Asian speakers. HiDF stays the only sign of a South Asian effect in video.
-- **On German the frame detectors rank fakes below real videos.** The nine DeepfakeBench detectors released with v1.0.1 and GenConViT score 0.35 to 0.44, below chance with their confidence intervals clear of 0.5, and each flags 54 to 67% of German real videos at its equal-error threshold, against 43 to 49% of Hindi's: the German real clips look faker to them than the fakes do. The DFDC winner, 0.859 on HiDF, is below chance in both languages (0.324 and 0.373). With no video score direction settled (FF++ or Celeb-DF v2), this is a pattern, not proof of inverted scores.
+- **On German the frame detectors rank fakes below real videos.** The nine DeepfakeBench detectors released with v1.0.1 and GenConViT score 0.35 to 0.44, below chance with their confidence intervals clear of 0.5, and each flags 54 to 67% of German real videos at its equal-error threshold, against 43 to 49% of Hindi's: the German real clips look faker to them than the fakes do. The DFDC winner, 0.859 on HiDF, is below chance in both languages (0.324 and 0.373). A pattern, not proof of inverted scores, while video direction is unsettled.
 - **The generator pattern holds in both languages.** Averaged over EchoMimic, Sonic and MEMO, the frame detectors miss 72 to 93% of German talking heads (54 to 83% in Hindi) while catching most face swaps; FTCN and RealForensics still catch nearly every LivePortrait reenactment (3 to 4% missed). The ranking at the top is the same: GenD PE-L, FTCN and SBI lead in both.
 - **Effort, the strongest CLIP detector on HiDF after GenD (0.919), drops to 0.54 to 0.59 here,** like the other FF++-trained models; GenD PE-L keeps more of its lead.
 
 ## Generator-level contamination check
 
-DF Arena (500M, 1B) and AntiDeepfake (MMS-300M, wav2vec 2.0 small) score 0.978 or more on almost every open South Asian audio set. The [contamination guard](evaluation.md#metrics) compares datasets, so a set made with a TTS system these models trained on still counts as clean. Desk check of 2026-11-08: each evalset's generators, from its paper or card, against the generators in every corpus the four models list ([Models](models.md#per-model)).
+Why DF Arena (500M, 1B) and AntiDeepfake (MMS-300M, wav2vec 2.0 small) score 0.978 or more on almost every open South Asian audio set: the [contamination guard](evaluation.md#contamination-verdicts) compares datasets, so a set made with a TTS system these models trained on still counts as clean. Desk check of 2026-11-08: each evalset's generators, from its paper or card, against the generators in every corpus the four models list ([Models](models.md#per-model)).
 
 | Evalset | Generators | Seen in training |
 | --- | --- | --- |
@@ -385,6 +220,16 @@ DF Arena (500M, 1B) and AntiDeepfake (MMS-300M, wav2vec 2.0 small) score 0.978 o
 - **Exact matches are few; family matches are everywhere.** XTTS-v2 in IndicSynth is the clear case. Most other sets share only an architecture (VITS, Tacotron) with something in training, trained on other speakers and languages.
 - **Familiarity doesn't explain the ceiling by itself.** The generators found in no training corpus are caught as well as XTTS-v2: at its EER threshold DF Arena 1B misses 0% of IndicSynth Bengali's XTTS-v2 fakes, 0.9% of FreeVC24's and 0.7% of VITS's; DF Arena 500M misses 1.6% of SpeechFake Hindi's SeedVC and 13% of its Edge-TTS; DF Arena 1B misses 0.1% of MAVOS-DD's kNN-VC (`by_method.csv` of each run). The voice-conversion lists of four AntiDeepfake corpora (DSD, CVoiceFake, DECRO, DiffSSD) couldn't be read, so "not found" is provisional there. Every fake here still passes through a neural vocoder of a kind these models trained on.
 - **The clean test is on disk but behind the guard.** MLAAD Hindi's Voxtral, OmniVoice and VoxCPM2 folders are systems no model here can have seen, scored against the same real speech as the older ones. The guard refuses MLAAD for all four models, rightly at the dataset level, so per-generator numbers need the team to agree a documented carve-out ([Progress](progress.md#open-decisions-that-shape-the-results)). SEA-Spoof (Hindi and Tamil, ten named generators, five of them likely unseen, on request) is the other route.
+
+## Cross-corpus audio
+
+Scored and recorded, but not results. The guard refuses MLAAD for the five models trained on it. SpeechFake's Bengali, Tamil, Marathi and Malayalam fakes run against real read speech from IndicSUPERB, because SpeechFake has no real speech in those languages; its Hindi fakes run against its own Common Voice Hindi.
+
+- **XLS-R + SLS carries over best** on MLAAD, and is the only model that catches more than a third of MLAAD Bengali's fakes at a 5% false-alarm rate.
+- **The ASVspoof-only AASIST pair is backwards on MLAAD Bengali and Hindi** (0.19 to 0.41), as on IndicSynth Bengali, but not on Sinhala. MLAAD Sinhala has 11,550 real clips to 1,000 fakes, and AASIST-L's 0.812 there catches only 3% of fakes at 5% FPR.
+- **SpeechFake splits the models, and the split is the warning.** All four post-trained models score 0.978 or more on all five languages, 1.000 on most, while the other six run from 0.148 to 0.986 on the same clips. The real and fake clips come from different corpora, so a score of 1.000 here may be the corpus and not the fake.
+- **The same set runs backwards for the classic models.** AASIST, AASIST-L, XLS-R + AASIST and XLSR-Mamba all fall below 0.33 on Hindi and Malayalam, the pattern insight 4 describes.
+- **BD-GRF6 defeats every model but AASIST3**, which scores 0.952 and catches 71% of its fakes at 5% FPR. The next best is AASIST-L at 0.709; the post-trained AntiDeepfake and DF Arena models sit at chance (0.51 to 0.59). AASIST3 may be telling the recordings apart rather than the fakes: BD-GRF6's fakes were recorded at 8 kHz ([below](#the-shortcut-probe)).
 
 ## The shortcut probe
 
@@ -411,7 +256,7 @@ Run on SPARK on 2026-11-13 (deeptrace-experiments' `shortcut` stage; aggregates 
 
 ## What the results can't say yet
 
-- **Lip-sync with cloned voices**, v1's focus: only MAVOS-DD Hindi so far, and with no video score direction settled ([above](#the-2026-10-28-round-full-hidf-and-mavos-dd-hindi)).
+- **Lip-sync with cloned voices**, v1's focus: only MAVOS-DD Hindi so far ([above](#faces-and-talking-heads-mavos-dd-hindi)).
 - **Sinhala.** Its only fakes are in MLAAD Sinhala, which the shortcut probe separates by sample rate and bandwidth alone ([above](#the-shortcut-probe)), so no Sinhala number counts yet.
 - **In-the-wild South Asian audio.** Every South Asian audio set so far is read or studio speech.
 - **Demographics in audio.** These sets carry gender at most.

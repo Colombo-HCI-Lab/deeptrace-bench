@@ -51,9 +51,7 @@ $DTB_ROOT/
 
 ## Namespaces
 
-`DTB_NAMESPACE=smoke` moves everything item-level (datasets, manifests, faces, scores, results, reports) under `$DTB_ROOT/smoke/`. Weights and upstream archives stay at the root, shared, so a smoke run never downloads a model twice. Scripts set it (`smoke.py`, `--sample`, `--smoke`); never set it in `.env`.
-
-`setup_datasets.py --sample` always switches to the smoke namespace, so a four-item sample can't be mistaken for the real dataset.
+`DTB_NAMESPACE=smoke` moves everything item-level (datasets, manifests, faces, scores, results, reports) under `$DTB_ROOT/smoke/`. Weights and upstream archives stay at the root, shared, so a smoke run never downloads a model twice. Scripts set it (`smoke.py`, `--sample`, `--smoke`); never set it in `.env`. `setup_datasets.py --sample` always switches to it, so a four-item sample can't be mistaken for the real dataset.
 
 ## Archive
 

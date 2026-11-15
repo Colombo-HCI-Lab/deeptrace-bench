@@ -3,9 +3,7 @@ title: "Adding a model"
 description: "Recipe: config, pinned weights, adapter, smoke test, parity (GenD as the worked example)"
 ---
 
-In plain words: adding a model means teaching the harness to run someone else's detector exactly as its authors did. You never rewrite the model. You write down where its code and weights come from and everything it was trained on ([step 1](#1-config)), lock those exact files ([step 2](#2-fetch-and-pin)), write a thin adapter that loads the authors' code and turns our prepared inputs into one fake probability per window or frame ([step 3](#3-adapter)), check the plumbing on a few clips ([step 4](#4-prove-it-runs)), and then prove the adapter scores like the original before any of its numbers count ([step 5](#5-before-any-result-counts)).
-
-A model is a config, a pinned upstream checkout, pinned weights and an adapter. Worked example: GenD (`configs/models/gend.yaml`, `src/deeptrace_bench/models/gend.py`). Other upstream shapes: `aasist.py` (one plain PyTorch file), `df_arena.py` (code inside a Hugging Face model repo), `deepfakebench.py` (one detector out of a training framework).
+Adding a model means teaching the harness to run someone else's detector exactly as its authors did; you never rewrite the model. A model is a config, a pinned upstream checkout, pinned weights and an adapter. Worked example: GenD (`configs/models/gend.yaml`, `src/deeptrace_bench/models/gend.py`). Other upstream shapes: `aasist.py` (one plain PyTorch file), `df_arena.py` (code inside a Hugging Face model repo), `deepfakebench.py` (one detector out of a training framework).
 
 ## How adapters work
 
@@ -13,13 +11,21 @@ One environment runs everything (Python 3.12, torch 2.8, transformers 4.56). Ups
 
 ## 1. Config
 
-Add `configs/models/<id>.yaml` (id = file name):
 
-- `upstream`: GitHub repo and full commit. Code in a Hugging Face model repo (custom modelling files next to the weights) uses `host: hf` with the Hub revision as `commit`; it is cloned the same way, without LFS weights.
-- `weights`: every file and its source. Kinds: `hf` (one file at a pinned `revision`), `hf_snapshot` (several files of a repo at a full 40-hex revision, into a folder, picked by `allow_patterns`), `github_release`, `github_raw`, `url` (optionally `member:` to take one file out of a zip by range requests), `gdrive`, `gdrive_folder`, `manual`. Pin everything loaded at runtime: GenD's code calls `CLIPModel.from_pretrained("openai/clip-vit-large-patch14")` unpinned, so its config adds that backbone as an `hf_snapshot` and the adapter points GenD at the local copy.
-- `training_data`: every dataset or corpus the released weights saw, including pretraining, with `split` where only one split was used. The contamination guard is only as good as this list.
-- `input`: what the adapter needs. Face models give a `crop` (`size`, `margin`, `align`; `size: null` keeps native size). Normalisation (mean, std) belongs in the adapter.
-- `modality`: `video` models also score `image` and `audio_video` evalsets; `audio` models score `audio` and `audio_video`.
+| Field | What goes in |
+| --- | --- |
+| `upstream` | GitHub repo and full commit. Code in a Hugging Face model repo (custom modelling files next to the weights) uses `host: hf` with the Hub revision as `commit`; it is cloned the same way, without LFS weights |
+| `weights` | every file and its source, by kind (below). Pin everything loaded at runtime: GenD's code calls `CLIPModel.from_pretrained("openai/clip-vit-large-patch14")` unpinned, so its config adds that backbone as an `hf_snapshot` and the adapter points GenD at the local copy |
+| `training_data` | every dataset or corpus the released weights saw, including pretraining, with `split` where only one split was used. The contamination guard is only as good as this list |
+| `input` | what the adapter needs. Face models give a `crop` (`size`, `margin`, `align`; `size: null` keeps native size). Normalisation (mean, std) belongs in the adapter |
+| `modality` | `video` models also score `image` and `audio_video` evalsets; `audio` models score `audio` and `audio_video` |
+
+| Weight kind | Fetches |
+| --- | --- |
+| `hf` | one file at a pinned `revision` |
+| `hf_snapshot` | several files of a repo at a full 40-hex revision, into a folder, picked by `allow_patterns` |
+| `url` | a file at a URL; `member:` takes one file out of a zip by range requests |
+| `github_release`, `github_raw`, `gdrive`, `gdrive_folder`, `manual` | as named |
 
 ## 2. Fetch and pin
 
@@ -34,15 +40,29 @@ Clones upstream at its commit into `third_party/` (git-ignored), archives it to 
 
 Subclass `deeptrace_bench.models.base.Detector` in `src/deeptrace_bench/models/<module>.py` and set `adapter:` in the config:
 
-- `convert_checkpoint()`: turn a pickled download into `model.safetensors` once with `self.save_converted(state, source)` (unwraps `{"state_dict": ...}`, strips `module.`, records the source hash). Return early when `self.converted_is_current(source)`. Safetensors weights (GenD) skip this. A Hub file called `model.safetensors` needs another local `name` in the config, or the conversion would overwrite it (`save_converted` refuses).
-- `load(device)`: build the network and load weights; `self.load_converted(network)` requires every key to match and refuses a conversion made from another download. Use `resolve_device` so `auto` works.
-- Import upstream code from the checkout (`self.upstream_dir`) through `models/_upstream.py`, never by copying it (compatibility fixes go in `patches/<repo>/`):
-  - `load_module`: one file (GenD);
-  - `load_package`: a folder of files that import each other (DF Arena);
-  - `scoped_modules`: stand-ins while importing a file that drags in a whole framework (DeepfakeBench);
-  - `models/_fairseq.py` and `models/_mamba.py`: pure-PyTorch stand-ins for fairseq (wav2vec 2.0, XLS-R) and mamba-ssm, which we don't install.
-- `score(inputs)`: P(fake) per window or frame. Inputs: face models get a list of RGB uint8 crops (sizes may differ); audio models an array of windows; audio-visual models (`modality: audio_video`) a dict of face crops, audio and frame counts; lip models (`input.inputs: mouths`) an array of grayscale mouth crops. Raise `PreprocessError` (e.g. `too_short`) when inputs can't make one window. Batch inside the adapter; the harness averages scores into one per item.
-- Keep heavy imports inside `load` and `score` so the registry test imports every adapter cheaply.
+| Method | Does |
+| --- | --- |
+| `convert_checkpoint()` | turns a pickled download into `model.safetensors` once with `self.save_converted(state, source)` (unwraps `{"state_dict": ...}`, strips `module.`, records the source hash). Return early when `self.converted_is_current(source)`. Safetensors weights (GenD) skip this. A Hub file called `model.safetensors` needs another local `name` in the config, or the conversion would overwrite it (`save_converted` refuses) |
+| `load(device)` | builds the network and loads weights; `self.load_converted(network)` requires every key to match and refuses a conversion made from another download. Use `resolve_device` so `auto` works |
+| `score(inputs)` | returns P(fake) per window or frame. Raise `PreprocessError` (e.g. `too_short`) when inputs can't make one window. Batch inside the adapter; the harness averages scores into one per item |
+
+| Model | `inputs` |
+| --- | --- |
+| face | a list of RGB uint8 crops (sizes may differ) |
+| audio | an array of windows |
+| audio-visual (`modality: audio_video`) | a dict of face crops, audio and frame counts |
+| lip (`input.inputs: mouths`) | an array of grayscale mouth crops |
+
+Import upstream code from the checkout (`self.upstream_dir`) through `models/_upstream.py`, never by copying it (compatibility fixes go in `patches/<repo>/`):
+
+| Helper | For |
+| --- | --- |
+| `load_module` | one file (GenD) |
+| `load_package` | a folder of files that import each other (DF Arena) |
+| `scoped_modules` | stand-ins while importing a file that drags in a whole framework (DeepfakeBench) |
+| `models/_fairseq.py`, `models/_mamba.py` | pure-PyTorch stand-ins for fairseq (wav2vec 2.0, XLS-R) and mamba-ssm, which we don't install |
+
+Keep heavy imports inside `load` and `score` so the registry test imports every adapter cheaply.
 
 ## 4. Prove it runs
 
@@ -64,32 +84,7 @@ Open the report and its crops ([reading the report](getting_started.md#reading-t
   uv run scripts/parity.py compare --model <id> --run <run dir>             # writes results/parity/<id>.json
   ```
 
-  `export` saves the exact inputs the adapter saw (windows or crops from the shared loaders) and its scores; a reference script in `scripts/parity_reference/` runs upstream's code on them; `compare` passes when every score agrees within 1e-3 and writes a committable summary (no item ids). A new adapter kind needs its own reference script. DeepfakeBench's runs in a throwaway old-torch virtualenv, made once:
-
-  ```bash
-  uv venv --python 3.9 $DTB_ROOT/parity/envs/dfb
-  uv pip install --python $DTB_ROOT/parity/envs/dfb/bin/python torch==1.13.1 torchvision==0.14.1 \
-    "numpy<1.24" opencv-python-headless==4.6.0.66 efficientnet-pytorch==0.7.1 pyyaml "scikit-learn<1.3" \
-    timm==0.6.13   # RECCE's encoder; install it in the same command, or uv upgrades torch
-  ```
-
-  SBI's reference (`sbi.py`) uses the same one. The fairseq models need two more, on a local disk (a virtualenv's `python` is a symlink, which a CIFS-mounted store can't hold). Each needs pip older than 24.1 (fairseq's pinned omegaconf has metadata newer pip rejects) and torchaudio pinned beside torch (or fairseq's install pulls the newest torch). AntiDeepfake's (`antideepfake.py`) uses fairseq 0.12.2:
-
-  ```bash
-  uv venv --seed --python 3.9 <envs>/fairseq && <envs>/fairseq/bin/python -m pip install "pip<24.1"
-  <envs>/fairseq/bin/pip install torch==1.13.1 torchaudio==0.13.1 "numpy<1.24" cython soundfile \
-    safetensors fairseq==0.12.2
-  ```
-
-  The XLS-R wrapper models (`ssl_xlsr.py`) need upstream's own stack, since fairseq 0.12.2 rejects the config inside `xlsr2_300m.pt`: torch 1.8.1 and the fairseq vendored in the SSL_Anti-spoofing checkout, installed from a copy outside the checkout. `SSLModel` loads `xlsr2_300m.pt` (3.8 GB, <https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt>) from the working directory, so keep it in the virtualenv's root, where the script runs:
-
-  ```bash
-  uv venv --seed --python 3.9 <envs>/fairseq-tak && <envs>/fairseq-tak/bin/python -m pip install "pip<24.1"
-  <envs>/fairseq-tak/bin/pip install torch==1.8.1 torchaudio==0.8.1 "numpy<1.24" cython soundfile
-  cp -r third_party/SSL_Anti-spoofing-*/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1 /tmp/fairseq-tak
-  <envs>/fairseq-tak/bin/pip install /tmp/fairseq-tak
-  curl -L -o <envs>/fairseq-tak/xlsr2_300m.pt https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt
-  ```
+  `export` saves the exact inputs the adapter saw (windows or crops from the shared loaders) and its scores; a reference script in `scripts/parity_reference/` runs upstream's code on them; `compare` passes when every score agrees within 1e-3 and writes a committable summary (no item ids). A new adapter kind needs its own reference script, and usually upstream's old stack in a virtualenv of its own: the ones built so far are in [Models](models.md#reference-environments).
 
 - **Score direction**: AUC above 0.5 on the reproduction evalset (FF++ test, ASVspoof 2019 LA eval, or In-the-Wild for models the guard refuses on ASVspoof 2019); an inverted logit flips every result silently. A seeded sample settles direction (`setup_datasets.py <id> --sample 300 --manifest`, then `score.py --smoke` and `evaluate.py --smoke`); the full set reproduces the published number.
 - Then give the model a `wave:`.

@@ -259,13 +259,13 @@ export function buildProgress(body: string) {
     decisions: items(section(secs, /^Open decisions/).text)
       .map(lead)
       .map((b) => ({ label: b.label, code: b.code, body: md(b.rest) })),
-    adding: md(section(secs, /^Adding an entry/).text),
   };
 }
 export type Progress = ReturnType<typeof buildProgress>;
 
 // ---------- At a glance: every detector on every dataset ----------
-// Two grids, speech and faces, since no detector crosses between them. Rows and columns come from
+// Two grids, speech and faces, since no detector crosses between them: every countable run, a quick
+// subset right after its full set. Rows and columns come from
 // the runs, so a new detector or evalset shows up without an edit here: a detector in no group
 // lands in "Other", and an evalset outside COL_ORDER sorts after the known ones of its kind.
 // Known columns in reading order; FF++, which every FF++ detector trained on and nobody has scored
@@ -313,9 +313,7 @@ const colName = (ev: string): [string, string] => {
   return GRID_NAMES[ev] ?? [ev, ""];
 };
 
-// quick: keep quick subsets beside their full sets (the all-runs matrix) instead of hiding them.
-function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined, { quick = false } = {}) {
-  const facts = new Map((detectors?.rows ?? []).map((r) => [plain(r[0]), r.slice(1).map(plain)]));
+function buildGrid() {
   const trainedOn = (modelId: string, ev: string) => {
     const m = D.models.find((x) => x.id === modelId);
     const names = D.datasets.filter((d) => d.evalsets.includes(ev)).map((d) => d.name);
@@ -341,6 +339,7 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined, 
           `${name(id)} on ${colName(ev)[0]}${colName(ev)[1] ? ` (${colName(ev)[1]})` : ""}`,
           `AUC ${fmt3(r.auc)} (95% ${fmt3(r.auc_lo)}–${fmt3(r.auc_hi)})`,
           `EER ${pct(r.eer)} (95% ${pct(r.eer_lo)}–${pct(r.eer_hi)})`,
+          r.tpr_at_fpr05 == null ? "" : `TPR at 5% FPR ${r.tpr_at_fpr05.toFixed(2)}`,
           `${int(r.n_real)} real / ${int(r.n_fake)} fake, ${int(r.n_failed)} failed`,
           r.wall_s ? `Wall time ${dur(r.wall_s)}` : "",
           trained ? "Trained on its train split, scored on the held-out eval split" : "",
@@ -359,13 +358,12 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined, 
       return { kind: "na", text: "–", title: "It can't read this set" };
     return { kind: "todo", text: "·", title: "Not run yet" };
   };
-  // Facts for a row header: the doc's detectors table, else the catalog's training data.
+  // Facts for a row header, from the catalog: what it is, its pretraining, its training data.
   const rowFacts = (id: string) => {
-    const f = facts.get(id);
-    if (f) return f;
-    const t = D.models.find((m) => m.id === id)?.training ?? [];
+    const m = D.models.find((x) => x.id === id);
+    const t = m?.training ?? [];
     const list = (xs: string[]) => (xs.length > 3 ? `${xs.slice(0, 3).join(", ")} and ${xs.length - 3} more` : xs.join(", "));
-    return ["", list(t.filter((x) => x.level === "pretrain").map((x) => x.name)) || "none", list(t.filter((x) => x.level !== "pretrain").map((x) => x.name))];
+    return [m?.architecture ?? "", list(t.filter((x) => x.level === "pretrain").map((x) => x.name)) || "none", list(t.filter((x) => x.level !== "pretrain").map((x) => x.name))];
   };
   const evalset = (id: string) => D.evalsets.find((x) => x.id === id);
   const kindOf = (id: string) => {
@@ -390,10 +388,8 @@ function buildGrid(detectors: { head: string[]; rows: string[][] } | undefined, 
 
   return GRIDS.map((grid) => {
     const mine = (modality?: string) => (modality === "audio") === grid.audio;
-    // Here a quick subset gives way to its full set; the all-runs matrix (quick) keeps both.
     const cols = [...new Set([...D.runs.map((r) => r.evalset), ...GRID_PINNED])]
       .filter((id) => mine(evalset(id)?.modality))
-      .filter((id) => quick || !(id.endsWith("_quick") && scored.has(full(id))))
       .sort((a, b) => rank(a) - rank(b) || at(a) - at(b) || full(a).localeCompare(full(b)) || a.localeCompare(b));
     const colGroups: { label: string; span: number }[] = [];
     for (const id of cols) {
@@ -437,7 +433,6 @@ const RESULTS_LAID_OUT = [
   /^Read this first/,
   /^Experiments/,
   /^The datasets/,
-  /^The detectors/,
   /^Insights/,
   /^Reproductions/,
   /^Audio: South Asian/,
@@ -465,9 +460,7 @@ export function buildResults(body: string) {
     rows: (dsTable?.rows ?? []).map((r) => r.map(plain)),
     note: md(prose(dsT)),
   };
-  const detectors = tables(get(/^The detectors/))[0];
-  const grids = buildGrid(detectors);
-  const allGrids = buildGrid(detectors, { quick: true });
+  const grids = buildGrid();
   const insights = items(get(/^Insights/))
     .map(lead)
     .map((b, i) => ({ n: i + 1, label: b.label, body: md(b.rest) }));
@@ -481,9 +474,8 @@ export function buildResults(body: string) {
   const sub = (re: RegExp) => section(audio, re);
   const langS = sub(/^Language matters/);
   const langP = paras(langS.text).filter((p) => !p.startsWith("|"));
-  const preS = sub(/^Multilingual pretraining/);
   const notes = audio
-    .filter((s) => !/^(Three tiers|Multilingual pretraining|Language matters)/.test(s.title))
+    .filter((s) => !/^(Three tiers|Language matters)/.test(s.title))
     .map((s) => ({ title: plain(s.title), body: md(s.text) }));
 
   const repT = get(/^Reproductions/);
@@ -558,10 +550,8 @@ export function buildResults(body: string) {
     first,
     datasets,
     grids,
-    allGrids,
     insights,
     lang: { title: plain(langS.title), ...heat(tables(langS.text)[0]), intro: md(langP[0] ?? ""), after: md(langP.slice(1).join("\n\n")) },
-    pre: { title: plain(preS.title), ...heat(tables(preS.text)[0]), body: md(prose(preS.text)) },
     notes,
     repro,
     reproBody: md(prose(repT)),

@@ -178,20 +178,15 @@ nav.index a:hover { color: var(--ink); }
 .swatches i { width: 14px; height: 10px; }
 .heat { border-collapse: separate; border-spacing: 3px; width: 100%; }
 .heat.lang { border-spacing: 2px; min-width: 680px; }
-.heat.pre { border-spacing: 2px; }
 .heat thead th { padding: 0 4px 8px; vertical-align: bottom; text-align: center; }
 .heat thead th:first-child { text-align: left; font: 500 12px/1.3 var(--mono); color: var(--muted); padding: 0 12px 8px 0; }
 .heat thead th span { display: block; }
 .heat thead th span:first-child { font-weight: 600; font-size: 0.95rem; line-height: 1.25; }
 .heat.lang thead th span:first-child { font-size: 0.9rem; }
 .heat thead th span + span { font: 400 12px/1.4 var(--mono); color: var(--muted); }
-.heat.pre thead th { font: 500 12px/1.3 var(--mono); color: var(--muted); padding: 0 4px 6px; }
-.heat.pre thead th:first-child { padding: 0 10px 6px 0; }
 .heat tbody th { text-align: left; font-weight: 400; font-size: 0.97rem; padding: 0 12px 0 0; white-space: nowrap; }
 .heat.lang tbody th { font-size: 0.93rem; }
-.heat.pre tbody th { font-size: 0.92rem; padding-right: 10px; }
 .heat td { padding: 0; height: 28px; text-align: center; font: 500 12px/1 var(--mono); }
-.heat.pre td { height: 30px; }
 .heat .tierrow td { padding: 14px 0 4px; height: auto; text-align: left; font: inherit; background: none; color: inherit; }
 /* The grids are as wide as their columns, not the page, so the speech and face grids line up
    column for column; the detector column stays put while a narrow screen scrolls the rest. */

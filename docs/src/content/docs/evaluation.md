@@ -1,6 +1,6 @@
 ---
 title: "Evaluation"
-description: "How a score becomes a number: evalsets, preprocessing, the settings still open, metrics, contamination verdicts, the shortcut probe, run flags"
+description: "How a score becomes a number: evalsets, preprocessing, the settings still open, metrics, contamination verdicts and the shortcut probe"
 ---
 
 Every setting lives in [`configs/eval/default.yaml`](/configs/eval/default.yaml), still `proposed` until the team settles [decision 5](progress.md#open-decisions-that-shape-the-results). A changed setting changes every run id ([naming rules](store_layout.md#naming-rules)), so results from different settings never mix. Terms such as evalset, parity and score direction are defined in [How it works](method.md#key-terms).
@@ -26,7 +26,7 @@ Quick evalsets carry `_quick` in their id. `hidf_video_quick` (2,011 of 8,722 it
 | --- | --- | --- | --- |
 | Audio | 16 kHz mono, 64,600-sample windows (about 4 s); a clip shorter than a window is tiled up to one, as AASIST does | mean of window scores | `too_short` under 1 s |
 | Video, images | one shared face detector (insightface's SCRFD-10GF, `det_10g.onnx`) on 32 evenly spaced frames, keeping the largest face per frame and caching its box and five landmarks; an image is a one-frame video. Each model then cuts its own crop from the cache | mean of frame scores | `no_face`: fewer than 8 frames with a face (video), or none (image) |
-| Frame-run models | their own sampling and detection cache. HAVIC: frames at 5 per second from the start (at most 50) with the audio under them (`preprocess/av.py`). LipForensics: the first 100 consecutive frames, cut into mouth crops from FAN's 68 landmarks with upstream's warp (`preprocess/mouths.py`). Written 2026-10-05 | per model ([Models](models.md#per-model)) | as for video |
+| Frame-run models (HAVIC, LipForensics and the other clip and audio-visual models) | their own frame sampling and detection cache, each described in [Models](models.md#per-model) | per model | as for video |
 
 Each model crops the cached faces its own way (size, margin and alignment from its config), because detectors do worse on crops unlike the ones they trained on. Code: `preprocess/faces.py`, `preprocess/scrfd.py`.
 
@@ -79,7 +79,13 @@ Before scoring, the contamination guard (`eval.contamination.check`) compares th
 | `overlap_excluded` | the model trained on this dataset, but the items it saw are listed, so they're excluded        | evaluated on the rest                    |
 | `contaminated`     | the model trained on this dataset and the items it saw aren't known                            | refused unless `--force`; never headline |
 
-It currently refuses HAVIC on FakeAVCeleb, AASIST3 and DF Arena on MLAAD, and DF Arena and both AntiDeepfake models on ASVspoof 2019 LA eval.
+What it refuses today:
+
+| Models | Refused on | Why |
+| --- | --- | --- |
+| HAVIC | FakeAVCeleb | fine-tuned on an unpublished 70% of it |
+| AASIST3, DF Arena 500M and 1B, both AntiDeepfake models | MLAAD (`mlaad_*`) | trained on it |
+| DF Arena 500M and 1B, both AntiDeepfake models | ASVspoof 2019 LA eval | DF Arena doesn't name its training partitions; AntiDeepfake trained on all of it |
 
 Its blind spot: it compares datasets, not generators, so a model that trained (through some other dataset) on the TTS system behind an evalset's fakes still gets `clean`. Our own fine-tuned checkpoints list their training items (`items_file`), so the guard covers them exactly.
 
@@ -101,14 +107,3 @@ Five stratified folds (seed 0), standardised features, out-of-fold scores, a 95%
 ## Fine-tuning splits
 
 `splits.identity_safe_split` links items sharing a `subject_id` or `source_subject_id` and keeps each linked group in one split, so no face or voice is on both sides. Seed and code are in git; assignments in `DTB_ROOT/splits/`.
-
-## Flags on each run
-
-Beside the verdict, the [all-runs matrix](https://colombo-hci-lab.github.io/deeptrace-bench/results/#all-runs) shows these flags on hover over each cell:
-
-| Flag | Means |
-| --- | --- |
-| `cross-corpus` | the evalset pairs different corpora |
-| `below chance` | AUC under 0.5 |
-| `no parity check` | the adapter hasn't been shown to score like upstream; the run is provisional |
-| `score direction unchecked` | the model hasn't scored above chance on a reproduction evalset, so its scores could be read backwards; the run is provisional |

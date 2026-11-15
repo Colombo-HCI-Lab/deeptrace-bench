@@ -5,15 +5,7 @@ description: "Install the harness, run the smoke test, and read its report"
 
 ## What you need
 
-[uv](https://docs.astral.sh/uv/), and one of:
-
-| Machine | Runs |
-| --- | --- |
-| Apple Silicon Mac | the tests and the smoke test |
-| Linux x86_64, NVIDIA GPU, CUDA 12 drivers | everything |
-| ARM Linux | nothing yet: `uv.lock` has no ARM wheels |
-
-The team's GPU cluster needs none of this setup: see [Where to run](spark.md).
+[uv](https://docs.astral.sh/uv/), and a machine the harness runs on: an Apple Silicon Mac for the tests and the smoke test, Linux x86_64 with an NVIDIA GPU for everything. [Where to run](spark.md) lists every machine; the team's GPU cluster needs none of this setup.
 
 ## Install
 
