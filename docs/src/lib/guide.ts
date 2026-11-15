@@ -4,7 +4,7 @@
 import { markdownToHtml } from "satteri";
 import { links } from "./links.mjs";
 import { mdLabels } from "./nav";
-import { D, dur, int } from "./status";
+import { D, dur, estimate, int } from "./status";
 
 const base = import.meta.env.BASE_URL;
 
@@ -73,7 +73,7 @@ const SPEECH: Group[] = [
 ];
 const FACES: Group[] = [
   { label: "Foundation", title: "Vision foundation models, lightly tuned on FF++", kind: "mid", models: ["gend", "gend_pe_l", "effort"] },
-  { label: "Temporal", title: "Face or mouth clips over time, trained on FF++", kind: "mid", models: ["realforensics", "ftcn", "lipforensics", "fakestormer"] },
+  { label: "Temporal", title: "Face or mouth clips over time, trained on FF++", kind: "mid", models: ["realforensics", "ftcn", "lipforensics", "fakestormer", "altfreezing", "tall"] },
   {
     label: "Frame CNN",
     title: "Single face crops, CNNs trained on FF++",
@@ -264,12 +264,11 @@ export function buildProgress(body: string) {
 export type Progress = ReturnType<typeof buildProgress>;
 
 // ---------- At a glance: every detector on every dataset ----------
-// Two grids, speech and faces, since no detector crosses between them: every countable run, a quick
-// subset right after its full set. Rows and columns come from
-// the runs, so a new detector or evalset shows up without an edit here: a detector in no group
-// lands in "Other", and an evalset outside COL_ORDER sorts after the known ones of its kind.
-// Known columns in reading order; FF++, which every FF++ detector trained on and nobody has scored
-// yet, is always shown.
+// Two grids, speech and faces, since no detector crosses between them: every detector that isn't
+// cut against every evalset, a scored quick subset right after its full set. Rows and columns come
+// from status.json, so a new detector or evalset shows up without an edit here: a detector in no
+// group lands in "Other", and an evalset outside COL_ORDER sorts after the known ones of its kind.
+// Known columns in reading order.
 const COL_ORDER = [
   "asvspoof2019_la_eval",
   "in_the_wild",
@@ -289,15 +288,25 @@ const COL_ORDER = [
   "mlaad_si",
   "bd_grf6",
 ];
-const GRID_PINNED = ["ffpp_test"];
-const GRID_NAMES: Record<string, [string, string]> = { ...EV, ffpp_test: ["FF++", "Faces · training set"] };
+// Sets nobody has scored yet, which the findings don't name.
+const GRID_NAMES: Record<string, [string, string]> = {
+  ...EV,
+  ffpp_test: ["FF++", "Faces · training set"],
+  celeb_df_v2_test: ["Celeb-DF v2", "English"],
+  fakeavceleb: ["FakeAVCeleb", "English"],
+  deephy: ["DeePhy", "Faces"],
+  dfplatter_sample: ["DF-Platter", "Faces"],
+  indeepfake: ["InDeepFake", "Faces"],
+  sea_spoof_hi: ["SEA-Spoof Hindi", "Hindi"],
+  sea_spoof_ta: ["SEA-Spoof Tamil", "Tamil"],
+};
 const GRIDS = [
   { id: "speech", title: "Speech", audio: true, groups: SPEECH },
   { id: "faces", title: "Faces, and faces with their voices", audio: false, groups: FACES },
 ];
 
 export interface GridCell {
-  kind: "run" | "trained" | "na" | "todo";
+  kind: "run" | "trained" | "na" | "off" | "pending" | "todo";
   text: string;
   eer?: string;
   style?: string;
@@ -356,7 +365,11 @@ function buildGrid() {
     const audio = (x?: string) => x === "audio";
     if (D.cells[`${id}|${ev}`] === "na" || (m && e && audio(m.modality) !== audio(e.modality)))
       return { kind: "na", text: "–", title: "It can't read this set" };
-    return { kind: "todo", text: "·", title: "Not run yet" };
+    if (m && !m.adapter) return { kind: "off", text: "", title: "No adapter yet" };
+    const t = m && e ? estimate(m, e) : null;
+    const gpu = t == null ? "" : `: about ${dur(t)} of GPU time for ${int(e!.size!.items)} clips`;
+    if (e && e.status !== "ready") return { kind: "pending", text: "", title: `Waiting for data access${gpu}` };
+    return { kind: "todo", text: "·", title: `Not run yet${gpu}` };
   };
   // Facts for a row header, from the catalog: what it is, its pretraining, its training data.
   const rowFacts = (id: string) => {
@@ -370,7 +383,7 @@ function buildGrid() {
     const e = evalset(id);
     return e?.role === "reproduction" ? "repro" : e?.role === "control" ? "control" : e?.pairing === "cross_corpus" ? "cross" : "zero";
   };
-  // Column groups in reading order; a group nobody has scored goes last.
+  // Column groups in reading order, a group nobody has scored last; unscored sets last in theirs.
   const COL_GROUPS: Record<string, [number, string]> = {
     repro: [0, "Reproduction"],
     zero: [1, "Zero-shot"],
@@ -378,7 +391,6 @@ function buildGrid() {
     control: [3, "Control · not South Asian"],
   };
   const scored = new Set(D.runs.map((r) => r.evalset));
-  const rank = (id: string) => (scored.has(id) ? COL_GROUPS[kindOf(id)][0] : 9);
   const at = (id: string) => {
     const full = id.replace(/_quick$/, "");
     return COL_ORDER.includes(full) ? COL_ORDER.indexOf(full) : COL_ORDER.length;
@@ -388,9 +400,13 @@ function buildGrid() {
 
   return GRIDS.map((grid) => {
     const mine = (modality?: string) => (modality === "audio") === grid.audio;
-    const cols = [...new Set([...D.runs.map((r) => r.evalset), ...GRID_PINNED])]
-      .filter((id) => mine(evalset(id)?.modality))
-      .sort((a, b) => rank(a) - rank(b) || at(a) - at(b) || full(a).localeCompare(full(b)) || a.localeCompare(b));
+    const ids = D.evalsets.map((e) => e.id).filter((id) => mine(evalset(id)?.modality) && (!id.endsWith("_quick") || scored.has(id)));
+    const scoredKinds = new Set(ids.filter((id) => scored.has(id)).map(kindOf));
+    const rank = (id: string) => COL_GROUPS[kindOf(id)][0] + (scoredKinds.has(kindOf(id)) ? 0 : 9);
+    const cols = ids.sort(
+      (a, b) =>
+        rank(a) - rank(b) || Number(!scored.has(full(a))) - Number(!scored.has(full(b))) || at(a) - at(b) || full(a).localeCompare(full(b)) || a.localeCompare(b),
+    );
     const colGroups: { label: string; span: number }[] = [];
     for (const id of cols) {
       const label = COL_GROUPS[kindOf(id)][1];
@@ -398,7 +414,7 @@ function buildGrid() {
       if (last?.label === label) last.span++;
       else colGroups.push({ label, span: 1 });
     }
-    const models = [...new Set(D.runs.filter((r) => cols.includes(r.evalset)).map((r) => r.model))];
+    const models = D.models.filter((m) => mine(m.modality) && (!m.cut || D.runs.some((r) => r.model === m.id))).map((m) => m.id);
     const grouped = new Set(grid.groups.flatMap((g) => g.models));
     const other = models.filter((id) => !grouped.has(id));
     const groups = [...grid.groups, ...(other.length ? [{ label: "Other", title: "Not grouped yet", kind: "mid" as Kind, models: other }] : [])];
@@ -406,7 +422,7 @@ function buildGrid() {
       id: grid.id,
       title: grid.title,
       colGroups,
-      cols: cols.map((ev) => ({ id: ev, name: colName(ev)[0], sub: colName(ev)[1] })),
+      cols: cols.map((ev) => ({ id: ev, name: colName(ev)[0], sub: colName(ev)[1], pending: evalset(ev)?.status !== "ready" })),
       groups: groups
         .map((g) => ({
           label: g.label,
@@ -417,7 +433,8 @@ function buildGrid() {
             .map((id) => {
               const [type = "", built = "", trained = ""] = rowFacts(id);
               const noParity = D.runs.some((r) => r.model === id && r.flags.includes("no parity check"));
-              return { name: name(id), type, built, trained, noParity, cells: cols.map((ev) => cell(id, ev)) };
+              const off = !D.models.find((x) => x.id === id)?.adapter;
+              return { name: name(id), type, built, trained, noParity, off, cells: cols.map((ev) => cell(id, ev)) };
             }),
         }))
         .filter((g) => g.rows.length),

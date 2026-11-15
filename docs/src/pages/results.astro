@@ -7,6 +7,7 @@ import Base from "../layouts/Base.astro";
 import { panels } from "../lib/figures";
 import { buildResults } from "../lib/guide";
 import RunGrid from "../components/RunGrid.astro";
+import { int } from "../lib/status";
 
 const R = buildResults((await getEntry("docs", "results"))!.body ?? "");
 // The page's sections, in the bar above them.
@@ -21,6 +22,20 @@ const sections = [
   { href: "#video-hidf", text: "Faces" },
   ...R.more.map((m) => ({ href: `#${m.id}`, text: m.short })),
   { href: "#what-the-results-cant-say-yet", text: "Not covered yet" },
+];
+// Every detector and evalset pair by state, without the quick subsets of sets shown in full.
+const count: Record<string, number> = {};
+for (const g of R.grids)
+  for (const row of g.groups.flatMap((x) => x.rows))
+    row.cells.forEach((c, i) => {
+      if (!g.cols[i].id.endsWith("_quick")) count[c.kind] = (count[c.kind] ?? 0) + 1;
+    });
+const tally: [string, string][] = [
+  ["run", "pairs scored"],
+  ["todo", "not scored yet"],
+  ["trained", "trained on it"],
+  ["pending", "waiting for data access"],
+  ["off", "waiting for an adapter"],
 ];
 ---
 
@@ -146,8 +161,9 @@ const sections = [
       <header>
         <div class="kicker">2 · The results</div>
         <h2>Every detector on every dataset</h2>
-        <p>Every countable run. AUC: 0.5 is a coin flip, 1 is perfect, below 0.5 means the detector has real and fake backwards. Speech detectors are grouped by what they were trained on, face detectors by what they look at. A column marked quick is a fixed, stratified share of the set before it. Failed clips (no face found, say) are counted, not dropped. Hover a cell for its interval, TPR at 5% FPR, clip counts, wall time and caveats.</p>
+        <p>Every detector against every evalset it can read, with every countable run. AUC: 0.5 is a coin flip, 1 is perfect, below 0.5 means the detector has real and fake backwards. Speech detectors are grouped by what they were trained on, face detectors by what they look at. A column marked quick is a fixed, stratified share of the set before it. Failed clips (no face found, say) are counted, not dropped. Hover a cell for its interval, TPR at 5% FPR, clip counts, wall time and caveats, or for an unscored pair its estimated GPU time (<a href={`${import.meta.env.BASE_URL}compute/`}>Compute cost</a>).</p>
       </header>
+      <div class="tally">{tally.map(([k, label]) => <div><b>{int(count[k] ?? 0)}</b><span>{label}</span></div>)}</div>
       <div class="toggle" role="group" aria-label="Metric">
         <button type="button" data-metric="auc" aria-pressed="true">AUC · higher is better</button>
         <button type="button" data-metric="eer" aria-pressed="false">EER · lower is better</button>
@@ -159,6 +175,8 @@ const sections = [
         <li><sup>so</sup> source overlap: the detector's pretraining shares a corpus with this set</li>
         <li><span class="sw g-na">–</span>it can't read this set</li>
         <li><span class="sw g-todo">·</span>not run yet</li>
+        <li><span class="sw g-pending"></span>waiting for data access (column name in italics)</li>
+        <li><span class="sw g-off"></span>no adapter yet (detector name in italics)</li>
       </ul>
       <dl class="terms-dl">
         <div><dt>below chance</dt><dd>AUC under 0.5: a score-reading bug on a reproduction set, a real finding on a South Asian one.</dd></div>

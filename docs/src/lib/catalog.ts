@@ -25,7 +25,7 @@ export const ROLE_ABOUT: Record<string, string> = {
   pipeline_test: "Prove the code runs; never reported.",
 };
 export const LEVEL: Record<string, string> = { pretrain: "pretrained on", train: "trained on", finetune: "fine-tuned on" };
-// South Asian languages in the order the coverage matrix shows them: most-spoken first, then
+// South Asian languages in the order the language matrix shows them: most-spoken first, then
 // the two the project is after (Nepali, Sinhala), then the rest.
 export const SA_LANGS = ["hi", "bn", "ur", "ta", "te", "mr", "gu", "kn", "ml", "pa", "or", "as", "ne", "si", "sa", "mni", "doi", "brx"];
 // The manifest features the dataset index tabulates, as reference.py names them.

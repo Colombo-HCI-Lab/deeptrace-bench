@@ -20,7 +20,7 @@ const { grid, prefix } = Astro.props;
       </tr>
       <tr>
         <th>Detector</th>
-        {grid.cols.map((c) => <th><span>{c.name}</span><span>{c.sub}</span></th>)}
+        {grid.cols.map((c) => <th class={c.pending ? "pending" : undefined} title={c.pending ? "Waiting for data access" : undefined}><span>{c.name}</span><span>{c.sub}</span></th>)}
       </tr>
     </thead>
     <tbody>
@@ -33,8 +33,8 @@ const { grid, prefix } = Astro.props;
           </tr>
           {g.rows.map((m) => (
             <tr>
-              <th scope="row" title={[m.type, `Backbone: ${m.built}`, `Trained on: ${m.trained}`, m.noParity && "No parity check yet, so not a result"].filter(Boolean).join("\n")}>
-                <span class="dname">{m.name}</span>
+              <th scope="row" title={[m.type, `Backbone: ${m.built}`, `Trained on: ${m.trained}`, m.off && "No adapter yet", m.noParity && "No parity check yet, so not a result"].filter(Boolean).join("\n")}>
+                <span class={m.off ? "dname off" : "dname"}>{m.name}</span>
               </th>
               {m.cells.map((c) => (
                 <td class={`g-${c.kind}${c.home ? " home" : ""}`} title={c.title} style={c.style}>

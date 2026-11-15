@@ -18,7 +18,6 @@ export const NAV: Group[] = [
   {
     label: "Models and datasets",
     items: [
-      leaf("coverage", "Coverage"),
       { heading: "Models", items: [leaf("model-catalog", "Model catalog"), leaf("compute", "Compute cost"), leaf("models", "Porting and parity")] },
       { heading: "Datasets", items: [leaf("dataset-catalog", "Dataset catalog"), leaf("datasets", "Access and requests")] },
     ],
@@ -38,7 +37,7 @@ export const NAV: Group[] = [
 // Pages built by hand rather than from one doc. Results, Progress (the Timeline) and How it works
 // are laid out from their docs, and are those docs' only pages. The two catalogs are built
 // from status.json, with a page per model and per dataset under each.
-export const PAGES = ["timeline", "results", "method", "coverage", "compute", "model-catalog", "dataset-catalog"];
+export const PAGES = ["timeline", "results", "method", "compute", "model-catalog", "dataset-catalog"];
 // The docs a guided page stands in for. catalog.md, generated for reading on GitHub, is the two
 // catalogs' source text there.
 export const STANDS_IN: Record<string, string> = { progress: "timeline", results: "results", method: "method", catalog: "model-catalog" };

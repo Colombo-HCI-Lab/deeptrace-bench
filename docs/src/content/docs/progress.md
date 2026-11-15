@@ -20,6 +20,7 @@ As of 2026-11-15:
 Docs and site only; no new runs.
 
 - Results has one grid: every countable run, quick subsets beside their full sets, with TPR at 5% FPR on hover. `results.md` no longer copies run numbers: it holds the findings and the breakdowns the grid can't show, grouped by experiment instead of by round.
+- Coverage merged into the Results grid, which showed the same AUCs: the grid now has every detector against every evalset, with pairs waiting for data access or an adapter marked and the GPU time of each unscored pair on hover, under a tally of the pairs in each state. The old address forwards there.
 - The site's data was rebuilt from the published runs, which added the last twelve language-control pairs and cleared the "no parity check" flag from the eight models that passed since 2026-11-11.
 - Every doc states a fact once and links to it elsewhere. [Models](models.md) has one status table, one table of reference environments and the same fact table per model; [Datasets](datasets.md#at-a-glance) lists datasets by how they are obtained.
 

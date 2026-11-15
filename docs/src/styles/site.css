@@ -214,6 +214,14 @@ nav.index a:hover { color: var(--ink); }
 [data-metric="eer"] .heat.grid .eer { display: inline; }
 .g-trained { background: repeating-linear-gradient(45deg, var(--tint), var(--tint) 5px, var(--tint-2) 5px, var(--tint-2) 10px); color: var(--muted); font-weight: 400; }
 .g-na, .g-todo { color: var(--muted); }
+.g-pending { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule) 5px 6px); }
+.g-off { outline: 1px dashed var(--rule-2); outline-offset: -5px; }
+.gridkey .sw.g-off { outline-offset: -3px; }
+.heat.grid thead th.pending span:first-child, .heat.grid .dname.off { font-style: italic; color: var(--muted); }
+.tally { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 10px; max-width: 900px; }
+.tally > div { display: grid; gap: 2px; padding: 12px 16px; border: 1px solid var(--rule); background: var(--card); }
+.tally b { font: 500 1.6rem/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+.tally span { font: 400 12px/1.3 var(--mono); color: var(--muted); }
 .gridkey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font: 400 12px/1.4 var(--mono); color: var(--muted); }
 .gridkey li { display: flex; align-items: center; gap: 7px; }
 .gridkey .sw { display: inline-grid; place-items: center; width: 22px; height: 16px; font-size: 12px; }
@@ -359,61 +367,17 @@ a.kind:hover { border-color: var(--ink); color: var(--ink); }
 .terms dt { font-weight: 600; }
 .terms dd { margin: 0; font-size: 0.92rem; line-height: 1.5; }
 
-/* Coverage grids. Every cell holds its AUC (.a) and its estimated time (.t); the section's
-   data-mode shows one. Cells marked .ht have a time estimate. */
 .panel { display: grid; gap: 18px; min-width: 0; }
 .panel h3 { margin-top: 10px; font-size: 1.15rem; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.87rem; color: var(--ink-2); }
 .legend span { display: inline-flex; gap: 8px; align-items: center; }
 .legend i { font: normal 500 12px/1 var(--mono); min-width: 2.6em; height: 22px; display: inline-grid; place-items: center; }
-.legend i.cell { min-width: 3.4em; color: var(--paper); }
-.legend i.guard { font-size: 14px; }
-.legend i.hatch { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule) 5px 6px); }
-.legend i.na { background: var(--tint); }
 .grid th, .grid td { padding: 0; }
 .grid thead th { font: 500 11px/1.2 var(--mono); color: var(--muted); vertical-align: bottom; text-align: left; }
-.grid th.mh { font-size: 12px; padding: 0 12px 8px 0; min-width: 190px; }
-.grid th.grp { padding: 0 8px 6px 6px; border-left: 1px solid var(--rule); white-space: nowrap; }
-.grid th.v { padding: 6px 0 8px; width: 50px; min-width: 50px; text-align: center; }
-.grid th.v span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; display: inline-block; margin: 0 auto; }
-.grid th.v.pending { font-style: italic; }
-.grid th.v.first, .grid td.first { border-left: 1px solid var(--rule); }
 .grid tbody th { text-align: left; font: 400 15px/1.2 var(--sans); padding: 0 12px 0 0; white-space: nowrap; height: 34px; border-top: 1px solid var(--rule); }
 .grid tbody th small { font: 400 10px/1 var(--mono); color: var(--muted); margin-left: 6px; }
 .grid td { border-top: 1px solid var(--rule); text-align: center; font: 400 12px/1 var(--mono); height: 34px; width: 50px; }
-.grid th.lad, .grid td.lad { width: 30px; min-width: 30px; color: var(--muted); }
-.grid td.lad.on { color: var(--ink); }
-.grid td.pending { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule) 5px 6px); }
-.grid td.run { font-weight: 500; }
-.grid td.guard { color: var(--muted); font-size: 15px; }
-.grid td.empty { color: var(--rule); }
-.grid td.na { background: var(--tint); }
-.grid tbody th, .grid th.mh { position: sticky; left: 0; background: var(--paper); z-index: 1; }
-/* The coverage page's grids are transposed like the round's dashboard: a column per model, a row
-   per evalset, AUC bands with a paper-coloured gap between cells. */
-#coverage .tally { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 10px; max-width: 900px; }
-#coverage .tally > div { display: grid; gap: 2px; padding: 12px 16px; border: 1px solid var(--rule); background: var(--card); }
-#coverage .tally b { font: 500 1.6rem/1.1 var(--sans); font-variant-numeric: tabular-nums; }
-#coverage .tally span { font: 400 12px/1.3 var(--mono); color: var(--muted); }
-#coverage .legend i.cell { min-width: 1.6em; height: 16px; }
-#coverage .legend i.off { outline: 1px dashed var(--rule-3); outline-offset: -4px; }
-#coverage .grid { border-collapse: separate; border-spacing: 0; }
-#coverage .grid th.mh { min-width: 0; padding-right: 16px; }
-#coverage .grid th.v { width: 46px; min-width: 46px; padding: 6px 0 6px; }
-#coverage .grid th.v span { font: 500 12px/1.2 var(--sans); color: var(--ink-2); }
-#coverage .grid th.v.off span { color: var(--muted-2); font-style: italic; }
-#coverage .grid tr.marks th { font: 400 9px/1 var(--mono); color: var(--muted); letter-spacing: 1px; padding: 0 0 8px; text-align: center; vertical-align: top; border-bottom: 1px solid var(--rule-2); }
-#coverage .grid tr.marks th.mh { text-align: left; letter-spacing: 0; font-size: 11px; }
-#coverage .grid tr.grp th { font: 500 11px/1.2 var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; padding: 14px 0 6px; height: auto; border-top: 0; background: transparent; position: static; }
-#coverage .grid tbody th[scope="row"] { font: 400 12px/1.2 var(--mono); color: var(--ink-2); height: 30px; padding-right: 16px; }
-#coverage .grid tbody th.pending { font-style: italic; color: var(--muted); }
-#coverage .grid td { height: 30px; width: 46px; border-top: 0; box-shadow: inset 0 0 0 1px var(--paper); }
-#coverage .grid td.empty { color: var(--muted); font-weight: 600; }
-#coverage .grid td.off { outline: 1px dashed var(--rule-2); outline-offset: -5px; }
-#coverage .grid td.guard { background: var(--tint); }
-#coverage .t, #coverage[data-mode="time"] .a { display: none; }
-#coverage[data-mode="time"] .t { display: inline; }
-#coverage[data-mode="time"] td.run { background-color: transparent !important; font-weight: 400; color: var(--ink) !important; }
+.grid tbody th { position: sticky; left: 0; background: var(--paper); z-index: 1; }
 
 /* Doc pages */
 .page { display: grid; gap: 28px; min-width: 0; }

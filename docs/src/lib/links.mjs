@@ -37,13 +37,15 @@ function catalogTarget(frag) {
 }
 const target = (slug, frag) => (slug === "catalog" ? catalogTarget(frag) : docPath(slug) + frag);
 
-// Docs merged into others on 2026-10-19, and where their content went. Old links, old URLs and
-// a stub page at each old address land there.
+// Docs merged into others on 2026-10-19, and the Coverage page merged into Results' grid on
+// 2026-11-15, and where their content went. Old links, old URLs and a stub page at each old
+// address land there.
 export const MOVED = {
   overview: "method/",
   smoke_test: "getting_started/",
   experiments: "results/#experiments",
   cluster: "spark/#curnagl",
+  coverage: "results/#all-runs",
 };
 // An old doc's new address, keeping the #anchor unless the move names its own.
 const movedTo = (slug, frag) => MOVED[slug] + (MOVED[slug].includes("#") ? "" : frag);
@@ -51,7 +53,7 @@ const movedTo = (slug, frag) => MOVED[slug] + (MOVED[slug].includes("#") ? "" : 
 // Anchors of the old single status page, and where each now lives.
 export const LEGACY = {
   runs: "results/#all-runs",
-  coverage: "coverage/",
+  coverage: "results/#all-runs",
   models: "model-catalog/",
   datasets: "dataset-catalog/",
   compute: "compute/",
@@ -59,7 +61,7 @@ export const LEGACY = {
   start: "method/#key-terms",
 };
 // The tabs of the old Models & data page (inventory/#<tab>), and where each now lives.
-export const INVENTORY = { coverage: "coverage/", models: LEGACY.models, datasets: LEGACY.datasets, compute: "compute/" };
+export const INVENTORY = { coverage: LEGACY.coverage, models: LEGACY.models, datasets: LEGACY.datasets, compute: "compute/" };
 
 export function rewrite(url, base) {
   if (/^(https?:|mailto:|#)/.test(url) && !url.startsWith(LIVE)) return url;
