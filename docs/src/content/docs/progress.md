@@ -5,15 +5,24 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-11-15:
+As of 2026-11-18:
 
 - **Models.** 35 detectors have adapters and weights, and all 35 pass parity against upstream code ([Models](models.md#parity)). AltFreezing and TALL are blocked on weights ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
+- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model now has its HiDF quick share except FakeStormer; it and the three audio-visual quick shares on MAVOS-DD Hindi are rerunning on SPARK. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-18: the quick shares for the full-set models
+
+Wave `s7_quick_shares`, run 44021999405 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `0213fcd`, harness pinned at `b16fb4b`).
+
+- Eight video models had been scored only on full HiDF, and three audio-visual models only on full MAVOS-DD Hindi, so their quick-subset cells in the Results grid were empty. This wave orders those eleven quick shares.
+- Seven landed: GenConViT, RealForensics, FTCN, LAA-Net, Effort, UnivFD and DFDC B7 on `hidf_video_quick`.
+- After eleven hours the worker's GPU dropped out ("CUDA unknown error" at CUDA init), so the last four failed within seconds of starting: FakeStormer on `hidf_video_quick`, and AVH-Align, LipFD and AVAD on `mavos_dd_hi_av_quick`. They are reordered unchanged as `s7b_quick_shares_rest` (run 44153757744, commit `584d33f`).
+- The video-only models on the audio-visual evalsets were left unordered on purpose; the grid still shows those cells as not run yet.
 
 ### 2026-11-15: one home for every number
 
