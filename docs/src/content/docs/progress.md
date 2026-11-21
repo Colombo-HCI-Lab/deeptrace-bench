@@ -9,19 +9,19 @@ As of 2026-11-21:
 
 - **Models.** 35 detectors have adapters and weights, and all 35 pass parity against upstream code ([Models](models.md#parity)). AltFreezing and TALL are blocked on weights ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one, so every pair the data on hand allows is scored; the empty cells left wait on data access or weights. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
+- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one, The 21 video models on the audio-visual MAVOS-DD sets are ordered on SPARK (waves `s8*`); after them, the empty cells left wait on data access or weights. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
 
-### 2026-11-21: the last quick shares, and nothing left to order
+### 2026-11-21: the last quick shares
 
 Wave `s7b_quick_shares_rest`, run 44153757744 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `584d33f`, harness pinned at `b16fb4b`).
 
 - SPARK's GPU worker was back on 2026-11-20, so the fourth attempt of the rerun ran: FakeStormer on `hidf_video_quick`, and LipFD and AVAD on `mavos_dd_hi_av_quick`, landed.
 - AVH-Align failed at once: it cuts its mouth crops with LipForensics' preprocessing code, and nothing cloned LipForensics' checkout unless a LipForensics run had already done so in the same container. Commit `a30d955` makes model setup clone a borrowed checkout too, and wave `s7c_avh_align_quick` (run 44857645283, harness pinned at `a30d955`) scored it.
-- The audio-visual MAVOS-DD sets are now for audio-visual models only, in the code as well as their notes: their labels count a voice-only fake as fake, which a video model can't see, and every video model already has the same videos scored on `mavos_dd_hi_video`. The grid shows those 42 cells as not applicable instead of not run yet, which leaves none of the latter.
+- The video models on the audio-visual MAVOS-DD sets, the last 42 cells the data on hand allows, are ordered on SPARK. Their labels count a voice-only fake as fake, which a video model can't see, so these numbers sit beside the same models' `mavos_dd_hi_video` ones as a measure of what a frames-only detector misses on a platform that also gets voice fakes.
 
 ### 2026-11-18: the quick shares for the full-set models
 
@@ -30,7 +30,7 @@ Wave `s7_quick_shares`, run 44021999405 in [deeptrace-experiments](https://githu
 - Eight video models had been scored only on full HiDF, and three audio-visual models only on full MAVOS-DD Hindi, so their quick-subset cells in the Results grid were empty. This wave orders those eleven quick shares.
 - Seven landed: GenConViT, RealForensics, FTCN, LAA-Net, Effort, UnivFD and DFDC B7 on `hidf_video_quick`.
 - After eleven hours the worker's GPU dropped out ("CUDA unknown error" at CUDA init), so the last four failed within seconds of starting: FakeStormer on `hidf_video_quick`, and AVH-Align, LipFD and AVAD on `mavos_dd_hi_av_quick`. Their rerun, `s7b_quick_shares_rest` (run 44153757744, commit `584d33f`), could not start a GPU container on the same worker until it was fixed; it ran on 2026-11-20 (below).
-- The video-only models on the audio-visual evalsets were left unordered on purpose (made explicit on 2026-11-21, above).
+- The video-only models on the audio-visual evalsets were left unordered on purpose ; they were ordered on 2026-11-21 (above).
 
 ### 2026-11-15: one home for every number
 
