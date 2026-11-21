@@ -744,9 +744,9 @@ AVH-Align (Smeu et al., CVPR 2025) trains only on 45,000 real AV-Deepfake1M vide
 | Input | mouth crops from 25 consecutive frames at a time (up to 100 frames per video) |
 | Paper | [None](https://arxiv.org/abs/2412.00175), CVPR 2025 |
 | Training | pretrained on LRS3; pretrained on VoxCeleb2; trained on AV-Deepfake1M |
-| Our runs | `mavos_dd_hi_av`: AUC 0.520, EER 48.4% |
+| Our runs | `mavos_dd_hi_av`: AUC 0.520, EER 48.4%; `mavos_dd_hi_av_quick`: AUC 0.549, EER 46.6% |
 | Licence | CC BY-NC-SA 4.0 (README) |
-| Status here | adapter written, parity checked, scored on 1 evalset |
+| Status here | adapter written, parity checked, scored on 2 evalsets |
 
 <a id="model-havic"></a>
 
