@@ -51,6 +51,10 @@ def test_video_models_score_images_but_not_audio(registry):
     assert accepts(gend, registry.evalset("unidatapro_videos"))
     assert not accepts(gend, registry.evalset("urdu_csalt"))
     assert not accepts(registry.model("aasist"), registry.evalset("unidatapro_videos"))
+    # an audio-visual set's labels count fakes on either track, so it is for audio-visual models
+    assert not accepts(gend, registry.evalset("mavos_dd_hi_av"))
+    assert not accepts(registry.model("aasist"), registry.evalset("mavos_dd_hi_av"))
+    assert accepts(registry.model("havic"), registry.evalset("mavos_dd_hi_av"))
 
 
 def test_pipeline_test_data_stays_out_of_real_evalsets(registry):

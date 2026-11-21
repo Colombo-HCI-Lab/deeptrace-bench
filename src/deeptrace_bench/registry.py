@@ -315,10 +315,13 @@ class ToolConfig(_Strict):
 # A model of one modality can score evalsets of these modalities. A video model sees an image
 # as a one-frame clip and an audio-video item through its frames; an audio model hears the
 # audio track.
+# An audio-visual evalset is for audio-visual models only: its labels count a fake on either
+# track, so a single-track model would be marked down for fakes it can't see. Each one has
+# per-track siblings (mavos_dd_hi_video, mavos_dd_hi_audio) with the same items for those.
 _ACCEPTS: dict[Modality, set[Modality]] = {
-    Modality.VIDEO: {Modality.VIDEO, Modality.IMAGE, Modality.AUDIO_VIDEO},
+    Modality.VIDEO: {Modality.VIDEO, Modality.IMAGE},
     Modality.IMAGE: {Modality.IMAGE},
-    Modality.AUDIO: {Modality.AUDIO, Modality.AUDIO_VIDEO},
+    Modality.AUDIO: {Modality.AUDIO},
     Modality.AUDIO_VIDEO: {Modality.AUDIO_VIDEO},
 }
 
