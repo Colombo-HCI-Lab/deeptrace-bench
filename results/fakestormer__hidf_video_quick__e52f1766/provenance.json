@@ -1,0 +1,25 @@
+{
+  "run_id": "fakestormer__hidf_video_quick__e52f1766",
+  "model_id": "fakestormer",
+  "evalset_id": "hidf_video_quick",
+  "upstream_commit": "c5b5f75100b878212a192c00013275f275f86182",
+  "weights_sha256": {
+    "fakestormer.pth": "761fe9c8fde5c1f02876ccd664fa0b6e833f96153799d8b03846bef3f8fae117",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "2c5cbd7296e5b1f948a422517a3c47115fc3a3720e9a02d2c599cf6929cb4850",
+    "model": "25d66628fc34af5ae56cd8b372daa35f4c2ed9f25002d792506e94ddb83237ad"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-17T17:48:59+00:00",
+  "last_started_utc": "2026-11-20T12:29:34+00:00",
+  "repo_commits": [
+    "b16fb4bc1613f1cb0bd96f28f8ac9719a42c696e"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

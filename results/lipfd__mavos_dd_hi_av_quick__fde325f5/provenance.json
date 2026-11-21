@@ -1,0 +1,25 @@
+{
+  "run_id": "lipfd__mavos_dd_hi_av_quick__fde325f5",
+  "model_id": "lipfd",
+  "evalset_id": "mavos_dd_hi_av_quick",
+  "upstream_commit": "3ed140aec0345dcffa07f7a7468ea8fe800afe41",
+  "weights_sha256": {
+    "ckpt.pth": "156fc8995a2ff7b50b56a1dbafb490b6936d5aa6c18dee5a6c67018853f2d9af",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "4b7956f542a7642c284e93ae3de9c19b7d698d36b893ac94cf434fca61d266d4",
+    "model": "e592bcfff3e296b8744a74c1fd23e8732cd1cb25d7b51e40e4f4ea59de3dffd4"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-17T18:47:51+00:00",
+  "last_started_utc": "2026-11-20T12:38:56+00:00",
+  "repo_commits": [
+    "b16fb4bc1613f1cb0bd96f28f8ac9719a42c696e"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
