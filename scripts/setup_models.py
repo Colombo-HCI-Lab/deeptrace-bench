@@ -101,6 +101,11 @@ def setup_model(model: ModelConfig, registry: Registry, record: bool, skip_upstr
     if model.upstream and not skip_upstream:
         path = ensure_upstream(model.upstream)
         log.info("upstream at %s", path)
+    crop_code = model.input.get("crop_code_from")
+    if crop_code and not skip_upstream:
+        # the mouth crop code lives in another model's checkout (AVH-Align reads LipForensics')
+        path = ensure_upstream(registry.model(crop_code).upstream)
+        log.info("crop code at %s", path)
     ok = fetch_weights(model, record)
     if ok and adapter_state(model) == "yes":
         # Done once per download: the converted file records which download it came from.
