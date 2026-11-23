@@ -331,9 +331,9 @@ Effort (Yan et al., ICML 2025) splits each weight matrix by SVD, freezes the pri
 | Paper | [Orthogonal Subspace Decomposition for Generalizable AI-Generated Image Detection](https://arxiv.org/abs/2411.15633), ICML 2025 · 128 citations |
 | Training | pretrained on OpenAI CLIP pretraining data; trained on FaceForensics++ (train split) |
 | Reported by the authors | Celeb-DF v2: AUC 0.956 (paper); DFDCP: AUC 0.909 (paper); DFDC: AUC 0.843 (paper) |
-| Our runs | `hidf_video`: AUC 0.919, EER 15.8%; `hidf_video_quick`: AUC 0.918, EER 15.7%; `mavos_dd_de_video_quick`: AUC 0.587, EER 42.1%; `mavos_dd_hi_video`: AUC 0.603, EER 42.7%; `mavos_dd_hi_video_quick`: AUC 0.537, EER 48.7% |
+| Our runs | `hidf_video`: AUC 0.919, EER 15.8%; `hidf_video_quick`: AUC 0.918, EER 15.7%; `mavos_dd_de_video_quick`: AUC 0.587, EER 42.1%; `mavos_dd_hi_av`: AUC 0.585, EER 44.7%; `mavos_dd_hi_video`: AUC 0.603, EER 42.7%; `mavos_dd_hi_video_quick`: AUC 0.537, EER 48.7% |
 | Licence | none published (README badge says CC BY-NC 4.0; issue 3 asks for a licence file) |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 6 evalsets |
 
 <a id="model-f3net"></a>
 
@@ -392,11 +392,11 @@ FFD (Dang et al., CVPR 2020) estimates an attention map of manipulated face regi
 | Paper | [On the Detection of Digital Face Manipulation](https://arxiv.org/abs/1910.01717), CVPR 2020 · 784 citations |
 | Training | pretrained on ImageNet-1k; trained on FaceForensics++ (train split) |
 | Reported by the authors | FF++ c23 test: AUC 0.962 (DeepfakeBench); Celeb-DF v2: AUC 0.744 (DeepfakeBench); DFDC: AUC 0.703 (DeepfakeBench) |
-| Our runs | `hidf_video`: AUC 0.760, EER 30.5%; `hidf_video_quick`: AUC 0.754, EER 30.3%; `mavos_dd_de_video_quick`: AUC 0.353, EER 60.5%; `mavos_dd_hi_video`: AUC 0.554, EER 46.5%; `mavos_dd_hi_video_quick`: AUC 0.546, EER 47.2% |
+| Our runs | `hidf_video`: AUC 0.760, EER 30.5%; `hidf_video_quick`: AUC 0.754, EER 30.3%; `mavos_dd_de_video_quick`: AUC 0.353, EER 60.5%; `mavos_dd_hi_av`: AUC 0.529, EER 48.2%; `mavos_dd_hi_video`: AUC 0.554, EER 46.5%; `mavos_dd_hi_video_quick`: AUC 0.546, EER 47.2% |
 | Size | 22 M parameters |
 | Cost | 11.9 GFLOPs and 2.3 ms per frame on a 24 GB GPU (fp32) |
 | Licence | CC BY-NC 4.0 (DeepfakeBench) |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 6 evalsets |
 
 <a id="model-ftcn"></a>
 
@@ -432,9 +432,9 @@ GenConViT (Wodajo et al., 2023) pairs a convolutional-transformer classifier wit
 | Input | 224 px face-box crops, 32 frames per video |
 | Paper | [None](https://arxiv.org/abs/2307.07036), arXiv 2023 |
 | Training | pretrained on ImageNet-1k; trained on DFDC; trained on FaceForensics++; trained on DeepfakeTIMIT |
-| Our runs | `hidf_video`: AUC 0.779, EER 29.1%; `hidf_video_quick`: AUC 0.791, EER 27.8%; `mavos_dd_de_video_quick`: AUC 0.365, EER 59.3%; `mavos_dd_hi_video`: AUC 0.541, EER 49.1%; `mavos_dd_hi_video_quick`: AUC 0.537, EER 49.5% |
+| Our runs | `hidf_video`: AUC 0.779, EER 29.1%; `hidf_video_quick`: AUC 0.791, EER 27.8%; `mavos_dd_de_video_quick`: AUC 0.365, EER 59.3%; `mavos_dd_hi_av`: AUC 0.529, EER 49.6%; `mavos_dd_hi_video`: AUC 0.541, EER 49.1%; `mavos_dd_hi_video_quick`: AUC 0.537, EER 49.5% |
 | Licence | MIT code; CC BY-NC 4.0 weights (model card) |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 6 evalsets |
 
 <a id="model-gend"></a>
 
