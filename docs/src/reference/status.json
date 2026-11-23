@@ -1,7 +1,7 @@
 {
  "built": "2026-11-23",
  "eval_status": "proposed",
- "citations_checked": "2026-10-05",
+ "citations_checked": "2026-11-23",
  "fake_types": [
   {
    "id": "face_swap",
@@ -103,7 +103,7 @@
    "paper": {
     "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
     "year": 2021,
-    "citations": 652,
+    "citations": 722,
     "venue": "ICASSP 2022",
     "url": "https://arxiv.org/abs/2110.01200"
    },
@@ -195,7 +195,7 @@
    "paper": {
     "title": "AASIST3: KAN-Enhanced AASIST Speech Deepfake Detection using SSL Features and Additional Regularization for the ASVspoof 2024 Challenge",
     "year": 2024,
-    "citations": 44,
+    "citations": 50,
     "venue": "ASVspoof 2024 Workshop",
     "url": "https://arxiv.org/abs/2408.17352"
    },
@@ -275,7 +275,7 @@
    "paper": {
     "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
     "year": 2021,
-    "citations": 652,
+    "citations": 722,
     "venue": "ICASSP 2022",
     "url": "https://arxiv.org/abs/2110.01200"
    },
@@ -337,7 +337,7 @@
    "paper": {
     "title": "AltFreezing for More General Video Face Forgery Detection",
     "year": 2023,
-    "citations": 148,
+    "citations": 161,
     "venue": "CVPR 2023",
     "url": "https://arxiv.org/abs/2307.08317"
    },
@@ -559,7 +559,7 @@
    "paper": {
     "title": "Post-training for Deepfake Speech Detection",
     "year": 2025,
-    "citations": 31,
+    "citations": 35,
     "venue": "ASRU 2025",
     "url": "https://arxiv.org/abs/2506.21090"
    },
@@ -796,7 +796,7 @@
    "paper": {
     "title": "Post-training for Deepfake Speech Detection",
     "year": 2025,
-    "citations": 31,
+    "citations": 35,
     "venue": "ASRU 2025",
     "url": "https://arxiv.org/abs/2506.21090"
    },
@@ -896,9 +896,9 @@
     }
    ],
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "Self-Supervised Video Forensics by Audio-Visual Anomaly Detection",
+    "year": 2023,
+    "citations": 171,
     "venue": "CVPR 2023",
     "url": "https://arxiv.org/abs/2301.01767"
    },
@@ -949,9 +949,9 @@
     }
    ],
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "Circumventing shortcuts in audio-visual deepfake detection datasets with unsupervised learning",
+    "year": 2024,
+    "citations": 43,
     "venue": "CVPR 2025",
     "url": "https://arxiv.org/abs/2412.00175"
    },
@@ -999,7 +999,7 @@
    "paper": {
     "title": "CORE: Consistent Representation Learning for Face Forgery Detection",
     "year": 2022,
-    "citations": 160,
+    "citations": 172,
     "venue": "CVPRW 2022",
     "url": "https://arxiv.org/abs/2206.02749"
    },
@@ -1141,7 +1141,7 @@
    "paper": {
     "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
     "year": 2025,
-    "citations": 36,
+    "citations": 43,
     "venue": "Speech DF Arena 2025",
     "url": "https://arxiv.org/abs/2509.02859"
    },
@@ -1290,7 +1290,7 @@
    "paper": {
     "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
     "year": 2025,
-    "citations": 36,
+    "citations": 43,
     "venue": "Speech DF Arena 2025",
     "url": "https://arxiv.org/abs/2509.02859"
    },
@@ -1420,7 +1420,7 @@
    "paper": {
     "title": "Video Face Manipulation Detection Through Ensemble of CNNs",
     "year": 2020,
-    "citations": 278,
+    "citations": 366,
     "venue": "ICPR 2020",
     "url": "https://arxiv.org/abs/2004.07676"
    },
@@ -1502,7 +1502,7 @@
    "paper": {
     "title": "Orthogonal Subspace Decomposition for Generalizable AI-Generated Image Detection",
     "year": 2024,
-    "citations": 128,
+    "citations": 162,
     "venue": "ICML 2025",
     "url": "https://arxiv.org/abs/2411.15633"
    },
@@ -1573,7 +1573,7 @@
    "paper": {
     "title": "Thinking in Frequency: Face Forgery Detection by Mining Frequency-aware Clues",
     "year": 2020,
-    "citations": 1265,
+    "citations": 1397,
     "venue": "ECCV 2020",
     "url": "https://arxiv.org/abs/2007.09355"
    },
@@ -1697,7 +1697,7 @@
    "paper": {
     "title": "On the Detection of Digital Face Manipulation",
     "year": 2019,
-    "citations": 784,
+    "citations": 816,
     "venue": "CVPR 2020",
     "url": "https://arxiv.org/abs/1910.01717"
    },
@@ -1772,9 +1772,9 @@
     }
    ],
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "Exploring Temporal Coherence for More General Video Face Forgery Detection",
+    "year": 2021,
+    "citations": 385,
     "venue": "ICCV 2021",
     "url": "https://arxiv.org/abs/2108.06693"
    },
@@ -1830,9 +1830,9 @@
     }
    ],
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "GenConViT: Deepfake Video Detection Using Generative Convolutional Vision Transformer",
+    "year": 2023,
+    "citations": 78,
     "venue": "arXiv 2023",
     "url": "https://arxiv.org/abs/2307.07036"
    },
@@ -1882,7 +1882,7 @@
    "paper": {
     "title": "Deepfake Detection that Generalizes Across Benchmarks",
     "year": 2025,
-    "citations": 35,
+    "citations": 59,
     "venue": "WACV 2026",
     "url": "https://arxiv.org/abs/2508.06248"
    },
@@ -1963,7 +1963,7 @@
    "paper": {
     "title": "Deepfake Detection that Generalizes Across Benchmarks",
     "year": 2025,
-    "citations": 35,
+    "citations": 59,
     "venue": "WACV 2026",
     "url": "https://arxiv.org/abs/2508.06248"
    },
@@ -2045,7 +2045,7 @@
    "paper": {
     "title": "Leave No Stone Unturned: Uncovering Holistic Audio-Visual Intrinsic Coherence for Deepfake Detection",
     "year": 2026,
-    "citations": 1,
+    "citations": 3,
     "venue": "CVPR 2026 Findings",
     "url": "https://arxiv.org/abs/2603.23960"
    },
@@ -2123,9 +2123,9 @@
     }
    ],
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "LAA-Net: Localized Artifact Attention Network for Quality-Agnostic and Generalizable Deepfake Detection",
+    "year": 2024,
+    "citations": 162,
     "venue": "CVPR 2024",
     "url": "https://arxiv.org/abs/2401.13856"
    },
@@ -2215,7 +2215,7 @@
    "paper": {
     "title": "Lips Don't Lie: A Generalisable and Robust Approach to Face Forgery Detection",
     "year": 2020,
-    "citations": 663,
+    "citations": 710,
     "venue": "CVPR 2021",
     "url": "https://arxiv.org/abs/2012.07657"
    },
@@ -2294,9 +2294,9 @@
     }
    ],
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "Leveraging Real Talking Faces via Self-Supervision for Robust Forgery Detection",
+    "year": 2022,
+    "citations": 249,
     "venue": "CVPR 2022",
     "url": "https://arxiv.org/abs/2201.07131"
    },
@@ -2344,7 +2344,7 @@
    "paper": {
     "title": "End-to-End Reconstruction-Classification Learning for Face Forgery Detection",
     "year": 2022,
-    "citations": 446,
+    "citations": 481,
     "venue": "CVPR 2022",
     "url": "https://www.semanticscholar.org/paper/1537faa9593d0d20e62055e4e6af6d382a26d313"
    },
@@ -2425,7 +2425,7 @@
    "paper": {
     "title": "Detecting Deepfakes with Self-Blended Images",
     "year": 2022,
-    "citations": 656,
+    "citations": 732,
     "venue": "CVPR 2022",
     "url": "https://arxiv.org/abs/2204.08376"
    },
@@ -2506,7 +2506,7 @@
    "paper": {
     "title": "Spatial-Phase Shallow Learning: Rethinking Face Forgery Detection in Frequency Domain",
     "year": 2021,
-    "citations": 628,
+    "citations": 655,
     "venue": "CVPR 2021",
     "url": "https://arxiv.org/abs/2103.01856"
    },
@@ -2588,7 +2588,7 @@
    "paper": {
     "title": "Generalizing Face Forgery Detection with High-frequency Features",
     "year": 2021,
-    "citations": 632,
+    "citations": 710,
     "venue": "CVPR 2021",
     "url": "https://arxiv.org/abs/2103.12376"
    },
@@ -2662,7 +2662,13 @@
      "split": "train"
     }
    ],
-   "paper": null,
+   "paper": {
+    "title": "TALL: Thumbnail Layout for Deepfake Video Detection",
+    "year": 2023,
+    "citations": 168,
+    "venue": "ICCV 2023",
+    "url": "https://arxiv.org/abs/2307.07494"
+   },
    "published": [],
    "trained_on": [
     "FaceForensics++"
@@ -2703,7 +2709,7 @@
    "paper": {
     "title": "UCF: Uncovering Common Features for Generalizable Deepfake Detection",
     "year": 2023,
-    "citations": 338,
+    "citations": 383,
     "venue": "ICCV 2023",
     "url": "https://arxiv.org/abs/2304.13949"
    },
@@ -2782,9 +2788,9 @@
     }
    ],
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "Towards Universal Fake Image Detectors that Generalize Across Generative Models",
+    "year": 2023,
+    "citations": 898,
     "venue": "CVPR 2023",
     "url": "https://arxiv.org/abs/2302.10174"
    },
@@ -2832,7 +2838,7 @@
    "paper": {
     "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
     "year": 2019,
-    "citations": 3394,
+    "citations": 3876,
     "venue": "ICCV 2019",
     "url": "https://arxiv.org/abs/1901.08971"
    },
@@ -2934,7 +2940,7 @@
    "paper": {
     "title": "Automatic speaker verification spoofing and deepfake detection using wav2vec 2.0 and data augmentation",
     "year": 2022,
-    "citations": 358,
+    "citations": 388,
     "venue": "Odyssey 2022",
     "url": "https://arxiv.org/abs/2202.12233"
    },
@@ -3027,7 +3033,7 @@
    "paper": {
     "title": "XLSR-Mamba: A Dual-Column Bidirectional State Space Model for Spoofing Attack Detection",
     "year": 2024,
-    "citations": 77,
+    "citations": 90,
     "venue": "IEEE SPL 2024",
     "url": "https://arxiv.org/abs/2411.10027"
    },
@@ -3128,7 +3134,7 @@
    "paper": {
     "title": "Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier",
     "year": 2024,
-    "citations": 136,
+    "citations": 160,
     "venue": "ACM MM 2024",
     "url": "https://doi.org/10.1145/3664647.3681345"
    },
@@ -3226,7 +3232,7 @@
    "paper": {
     "title": "ASVspoof 2019: A large-scale public database of synthesized, converted and replayed speech",
     "year": 2019,
-    "citations": 700,
+    "citations": 755,
     "venue": "CSL 2020",
     "url": "https://doi.org/10.1016/j.csl.2020.101114"
    },
@@ -3268,9 +3274,9 @@
    "recorded": null,
    "languages_held": null,
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "AV-Deepfake1M: A Large-Scale LLM-Driven Audio-Visual Deepfake Dataset",
+    "year": 2023,
+    "citations": 154,
     "venue": "ACM MM 2023",
     "url": "https://arxiv.org/abs/2311.15308"
    },
@@ -3462,7 +3468,7 @@
    "paper": {
     "title": "The Casual Conversations v2 Dataset : A diverse, large benchmark for measuring fairness and robustness in audio/vision/speech models",
     "year": 2023,
-    "citations": 4,
+    "citations": 6,
     "venue": "CVPRW 2023",
     "url": "https://arxiv.org/abs/2303.04838"
    },
@@ -3537,7 +3543,7 @@
    "paper": {
     "title": "Celeb-DF: A Large-Scale Challenging Dataset for DeepFake Forensics",
     "year": 2019,
-    "citations": 1861,
+    "citations": 2071,
     "venue": "CVPR 2020",
     "url": "https://arxiv.org/abs/1909.12962"
    },
@@ -3620,7 +3626,7 @@
    "paper": {
     "title": "Deepfake-Eval-2024: A Multi-Modal In-the-Wild Benchmark of Deepfakes Circulated in 2024",
     "year": 2025,
-    "citations": 89,
+    "citations": 114,
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2503.02857"
    },
@@ -3708,7 +3714,7 @@
    "paper": {
     "title": "DeePhy: On Deepfake Phylogeny",
     "year": 2022,
-    "citations": 23,
+    "citations": 25,
     "venue": "IJCB 2022",
     "url": "https://arxiv.org/abs/2209.09111"
    },
@@ -3791,7 +3797,7 @@
    "paper": {
     "title": "DF-Platter: Multi-Face Heterogeneous Deepfake Dataset",
     "year": 2023,
-    "citations": 78,
+    "citations": 143,
     "venue": "CVPR 2023",
     "url": "https://www.semanticscholar.org/paper/f1a9f5f42a68a8b5ee07e06dee800629fccc533f"
    },
@@ -3842,7 +3848,7 @@
    "paper": {
     "title": "FakeAVCeleb: A Novel Audio-Video Multimodal Deepfake Dataset",
     "year": 2021,
-    "citations": 413,
+    "citations": 513,
     "venue": "NeurIPS D&B 2021",
     "url": "https://arxiv.org/abs/2108.05080"
    },
@@ -3890,7 +3896,7 @@
    "paper": {
     "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
     "year": 2019,
-    "citations": 3394,
+    "citations": 3876,
     "venue": "ICCV 2019",
     "url": "https://arxiv.org/abs/1901.08971"
    },
@@ -3936,9 +3942,9 @@
    "recorded": null,
    "languages_held": null,
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "Hindi audio-video-Deepfake (HAV-DF): A Hindi language-based Audio-video Deepfake Dataset",
+    "year": 2024,
+    "citations": 5,
     "venue": "arXiv 2024",
     "url": "https://arxiv.org/abs/2411.15457"
    },
@@ -3990,7 +3996,7 @@
    "paper": {
     "title": "HiDF: A Human-Indistinguishable Deepfake Dataset",
     "year": 2025,
-    "citations": 13,
+    "citations": 16,
     "venue": "KDD 2025",
     "url": "https://doi.org/10.1145/3711896.3737399"
    },
@@ -4122,7 +4128,7 @@
    "paper": {
     "title": "Does Audio Deepfake Detection Generalize?",
     "year": 2022,
-    "citations": 381,
+    "citations": 415,
     "venue": "Interspeech 2022",
     "url": "https://arxiv.org/abs/2203.16263"
    },
@@ -4169,7 +4175,7 @@
    "paper": {
     "title": "InDeepFake: A novel multimodal multilingual indian deepfake video dataset",
     "year": 2025,
-    "citations": 6,
+    "citations": 7,
     "venue": "Pattern Recognition Letters 2025",
     "url": "https://doi.org/10.1016/j.patrec.2025.07.002"
    },
@@ -4209,7 +4215,7 @@
    "paper": {
     "title": "Indic-CodecFake meets SATYAM: Towards Detecting Neural Audio Codec Synthesized Speech Deepfakes in Indic Languages",
     "year": 2026,
-    "citations": 1,
+    "citations": 2,
     "venue": "ACL 2026 Findings",
     "url": "https://arxiv.org/abs/2604.19949"
    },
@@ -4280,7 +4286,7 @@
    "paper": {
     "title": "IndicSUPERB: A Speech Processing Universal Performance Benchmark for Indian languages",
     "year": 2022,
-    "citations": 74,
+    "citations": 85,
     "venue": "AAAI 2023",
     "url": "https://arxiv.org/abs/2208.11761"
    },
@@ -4491,7 +4497,7 @@
    "paper": {
     "title": "IndieFake Dataset: A Benchmark Dataset for Audio Deepfake Detection",
     "year": 2025,
-    "citations": 3,
+    "citations": 4,
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2506.19014"
    },
@@ -4657,7 +4663,7 @@
    "paper": {
     "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
     "year": 2025,
-    "citations": 11,
+    "citations": 15,
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2505.11109"
    },
@@ -4722,7 +4728,7 @@
    "paper": {
     "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
     "year": 2025,
-    "citations": 11,
+    "citations": 15,
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2505.11109"
    },
@@ -4829,7 +4835,7 @@
    "paper": {
     "title": "MLAAD: The Multi-Language Audio Anti-Spoofing Dataset",
     "year": 2024,
-    "citations": 182,
+    "citations": 197,
     "venue": "IJCNN 2024",
     "url": "https://arxiv.org/abs/2401.09512"
    },
@@ -4877,7 +4883,7 @@
    "paper": {
     "title": "Crowd-Sourced Speech Corpora for Javanese, Sundanese, Sinhala, Nepali, and Bangladeshi Bengali",
     "year": 2018,
-    "citations": 102,
+    "citations": 105,
     "venue": "SLTU 2018",
     "url": "https://doi.org/10.21437/SLTU.2018-11"
    },
@@ -4995,7 +5001,7 @@
    "paper": {
     "title": "SpeechFake: A Large-Scale Multilingual Speech Deepfake Dataset Incorporating Cutting-Edge Generation Methods",
     "year": 2025,
-    "citations": 28,
+    "citations": 39,
     "venue": "ACL 2025",
     "url": "https://arxiv.org/abs/2507.21463"
    },
@@ -5041,7 +5047,7 @@
    "paper": {
     "title": "Svarah: Evaluating English ASR Systems on Indian Accents",
     "year": 2023,
-    "citations": 29,
+    "citations": 33,
     "venue": "Interspeech 2023",
     "url": "https://arxiv.org/abs/2305.15760"
    },
@@ -5084,9 +5090,9 @@
    "recorded": null,
    "languages_held": null,
    "paper": {
-    "title": null,
-    "year": null,
-    "citations": null,
+    "title": "TalkingHeadBench: A Multi-Modal Benchmark & Analysis of Talking-Head DeepFake Detection",
+    "year": 2025,
+    "citations": 20,
     "venue": "WACV 2026",
     "url": "https://arxiv.org/abs/2505.24866"
    },
@@ -5180,7 +5186,7 @@
    "paper": {
     "title": "Deepfake Defense: Constructing and Evaluating a Specialized Urdu Deepfake Audio Dataset",
     "year": 2024,
-    "citations": 7,
+    "citations": 8,
     "venue": "ACL 2024 Findings",
     "url": "https://doi.org/10.18653/v1/2024.findings-acl.861"
    },

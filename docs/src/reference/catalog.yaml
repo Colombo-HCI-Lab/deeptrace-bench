@@ -761,6 +761,7 @@ models:
     why: >-
       MAVOS-DD reports TALL as a baseline, so our number would sit beside theirs. Blocked: no
       FF++-trained checkpoint is released.
+    s2_id: ARXIV:2307.07494
     venue: ICCV 2023
     summary: >-
       Thumbnail layout of consecutive face frames into one image, classified by a Swin
