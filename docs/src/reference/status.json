@@ -878,7 +878,7 @@
    "blocked": false,
    "licence": "MIT",
    "summary": "Audio-visual synchronisation features from real videos, scored by an autoregressive model of their sequence; anomalies read as fakes.",
-   "why": "Never trained on a fake: it flags videos whose lip motion and sound a model of real speech finds unlikely. A fake-free detector tests whether training-set faces bias detection, and lip-sync is MAVOS-DD's main manipulation.",
+   "why": "Never trained on a fake: it flags videos whose lip motion and sound a model of real speech finds unlikely. A fake-free detector tests whether training-set faces bias detection, and audio-driven talking heads are MAVOS-DD's main manipulation.",
    "cut": false,
    "catches": [
     "lip_sync",
@@ -921,7 +921,7 @@
    "blocked": false,
    "licence": "CC BY-NC-SA 4.0 (README)",
    "summary": "Small alignment network over frozen AV-HuBERT audio and visual features, trained on real AV-Deepfake1M videos; misalignment reads as fake.",
-   "why": "Its paper shows supervised audio-visual detectors learn dataset shortcuts; it learns alignment from real videos only. The strongest unsupervised candidate for MAVOS-DD's lip-sync fakes.",
+   "why": "Its paper shows supervised audio-visual detectors learn dataset shortcuts; it learns alignment from real videos only. The strongest unsupervised candidate for MAVOS-DD's audio-driven talking heads.",
    "cut": false,
    "catches": [
     "lip_sync",
@@ -2148,7 +2148,7 @@
    "blocked": false,
    "licence": "none stated; code imported from the pinned checkout, never copied",
    "summary": "Audio-visual detector of lip-audio inconsistency, trained on AVLips (Wav2Lip, MakeItTalk and TalkLip fakes over LRS3).",
-   "why": "Built for lip-sync fakes specifically, MAVOS-DD's largest manipulation family.",
+   "why": "Built for lip-sync fakes specifically, v1's focus; MAVOS-DD has none, so its scores there test talking heads instead.",
    "cut": false,
    "catches": [
     "lip_sync"
@@ -4682,7 +4682,7 @@
    ],
    "licence": "CC BY-NC-SA 4.0",
    "summary": "Hindi YouTube videos and fakes from eight face-swap, talking-head, reenactment and voice-conversion generators; our one downloadable South Asian audio-video set.",
-   "why": "The only South Asian video anyone can download: Hindi talking heads, face swaps and voice conversion, so it is the first test of v1's lip-sync with cloned voices, and HAVIC's only South Asian set.",
+   "why": "The only South Asian video anyone can download: Hindi talking heads, face swaps and voice conversion, so it is the first test of v1's talking-head family (it has no lip-sync fakes), and HAVIC's only South Asian set.",
    "cut": false,
    "scale": "3,632 real and 3,881 fake videos",
    "contains": [

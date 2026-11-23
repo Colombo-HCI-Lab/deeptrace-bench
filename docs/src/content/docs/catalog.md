@@ -718,7 +718,7 @@ AVAD (Feng, Chen and Owens, CVPR 2023) learns only from real talking faces (LRS2
 
 | | |
 | --- | --- |
-| Why it's here | Never trained on a fake: it flags videos whose lip motion and sound a model of real speech finds unlikely. A fake-free detector tests whether training-set faces bias detection, and lip-sync is MAVOS-DD's main manipulation. |
+| Why it's here | Never trained on a fake: it flags videos whose lip motion and sound a model of real speech finds unlikely. A fake-free detector tests whether training-set faces bias detection, and audio-driven talking heads are MAVOS-DD's main manipulation. |
 | Kinds of fake it trained on | Lip-sync, Talking head |
 | What it looks at | audio-visual synchronisation of real speech |
 | How it works | Face clip and its audio, audio-visual synchronisation network, PCA, autoregressive regressors over the feature and time-offset sequences, anomaly score |
@@ -737,7 +737,7 @@ AVH-Align (Smeu et al., CVPR 2025) trains only on 45,000 real AV-Deepfake1M vide
 
 | | |
 | --- | --- |
-| Why it's here | Its paper shows supervised audio-visual detectors learn dataset shortcuts; it learns alignment from real videos only. The strongest unsupervised candidate for MAVOS-DD's lip-sync fakes. |
+| Why it's here | Its paper shows supervised audio-visual detectors learn dataset shortcuts; it learns alignment from real videos only. The strongest unsupervised candidate for MAVOS-DD's audio-driven talking heads. |
 | Kinds of fake it trained on | Lip-sync, Talking head |
 | What it looks at | audio-visual alignment in AV-HuBERT features |
 | How it works | Mouth-region video and audio, AV-HuBERT large encoder (frozen), per-frame alignment head, mean misalignment score |
@@ -778,7 +778,7 @@ LipFD (Liu et al., NeurIPS 2024) compares lip motion with audio over time. Its t
 
 | | |
 | --- | --- |
-| Why it's here | Built for lip-sync fakes specifically, MAVOS-DD's largest manipulation family. |
+| Why it's here | Built for lip-sync fakes specifically, v1's focus; MAVOS-DD has none, so its scores there test talking heads instead. |
 | Kinds of fake it trained on | Lip-sync |
 | What it looks at | temporal mismatch between lip motion and audio |
 | How it works | Mouth crops with the audio spectrogram, global and regional encoders, binary head |
@@ -1281,7 +1281,7 @@ Hindi YouTube videos and fakes from eight face-swap, talking-head, reenactment a
 
 | | |
 | --- | --- |
-| Why it's here | The only South Asian video anyone can download: Hindi talking heads, face swaps and voice conversion, so it is the first test of v1's lip-sync with cloned voices, and HAVIC's only South Asian set. |
+| Why it's here | The only South Asian video anyone can download: Hindi talking heads, face swaps and voice conversion, so it is the first test of v1's talking-head family (it has no lip-sync fakes), and HAVIC's only South Asian set. |
 | Media | Audio-visual, real and fake |
 | Languages | Hindi |
 | Size | 3,632 real and 3,881 fake videos |

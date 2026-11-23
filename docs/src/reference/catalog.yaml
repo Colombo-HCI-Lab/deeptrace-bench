@@ -226,7 +226,7 @@ models:
     why: >-
       Never trained on a fake: it flags videos whose lip motion and sound a model of real speech
       finds unlikely. A fake-free detector tests whether training-set faces bias detection, and
-      lip-sync is MAVOS-DD's main manipulation.
+      audio-driven talking heads are MAVOS-DD's main manipulation.
     s2_id: ARXIV:2301.01767
     venue: CVPR 2023
     summary: >-
@@ -246,7 +246,7 @@ models:
     why: >-
       Its paper shows supervised audio-visual detectors learn dataset shortcuts; it learns
       alignment from real videos only. The strongest unsupervised candidate for MAVOS-DD's
-      lip-sync fakes.
+      audio-driven talking heads.
     s2_id: ARXIV:2412.00175
     venue: CVPR 2025
     summary: >-
@@ -600,7 +600,7 @@ models:
     catches: [lip_sync]
     cue: temporal mismatch between lip motion and audio
     why: >-
-      Built for lip-sync fakes specifically, MAVOS-DD's largest manipulation family.
+      Built for lip-sync fakes specifically, v1's focus; MAVOS-DD has none, so its scores there test talking heads instead.
     venue: NeurIPS 2024
     summary: >-
       Audio-visual detector of lip-audio inconsistency, trained on AVLips (Wav2Lip, MakeItTalk
@@ -1520,7 +1520,7 @@ datasets:
     fakes: [face_swap, talking_head, reenactment, vc]
     why: >-
       The only South Asian video anyone can download: Hindi talking heads, face swaps and voice
-      conversion, so it is the first test of v1's lip-sync with cloned voices, and HAVIC's only
+      conversion, so it is the first test of v1's talking-head family (it has no lip-sync fakes), and HAVIC's only
       South Asian set.
     s2_id: ARXIV:2505.11109
     venue: arXiv 2025
