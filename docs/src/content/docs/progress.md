@@ -19,7 +19,7 @@ As of 2026-11-26:
 
 Wave `s8d_video_on_av`, run 45544595945 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `fbe5a87`, harness pinned at `ab7ebcb`).
 
-- EfficientNet-B4, RECCE, GenD (PE-L), UnivFD, LAA-Net, GenD, the DFDC winner and LipForensics on `mavos_dd_hi_av_quick`, and FTCN, LAA-Net and GenD (PE-L) on `mavos_dd_hi_av`, landed, all eleven in one job. Ten score below the same model on the matching `mavos_dd_hi_video` set, by 0.011 to 0.083 AUC; the largest drops again belong to the strongest video models (FTCN 0.77 against 0.85, GenD PE-L 0.72 against 0.80 on the full set). The DFDC winner is the exception, 0.39 against 0.37, below chance on both, as it is elsewhere while video score directions stay unsettled.
+- EfficientNet-B4, RECCE, GenD (PE-L), UnivFD, LAA-Net, GenD, the DFDC winner and LipForensics on `mavos_dd_hi_av_quick`, and FTCN, LAA-Net and GenD (PE-L) on `mavos_dd_hi_av`, landed, all eleven in one job. Ten score below the same model on the matching `mavos_dd_hi_video` set, by 0.011 to 0.083 AUC; the largest drops again belong to the strongest video models (FTCN 0.77 against 0.85, GenD PE-L 0.72 against 0.80 on the full set). The DFDC winner is the exception, 0.39 against 0.37: it sits below chance on every MAVOS-DD set (0.32 to 0.39) while scoring 0.85 on HiDF, so its score direction on MAVOS-DD looks inverted rather than the audio mattering.
 - LipForensics ran at 0.26 items/s on the quick share, about three times its rate on the full set in `s8b`.
 
 ### 2026-11-25: video models on the audio-visual sets, ten more
