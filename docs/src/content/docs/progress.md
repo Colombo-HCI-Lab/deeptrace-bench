@@ -5,22 +5,29 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-11-24:
+As of 2026-11-25:
 
 - **Models.** 35 detectors have adapters and weights, and all 35 pass parity against upstream code ([Models](models.md#parity)). AltFreezing and TALL are blocked on weights ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one. Of the 42 pairs of the 21 video models on the audio-visual MAVOS-DD sets, 18 are scored and the rest are ordered on SPARK (waves `s8*`); after them, the empty cells left wait on data access or weights. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
+- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one. Of the 42 pairs of the 21 video models on the audio-visual MAVOS-DD sets, 28 are scored and the rest are ordered on SPARK (waves `s8*`); after them, the empty cells left wait on data access or weights. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-25: video models on the audio-visual sets, ten more
+
+Wave `s8c_video_on_av`, run 45329263353 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `5b418d6`, harness pinned at `ab7ebcb`).
+
+- Xception, FFD, UCF, SRM and GenConViT on `mavos_dd_hi_av_quick`, and RECCE, SPSL, EfficientNet-B4, FakeSTormer and UnivFD on `mavos_dd_hi_av`, landed. All but GenConViT score below the same model on the matching `mavos_dd_hi_video` set, by 0.021 to 0.051 AUC (UnivFD 0.67 against 0.71); GenConViT is 0.537 on both, about chance either way.
+- RealForensics on `mavos_dd_hi_av` slowed to 0.14 items/s and was interrupted at 6642 of 7513 items, and the DFDC winner on that set was skipped for budget. Both, with LipForensics' remainder, are ordered as wave `s8e` after `s8d`.
 
 ### 2026-11-24: video models on the audio-visual sets, nine more
 
 Wave `s8b_video_on_av`, run 45118735814 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `9a0debf`, harness pinned at `ab7ebcb`).
 
 - SPSL, SBI, FTCN, FakeSTormer and Effort on `mavos_dd_hi_av_quick`, and Xception, UCF, GenD and SBI on `mavos_dd_hi_av`, landed. Each again scores below the same model on the matching `mavos_dd_hi_video` set, by 0.008 (Effort) to 0.063 (SBI) AUC. The models that do best on video lose the most: FTCN 0.77 against 0.83, GenD 0.69 against 0.74, SBI 0.71 against 0.78, since a detector that only looks at faces cannot catch the voice-only fakes the audio-visual labels add.
-- LipForensics on `mavos_dd_hi_av` scored 3807 of 7513 items in 11.4 hours (0.09 items/s) before the job's budget ran out. Scoring resumes, so a later wave finishes the rest.
+- LipForensics on `mavos_dd_hi_av` scored 3807 of 7513 items in 11.4 hours (0.09 items/s) before the job's budget ran out. Scoring resumes, so a later wave (`s8e`) finishes the rest.
 
 ### 2026-11-23: video models on the audio-visual sets, first nine
 
