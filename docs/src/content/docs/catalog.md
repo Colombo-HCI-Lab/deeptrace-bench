@@ -289,9 +289,9 @@ Selim Seferbekov's winning DFDC entry averaged seven EfficientNet-B7 classifiers
 | Input | 380 px face-box crops, 32 frames per video |
 | Paper | no paper |
 | Training | pretrained on ImageNet-1k; trained on DFDC |
-| Our runs | `hidf_video`: AUC 0.859, EER 21.8%; `hidf_video_quick`: AUC 0.850, EER 22.4%; `mavos_dd_de_video_quick`: AUC 0.324, EER 64.2%; `mavos_dd_hi_video`: AUC 0.390, EER 59.2%; `mavos_dd_hi_video_quick`: AUC 0.373, EER 60.1% |
+| Our runs | `hidf_video`: AUC 0.859, EER 21.8%; `hidf_video_quick`: AUC 0.850, EER 22.4%; `mavos_dd_de_video_quick`: AUC 0.324, EER 64.2%; `mavos_dd_hi_av_quick`: AUC 0.392, EER 58.3%; `mavos_dd_hi_video`: AUC 0.390, EER 59.2%; `mavos_dd_hi_video_quick`: AUC 0.373, EER 60.1% |
 | Licence | MIT |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 6 evalsets |
 
 <a id="model-efficientnet_b4"></a>
 
@@ -309,11 +309,11 @@ DeepfakeBench's single-network version of the detector studied by Bonettini et a
 | Paper | [Video Face Manipulation Detection Through Ensemble of CNNs](https://arxiv.org/abs/2004.07676), ICPR 2020 · 366 citations |
 | Training | pretrained on ImageNet-1k; trained on FaceForensics++ (train split) |
 | Reported by the authors | FF++ c23 test: AUC 0.957 (DeepfakeBench); Celeb-DF v2: AUC 0.749 (DeepfakeBench); DFDC: AUC 0.696 (DeepfakeBench) |
-| Our runs | `hidf_video`: AUC 0.742, EER 32.1%; `hidf_video_quick`: AUC 0.741, EER 31.9%; `mavos_dd_de_video_quick`: AUC 0.414, EER 55.6%; `mavos_dd_hi_av`: AUC 0.563, EER 45.6%; `mavos_dd_hi_video`: AUC 0.583, EER 43.7%; `mavos_dd_hi_video_quick`: AUC 0.570, EER 45.8% |
+| Our runs | `hidf_video`: AUC 0.742, EER 32.1%; `hidf_video_quick`: AUC 0.741, EER 31.9%; `mavos_dd_de_video_quick`: AUC 0.414, EER 55.6%; `mavos_dd_hi_av`: AUC 0.563, EER 45.6%; `mavos_dd_hi_av_quick`: AUC 0.539, EER 48.3%; `mavos_dd_hi_video`: AUC 0.583, EER 43.7%; `mavos_dd_hi_video_quick`: AUC 0.570, EER 45.8% |
 | Size | 18 M parameters |
 | Cost | 3.9 GFLOPs and 2.4 ms per frame on a 24 GB GPU (fp32) |
 | Licence | CC BY-NC 4.0 (DeepfakeBench) |
-| Status here | adapter written, parity checked, scored on 6 evalsets |
+| Status here | adapter written, parity checked, scored on 7 evalsets |
 
 <a id="model-effort"></a>
 
@@ -413,9 +413,9 @@ FTCN (Zheng et al., ICCV 2021) removes spatial convolution so the network must u
 | Input | 224 px face clips of 32 consecutive frames, one alignment per clip, every 16 frames (up to 100 per video) |
 | Paper | [Exploring Temporal Coherence for More General Video Face Forgery Detection](https://arxiv.org/abs/2108.06693), ICCV 2021 · 385 citations |
 | Training | trained on FaceForensics++ (train split) |
-| Our runs | `hidf_video`: AUC 0.865, EER 21.8%; `hidf_video_quick`: AUC 0.843, EER 23.6%; `mavos_dd_de_video_quick`: AUC 0.705, EER 36.8%; `mavos_dd_hi_av_quick`: AUC 0.772, EER 30.6%; `mavos_dd_hi_video`: AUC 0.854, EER 22.6%; `mavos_dd_hi_video_quick`: AUC 0.831, EER 26.1% |
+| Our runs | `hidf_video`: AUC 0.865, EER 21.8%; `hidf_video_quick`: AUC 0.843, EER 23.6%; `mavos_dd_de_video_quick`: AUC 0.705, EER 36.8%; `mavos_dd_hi_av`: AUC 0.771, EER 30.0%; `mavos_dd_hi_av_quick`: AUC 0.772, EER 30.6%; `mavos_dd_hi_video`: AUC 0.854, EER 22.6%; `mavos_dd_hi_video_quick`: AUC 0.831, EER 26.1% |
 | Licence | none stated (upstream issue 16 asks for one); code imported from the pinned checkout, never copied |
-| Status here | adapter written, parity checked, scored on 6 evalsets |
+| Status here | adapter written, parity checked, scored on 7 evalsets |
 
 <a id="model-genconvit"></a>
 
@@ -452,11 +452,11 @@ GenD (Yermakov et al., WACV 2026) tunes only CLIP's LayerNorm parameters (about 
 | Paper | [Deepfake Detection that Generalizes Across Benchmarks](https://arxiv.org/abs/2508.06248), WACV 2026 · 59 citations |
 | Training | pretrained on OpenAI CLIP pretraining data; trained on FaceForensics++ (train split) |
 | Reported by the authors | Celeb-DF v2: AUC 0.946 (paper); DFDC: AUC 0.864 (paper); 14 cross-dataset sets, mean: AUC 0.912 (paper) |
-| Our runs | `hidf_video`: AUC 0.952, EER 11.5%; `hidf_video_quick`: AUC 0.948, EER 11.1%; `mavos_dd_de_video_quick`: AUC 0.610, EER 43.4%; `mavos_dd_hi_av`: AUC 0.686, EER 37.9%; `mavos_dd_hi_video`: AUC 0.741, EER 33.4%; `mavos_dd_hi_video_quick`: AUC 0.702, EER 36.5% |
+| Our runs | `hidf_video`: AUC 0.952, EER 11.5%; `hidf_video_quick`: AUC 0.948, EER 11.1%; `mavos_dd_de_video_quick`: AUC 0.610, EER 43.4%; `mavos_dd_hi_av`: AUC 0.686, EER 37.9%; `mavos_dd_hi_av_quick`: AUC 0.656, EER 39.2%; `mavos_dd_hi_video`: AUC 0.741, EER 33.4%; `mavos_dd_hi_video_quick`: AUC 0.702, EER 36.5% |
 | Size | 304 M parameters |
 | Cost | 162.0 GFLOPs and 12.8 ms per frame on a 24 GB GPU (fp32) |
 | Licence | MIT |
-| Status here | adapter written, parity checked, scored on 6 evalsets |
+| Status here | adapter written, parity checked, scored on 7 evalsets |
 
 <a id="model-gend_pe_l"></a>
 
@@ -474,11 +474,11 @@ GenD's second released backbone (Yermakov et al., WACV 2026): identical training
 | Paper | [Deepfake Detection that Generalizes Across Benchmarks](https://arxiv.org/abs/2508.06248), WACV 2026 · 59 citations |
 | Training | pretrained on Perception Encoder pretraining data; trained on FaceForensics++ (train split) |
 | Reported by the authors | Celeb-DF v2: AUC 0.950 (paper); DFDC: AUC 0.822 (paper); 14 cross-dataset sets, mean: AUC 0.914 (paper) |
-| Our runs | `hidf_video`: AUC 0.940, EER 13.4%; `hidf_video_quick`: AUC 0.944, EER 12.7%; `mavos_dd_de_video_quick`: AUC 0.712, EER 36.1%; `mavos_dd_hi_video`: AUC 0.798, EER 28.7%; `mavos_dd_hi_video_quick`: AUC 0.764, EER 31.5% |
+| Our runs | `hidf_video`: AUC 0.940, EER 13.4%; `hidf_video_quick`: AUC 0.944, EER 12.7%; `mavos_dd_de_video_quick`: AUC 0.712, EER 36.1%; `mavos_dd_hi_av`: AUC 0.722, EER 34.0%; `mavos_dd_hi_av_quick`: AUC 0.699, EER 37.1%; `mavos_dd_hi_video`: AUC 0.798, EER 28.7%; `mavos_dd_hi_video_quick`: AUC 0.764, EER 31.5% |
 | Size | 316 M parameters |
 | Cost | 163.1 GFLOPs and 12.8 ms per frame on a 24 GB GPU (fp32) |
 | Licence | MIT |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 7 evalsets |
 
 <a id="model-laa_net"></a>
 
@@ -495,9 +495,9 @@ LAA-Net (Nguyen et al., CVPR 2024) focuses on small blending artefacts and claim
 | Input | 256 px face-box crops, 32 frames per video |
 | Paper | [LAA-Net: Localized Artifact Attention Network for Quality-Agnostic and Generalizable Deepfake Detection](https://arxiv.org/abs/2401.13856), CVPR 2024 · 162 citations |
 | Training | pretrained on ImageNet-1k; trained on FaceForensics++ (train split) |
-| Our runs | `hidf_video`: AUC 0.839, EER 23.7%; `hidf_video_quick`: AUC 0.835, EER 24.8%; `mavos_dd_de_video_quick`: AUC 0.596, EER 43.5%; `mavos_dd_hi_video`: AUC 0.633, EER 39.7%; `mavos_dd_hi_video_quick`: AUC 0.591, EER 43.0% |
+| Our runs | `hidf_video`: AUC 0.839, EER 23.7%; `hidf_video_quick`: AUC 0.835, EER 24.8%; `mavos_dd_de_video_quick`: AUC 0.596, EER 43.5%; `mavos_dd_hi_av`: AUC 0.604, EER 41.7%; `mavos_dd_hi_av_quick`: AUC 0.578, EER 43.5%; `mavos_dd_hi_video`: AUC 0.633, EER 39.7%; `mavos_dd_hi_video_quick`: AUC 0.591, EER 43.0% |
 | Licence | SnT academic licence (research use only) |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 7 evalsets |
 
 <a id="model-lipforensics"></a>
 
@@ -515,11 +515,11 @@ LipForensics (Haliassos et al., CVPR 2021) is pretrained for lipreading on LRW, 
 | Paper | [Lips Don't Lie: A Generalisable and Robust Approach to Face Forgery Detection](https://arxiv.org/abs/2012.07657), CVPR 2021 · 710 citations |
 | Training | pretrained on LRW; trained on FaceForensics++ (train split) |
 | Reported by the authors | FF++, unseen manipulations: AUC 0.971 (paper); Celeb-DF v2: AUC 0.824 (paper); DFDC: AUC 0.735 (paper) |
-| Our runs | `hidf_video`: AUC 0.870, EER 21.6%; `hidf_video_quick`: AUC 0.885, EER 20.8%; `mavos_dd_de_video_quick`: AUC 0.556, EER 46.4%; `mavos_dd_hi_video`: AUC 0.703, EER 35.4%; `mavos_dd_hi_video_quick`: AUC 0.661, EER 38.7% |
+| Our runs | `hidf_video`: AUC 0.870, EER 21.6%; `hidf_video_quick`: AUC 0.885, EER 20.8%; `mavos_dd_de_video_quick`: AUC 0.556, EER 46.4%; `mavos_dd_hi_av_quick`: AUC 0.634, EER 40.5%; `mavos_dd_hi_video`: AUC 0.703, EER 35.4%; `mavos_dd_hi_video_quick`: AUC 0.661, EER 38.7% |
 | Size | 36 M parameters |
 | Cost | 17.8 GFLOPs and 5.7 ms per mouth clip on a 24 GB GPU (fp32) |
 | Licence | MIT (FAN landmarks from face-alignment, BSD-3) |
-| Status here | adapter written, parity checked, scored on 5 evalsets |
+| Status here | adapter written, parity checked, scored on 6 evalsets |
 
 <a id="model-realforensics"></a>
 
@@ -556,11 +556,11 @@ RECCE (Cao et al., CVPR 2022) trains a decoder to reconstruct real faces, so fak
 | Paper | [End-to-End Reconstruction-Classification Learning for Face Forgery Detection](https://www.semanticscholar.org/paper/1537faa9593d0d20e62055e4e6af6d382a26d313), CVPR 2022 · 481 citations |
 | Training | pretrained on ImageNet-1k; trained on FaceForensics++ (train split) |
 | Reported by the authors | FF++ c23 test: AUC 0.962 (DeepfakeBench); Celeb-DF v2: AUC 0.732 (DeepfakeBench); DFDC: AUC 0.713 (DeepfakeBench) |
-| Our runs | `hidf_video`: AUC 0.770, EER 29.7%; `hidf_video_quick`: AUC 0.787, EER 28.7%; `mavos_dd_de_video_quick`: AUC 0.397, EER 56.3%; `mavos_dd_hi_av`: AUC 0.514, EER 49.4%; `mavos_dd_hi_video`: AUC 0.539, EER 47.4%; `mavos_dd_hi_video_quick`: AUC 0.536, EER 47.9% |
+| Our runs | `hidf_video`: AUC 0.770, EER 29.7%; `hidf_video_quick`: AUC 0.787, EER 28.7%; `mavos_dd_de_video_quick`: AUC 0.397, EER 56.3%; `mavos_dd_hi_av`: AUC 0.514, EER 49.4%; `mavos_dd_hi_av_quick`: AUC 0.500, EER 50.3%; `mavos_dd_hi_video`: AUC 0.539, EER 47.4%; `mavos_dd_hi_video_quick`: AUC 0.536, EER 47.9% |
 | Size | 48 M parameters |
 | Cost | 16.0 GFLOPs and 3.2 ms per frame on a 24 GB GPU (fp32) |
 | Licence | CC BY-NC 4.0 (DeepfakeBench) |
-| Status here | adapter written, parity checked, scored on 6 evalsets |
+| Status here | adapter written, parity checked, scored on 7 evalsets |
 
 <a id="model-sbi"></a>
 
@@ -682,9 +682,9 @@ UnivFD (Ojha, Li and Lee, CVPR 2023) shows a linear probe on CLIP features gener
 | Input | 224 px face-box crops, 32 frames per video |
 | Paper | [Towards Universal Fake Image Detectors that Generalize Across Generative Models](https://arxiv.org/abs/2302.10174), CVPR 2023 · 898 citations |
 | Training | pretrained on OpenAI CLIP pretraining data; trained on ProGAN images from ForenSynths |
-| Our runs | `hidf_video`: AUC 0.685, EER 36.8%; `hidf_video_quick`: AUC 0.686, EER 36.5%; `mavos_dd_de_video_quick`: AUC 0.547, EER 46.8%; `mavos_dd_hi_av`: AUC 0.673, EER 39.2%; `mavos_dd_hi_video`: AUC 0.710, EER 36.0%; `mavos_dd_hi_video_quick`: AUC 0.703, EER 36.2% |
+| Our runs | `hidf_video`: AUC 0.685, EER 36.8%; `hidf_video_quick`: AUC 0.686, EER 36.5%; `mavos_dd_de_video_quick`: AUC 0.547, EER 46.8%; `mavos_dd_hi_av`: AUC 0.673, EER 39.2%; `mavos_dd_hi_av_quick`: AUC 0.692, EER 37.1%; `mavos_dd_hi_video`: AUC 0.710, EER 36.0%; `mavos_dd_hi_video_quick`: AUC 0.703, EER 36.2% |
 | Licence | MIT |
-| Status here | adapter written, parity checked, scored on 6 evalsets |
+| Status here | adapter written, parity checked, scored on 7 evalsets |
 
 <a id="model-xception"></a>
 

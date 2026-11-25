@@ -1,0 +1,25 @@
+{
+  "run_id": "laa_net__mavos_dd_hi_av_quick__dd39a938",
+  "model_id": "laa_net",
+  "evalset_id": "mavos_dd_hi_av_quick",
+  "upstream_commit": "a33446ab94b3bc0d176a879d43e0700adc52c817",
+  "weights_sha256": {
+    "laa_net_sbi.pth": "fde726610e778045f65c3fbe839bc463c4d3a9970f72ca109d5911917305c991",
+    "scrfd_10g/det_10g.onnx": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "4b7956f542a7642c284e93ae3de9c19b7d698d36b893ac94cf434fca61d266d4",
+    "model": "ee7be82c2e2161b72ca55d8d3488243ab52d4bfa403f7cf29199abffc4972ed7"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-25T06:33:35+00:00",
+  "last_started_utc": "2026-11-25T06:33:35+00:00",
+  "repo_commits": [
+    "ab7ebcb51b58048b03eea68dcea81203e9be8645"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
