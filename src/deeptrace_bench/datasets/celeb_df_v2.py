@@ -1,6 +1,6 @@
 """Celeb-DF (v2), the standard cross-dataset benchmark for face-swap detectors.
 
-Layout (from the authors' README; not yet checked against a copy, 2026-10-05):
+Layout (from the authors' README; matches the released zip, checked 2026-11-26):
 ``Celeb-real/`` (590 celebrity interview videos), ``YouTube-real/`` (300 more real videos),
 ``Celeb-synthesis/`` (5,639 face swaps) and ``List_of_testing_videos.txt``, one
 ``<label> <path>`` line per test video (label 1 real, 0 fake): 518 videos. Videos outside the
