@@ -43,7 +43,7 @@ To try a dataset before downloading it, `--sample N` fetches N real and N fake i
 
 ## Requests to send
 
-These need a person. Send them early: replies take days to months. On 2026-10-04 the FF++, InDeepFake and FakeAVCeleb forms and both IAB Rubric pages were live. On 2026-11-26 the FF++, Celeb-DF v2 and FakeAVCeleb forms were submitted for the project (applicant Oshan, PI Dr. Dilrukshi Gamage); the InDeepFake form was filled in but not yet signed or emailed.
+These need a person. Send them early: replies take days to months. On 2026-10-04 the FF++, InDeepFake and FakeAVCeleb forms and both IAB Rubric pages were live. On 2026-11-26 the FF++, Celeb-DF v2 and FakeAVCeleb forms were submitted and the signed InDeepFake form was emailed, all for the project (applicant Oshan, PI Dr. Dilrukshi Gamage).
 
 | Dataset                 | What to do                                                                                                       | Who                                                         |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
