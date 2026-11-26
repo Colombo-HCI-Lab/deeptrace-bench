@@ -9,11 +9,18 @@ As of 2026-11-26:
 
 - **Models.** 35 detectors have adapters and weights, and all 35 pass parity against upstream code ([Models](models.md#parity)). AltFreezing and TALL are blocked on weights ([Models](models.md#status)).
 - **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++, Celeb-DF v2 and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one. Of the 42 pairs of the 21 video models on the audio-visual MAVOS-DD sets, 39 are scored and the last three are ordered on SPARK (wave `s8e`); after them, the empty cells left wait on data access or weights. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
+- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one. All 42 pairs of the 21 video models on the audio-visual MAVOS-DD sets are scored; the mirror 20 pairs of the 10 audio models on those sets are ordered on SPARK (wave `s9a`), and after them the empty cells left wait on data access or weights. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-26: video models on the audio-visual sets, the last three
+
+Wave `s8e_lipforensics_av`, run 45688026766 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `bab95e7`, harness pinned at `ab7ebcb`).
+
+- RealForensics, the DFDC winner and LipForensics on `mavos_dd_hi_av` finished, the first and last resuming the items `s8c` and `s8b` had scored. That completes all 42 video-model pairs on the audio-visual sets. RealForensics (0.72 against 0.78) and LipForensics (0.66 against 0.70) again score below their `mavos_dd_hi_video` numbers; the DFDC winner is 0.42 against 0.39, below chance on MAVOS-DD as before.
+- The revert in `562e0ca` reopened the 10 audio models on the same two sets too, the mirror case where face-only fakes count as fake. Those 20 pairs are wave `s9a_audio_on_av` (run 45784151681), about 4 hours by the same models' `mavos_dd_hi_audio` times.
 
 ### 2026-11-26: video models on the audio-visual sets, eleven more
 

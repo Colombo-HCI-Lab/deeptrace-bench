@@ -1,5 +1,5 @@
 {
- "built": "2026-11-25",
+ "built": "2026-11-26",
  "eval_status": "proposed",
  "citations_checked": "2026-11-23",
  "fake_types": [
@@ -11130,6 +11130,45 @@
   },
   {
    "model": "dfdc_b7",
+   "evalset": "mavos_dd_hi_av",
+   "run_id": "dfdc_b7__mavos_dd_hi_av__f665d334",
+   "pairing": "same_corpus",
+   "n": 7513,
+   "n_real": 3632,
+   "n_fake": 3881,
+   "n_failed": 78,
+   "auc": 0.41966897534888586,
+   "auc_lo": 0.40742194809066656,
+   "auc_hi": 0.4321477187033986,
+   "eer": 0.5629546726357023,
+   "eer_lo": 0.5524475524475525,
+   "eer_hi": 0.5741480384317542,
+   "acc": 0.4372562205783457,
+   "bal_acc": 0.43724838240786756,
+   "ap": 0.5406363666791998,
+   "tpr_at_fpr01": 0.06060606060606061,
+   "tpr_at_fpr05": 0.11318311318311318,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked",
+    "below chance"
+   ],
+   "wall_s": 24517.4,
+   "windows": 235469,
+   "compute": {
+    "items_per_s": 0.307,
+    "windows_per_s": 11.51,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 3.169,
+    "gpu_util_mean": 83.2,
+    "energy_wh": 1645.664,
+    "energy_wh_per_1k_items": 219.042,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "dfdc_b7",
    "evalset": "mavos_dd_hi_av_quick",
    "run_id": "dfdc_b7__mavos_dd_hi_av_quick__1fe9641f",
    "pairing": "same_corpus",
@@ -14178,6 +14217,44 @@
   },
   {
    "model": "lipforensics",
+   "evalset": "mavos_dd_hi_av",
+   "run_id": "lipforensics__mavos_dd_hi_av__a4fe2bcd",
+   "pairing": "same_corpus",
+   "n": 7513,
+   "n_real": 3632,
+   "n_fake": 3881,
+   "n_failed": 115,
+   "auc": 0.6636369039706693,
+   "auc_lo": 0.6528570422621812,
+   "auc_hi": 0.6754171041466959,
+   "eer": 0.38319458896982306,
+   "eer_lo": 0.3722684703433923,
+   "eer_hi": 0.39438085327783556,
+   "acc": 0.6165179778318465,
+   "bal_acc": 0.6165062508161576,
+   "ap": 0.7195430395442826,
+   "tpr_at_fpr01": 0.13423517169614985,
+   "tpr_at_fpr05": 0.2583246618106139,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 58645.4,
+   "windows": 29580,
+   "compute": {
+    "items_per_s": 0.067,
+    "windows_per_s": 261.91,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 4.654,
+    "gpu_util_mean": 10.0,
+    "energy_wh": 2436.928,
+    "energy_wh_per_1k_items": 620.241,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "lipforensics",
    "evalset": "mavos_dd_hi_av_quick",
    "run_id": "lipforensics__mavos_dd_hi_av_quick__eb4b17c4",
    "pairing": "same_corpus",
@@ -14401,6 +14478,44 @@
     "gpu_util_mean": 31.8,
     "energy_wh": 368.651,
     "energy_wh_per_1k_items": 136.487,
+    "gpu": "NVIDIA GeForce RTX 3090"
+   }
+  },
+  {
+   "model": "realforensics",
+   "evalset": "mavos_dd_hi_av",
+   "run_id": "realforensics__mavos_dd_hi_av__d5d7be95",
+   "pairing": "same_corpus",
+   "n": 7513,
+   "n_real": 3632,
+   "n_fake": 3881,
+   "n_failed": 115,
+   "auc": 0.7243864104697729,
+   "auc_lo": 0.7132287629187145,
+   "auc_hi": 0.7350677678036561,
+   "eer": 0.3454734651404787,
+   "eer_lo": 0.33428680190338217,
+   "eer_hi": 0.3564997186268993,
+   "acc": 0.6542308732089754,
+   "bal_acc": 0.6542188104798451,
+   "ap": 0.7675462492187763,
+   "tpr_at_fpr01": 0.18210197710718,
+   "tpr_at_fpr05": 0.29474505723204997,
+   "verdict": "clean",
+   "reasons": [],
+   "flags": [
+    "score direction unchecked"
+   ],
+   "wall_s": 52391.0,
+   "windows": 29584,
+   "compute": {
+    "items_per_s": 0.021,
+    "windows_per_s": 54.87,
+    "realtime_factor": null,
+    "cuda_max_allocated_gb": 4.593,
+    "gpu_util_mean": 11.8,
+    "energy_wh": 2230.667,
+    "energy_wh_per_1k_items": 2004.193,
     "gpu": "NVIDIA GeForce RTX 3090"
    }
   },
