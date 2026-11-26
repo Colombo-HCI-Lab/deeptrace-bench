@@ -6,5 +6,5 @@ components:
   - dataset: celeb_df_v2
     filter: {split: test}
 group_by: []
-status: pending_access
+status: ready
 notes: The official 518-video test list; reproduce each video model's published Celeb-DF v2 AUC here.

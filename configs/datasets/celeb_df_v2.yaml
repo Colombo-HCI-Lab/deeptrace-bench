@@ -4,8 +4,13 @@ modality: video
 role: reproduction
 status: request
 access:
-  kind: manual
+  # Since 2026-11-27 the project's copy is a private mirror under Oshan's Hugging Face account, so
+  # SPARK jobs can fetch it with the HF_TOKEN secret (the terms bar redistribution, so it isn't
+  # public). Anyone else requests it from the authors and links it in with --from.
+  kind: hf
   page: https://github.com/yuezunli/celeb-deepfakeforensics
+  repo: ivantha/celeb-df-v2
+  revision: 9cf95bd0527f827f3365d0030a01e06006be8b05
   request: Fill in the request form linked from the repo README; submitting it shows the Google Drive and Baidu download links at once (checked 2026-11-26).
   expect: [Celeb-real, Celeb-synthesis, YouTube-real, List_of_testing_videos.txt]
 licence: Celeb-DF terms of use (research only)
