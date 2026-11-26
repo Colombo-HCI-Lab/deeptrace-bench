@@ -19,7 +19,7 @@ As of 2026-11-26:
 
 Wave `s9a_audio_on_av`, run 45784151681 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `516bd78`, harness pinned at `ab7ebcb`).
 
-- All 20 pairs of the 10 audio models on `mavos_dd_hi_av` and its quick share are scored, about 5 hours on SPARK. Every audio model scores far below its `mavos_dd_hi_audio` number, which is expected: these labels count face-only fakes as fake, and their audio is real. The DF Arena and AntiDeepfake models hold up best (0.77 to 0.82 on the full set, against 0.999 or more on audio alone); AASIST and AASIST-L fall below chance (0.44 and 0.45).
+- All 20 pairs of the 10 audio models on `mavos_dd_hi_av` and its quick share are scored, about 5 hours on SPARK. Every audio model scores far below its `mavos_dd_hi_audio` number, as expected when these labels count face-only fakes as fake. The DF Arena and AntiDeepfake models hold up best (0.77 to 0.82 on the full set, against 0.999 or more on audio alone); AASIST and AASIST-L fall below chance (0.44 and 0.45). The four post-trained models still flag 61 to 66% of the face-only fakes against 26 to 30% of real videos, so those clips' audio differs from the real ones' in some way MAVOS-DD's labels don't record ([Results](results.md#faces-and-talking-heads-mavos-dd-hindi)).
 - With these, every pair runnable on SPARK is scored. The empty cells left wait on dataset access or on AltFreezing and TALL weights.
 
 ### 2026-11-26: video models on the audio-visual sets, the last three
@@ -266,9 +266,10 @@ In order:
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
 2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
 3. **Generators they haven't seen.** Per-generator numbers on MLAAD Hindi's 2026 systems, once the team agrees the guard carve-out below, or on SEA-Spoof once its request is granted. The desk check is done ([Results](results.md#generator-level-contamination-check)).
-4. **Decide which cross-corpus audio numbers count** (E5). The shortcut probe separates every cross-corpus set by trivial features; the options are in [Results](results.md#the-shortcut-probe).
-5. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits). Waits on the team choosing the models and training data (Oshan, 2026-11-14); no training code exists yet.
-6. **deeptrace's own data** (E7), once collection starts.
+4. **Check the audio of MAVOS-DD's face-only fakes.** The audio models flag them far more often than real clips ([Results](results.md#faces-and-talking-heads-mavos-dd-hindi)); the shortcut probe reads audio evalsets only, so extending it to `mavos_dd_hi_av`'s audio track would show whether re-encoding or another trivial feature explains it.
+5. **Decide which cross-corpus audio numbers count** (E5). The shortcut probe separates every cross-corpus set by trivial features; the options are in [Results](results.md#the-shortcut-probe).
+6. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits). Waits on the team choosing the models and training data (Oshan, 2026-11-14); no training code exists yet.
+7. **deeptrace's own data** (E7), once collection starts.
 
 ## Open decisions that shape the results
 
