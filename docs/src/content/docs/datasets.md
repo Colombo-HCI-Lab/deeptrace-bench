@@ -43,17 +43,17 @@ To try a dataset before downloading it, `--sample N` fetches N real and N fake i
 
 ## Requests to send
 
-These need a person. Send them early: replies take days to months. On 2026-10-04 the FF++, InDeepFake and FakeAVCeleb forms and both IAB Rubric pages were live.
+These need a person. Send them early: replies take days to months. On 2026-10-04 the FF++, InDeepFake and FakeAVCeleb forms and both IAB Rubric pages were live. On 2026-11-26 the FF++, Celeb-DF v2 and FakeAVCeleb forms were submitted for the project (applicant Oshan, PI Dr. Dilrukshi Gamage); the InDeepFake form was filled in but not yet signed or emailed.
 
 | Dataset                 | What to do                                                                                                       | Who                                                         |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| FF++                    | Google Form linked from <https://github.com/ondyari/FaceForensics>; they email a download script                 | any team member                                             |
-| InDeepFake              | Fill in the access request form (PDF in the repo README) and email it; academic institutions only               | applicant, naming the PI                                    |
-| FakeAVCeleb             | Request form on <https://sites.google.com/view/fakeavcelebdash-lab/>                                             | applicant with ethics approval or a faculty sponsor         |
+| FF++                    | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSdRRR3L5zAv6tQ_CKxmK4W96tAab_pfBu2EKAgQbeDVhmXagg/viewform) (linked from <https://github.com/ondyari/FaceForensics>); they email a download script | any team member                                             |
+| InDeepFake              | Fill in and sign the [access request form](https://github.com/user-attachments/files/21651935/InDeepFake_Access_Request_Form.pdf) (PDF linked from the repo README) and email it to ruchira@it.iiests.ac.in; academic institutions only | applicant, naming the PI                                    |
+| FakeAVCeleb             | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSfPDd3oV0auqmmWEgCSaTEQ6CGpFeB-ozQJ35x-B_0Xjd93bw/viewform) (linked from <https://sites.google.com/view/fakeavcelebdash-lab/>); access comes as a Google Drive share | applicant with ethics approval or a faculty sponsor         |
 | DeePhy, DF-Platter      | Sign the IAB Rubric licence and email it to databases@iab-rubric.org, one email per dataset                     | someone with legal authority: UCSC's Director or Registrar  |
 | Deepfake-Eval-2024      | Request on its Hugging Face page with a link to prior deepfake-detection work                                    | any team member                                             |
 | IndieFake               | Form on <https://indie-fake-dataset.netlify.app/>                                                                | any team member                                             |
-| Celeb-DF v2             | Request form linked from <https://github.com/yuezunli/celeb-deepfakeforensics>                                   | any team member                                             |
+| Celeb-DF v2             | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScoXint8ndZXyJi2Rcy4MvDHkkZLyBFKN43lTeyiG88wrG0rA/viewform) (linked from <https://github.com/yuezunli/celeb-deepfakeforensics>) | any team member                                             |
 | Casual Conversations v2 | Request on <https://ai.meta.com/datasets/casual-conversations-v2-dataset/> and accept Meta's licence             | any team member                                             |
 | HAV-DF                  | Email the BML Munjal University authors (addresses in the paper, arXiv 2411.15457); ask for the release behind the splits later papers report | any team member |
 | DeepFakeX               | Request access on <https://zenodo.org/records/14202454> with a research purpose                                  | any team member                                             |
@@ -65,8 +65,10 @@ These need a person. Send them early: replies take days to months. On 2026-10-04
 | DFDC                    | Download from AWS (needs an AWS account) or from Kaggle (accept the competition rules)                           | any team member                                             |
 | SEA-Spoof               | Email the authors (wu_jinyang@a-star.edu.sg, imcc.sg@gmail.com), then submit the form on <https://huggingface.co/datasets/Jack-ppkdczgx/SEA-Spoof> | an applicant at an academic institution |
 
-- **FakeAVCeleb:** requests without ethics (IRB) approval are rejected; complete ones got access within days, says a maintainer (GitHub issue 13, 2024-12-18), though others report months. Don't use the unofficial Hugging Face mirrors.
-- **FF++:** an issue from 2025-10-05 said its download server was down. It answered again on 2026-10-04, but no download was tested.
+- **FakeAVCeleb:** requests without ethics (IRB) approval are rejected; complete ones got access within days, says a maintainer (GitHub issue 13, 2024-12-18), though others report months. The form (checked 2026-11-26) has no ethics field, so state the approval, or the faculty sponsor, in the purpose. It asks for an official email, the supervisor's name and email, a Gmail address to share the Google Drive folder with, and a purpose of at least 100 words. The Drive access expires after one week, so download as soon as it arrives. Don't use the unofficial Hugging Face mirrors.
+- **FF++:** an issue from 2025-10-05 said its download server was down. It answered again on 2026-10-04, but no download was tested. The form asks for an email, name, affiliation, the supervisor's name and email, and a purpose, and the applicant ticks agreement to the terms of use.
+- **Celeb-DF v2:** the form has no email field and records the Google account it is filled in from, so sign in with the account that should get the reply, or put the academic email in the purpose. It also asks for city, country, the dataset version and a typed signature. Submitting it shows the Google Drive and Baidu download links at once, with no review; keep those links out of this repo.
+- **InDeepFake:** the PDF moved from the repo to a GitHub attachment link (checked 2026-11-26). It asks for the applicant's and the PI's names and emails, the affiliation, a purpose, a ticked agreement, a date and a signature.
 - **DF-Platter and DeePhy:** read [Data policy](data_policy.md#sharing-across-institutions) first: the licence covers only the signing institution, and the team spans more than one.
 
 When a copy arrives, put it in the shared store and link it in:
