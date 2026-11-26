@@ -1,0 +1,25 @@
+{
+  "run_id": "xlsr_sls__mavos_dd_hi_av_quick__f6ffb8de",
+  "model_id": "xlsr_sls",
+  "evalset_id": "mavos_dd_hi_av_quick",
+  "upstream_commit": "89a09ac4404c5687d96d6c123fcf6db20e4e4b38",
+  "weights_sha256": {
+    "MMpaper_model.pth": "0d315184aa8e6f017ea72c4d2458c11bae8f07fd743fe860a3aa932e36135fa6",
+    "xls-r-300m-config/config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "4b7956f542a7642c284e93ae3de9c19b7d698d36b893ac94cf434fca61d266d4",
+    "model": "e99588695a16e06df4b1beaa0cc97e2c2ba2513534852cb58b8120e4a2a2b287"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-26T09:14:23+00:00",
+  "last_started_utc": "2026-11-26T09:14:23+00:00",
+  "repo_commits": [
+    "ab7ebcb51b58048b03eea68dcea81203e9be8645"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}

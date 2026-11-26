@@ -1,0 +1,88 @@
+{
+  "run_id": "xlsr_mamba__mavos_dd_hi_av_quick__24635fb0",
+  "model": "xlsr_mamba",
+  "evalset": "mavos_dd_hi_av_quick",
+  "role": "south_asian",
+  "namespace": null,
+  "pairing": "same_corpus",
+  "verdict": "clean",
+  "verdict_reasons": [],
+  "score_direction_ok": true,
+  "eval_config_status": "proposed",
+  "parity_passed": true,
+  "overall": {
+    "n": 2494,
+    "n_real": 300,
+    "n_fake": 2194,
+    "n_failed": 6,
+    "auc": 0.6008013406459476,
+    "eer": 0.44333333333333336,
+    "threshold": 0.9191874311520503,
+    "auc_lo": 0.5709299207800123,
+    "auc_hi": 0.6293609460694698,
+    "eer_lo": 0.4166666666666667,
+    "eer_hi": 0.46800731261425965,
+    "fpr": 0.44333333333333336,
+    "fnr": 0.4405850091407678,
+    "acc": 0.5590836012861736,
+    "bal_acc": 0.5580408287629495,
+    "ap": 0.9250244267605662,
+    "tpr_at_fpr01": 0.1206581352833638,
+    "tpr_at_fpr05": 0.22623400365630714
+  },
+  "unscored_items": 0,
+  "failures": {
+    "too_short": 6
+  },
+  "compute": {
+    "measured": true,
+    "sessions": 1,
+    "sessions_completed": 1,
+    "wall_s": 922.9,
+    "phases_s": {
+      "build_loader": 0.023,
+      "load_model": 5.415,
+      "score": 917.426
+    },
+    "items_timed": 2494,
+    "items_per_s": 2.718,
+    "load_ms": {
+      "mean": 41.88,
+      "p50": 31.17,
+      "p95": 88.09
+    },
+    "infer_ms": {
+      "mean": 326.59,
+      "p50": 261.28,
+      "p95": 583.49
+    },
+    "windows": 17641,
+    "window_unit": "4.04 s audio window",
+    "windows_per_s": 21.71,
+    "realtime_factor": 77.64,
+    "cuda_max_allocated_gb": 2.568,
+    "cuda_max_reserved_gb": 5.18,
+    "gpu_mem_used_max_gb": 6.001,
+    "peak_rss_gb": 3.422,
+    "gpu_util_mean": 60.8,
+    "power_mean_w": 259.1,
+    "temp_max_c": 90.0,
+    "energy_wh": 66.532,
+    "energy_wh_per_1k_items": 26.677,
+    "env": {
+      "device": "cuda",
+      "python": "3.12.3",
+      "torch": "2.8.0+cu128",
+      "cuda_runtime": "12.8",
+      "cudnn": 91002,
+      "arch": "x86_64",
+      "cpu": "AMD Ryzen 9 3900X 12-Core Processor",
+      "cpu_count": 24,
+      "ram_gb": 135.1,
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_gb": 25.3,
+      "driver": "575.57.08",
+      "compute_capability": "8.6"
+    }
+  }
+}

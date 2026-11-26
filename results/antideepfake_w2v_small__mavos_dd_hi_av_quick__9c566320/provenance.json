@@ -1,0 +1,24 @@
+{
+  "run_id": "antideepfake_w2v_small__mavos_dd_hi_av_quick__9c566320",
+  "model_id": "antideepfake_w2v_small",
+  "evalset_id": "mavos_dd_hi_av_quick",
+  "upstream_commit": "0dea622bde8f064c8ee5a557f2598643123fc6b6",
+  "weights_sha256": {
+    "wav2vec-small-anti-deepfake.safetensors": "828ee456122f86d5d631cb7895a10e5c62c78a4fcb8a8b1c42cb5838a9abcfe0"
+  },
+  "config_hashes": {
+    "eval": "4cc286d7421c309b2741190b05c52175e495f462677f31c6462a6b44afa66ee1",
+    "evalset": "4b7956f542a7642c284e93ae3de9c19b7d698d36b893ac94cf434fca61d266d4",
+    "model": "946884cb602854fef4529c668f841a169c24ab7941719043c0ea787cdc9742c0"
+  },
+  "preprocessing": "shared",
+  "first_started_utc": "2026-11-26T08:46:10+00:00",
+  "last_started_utc": "2026-11-26T08:46:10+00:00",
+  "repo_commits": [
+    "ab7ebcb51b58048b03eea68dcea81203e9be8645"
+  ],
+  "repo_dirty": false,
+  "devices": [
+    "cuda"
+  ]
+}
