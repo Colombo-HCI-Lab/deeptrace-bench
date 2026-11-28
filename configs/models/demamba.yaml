@@ -1,0 +1,28 @@
+id: demamba
+name: DeMamba (GenVideo-100K checkpoint)
+modality: video
+status: workable
+licence: Apache-2.0 (checkpoint and evaluator); DeMamba's code is the authors'
+paper: Chen et al., DeMamba, AI-Generated Video Detection on Million-Scale GenVideo Benchmark, arXiv 2405.19707 (2024)
+upstream:
+  host: hf
+  repo: Ahsanz/DeMamba-GenVideo100K
+  commit: 08664b1ea90a1de2bbc1f9a77e3ba0dd1dd4846e
+weights:
+  - name: best_acc.pth
+    kind: hf
+    repo: Ahsanz/DeMamba-GenVideo100K
+    filename: best_acc.pth
+    revision: 08664b1ea90a1de2bbc1f9a77e3ba0dd1dd4846e
+    size_bytes: 502986967
+training_data:
+  - {dataset: clip_wit, level: pretrain, note: "X-CLIP's CLIP initialisation"}
+  - {dataset: kinetics400, level: pretrain, note: "X-CLIP-B/16 video pretraining"}
+  - {dataset: genvideo_100k, level: train, note: "10,000 clips per generator (ZeroScope, I2VGen-XL, SVD, VideoCrafter, Pika, DynamiCrafter, SD, SEINE, Latte, OpenSora), reals from Kinetics-400 and Youku"}
+adapter: deeptrace_bench.models.demamba:DeMambaDetector
+input:
+  inputs: frame_clips             # preprocess.frame_clips: whole frames, no face detection
+  sampling: demamba
+  clip_frames: 8
+  max_frames: 32
+notes: The first detector here built for fully generated video (2026-11-28). Its authors released no weights (DeMamba issue 16); this checkpoint was trained with their code by the Counterfactual-Deepfake-Bench team (WVU) and ships with the evaluator the adapter imports. Its card reports AUC 0.9667 and AP 0.9628 on all of GenVideo-Val, the reproduction target, and that it flags about 17% of real videos at 0.5. None of Counterfactual-Deepfake-Bench's generators (LTX, Wan, HunyuanVideo) is in its training data.

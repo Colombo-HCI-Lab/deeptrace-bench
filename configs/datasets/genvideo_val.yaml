@@ -1,0 +1,20 @@
+id: genvideo_val
+name: GenVideo-Val
+modality: video
+role: reproduction
+status: open
+access:
+  kind: url
+  page: https://modelscope.cn/datasets/cccnju/Gen-Video
+  urls:
+    GenVideo-Val.zip: "https://www.modelscope.cn/api/v1/datasets/cccnju/Gen-Video/repo?Revision=master&FilePath=GenVideo-Val.zip"
+  sha256:
+    # ModelScope's LFS object id for the file, which is its sha256 (checked 2026-11-28).
+    GenVideo-Val.zip: aba02ecd57528257249dd38b72b7a34c9d56bc75d4f2541a721b2778f1d864a6
+licence: CC BY-NC 4.0
+licence_terms:
+  - Non-commercial use only.
+contains: [real, fake]
+size_gb: 13.9
+builder: deeptrace_bench.datasets.genvideo_val:build_manifest
+notes: The validation split of GenVideo (Chen et al., DeMamba, 2024), the set DeMamba's checkpoint card and D3's paper report, so it is where both reproduce. 10,000 real MSR-VTT videos and 8,584 fakes from ten text- and image-to-video generators (Crafter, Gen2, HotShot, Lavie, ModelScope, MoonValley, MorphStudio, Show_1, Sora, WildScrape), as one 13.9 GB zip (listed by range reads 2026-11-28). Generic scenes, not faces, and no South Asian signal.

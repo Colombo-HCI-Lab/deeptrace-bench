@@ -142,11 +142,13 @@ def read_video_frames(
     rate: float | None = None,
     consecutive: bool = False,
     windows: tuple[int, int] | None = None,
+    pick: Callable[[int, float], list[int]] | None = None,
 ) -> tuple[list[tuple[int, np.ndarray]], int]:
     """Read ``k`` evenly spread frames of a video as RGB uint8; with ``rate`` set, the first
     ``k`` frames at ``rate`` per second (``rate_frame_indices``); with ``consecutive``, the
     first ``k`` frames; with ``windows`` (count, length), runs of frames spread over the video
-    (``window_frame_indices``).
+    (``window_frame_indices``); with ``pick``, the indices it returns for the video's frame
+    count and frame rate (sorted, ``k`` unused).
 
     Frames are decoded in order with ``grab`` and only the wanted ones converted, which is
     robust to formats that seek badly. OpenCV applies the rotation stored in phone videos.
@@ -167,7 +169,9 @@ def read_video_frames(
             n_frames = _count_frames(cap)
             cap.release()
             cap = cv2.VideoCapture(str(path))
-        if consecutive:
+        if pick is not None:
+            wanted = pick(n_frames, cap.get(cv2.CAP_PROP_FPS))
+        elif consecutive:
             wanted = list(range(min(k, n_frames)))
         elif windows is not None:
             wanted = window_frame_indices(n_frames, *windows)

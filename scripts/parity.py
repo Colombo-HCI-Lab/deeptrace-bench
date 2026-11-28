@@ -62,6 +62,8 @@ REFERENCES = {
     "LAANetDetector": ("laa_net.py", "{dtb_root}/parity/envs/snt/bin/python"),
     "FakeSTormerDetector": ("fakestormer.py", "{dtb_root}/parity/envs/snt/bin/python"),
     "UnivFDDetector": ("univfd.py", "{dtb_root}/parity/envs/clip/bin/python"),
+    "DeMambaDetector": ("demamba.py", "{dtb_root}/parity/envs/xclip/bin/python"),
+    "D3Detector": ("d3.py", "{dtb_root}/parity/envs/xclip/bin/python"),
     "LipFDDetector": ("lipfd.py", "{dtb_root}/parity/envs/clip/bin/python"),
     "AVADDetector": ("avad.py", "{dtb_root}/parity/envs/avad/bin/python"),
     "GenConViTDetector": ("genconvit.py", "{dtb_root}/parity/envs/genconvit/bin/python"),
@@ -86,6 +88,7 @@ def _inputs_loader(registry: Registry, model: ModelConfig):
     if model.modality == Modality.AUDIO_VIDEO or model.input.get("inputs") in (
         "mouths",
         "face_clips",
+        "frame_clips",
         "frame_groups",
         "faces_150",
         "lip_composites",

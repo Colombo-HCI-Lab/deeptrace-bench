@@ -1,0 +1,9 @@
+id: genvideo_val
+modality: video
+role: reproduction
+pairing: same_corpus
+components:
+  - dataset: genvideo_val
+group_by: [method]
+status: ready
+notes: All of GenVideo-Val, as DeMamba's checkpoint card scores it (AUC 0.9667, AP 0.9628) and D3's paper reports it (per generator against the MSR-VTT reals). Reproduction for the detectors of generated video, never a South Asian result.

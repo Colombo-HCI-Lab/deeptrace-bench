@@ -1,0 +1,27 @@
+id: d3
+name: D3 (training-free, X-CLIP-B/16)
+modality: video
+status: workable
+licence: MIT (code); X-CLIP weights MIT
+paper: Zheng et al., D3, Training-Free AI-Generated Video Detection Using Second-Order Features, ICCV 2025 (arXiv 2508.00701)
+upstream:
+  repo: Zig-HS/D3
+  commit: c798fbc57fe0c4198d63a73732c2c0f9e4b4816c
+weights:
+  - name: xclip-base-patch16
+    kind: hf_snapshot
+    repo: microsoft/xclip-base-patch16
+    revision: d6184e3fd8780d04c85d0f1eabe5f94bf44d98f6
+    allow_patterns: [config.json, model.safetensors]
+training_data:
+  - {dataset: clip_wit, level: pretrain, note: "X-CLIP's CLIP initialisation"}
+  - {dataset: kinetics400, level: pretrain, note: "X-CLIP-B/16 video pretraining; D3 itself trains nothing"}
+adapter: deeptrace_bench.models.d3:D3Detector
+input:
+  inputs: frame_clips             # preprocess.frame_clips: whole frames, no face detection
+  sampling: rate
+  rate: 8
+  seconds: 3
+  clip_frames: 16
+  min_frames: 8
+notes: Training-free (2026-11-28) - a statistic of frozen X-CLIP features, so no detector weights and nothing it could have overfitted to a generator. Upstream scores AP per generator against GenVideo-Val's MSRVTT reals, at most 1,000 videos a side, from a random 3 s start; here the start is 0 and the full sets are scored. Its score has no official threshold, so only rank metrics mean anything.

@@ -132,3 +132,9 @@
 - id: ffhq
   name: FFHQ (Flickr faces)
   note: Source images for TalkingHeadBench's portrait animations.
+- id: kinetics400
+  name: Kinetics-400
+  note: X-CLIP's video pretraining and the real side of GenVideo's training split.
+- id: genvideo_100k
+  name: GenVideo-100K (the lightweight GenVideo training split)
+  note: DeMamba's training data (10,000 clips per generator plus Kinetics-400 and Youku reals); GenVideo-Val, its validation split, is a separate set.

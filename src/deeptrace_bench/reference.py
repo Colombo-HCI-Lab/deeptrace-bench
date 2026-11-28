@@ -78,6 +78,8 @@ def model_input(model: ModelConfig) -> str | None:
             f"224 px face clips of {spec['clip_frames']} consecutive frames, one alignment per "
             f"clip, every {spec['clip_stride']} frames (up to {spec['max_frames']} per video)"
         )
+    if spec.get("inputs") == "frame_clips":
+        return f"{spec['clip_frames']} whole frames at 224 px, 10% trimmed off the long sides"
     if spec.get("inputs") == "faces_150":
         return (
             f"150 px whole-face patches from {spec['clip_frames']} consecutive frames at a time "

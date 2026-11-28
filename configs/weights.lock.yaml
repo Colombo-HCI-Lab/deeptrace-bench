@@ -22,6 +22,11 @@ avh_align:
   self_large_vox_433h.pt: 2689a9e9e8d601b30f9181342017dc0215669990732d8920ac7065c88f81d954
 core:
   core_best.pth: 3d34dca33ab66ee027425e0bc48fb889811ecd4ea53f72f958d83124144d1af7
+d3:
+  xclip-base-patch16/config.json: 43d49d757dc8a3ef3dfd242d7ebe0c2effcfa0404f9343864e50c45245f99d3a
+  xclip-base-patch16/model.safetensors: b5db836d57b7e22001cb2bab581719e910b4c571d926fe839b5d07bc0ba2d03e
+demamba:
+  best_acc.pth: f89897c72b595aa85a524e59083919cebb0b92161d2a694a2cbffbdd8456ce17
 df_arena_1b:
   pytorch_model.bin: 780bc14fd4c15e65d58efdef728427cf03cd29cd60be528e97badf8c89087988
   xls-r-1b-config/config.json: 36668778db09d5c64090b62d6afb66ba63057304fe456a45388066ff7dabb997

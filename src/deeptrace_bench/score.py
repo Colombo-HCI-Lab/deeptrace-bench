@@ -33,6 +33,7 @@ from .preprocess.audio import load_audio, segment
 from .preprocess.av import AudioVideoLoader, MouthAudioLoader
 from .preprocess.clips import FaceClipLoader
 from .preprocess.faces import FaceLoader
+from .preprocess.frame_clips import FrameClipLoader
 from .preprocess.frame_groups import FrameGroupLoader
 from .preprocess.mouths import MouthLoader
 from .preprocess.talking_faces import TalkingFaceLoader
@@ -237,6 +238,9 @@ def build_loader(
             min_samples=int(audio["min_seconds"] * audio["sample_rate"]),
         )
         return loader, audio["aggregation"]
+    if model.input.get("inputs") == "frame_clips":
+        # a detector of generated video reads whole frames, with no face detection
+        return FrameClipLoader(model.input), registry.eval.video["aggregation"]
     loader = FaceLoader.from_registry(
         registry, model, save_crops_to=crops_dir, save_crops=save_crops, part_prefix=prefix
     )
