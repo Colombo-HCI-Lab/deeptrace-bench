@@ -822,6 +822,46 @@ models:
       UnivFD (Ojha, Li and Lee, CVPR 2023) shows a linear probe on CLIP features generalises
       across image generators. It never saw a face swap, so it is a floor for face-specific
       models.
+  demamba:
+    catches: [fully_synthetic]
+    cue: whole-frame features over time, not faces
+    why: >-
+      The strongest open detector of fully generated video on the Counterfactual-Deepfake-Bench
+      authors' own run, so it shows what a detector built for this type does on the requested
+      Indian cell.
+    s2_id: ARXIV:2405.19707
+    venue: arXiv 2024
+    published:
+      - {test: "GenVideo-Val (all)", metric: AUC, value: "0.967", source: model card, cite: "FULL_val_metrics.txt", evalset: genvideo_val}
+    summary: >-
+      X-CLIP-B/16 frame features, fine-tuned, read across 8 frames by a bidirectional Mamba block;
+      the checkpoint is a third party's training with the authors' code on GenVideo-100K.
+    architecture: >-
+      8 whole frames at 2 fps, 224 px, X-CLIP-B/16 vision tower, bidirectional Mamba over patch
+      tokens in time, one logit
+    description: >-
+      DeMamba (Chen et al., 2024) introduced GenVideo and reads spatio-temporal inconsistency.
+      Its authors released no weights; this checkpoint was trained on GenVideo-100K by the
+      Counterfactual-Deepfake-Bench team and flags about 17% of real videos at 0.5.
+  d3:
+    catches: [fully_synthetic]
+    cue: second-order temporal statistics of frozen features
+    why: >-
+      Training-free, so it can't have overfitted to any generator or face: a check of whether
+      generated video's too-smooth motion holds up on the requested Indian cell.
+    s2_id: ARXIV:2508.00701
+    venue: ICCV 2025
+    published:
+      - {test: "GenVideo (mean per generator)", metric: AUC, value: "0.977", source: paper, cite: "ablation table, X-CLIP-B/16, L2", evalset: genvideo_val}
+    summary: >-
+      The spread of second differences between consecutive frozen X-CLIP-B/16 frame embeddings;
+      real video's is larger.
+    architecture: >-
+      16 whole frames at 8 fps from the first 3 s, 224 px, frozen X-CLIP-B/16, std of second-order
+      L2 distances, no trained part
+    description: >-
+      D3 (Zheng et al., ICCV 2025) needs no training data. Its score has no official threshold, so
+      only rank metrics and thresholds set on reals mean anything.
   xception:
     catches: [face_swap, reenactment]
     cue: face texture
@@ -1096,6 +1136,23 @@ datasets:
     notes: >-
       The people are synthetic and the labels are prompted presentation; the real side
       (CelebV-HQ) must be fetched separately.
+  genvideo_val:
+    fakes: [fully_synthetic]
+    why: >-
+      The set DeMamba's checkpoint and D3's paper both report on, so it is where the detectors of
+      generated video are reproduced. Generic scenes, no South Asian signal.
+    s2_id: ARXIV:2405.19707
+    venue: arXiv 2024
+    summary: >-
+      GenVideo's validation split: real MSR-VTT clips and fakes from ten text- and image-to-video
+      generators.
+    scale: 10,000 real and 8,584 fake videos
+    generators:
+    - Crafter, Gen2, HotShot, Lavie, ModelScope, MoonValley, MorphStudio, Show_1, Sora, WildScrape
+    annotations:
+    - generator
+    format: MP4, some GIF and MOV, one 13.9 GB zip
+    notes: Fakes vary in size and frame rate by generator, reals are MSR-VTT web clips.
   deepfake_eval_2024:
     fakes: [face_swap, lip_sync, fully_synthetic]
     why: >-

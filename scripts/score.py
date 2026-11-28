@@ -100,9 +100,9 @@ def main() -> int:
     items = shard_items(items, index, count)
     prefix = part_prefix(index, count)
 
-    # The face detector's weights are part of what defines a video or image run.
+    # The face detector's weights are part of what defines a video or image run that uses it.
     weights = dict(locked_hashes(model.id))
-    if not is_audio:
+    if not is_audio and model.input.get("inputs") != "frame_clips":
         tool = registry.face_detector()
         weights.update({f"{tool.id}/{k}": v for k, v in locked_hashes(tool.id).items()})
 

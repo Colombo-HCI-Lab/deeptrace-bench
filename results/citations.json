@@ -1,38 +1,38 @@
 {
- "checked": "2026-11-23",
+ "checked": "2026-11-28",
  "papers": {
   "1537faa9593d0d20e62055e4e6af6d382a26d313": {
-   "citations": 481,
+   "citations": 480,
    "title": "End-to-End Reconstruction-Classification Learning for Face Forgery Detection",
    "year": 2022
   },
   "ARXIV:1901.08971": {
-   "citations": 3876,
+   "citations": 3889,
    "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
    "year": 2019
   },
   "ARXIV:1909.12962": {
-   "citations": 2071,
+   "citations": 2078,
    "title": "Celeb-DF: A Large-Scale Challenging Dataset for DeepFake Forensics",
    "year": 2019
   },
   "ARXIV:1910.01717": {
-   "citations": 816,
+   "citations": 818,
    "title": "On the Detection of Digital Face Manipulation",
    "year": 2019
   },
   "ARXIV:2004.07676": {
-   "citations": 366,
+   "citations": 369,
    "title": "Video Face Manipulation Detection Through Ensemble of CNNs",
    "year": 2020
   },
   "ARXIV:2007.09355": {
-   "citations": 1397,
+   "citations": 1401,
    "title": "Thinking in Frequency: Face Forgery Detection by Mining Frequency-aware Clues",
    "year": 2020
   },
   "ARXIV:2012.07657": {
-   "citations": 710,
+   "citations": 713,
    "title": "Lips Don't Lie: A Generalisable and Robust Approach to Face Forgery Detection",
    "year": 2020
   },
@@ -42,42 +42,42 @@
    "year": 2021
   },
   "ARXIV:2103.12376": {
-   "citations": 710,
+   "citations": 709,
    "title": "Generalizing Face Forgery Detection with High-frequency Features",
    "year": 2021
   },
   "ARXIV:2108.05080": {
-   "citations": 513,
+   "citations": 517,
    "title": "FakeAVCeleb: A Novel Audio-Video Multimodal Deepfake Dataset",
    "year": 2021
   },
   "ARXIV:2108.06693": {
-   "citations": 385,
+   "citations": 386,
    "title": "Exploring Temporal Coherence for More General Video Face Forgery Detection",
    "year": 2021
   },
   "ARXIV:2110.01200": {
-   "citations": 722,
+   "citations": 728,
    "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
    "year": 2021
   },
   "ARXIV:2201.07131": {
-   "citations": 249,
+   "citations": 250,
    "title": "Leveraging Real Talking Faces via Self-Supervision for Robust Forgery Detection",
    "year": 2022
   },
   "ARXIV:2202.12233": {
-   "citations": 388,
+   "citations": 394,
    "title": "Automatic speaker verification spoofing and deepfake detection using wav2vec 2.0 and data augmentation",
    "year": 2022
   },
   "ARXIV:2203.16263": {
-   "citations": 415,
+   "citations": 420,
    "title": "Does Audio Deepfake Detection Generalize?",
    "year": 2022
   },
   "ARXIV:2204.08376": {
-   "citations": 732,
+   "citations": 734,
    "title": "Detecting Deepfakes with Self-Blended Images",
    "year": 2022
   },
@@ -87,7 +87,7 @@
    "year": 2022
   },
   "ARXIV:2208.11761": {
-   "citations": 85,
+   "citations": 86,
    "title": "IndicSUPERB: A Speech Processing Universal Performance Benchmark for Indian languages",
    "year": 2022
   },
@@ -102,7 +102,7 @@
    "year": 2023
   },
   "ARXIV:2302.10174": {
-   "citations": 898,
+   "citations": 917,
    "title": "Towards Universal Fake Image Detectors that Generalize Across Generative Models",
    "year": 2023
   },
@@ -112,7 +112,7 @@
    "year": 2023
   },
   "ARXIV:2304.13949": {
-   "citations": 383,
+   "citations": 384,
    "title": "UCF: Uncovering Common Features for Generalizable Deepfake Detection",
    "year": 2023
   },
@@ -122,7 +122,7 @@
    "year": 2023
   },
   "ARXIV:2307.07036": {
-   "citations": 78,
+   "citations": 79,
    "title": "GenConViT: Deepfake Video Detection Using Generative Convolutional Vision Transformer",
    "year": 2023
   },
@@ -137,22 +137,27 @@
    "year": 2023
   },
   "ARXIV:2311.15308": {
-   "citations": 154,
+   "citations": 156,
    "title": "AV-Deepfake1M: A Large-Scale LLM-Driven Audio-Visual Deepfake Dataset",
    "year": 2023
   },
   "ARXIV:2401.09512": {
-   "citations": 197,
+   "citations": 200,
    "title": "MLAAD: The Multi-Language Audio Anti-Spoofing Dataset",
    "year": 2024
   },
   "ARXIV:2401.13856": {
-   "citations": 162,
+   "citations": 163,
    "title": "LAA-Net: Localized Artifact Attention Network for Quality-Agnostic and Generalizable Deepfake Detection",
    "year": 2024
   },
+  "ARXIV:2405.19707": {
+   "citations": 125,
+   "title": "DeMamba: AI-Generated Video Detection on Million-Scale GenVideo Benchmark",
+   "year": 2024
+  },
   "ARXIV:2408.17352": {
-   "citations": 50,
+   "citations": 52,
    "title": "AASIST3: KAN-Enhanced AASIST Speech Deepfake Detection using SSL Features and Additional Regularization for the ASVspoof 2024 Challenge",
    "year": 2024
   },
@@ -167,17 +172,17 @@
    "year": 2024
   },
   "ARXIV:2411.15633": {
-   "citations": 162,
+   "citations": 166,
    "title": "Orthogonal Subspace Decomposition for Generalizable AI-Generated Image Detection",
    "year": 2024
   },
   "ARXIV:2412.00175": {
-   "citations": 43,
+   "citations": 45,
    "title": "Circumventing shortcuts in audio-visual deepfake detection datasets with unsupervised learning",
    "year": 2024
   },
   "ARXIV:2503.02857": {
-   "citations": 114,
+   "citations": 117,
    "title": "Deepfake-Eval-2024: A Multi-Modal In-the-Wild Benchmark of Deepfakes Circulated in 2024",
    "year": 2025
   },
@@ -187,7 +192,7 @@
    "year": 2025
   },
   "ARXIV:2505.11109": {
-   "citations": 15,
+   "citations": 16,
    "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
    "year": 2025
   },
@@ -202,22 +207,27 @@
    "year": 2025
   },
   "ARXIV:2506.21090": {
-   "citations": 35,
+   "citations": 37,
    "title": "Post-training for Deepfake Speech Detection",
    "year": 2025
   },
   "ARXIV:2507.21463": {
-   "citations": 39,
+   "citations": 41,
    "title": "SpeechFake: A Large-Scale Multilingual Speech Deepfake Dataset Incorporating Cutting-Edge Generation Methods",
    "year": 2025
   },
+  "ARXIV:2508.00701": {
+   "citations": 58,
+   "title": "D3: Training-Free AI-Generated Video Detection Using Second-Order Features",
+   "year": 2025
+  },
   "ARXIV:2508.06248": {
-   "citations": 59,
+   "citations": 60,
    "title": "Deepfake Detection that Generalizes Across Benchmarks",
    "year": 2025
   },
   "ARXIV:2509.02859": {
-   "citations": 43,
+   "citations": 45,
    "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
    "year": 2025
   },
@@ -232,7 +242,7 @@
    "year": 2026
   },
   "ARXIV:2603.23960": {
-   "citations": 3,
+   "citations": 4,
    "title": "Leave No Stone Unturned: Uncovering Holistic Audio-Visual Intrinsic Coherence for Deepfake Detection",
    "year": 2026
   },
@@ -242,7 +252,7 @@
    "year": 2026
   },
   "DOI:10.1016/j.csl.2020.101114": {
-   "citations": 755,
+   "citations": 760,
    "title": "ASVspoof 2019: A large-scale public database of synthesized, converted and replayed speech",
    "year": 2019
   },
@@ -252,7 +262,7 @@
    "year": 2025
   },
   "DOI:10.1145/3664647.3681345": {
-   "citations": 160,
+   "citations": 161,
    "title": "Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier",
    "year": 2024
   },
@@ -267,12 +277,12 @@
    "year": 2024
   },
   "DOI:10.18653/v1/2025.acl-long.1070": {
-   "citations": 11,
+   "citations": 12,
    "title": "IndicSynth: A Large-Scale Multilingual Synthetic Speech Dataset for Low-Resource Indian Languages",
    "year": 2025
   },
   "DOI:10.21437/SLTU.2018-11": {
-   "citations": 105,
+   "citations": 106,
    "title": "Crowd-Sourced Speech Corpora for Javanese, Sundanese, Sinhala, Nepali, and Bangladeshi Bengali",
    "year": 2018
   },

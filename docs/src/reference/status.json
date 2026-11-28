@@ -1,7 +1,7 @@
 {
  "built": "2026-11-28",
  "eval_status": "proposed",
- "citations_checked": "2026-11-23",
+ "citations_checked": "2026-11-28",
  "fake_types": [
   {
    "id": "face_swap",
@@ -103,7 +103,7 @@
    "paper": {
     "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
     "year": 2021,
-    "citations": 722,
+    "citations": 728,
     "venue": "ICASSP 2022",
     "url": "https://arxiv.org/abs/2110.01200"
    },
@@ -195,7 +195,7 @@
    "paper": {
     "title": "AASIST3: KAN-Enhanced AASIST Speech Deepfake Detection using SSL Features and Additional Regularization for the ASVspoof 2024 Challenge",
     "year": 2024,
-    "citations": 50,
+    "citations": 52,
     "venue": "ASVspoof 2024 Workshop",
     "url": "https://arxiv.org/abs/2408.17352"
    },
@@ -275,7 +275,7 @@
    "paper": {
     "title": "AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention Networks",
     "year": 2021,
-    "citations": 722,
+    "citations": 728,
     "venue": "ICASSP 2022",
     "url": "https://arxiv.org/abs/2110.01200"
    },
@@ -559,7 +559,7 @@
    "paper": {
     "title": "Post-training for Deepfake Speech Detection",
     "year": 2025,
-    "citations": 35,
+    "citations": 37,
     "venue": "ASRU 2025",
     "url": "https://arxiv.org/abs/2506.21090"
    },
@@ -796,7 +796,7 @@
    "paper": {
     "title": "Post-training for Deepfake Speech Detection",
     "year": 2025,
-    "citations": 35,
+    "citations": 37,
     "venue": "ASRU 2025",
     "url": "https://arxiv.org/abs/2506.21090"
    },
@@ -951,7 +951,7 @@
    "paper": {
     "title": "Circumventing shortcuts in audio-visual deepfake detection datasets with unsupervised learning",
     "year": 2024,
-    "citations": 43,
+    "citations": 45,
     "venue": "CVPR 2025",
     "url": "https://arxiv.org/abs/2412.00175"
    },
@@ -1049,6 +1049,113 @@
    }
   },
   {
+   "id": "d3",
+   "name": "D3",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "licence": "MIT (code); X-CLIP weights MIT",
+   "summary": "The spread of second differences between consecutive frozen X-CLIP-B/16 frame embeddings; real video's is larger.",
+   "why": "Training-free, so it can't have overfitted to any generator or face: a check of whether generated video's too-smooth motion holds up on the requested Indian cell.",
+   "cut": false,
+   "catches": [
+    "fully_synthetic"
+   ],
+   "cue": "second-order temporal statistics of frozen features",
+   "architecture": "16 whole frames at 8 fps from the first 3 s, 224 px, frozen X-CLIP-B/16, std of second-order L2 distances, no trained part",
+   "description": "D3 (Zheng et al., ICCV 2025) needs no training data. Its score has no official threshold, so only rank metrics and thresholds set on reals mean anything.",
+   "input": "16 whole frames at 224 px, 10% trimmed off the long sides",
+   "training": [
+    {
+     "name": "OpenAI CLIP pretraining data",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Kinetics-400",
+     "level": "pretrain",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "D3: Training-Free AI-Generated Video Detection Using Second-Order Features",
+    "year": 2025,
+    "citations": 58,
+    "venue": "ICCV 2025",
+    "url": "https://arxiv.org/abs/2508.00701"
+   },
+   "published": [
+    {
+     "test": "GenVideo (mean per generator)",
+     "metric": "AUC",
+     "value": "0.977",
+     "source": "paper",
+     "cite": "ablation table, X-CLIP-B/16, L2",
+     "evalset": "genvideo_val"
+    }
+   ],
+   "trained_on": [],
+   "parity": null,
+   "profile": null
+  },
+  {
+   "id": "demamba",
+   "name": "DeMamba",
+   "modality": "video",
+   "adapter": true,
+   "blocked": false,
+   "licence": "Apache-2.0 (checkpoint and evaluator); DeMamba's code is the authors'",
+   "summary": "X-CLIP-B/16 frame features, fine-tuned, read across 8 frames by a bidirectional Mamba block; the checkpoint is a third party's training with the authors' code on GenVideo-100K.",
+   "why": "The strongest open detector of fully generated video on the Counterfactual-Deepfake-Bench authors' own run, so it shows what a detector built for this type does on the requested Indian cell.",
+   "cut": false,
+   "catches": [
+    "fully_synthetic"
+   ],
+   "cue": "whole-frame features over time, not faces",
+   "architecture": "8 whole frames at 2 fps, 224 px, X-CLIP-B/16 vision tower, bidirectional Mamba over patch tokens in time, one logit",
+   "description": "DeMamba (Chen et al., 2024) introduced GenVideo and reads spatio-temporal inconsistency. Its authors released no weights; this checkpoint was trained on GenVideo-100K by the Counterfactual-Deepfake-Bench team and flags about 17% of real videos at 0.5.",
+   "input": "8 whole frames at 224 px, 10% trimmed off the long sides",
+   "training": [
+    {
+     "name": "OpenAI CLIP pretraining data",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "Kinetics-400",
+     "level": "pretrain",
+     "split": null
+    },
+    {
+     "name": "GenVideo-100K",
+     "level": "train",
+     "split": null
+    }
+   ],
+   "paper": {
+    "title": "DeMamba: AI-Generated Video Detection on Million-Scale GenVideo Benchmark",
+    "year": 2024,
+    "citations": 125,
+    "venue": "arXiv 2024",
+    "url": "https://arxiv.org/abs/2405.19707"
+   },
+   "published": [
+    {
+     "test": "GenVideo-Val (all)",
+     "metric": "AUC",
+     "value": "0.967",
+     "source": "model card",
+     "cite": "FULL_val_metrics.txt",
+     "evalset": "genvideo_val"
+    }
+   ],
+   "trained_on": [
+    "GenVideo-100K"
+   ],
+   "parity": null,
+   "profile": null
+  },
+  {
    "id": "df_arena_1b",
    "name": "DF Arena 1B",
    "modality": "audio",
@@ -1141,7 +1248,7 @@
    "paper": {
     "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
     "year": 2025,
-    "citations": 43,
+    "citations": 45,
     "venue": "Speech DF Arena 2025",
     "url": "https://arxiv.org/abs/2509.02859"
    },
@@ -1290,7 +1397,7 @@
    "paper": {
     "title": "Speech DF Arena: A Leaderboard for Speech DeepFake Detection Models",
     "year": 2025,
-    "citations": 43,
+    "citations": 45,
     "venue": "Speech DF Arena 2025",
     "url": "https://arxiv.org/abs/2509.02859"
    },
@@ -1420,7 +1527,7 @@
    "paper": {
     "title": "Video Face Manipulation Detection Through Ensemble of CNNs",
     "year": 2020,
-    "citations": 366,
+    "citations": 369,
     "venue": "ICPR 2020",
     "url": "https://arxiv.org/abs/2004.07676"
    },
@@ -1502,7 +1609,7 @@
    "paper": {
     "title": "Orthogonal Subspace Decomposition for Generalizable AI-Generated Image Detection",
     "year": 2024,
-    "citations": 162,
+    "citations": 166,
     "venue": "ICML 2025",
     "url": "https://arxiv.org/abs/2411.15633"
    },
@@ -1573,7 +1680,7 @@
    "paper": {
     "title": "Thinking in Frequency: Face Forgery Detection by Mining Frequency-aware Clues",
     "year": 2020,
-    "citations": 1397,
+    "citations": 1401,
     "venue": "ECCV 2020",
     "url": "https://arxiv.org/abs/2007.09355"
    },
@@ -1706,7 +1813,7 @@
    "paper": {
     "title": "On the Detection of Digital Face Manipulation",
     "year": 2019,
-    "citations": 816,
+    "citations": 818,
     "venue": "CVPR 2020",
     "url": "https://arxiv.org/abs/1910.01717"
    },
@@ -1783,7 +1890,7 @@
    "paper": {
     "title": "Exploring Temporal Coherence for More General Video Face Forgery Detection",
     "year": 2021,
-    "citations": 385,
+    "citations": 386,
     "venue": "ICCV 2021",
     "url": "https://arxiv.org/abs/2108.06693"
    },
@@ -1860,7 +1967,7 @@
    "paper": {
     "title": "GenConViT: Deepfake Video Detection Using Generative Convolutional Vision Transformer",
     "year": 2023,
-    "citations": 78,
+    "citations": 79,
     "venue": "arXiv 2023",
     "url": "https://arxiv.org/abs/2307.07036"
    },
@@ -1912,7 +2019,7 @@
    "paper": {
     "title": "Deepfake Detection that Generalizes Across Benchmarks",
     "year": 2025,
-    "citations": 59,
+    "citations": 60,
     "venue": "WACV 2026",
     "url": "https://arxiv.org/abs/2508.06248"
    },
@@ -1993,7 +2100,7 @@
    "paper": {
     "title": "Deepfake Detection that Generalizes Across Benchmarks",
     "year": 2025,
-    "citations": 59,
+    "citations": 60,
     "venue": "WACV 2026",
     "url": "https://arxiv.org/abs/2508.06248"
    },
@@ -2075,7 +2182,7 @@
    "paper": {
     "title": "Leave No Stone Unturned: Uncovering Holistic Audio-Visual Intrinsic Coherence for Deepfake Detection",
     "year": 2026,
-    "citations": 3,
+    "citations": 4,
     "venue": "CVPR 2026 Findings",
     "url": "https://arxiv.org/abs/2603.23960"
    },
@@ -2155,7 +2262,7 @@
    "paper": {
     "title": "LAA-Net: Localized Artifact Attention Network for Quality-Agnostic and Generalizable Deepfake Detection",
     "year": 2024,
-    "citations": 162,
+    "citations": 163,
     "venue": "CVPR 2024",
     "url": "https://arxiv.org/abs/2401.13856"
    },
@@ -2254,7 +2361,7 @@
    "paper": {
     "title": "Lips Don't Lie: A Generalisable and Robust Approach to Face Forgery Detection",
     "year": 2020,
-    "citations": 710,
+    "citations": 713,
     "venue": "CVPR 2021",
     "url": "https://arxiv.org/abs/2012.07657"
    },
@@ -2335,7 +2442,7 @@
    "paper": {
     "title": "Leveraging Real Talking Faces via Self-Supervision for Robust Forgery Detection",
     "year": 2022,
-    "citations": 249,
+    "citations": 250,
     "venue": "CVPR 2022",
     "url": "https://arxiv.org/abs/2201.07131"
    },
@@ -2392,7 +2499,7 @@
    "paper": {
     "title": "End-to-End Reconstruction-Classification Learning for Face Forgery Detection",
     "year": 2022,
-    "citations": 481,
+    "citations": 480,
     "venue": "CVPR 2022",
     "url": "https://www.semanticscholar.org/paper/1537faa9593d0d20e62055e4e6af6d382a26d313"
    },
@@ -2473,7 +2580,7 @@
    "paper": {
     "title": "Detecting Deepfakes with Self-Blended Images",
     "year": 2022,
-    "citations": 732,
+    "citations": 734,
     "venue": "CVPR 2022",
     "url": "https://arxiv.org/abs/2204.08376"
    },
@@ -2636,7 +2743,7 @@
    "paper": {
     "title": "Generalizing Face Forgery Detection with High-frequency Features",
     "year": 2021,
-    "citations": 710,
+    "citations": 709,
     "venue": "CVPR 2021",
     "url": "https://arxiv.org/abs/2103.12376"
    },
@@ -2757,7 +2864,7 @@
    "paper": {
     "title": "UCF: Uncovering Common Features for Generalizable Deepfake Detection",
     "year": 2023,
-    "citations": 383,
+    "citations": 384,
     "venue": "ICCV 2023",
     "url": "https://arxiv.org/abs/2304.13949"
    },
@@ -2838,7 +2945,7 @@
    "paper": {
     "title": "Towards Universal Fake Image Detectors that Generalize Across Generative Models",
     "year": 2023,
-    "citations": 898,
+    "citations": 917,
     "venue": "CVPR 2023",
     "url": "https://arxiv.org/abs/2302.10174"
    },
@@ -2886,7 +2993,7 @@
    "paper": {
     "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
     "year": 2019,
-    "citations": 3876,
+    "citations": 3889,
     "venue": "ICCV 2019",
     "url": "https://arxiv.org/abs/1901.08971"
    },
@@ -2988,7 +3095,7 @@
    "paper": {
     "title": "Automatic speaker verification spoofing and deepfake detection using wav2vec 2.0 and data augmentation",
     "year": 2022,
-    "citations": 388,
+    "citations": 394,
     "venue": "Odyssey 2022",
     "url": "https://arxiv.org/abs/2202.12233"
    },
@@ -3182,7 +3289,7 @@
    "paper": {
     "title": "Audio Deepfake Detection with Self-Supervised XLS-R and SLS Classifier",
     "year": 2024,
-    "citations": 160,
+    "citations": 161,
     "venue": "ACM MM 2024",
     "url": "https://doi.org/10.1145/3664647.3681345"
    },
@@ -3280,7 +3387,7 @@
    "paper": {
     "title": "ASVspoof 2019: A large-scale public database of synthesized, converted and replayed speech",
     "year": 2019,
-    "citations": 755,
+    "citations": 760,
     "venue": "CSL 2020",
     "url": "https://doi.org/10.1016/j.csl.2020.101114"
    },
@@ -3324,7 +3431,7 @@
    "paper": {
     "title": "AV-Deepfake1M: A Large-Scale LLM-Driven Audio-Visual Deepfake Dataset",
     "year": 2023,
-    "citations": 154,
+    "citations": 156,
     "venue": "ACM MM 2023",
     "url": "https://arxiv.org/abs/2311.15308"
    },
@@ -3597,7 +3704,7 @@
    "paper": {
     "title": "Celeb-DF: A Large-Scale Challenging Dataset for DeepFake Forensics",
     "year": 2019,
-    "citations": 2071,
+    "citations": 2078,
     "venue": "CVPR 2020",
     "url": "https://arxiv.org/abs/1909.12962"
    },
@@ -3641,7 +3748,9 @@
    "recorded": null,
    "languages_held": null,
    "paper": null,
-   "evalsets": []
+   "evalsets": [
+    "counterfactual_t2v_quick"
+   ]
   },
   {
    "id": "deepfake_eval_2024",
@@ -3680,7 +3789,7 @@
    "paper": {
     "title": "Deepfake-Eval-2024: A Multi-Modal In-the-Wild Benchmark of Deepfakes Circulated in 2024",
     "year": 2025,
-    "citations": 114,
+    "citations": 117,
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2503.02857"
    },
@@ -3902,7 +4011,7 @@
    "paper": {
     "title": "FakeAVCeleb: A Novel Audio-Video Multimodal Deepfake Dataset",
     "year": 2021,
-    "citations": 513,
+    "citations": 517,
     "venue": "NeurIPS D&B 2021",
     "url": "https://arxiv.org/abs/2108.05080"
    },
@@ -3950,12 +4059,52 @@
    "paper": {
     "title": "FaceForensics++: Learning to Detect Manipulated Facial Images",
     "year": 2019,
-    "citations": 3876,
+    "citations": 3889,
     "venue": "ICCV 2019",
     "url": "https://arxiv.org/abs/1901.08971"
    },
    "evalsets": [
     "ffpp_test"
+   ]
+  },
+  {
+   "id": "genvideo_val",
+   "name": "GenVideo-Val",
+   "modality": "video",
+   "role": "reproduction",
+   "status": "open",
+   "languages": [],
+   "licence": "CC BY-NC 4.0",
+   "summary": "GenVideo's validation split: real MSR-VTT clips and fakes from ten text- and image-to-video generators.",
+   "why": "The set DeMamba's checkpoint and D3's paper both report on, so it is where the detectors of generated video are reproduced. Generic scenes, no South Asian signal.",
+   "cut": false,
+   "scale": "10,000 real and 8,584 fake videos",
+   "contains": [
+    "real",
+    "fake"
+   ],
+   "fakes": [
+    "fully_synthetic"
+   ],
+   "generators": [
+    "Crafter, Gen2, HotShot, Lavie, ModelScope, MoonValley, MorphStudio, Show_1, Sora, WildScrape"
+   ],
+   "annotations": [
+    "generator"
+   ],
+   "format": "MP4, some GIF and MOV, one 13.9 GB zip",
+   "notes": "Fakes vary in size and frame rate by generator, reals are MSR-VTT web clips.",
+   "recorded": null,
+   "languages_held": null,
+   "paper": {
+    "title": "DeMamba: AI-Generated Video Detection on Million-Scale GenVideo Benchmark",
+    "year": 2024,
+    "citations": 125,
+    "venue": "arXiv 2024",
+    "url": "https://arxiv.org/abs/2405.19707"
+   },
+   "evalsets": [
+    "genvideo_val"
    ]
   },
   {
@@ -4182,7 +4331,7 @@
    "paper": {
     "title": "Does Audio Deepfake Detection Generalize?",
     "year": 2022,
-    "citations": 415,
+    "citations": 420,
     "venue": "Interspeech 2022",
     "url": "https://arxiv.org/abs/2203.16263"
    },
@@ -4340,7 +4489,7 @@
    "paper": {
     "title": "IndicSUPERB: A Speech Processing Universal Performance Benchmark for Indian languages",
     "year": 2022,
-    "citations": 85,
+    "citations": 86,
     "venue": "AAAI 2023",
     "url": "https://arxiv.org/abs/2208.11761"
    },
@@ -4422,7 +4571,7 @@
    "paper": {
     "title": "IndicSynth: A Large-Scale Multilingual Synthetic Speech Dataset for Low-Resource Indian Languages",
     "year": 2025,
-    "citations": 11,
+    "citations": 12,
     "venue": "ACL 2025",
     "url": "https://doi.org/10.18653/v1/2025.acl-long.1070"
    },
@@ -4717,7 +4866,7 @@
    "paper": {
     "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
     "year": 2025,
-    "citations": 15,
+    "citations": 16,
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2505.11109"
    },
@@ -4782,11 +4931,12 @@
    "paper": {
     "title": "MAVOS-DD: Multilingual Audio-Video Open-Set Deepfake Detection Benchmark",
     "year": 2025,
-    "citations": 15,
+    "citations": 16,
     "venue": "arXiv 2025",
     "url": "https://arxiv.org/abs/2505.11109"
    },
    "evalsets": [
+    "counterfactual_t2v_quick",
     "mavos_dd_hi_audio",
     "mavos_dd_hi_av",
     "mavos_dd_hi_av_quick",
@@ -4889,7 +5039,7 @@
    "paper": {
     "title": "MLAAD: The Multi-Language Audio Anti-Spoofing Dataset",
     "year": 2024,
-    "citations": 197,
+    "citations": 200,
     "venue": "IJCNN 2024",
     "url": "https://arxiv.org/abs/2401.09512"
    },
@@ -4937,7 +5087,7 @@
    "paper": {
     "title": "Crowd-Sourced Speech Corpora for Javanese, Sundanese, Sinhala, Nepali, and Bangladeshi Bengali",
     "year": 2018,
-    "citations": 105,
+    "citations": 106,
     "venue": "SLTU 2018",
     "url": "https://doi.org/10.21437/SLTU.2018-11"
    },
@@ -5055,7 +5205,7 @@
    "paper": {
     "title": "SpeechFake: A Large-Scale Multilingual Speech Deepfake Dataset Incorporating Cutting-Edge Generation Methods",
     "year": 2025,
-    "citations": 39,
+    "citations": 41,
     "venue": "ACL 2025",
     "url": "https://arxiv.org/abs/2507.21463"
    },
@@ -5306,6 +5456,14 @@
    }
   },
   {
+   "id": "counterfactual_t2v_quick",
+   "modality": "video",
+   "role": "south_asian",
+   "pairing": "cross_corpus",
+   "status": "ready",
+   "size": null
+  },
+  {
    "id": "deephy",
    "modality": "video",
    "role": "south_asian",
@@ -5335,6 +5493,14 @@
    "role": "reproduction",
    "pairing": "same_corpus",
    "status": "pending_access",
+   "size": null
+  },
+  {
+   "id": "genvideo_val",
+   "modality": "video",
+   "role": "reproduction",
+   "pairing": "same_corpus",
+   "status": "ready",
    "size": null
   },
   {
@@ -5582,10 +5748,12 @@
  ],
  "cells": {
   "aasist|celeb_df_v2_test": "na",
+  "aasist|counterfactual_t2v_quick": "na",
   "aasist|deephy": "na",
   "aasist|dfplatter_sample": "na",
   "aasist|fakeavceleb": "na",
   "aasist|ffpp_test": "na",
+  "aasist|genvideo_val": "na",
   "aasist|hidf_video": "na",
   "aasist|hidf_video_quick": "na",
   "aasist|indeepfake": "na",
@@ -5593,10 +5761,12 @@
   "aasist|mavos_dd_hi_video": "na",
   "aasist|mavos_dd_hi_video_quick": "na",
   "aasist3|celeb_df_v2_test": "na",
+  "aasist3|counterfactual_t2v_quick": "na",
   "aasist3|deephy": "na",
   "aasist3|dfplatter_sample": "na",
   "aasist3|fakeavceleb": "na",
   "aasist3|ffpp_test": "na",
+  "aasist3|genvideo_val": "na",
   "aasist3|hidf_video": "na",
   "aasist3|hidf_video_quick": "na",
   "aasist3|indeepfake": "na",
@@ -5607,10 +5777,12 @@
   "aasist3|mlaad_hi": "guard",
   "aasist3|mlaad_si": "guard",
   "aasist_l|celeb_df_v2_test": "na",
+  "aasist_l|counterfactual_t2v_quick": "na",
   "aasist_l|deephy": "na",
   "aasist_l|dfplatter_sample": "na",
   "aasist_l|fakeavceleb": "na",
   "aasist_l|ffpp_test": "na",
+  "aasist_l|genvideo_val": "na",
   "aasist_l|hidf_video": "na",
   "aasist_l|hidf_video_quick": "na",
   "aasist_l|indeepfake": "na",
@@ -5640,10 +5812,12 @@
   "altfreezing|urdu_csalt": "na",
   "antideepfake_mms_300m|asvspoof2019_la_eval": "guard",
   "antideepfake_mms_300m|celeb_df_v2_test": "na",
+  "antideepfake_mms_300m|counterfactual_t2v_quick": "na",
   "antideepfake_mms_300m|deephy": "na",
   "antideepfake_mms_300m|dfplatter_sample": "na",
   "antideepfake_mms_300m|fakeavceleb": "na",
   "antideepfake_mms_300m|ffpp_test": "na",
+  "antideepfake_mms_300m|genvideo_val": "na",
   "antideepfake_mms_300m|hidf_video": "na",
   "antideepfake_mms_300m|hidf_video_quick": "na",
   "antideepfake_mms_300m|indeepfake": "na",
@@ -5655,10 +5829,12 @@
   "antideepfake_mms_300m|mlaad_si": "guard",
   "antideepfake_w2v_small|asvspoof2019_la_eval": "guard",
   "antideepfake_w2v_small|celeb_df_v2_test": "na",
+  "antideepfake_w2v_small|counterfactual_t2v_quick": "na",
   "antideepfake_w2v_small|deephy": "na",
   "antideepfake_w2v_small|dfplatter_sample": "na",
   "antideepfake_w2v_small|fakeavceleb": "na",
   "antideepfake_w2v_small|ffpp_test": "na",
+  "antideepfake_w2v_small|genvideo_val": "na",
   "antideepfake_w2v_small|hidf_video": "na",
   "antideepfake_w2v_small|hidf_video_quick": "na",
   "antideepfake_w2v_small|indeepfake": "na",
@@ -5673,10 +5849,12 @@
   "avad|banglafake": "na",
   "avad|bd_grf6": "na",
   "avad|celeb_df_v2_test": "na",
+  "avad|counterfactual_t2v_quick": "na",
   "avad|deephy": "na",
   "avad|dfplatter_sample": "na",
   "avad|fakeavceleb": "na",
   "avad|ffpp_test": "na",
+  "avad|genvideo_val": "na",
   "avad|hidf_video": "na",
   "avad|hidf_video_quick": "na",
   "avad|in_the_wild": "na",
@@ -5705,10 +5883,12 @@
   "avh_align|banglafake": "na",
   "avh_align|bd_grf6": "na",
   "avh_align|celeb_df_v2_test": "na",
+  "avh_align|counterfactual_t2v_quick": "na",
   "avh_align|deephy": "na",
   "avh_align|dfplatter_sample": "na",
   "avh_align|fakeavceleb": "na",
   "avh_align|ffpp_test": "na",
+  "avh_align|genvideo_val": "na",
   "avh_align|hidf_video": "na",
   "avh_align|hidf_video_quick": "na",
   "avh_align|in_the_wild": "na",
@@ -5753,12 +5933,56 @@
   "core|speechfake_mr": "na",
   "core|speechfake_ta": "na",
   "core|urdu_csalt": "na",
+  "d3|asvspoof2019_la_eval": "na",
+  "d3|bangla_voices": "na",
+  "d3|banglafake": "na",
+  "d3|bd_grf6": "na",
+  "d3|in_the_wild": "na",
+  "d3|indicsynth_bn": "na",
+  "d3|indicsynth_hi": "na",
+  "d3|indicsynth_ur": "na",
+  "d3|indictts_challenge": "na",
+  "d3|mavos_dd_hi_audio": "na",
+  "d3|mlaad_bn": "na",
+  "d3|mlaad_hi": "na",
+  "d3|mlaad_si": "na",
+  "d3|sea_spoof_hi": "na",
+  "d3|sea_spoof_ta": "na",
+  "d3|speechfake_bn": "na",
+  "d3|speechfake_hi": "na",
+  "d3|speechfake_ml": "na",
+  "d3|speechfake_mr": "na",
+  "d3|speechfake_ta": "na",
+  "d3|urdu_csalt": "na",
+  "demamba|asvspoof2019_la_eval": "na",
+  "demamba|bangla_voices": "na",
+  "demamba|banglafake": "na",
+  "demamba|bd_grf6": "na",
+  "demamba|in_the_wild": "na",
+  "demamba|indicsynth_bn": "na",
+  "demamba|indicsynth_hi": "na",
+  "demamba|indicsynth_ur": "na",
+  "demamba|indictts_challenge": "na",
+  "demamba|mavos_dd_hi_audio": "na",
+  "demamba|mlaad_bn": "na",
+  "demamba|mlaad_hi": "na",
+  "demamba|mlaad_si": "na",
+  "demamba|sea_spoof_hi": "na",
+  "demamba|sea_spoof_ta": "na",
+  "demamba|speechfake_bn": "na",
+  "demamba|speechfake_hi": "na",
+  "demamba|speechfake_ml": "na",
+  "demamba|speechfake_mr": "na",
+  "demamba|speechfake_ta": "na",
+  "demamba|urdu_csalt": "na",
   "df_arena_1b|asvspoof2019_la_eval": "guard",
   "df_arena_1b|celeb_df_v2_test": "na",
+  "df_arena_1b|counterfactual_t2v_quick": "na",
   "df_arena_1b|deephy": "na",
   "df_arena_1b|dfplatter_sample": "na",
   "df_arena_1b|fakeavceleb": "na",
   "df_arena_1b|ffpp_test": "na",
+  "df_arena_1b|genvideo_val": "na",
   "df_arena_1b|hidf_video": "na",
   "df_arena_1b|hidf_video_quick": "na",
   "df_arena_1b|indeepfake": "na",
@@ -5770,10 +5994,12 @@
   "df_arena_1b|mlaad_si": "guard",
   "df_arena_500m|asvspoof2019_la_eval": "guard",
   "df_arena_500m|celeb_df_v2_test": "na",
+  "df_arena_500m|counterfactual_t2v_quick": "na",
   "df_arena_500m|deephy": "na",
   "df_arena_500m|dfplatter_sample": "na",
   "df_arena_500m|fakeavceleb": "na",
   "df_arena_500m|ffpp_test": "na",
+  "df_arena_500m|genvideo_val": "na",
   "df_arena_500m|hidf_video": "na",
   "df_arena_500m|hidf_video_quick": "na",
   "df_arena_500m|indeepfake": "na",
@@ -6000,10 +6226,12 @@
   "havic|banglafake": "na",
   "havic|bd_grf6": "na",
   "havic|celeb_df_v2_test": "na",
+  "havic|counterfactual_t2v_quick": "na",
   "havic|deephy": "na",
   "havic|dfplatter_sample": "na",
   "havic|fakeavceleb": "na",
   "havic|ffpp_test": "na",
+  "havic|genvideo_val": "na",
   "havic|hidf_video": "na",
   "havic|hidf_video_quick": "na",
   "havic|in_the_wild": "na",
@@ -6053,10 +6281,12 @@
   "lipfd|banglafake": "na",
   "lipfd|bd_grf6": "na",
   "lipfd|celeb_df_v2_test": "na",
+  "lipfd|counterfactual_t2v_quick": "na",
   "lipfd|deephy": "na",
   "lipfd|dfplatter_sample": "na",
   "lipfd|fakeavceleb": "na",
   "lipfd|ffpp_test": "na",
+  "lipfd|genvideo_val": "na",
   "lipfd|hidf_video": "na",
   "lipfd|hidf_video_quick": "na",
   "lipfd|in_the_wild": "na",
@@ -6291,10 +6521,12 @@
   "xception|speechfake_ta": "na",
   "xception|urdu_csalt": "na",
   "xlsr_aasist|celeb_df_v2_test": "na",
+  "xlsr_aasist|counterfactual_t2v_quick": "na",
   "xlsr_aasist|deephy": "na",
   "xlsr_aasist|dfplatter_sample": "na",
   "xlsr_aasist|fakeavceleb": "na",
   "xlsr_aasist|ffpp_test": "na",
+  "xlsr_aasist|genvideo_val": "na",
   "xlsr_aasist|hidf_video": "na",
   "xlsr_aasist|hidf_video_quick": "na",
   "xlsr_aasist|indeepfake": "na",
@@ -6302,10 +6534,12 @@
   "xlsr_aasist|mavos_dd_hi_video": "na",
   "xlsr_aasist|mavos_dd_hi_video_quick": "na",
   "xlsr_mamba|celeb_df_v2_test": "na",
+  "xlsr_mamba|counterfactual_t2v_quick": "na",
   "xlsr_mamba|deephy": "na",
   "xlsr_mamba|dfplatter_sample": "na",
   "xlsr_mamba|fakeavceleb": "na",
   "xlsr_mamba|ffpp_test": "na",
+  "xlsr_mamba|genvideo_val": "na",
   "xlsr_mamba|hidf_video": "na",
   "xlsr_mamba|hidf_video_quick": "na",
   "xlsr_mamba|indeepfake": "na",
@@ -6313,10 +6547,12 @@
   "xlsr_mamba|mavos_dd_hi_video": "na",
   "xlsr_mamba|mavos_dd_hi_video_quick": "na",
   "xlsr_sls|celeb_df_v2_test": "na",
+  "xlsr_sls|counterfactual_t2v_quick": "na",
   "xlsr_sls|deephy": "na",
   "xlsr_sls|dfplatter_sample": "na",
   "xlsr_sls|fakeavceleb": "na",
   "xlsr_sls|ffpp_test": "na",
+  "xlsr_sls|genvideo_val": "na",
   "xlsr_sls|hidf_video": "na",
   "xlsr_sls|hidf_video_quick": "na",
   "xlsr_sls|indeepfake": "na",

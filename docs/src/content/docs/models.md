@@ -7,7 +7,7 @@ The configs (`configs/models/<id>.yaml`) are the source of truth, and `uv run sc
 
 ## Status
 
-Checked on 2026-11-28 against the configs and the published runs. All 35 models with an adapter pass [parity](#parity).
+Checked on 2026-11-28 against the configs and the published runs. All 35 models with an adapter pass [parity](#parity), except DeMamba and D3, added that day, whose parity job is queued on SPARK.
 
 | Models | Modality | Status | Score direction |
 | --- | --- | --- | --- |
@@ -18,6 +18,7 @@ Checked on 2026-11-28 against the configs and the published runs. All 35 models 
 | AASIST, AASIST-L | audio | ready, wave 1 | settled |
 | XLS-R + AASIST | audio | workable, wave 1 | settled |
 | XLS-R + SLS, XLSR-Mamba, AASIST3, AntiDeepfake MMS-300M and w2v2 small, DF Arena 500M and 1B | audio | workable | settled |
+| DeMamba (GenVideo-100K checkpoint), D3 | video | workable, parity pending | not yet: reproduction on GenVideo-Val |
 | AltFreezing, TALL | video | blocked, no adapter | |
 
 A score direction is settled once the model scores above chance on a reproduction evalset. The video models' were settled on 2026-11-27 on Celeb-DF v2's official test list, where the 20 scored there score 0.68 to 0.98 ([Results](results.md#reproductions)). GenConViT trained on Celeb-DF v2, FF++ and DFDC, so the guard refuses it on all of them. The four audio-visual models' wait on an audio-visual reproduction set: FakeAVCeleb is on request ([Datasets](datasets.md#requests-to-send)), and HAVIC, trained on part of it, is refused there.
@@ -34,6 +35,7 @@ Both blocked models wait on weights. AltFreezing's are only on RecDrive and Baid
 | Do cues that ignore face texture drop less on South Asian faces? | FTCN (motion only), RealForensics (lip motion from real talking faces) |
 | Do detectors that never saw a fake avoid training-face bias? | AVAD, AVH-Align (audio-visual alignment of real speech) |
 | Do more varied training faces help? | GenConViT, DFDC winner (both trained on DFDC's paid actors, not only FF++) |
+| Are fully generated (text-to-video) fakes caught by detectors built for them? | DeMamba (trained on GenVideo), D3 (training-free), whole frames rather than face crops |
 | How do newer relatives of what holds up on MAVOS-DD do? | LAA-Net, FakeSTormer (SBI-style training), LipFD (lip-sync specific), UnivFD (generic AI-image floor), TALL (MAVOS-DD's own baseline) |
 
 The last four rows joined on 2026-10-28, chosen for the South Asian question, each with weights confirmed reachable that day except TALL's. DeepfakeBench releases no checkpoint for any of its video detectors (TALL, FTCN, AltFreezing, STIL, VideoMAE, TimeSformer, X-CLIP), only the frame-level set already here (checked 2026-10-28), so these come from their authors' repos. Each model's own reason, and whether it is a cut candidate, is on its page in the [Model catalog](catalog.md#models).

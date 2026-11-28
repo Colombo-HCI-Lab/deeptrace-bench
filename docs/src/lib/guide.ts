@@ -83,6 +83,7 @@ const FACES: Group[] = [
   { label: "DFDC", title: "Trained on DFDC instead of FF++", kind: "mid", models: ["dfdc_b7", "genconvit"] },
   { label: "Audio-visual", title: "Read the voice and the face together", kind: "mid", models: ["havic", "avh_align", "avad", "lipfd"] },
   { label: "AI images", title: "A generic AI-image detector, trained on GAN images", kind: "mid", models: ["univfd"] },
+  { label: "AI video", title: "Detectors of generated video, reading whole frames", kind: "mid", models: ["demamba", "d3"] },
 ];
 
 const fmt3 = (x: number) => x.toFixed(3);
