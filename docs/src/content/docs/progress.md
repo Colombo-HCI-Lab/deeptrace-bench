@@ -5,15 +5,24 @@ description: "Where the benchmark stands, what each round of work added, and wha
 
 ## Where things stand
 
-As of 2026-11-26:
+As of 2026-11-28:
 
 - **Models.** 35 detectors have adapters and weights, and all 35 pass parity against upstream code ([Models](models.md#parity)). AltFreezing and TALL are blocked on weights ([Models](models.md#status)).
-- **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Celeb-DF v2 is in the store since 2026-11-26, not yet scored. Other request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++ and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
-- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control, the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one. All 42 pairs of the 21 video models and all 20 pairs of the 10 audio models on the audio-visual MAVOS-DD sets are scored, so every empty cell left waits on data access or weights, except Celeb-DF v2's: it arrived on 2026-11-26 and isn't scored yet. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio model has a settled score direction; no video model does yet ([Models](models.md#status)).
+- **Data.** Builders cover every open South Asian set, the reproduction sets and HiDF. Celeb-DF v2 arrived on 2026-11-26 and is scored. The other request-only sets (FakeAVCeleb, InDeepFake, DeePhy, DF-Platter, FF++ and others) wait on requests ([datasets.md](datasets.md#requests-to-send)).
+- **Runs.** All 21 video models with weights are scored on HiDF, MAVOS-DD Hindi and the MAVOS-DD German language control (all but GenConViT on Celeb-DF v2's official test list too), the four audio-visual models on MAVOS-DD Hindi, and every audio model on its reproductions and on every South Asian and cross-corpus set the guard allows ([Results](results.md)). Every video model has its HiDF quick share and every audio-visual model its MAVOS-DD Hindi one. All 42 pairs of the 21 video models and all 20 pairs of the 10 audio models on the audio-visual MAVOS-DD sets are scored, so every empty cell left waits on data access or weights. The shortcut probe separates every cross-corpus audio set by trivial features, so which of those numbers count waits on the team ([Results](results.md#the-shortcut-probe)). Every audio and video model has a settled score direction, the video models' from Celeb-DF v2 since 2026-11-27, except GenConViT, which trained on every reproduction set; the four audio-visual models' wait on an audio-visual reproduction set ([Models](models.md#status)).
 - **Compute.** The DESI lab's SPARK cluster runs the harness and scores any pair or a whole wave of them, ordered with one command; the same wave stage runs on any other GPU too ([Where to run](spark.md)). The two 24 GB GPUs outside SPARK that ran most of the round are switched off; SPARK scores the rest of it.
 - **Rules.** The evaluation setup is still `proposed` (decision 5, below), so every number can still move.
 
 ## Timeline
+
+### 2026-11-27: video models on Celeb-DF v2
+
+Wave `s10_celeb_df_v2`, run 45890304735 in [deeptrace-experiments](https://github.com/UNIL-DESI/deeptrace-experiments) (commit `389442c`, harness pinned at `0b78d15`).
+
+- All 21 video models with weights scored Celeb-DF v2's official test list (518 videos, 178 real and 340 fake) in about 9 hours on SPARK, with no failed items. GenConViT's run (0.901) was withdrawn: its released weights trained on a random split of Celeb-DF v2, which its config had missed, so the guard now refuses the pair. The other 20 are `clean`. SPARK fetched the set from a private Hugging Face mirror with the project's token, since its terms bar a public copy; the first order of the wave (run 45889503546) stopped in 2 minutes because the jobs fetched only open data, fixed in `389442c`.
+- All 20 score above chance, from 0.68 (UnivFD) to 0.98 (the DFDC winner), so their score directions are settled and their runs elsewhere are no longer provisional. SBI, both GenD models, LAA-Net and FakeSTormer reproduce their papers within 0.011, and the six DeepfakeBench detectors with a published per-video figure within 0.02 of it. The temporal models fall short, FTCN by 0.041, RealForensics by 0.056 and LipForensics by 0.104, and Effort by 0.036; all pass parity, so the gap is in the protocol ([Results](results.md#reproductions)).
+- Recording GenConViT's training sets no longer drops its earlier runs from the site: a model's training data no longer counts toward whether a run is current, and the site instead re-checks every run against the guard, leaving out a pair it now refuses. Its HiDF and MAVOS-DD runs stay, still provisional.
+- With the direction settled, the DFDC winner's below-chance MAVOS-DD scores (0.32 to 0.42) and the frame detectors' on German are how those models rank those sets, not a flipped adapter: the DFDC winner leads Celeb-DF v2 at 0.977.
 
 ### 2026-11-26: audio models on the audio-visual sets
 
@@ -264,12 +273,11 @@ Commits `15a2e2c` and `d3a6d03`.
 In order:
 
 1. **Settle the evaluation setup** (decision 5). The audio question now has a concrete case: average 4-second windows or score each utterance whole, which may explain MMS-300M's In-the-Wild gap ([Models](models.md#per-model)).
-2. **FF++ or Celeb-DF v2**, to settle every video model's score direction.
-3. **Generators they haven't seen.** Per-generator numbers on MLAAD Hindi's 2026 systems, once the team agrees the guard carve-out below, or on SEA-Spoof once its request is granted. The desk check is done ([Results](results.md#generator-level-contamination-check)).
-4. **Check the audio of MAVOS-DD's face-only fakes.** The audio models flag them far more often than real clips ([Results](results.md#faces-and-talking-heads-mavos-dd-hindi)); the shortcut probe reads audio evalsets only, so extending it to `mavos_dd_hi_av`'s audio track would show whether re-encoding or another trivial feature explains it.
-5. **Decide which cross-corpus audio numbers count** (E5). The shortcut probe separates every cross-corpus set by trivial features; the options are in [Results](results.md#the-shortcut-probe).
-6. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits). Waits on the team choosing the models and training data (Oshan, 2026-11-14); no training code exists yet.
-7. **deeptrace's own data** (E7), once collection starts.
+2. **Generators they haven't seen.** Per-generator numbers on MLAAD Hindi's 2026 systems, once the team agrees the guard carve-out below, or on SEA-Spoof once its request is granted. The desk check is done ([Results](results.md#generator-level-contamination-check)).
+3. **Check the audio of MAVOS-DD's face-only fakes.** The audio models flag them far more often than real clips ([Results](results.md#faces-and-talking-heads-mavos-dd-hindi)); the shortcut probe reads audio evalsets only, so extending it to `mavos_dd_hi_av`'s audio track would show whether re-encoding or another trivial feature explains it.
+4. **Decide which cross-corpus audio numbers count** (E5). The shortcut probe separates every cross-corpus set by trivial features; the options are in [Results](results.md#the-shortcut-probe).
+5. **Fine-tuned baselines** (E6) on [identity-safe splits](evaluation.md#fine-tuning-splits). Waits on the team choosing the models and training data (Oshan, 2026-11-14); no training code exists yet.
+6. **deeptrace's own data** (E7), once collection starts.
 
 ## Open decisions that shape the results
 

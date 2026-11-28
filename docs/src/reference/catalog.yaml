@@ -433,6 +433,8 @@ models:
       The 2025 spatio-temporal counterpart of SBI and LAA-Net: trained on real videos with
       synthetic video-level fakes, so it sees no particular generator.
     venue: ICCV 2025
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.928", source: paper, cite: "Table 1, 16 frames", evalset: celeb_df_v2_test}
     summary: >-
       Spatio-temporal transformer on face clips, trained on FF++ real videos with video-level
       pseudo-fakes.
@@ -474,6 +476,8 @@ models:
       drop least.
     s2_id: ARXIV:2108.06693
     venue: ICCV 2021
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.869", source: paper, cite: "Table 4", evalset: celeb_df_v2_test}
     summary: >-
       Fully temporal 3D convolutional network plus a temporal transformer on face clips; FF++
       c23.
@@ -499,8 +503,7 @@ models:
       branches, two-way classifier averaged over frames
     description: >-
       GenConViT (Wodajo et al., 2023) pairs a convolutional-transformer classifier with
-      generative branches. The weights on the Hub are CC BY-NC 4.0 although the code is MIT. Not
-      adapted yet.
+      generative branches. The weights on the Hub are CC BY-NC 4.0 although the code is MIT.
   gend:
     catches: [face_swap, reenactment]
     cue: foundation-model features (CLIP)
@@ -585,6 +588,8 @@ models:
       the same way on real faces only, is the natural next test.
     s2_id: ARXIV:2401.13856
     venue: CVPR 2024
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.954", source: paper, cite: "Table 1", evalset: celeb_df_v2_test}
     summary: >-
       Localised artefact attention with heatmap and self-consistency heads, trained on FF++ real
       frames with blended pseudo-fakes.
@@ -594,8 +599,7 @@ models:
     description: >-
       LAA-Net (Nguyen et al., CVPR 2024) focuses on small blending artefacts and claims
       robustness to compression. Its checkpoints are in a Dropbox folder (fetched by hand) under an
-      academic licence, and upstream uses dlib landmarks, which this repo doesn't install. Not
-      adapted yet.
+      academic licence, and upstream uses dlib landmarks, which this repo doesn't install.
   lipfd:
     catches: [lip_sync]
     cue: temporal mismatch between lip motion and audio
@@ -644,6 +648,8 @@ models:
       already among the stronger models here.
     s2_id: ARXIV:2201.07131
     venue: CVPR 2022
+    published:
+      - {test: "Celeb-DF v2", metric: AUC, value: "0.869", source: paper, cite: "Table 2", evalset: celeb_df_v2_test}
     summary: >-
       Video encoder pretrained self-supervised on LRW talking faces (video and audio), then
       trained on FF++ c23; scores from video alone.

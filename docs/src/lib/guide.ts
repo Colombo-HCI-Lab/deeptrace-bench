@@ -495,7 +495,10 @@ export function buildResults(body: string) {
     .filter((s) => !/^(Three tiers|Language matters)/.test(s.title))
     .map((s) => ({ title: plain(s.title), body: md(s.text) }));
 
-  const repT = get(/^Reproductions/);
+  // The audio table and its notes come first; each ### subsection after them (video) shows as markdown.
+  const repAll = get(/^Reproductions/);
+  const repT = repAll.split(/^### /m)[0];
+  const reproMore = split(repAll, 3).map((s) => ({ title: plain(s.title), body: md(s.text) }));
   const rt = tables(repT)[0];
   const num = (s: string) => {
     const m = s.match(/(\d+(?:\.\d+)?)%/);
@@ -572,6 +575,7 @@ export function buildResults(body: string) {
     notes,
     repro,
     reproBody: md(prose(repT)),
+    reproMore,
     video,
     gaps: md(get(/^What the results can/)),
     more,

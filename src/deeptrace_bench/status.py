@@ -122,6 +122,8 @@ def _model_hashes(model: ModelConfig) -> set[str]:
         kept = {k: v for k, v in config.items() if k not in _DESCRIPTIVE_MODEL_FIELDS}
         # where a weight is fetched from doesn't change it: weights.lock.yaml pins each file's sha256
         kept["weights"] = [w["name"] for w in config.get("weights") or []]
+        # training data changes the guard's verdict, not the scores; scored_runs re-checks that
+        kept.pop("training_data", None)
         return kept
 
     hashes = {config_hash(now)}
@@ -184,6 +186,8 @@ def scored_runs(registry: Registry) -> list[dict[str, Any]]:
             continue
         if not _is_current(inputs, model, evalset):
             continue
+        if check(model, evalset, registry).verdict == Verdict.CONTAMINATED:
+            continue  # the guard refuses the pair now, say after a training set came to light
         key = (model.id, evalset.id)
         if key not in best or inputs["started"] > best[key][0]:
             best[key] = (inputs["started"], summary, in_store)

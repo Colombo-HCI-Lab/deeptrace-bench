@@ -114,6 +114,9 @@
 - id: deepfake_timit
   name: DeepfakeTIMIT (face swaps over VidTIMIT)
   note: Part of GenConViT's training mix.
+- id: trusted_media
+  name: TrustedMedia (AI Singapore's deepfake video set, 4,380 fake and 2,563 real)
+  note: Part of GenConViT's training mix (training only, per its paper).
 - id: avlips
   name: AVLips (LipFD's lip-sync training set, over LRS3)
   note: Wav2Lip, MakeItTalk and TalkLip fakes.

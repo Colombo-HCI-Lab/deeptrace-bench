@@ -288,11 +288,19 @@ const tally: [string, string][] = [
         </table>
       </div>
       <div class="snip text" set:html={R.reproBody} />
+      {
+        R.reproMore.map((m) => (
+          <>
+            <h3>{m.title}</h3>
+            <div class="snip text prose" set:html={m.body} />
+          </>
+        ))
+      }
     </section>
 
     <section id="video-hidf" class="block">
       <header>
-        <div class="kicker">Video · provisional</div>
+        <div class="kicker">Video</div>
         <h2>Faces: HiDF</h2>
         <div class="snip" style="max-width: 66ch; color: var(--muted)" set:html={R.video.intro} />
       </header>

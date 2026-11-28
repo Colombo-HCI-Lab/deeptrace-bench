@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 from deeptrace_bench import status
+from deeptrace_bench.eval.contamination import Check, Verdict
 from deeptrace_bench.runs import config_hash
 from deeptrace_bench.status import (
     collect,
@@ -116,6 +117,25 @@ def test_runs_from_before_a_weight_moved_host_still_count(registry, tmp_path, mo
     record.write_text(json.dumps(data))
     [row] = scored_runs(registry)
     assert row["run_id"] == "aasist__urdu_csalt__moved"
+
+
+def test_training_data_edits_keep_runs_unless_the_guard_refuses(registry, tmp_path, monkeypatch):
+    monkeypatch.setenv("DTB_ROOT", str(tmp_path))
+    monkeypatch.delenv("DTB_NAMESPACE", raising=False)
+    monkeypatch.setattr(status, "PUBLISHED_RESULTS_DIR", tmp_path / "published")
+    now = registry.model("aasist").model_dump(mode="json")
+    older = {**now, "training_data": now["training_data"][:-1]}
+    monkeypatch.setattr(status, "_committed_model_configs", lambda _: [older])
+    _store_run(tmp_path, registry, "aasist__urdu_csalt__old", "2026-10-01", auc=0.7)
+    record = tmp_path / "scores" / "aasist__urdu_csalt__old" / "run.json"
+    data = json.loads(record.read_text())
+    data["config_hashes"]["model"] = config_hash(older)
+    record.write_text(json.dumps(data))
+    [row] = scored_runs(registry)
+    assert row["run_id"] == "aasist__urdu_csalt__old"
+    refused = Check(verdict=Verdict.CONTAMINATED)
+    monkeypatch.setattr(status, "check", lambda *_: refused)
+    assert scored_runs(registry) == []
 
 
 def test_published_runs_count_when_the_store_lacks_them(registry, tmp_path, monkeypatch):

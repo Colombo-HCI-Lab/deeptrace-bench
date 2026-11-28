@@ -20,6 +20,11 @@ training_data:
   - {dataset: dfdc, level: train}
   - {dataset: ffpp, level: train}
   - {dataset: deepfake_timit, level: train}
+  # The paper (Section IV, "Datasets") trains on a random split of Celeb-DF v2 and TrustedMedia too, and
+  # the README says the released weights were trained on Celeb-DF v2; found 2026-11-28 after its
+  # Celeb-DF v2 test run scored 0.901, which was withdrawn.
+  - {dataset: celeb_df_v2, level: train}
+  - {dataset: trusted_media, level: train}
 adapter: deeptrace_bench.models.genconvit:GenConViTDetector
 input:
   crop: {size: 224, margin: 1.0, align: box}   # the box itself, stretched to 224, as upstream's tight dlib boxes

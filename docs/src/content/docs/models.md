@@ -7,19 +7,20 @@ The configs (`configs/models/<id>.yaml`) are the source of truth, and `uv run sc
 
 ## Status
 
-Checked on 2026-11-15 against the configs and the published runs. All 35 models with an adapter pass [parity](#parity).
+Checked on 2026-11-28 against the configs and the published runs. All 35 models with an adapter pass [parity](#parity).
 
 | Models | Modality | Status | Score direction |
 | --- | --- | --- | --- |
-| Xception, EfficientNet-B4, SBI, GenD (CLIP L/14) | video | ready, wave 1 | not yet |
-| GenD (PE L/14), UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD, Effort, UnivFD, LAA-Net, GenConViT (ED), DFDC winner (7 x B7), FTCN, FakeSTormer, RealForensics, LipForensics | video | workable | not yet |
+| Xception, EfficientNet-B4, SBI, GenD (CLIP L/14) | video | ready, wave 1 | settled |
+| GenD (PE L/14), UCF, F3Net, SPSL, RECCE, SRM, CORE, FFD, Effort, UnivFD, LAA-Net, DFDC winner (7 x B7), FTCN, FakeSTormer, RealForensics, LipForensics | video | workable | settled |
+| GenConViT (ED) | video | workable | can't be settled: trained on every reproduction set |
 | HAVIC, AVH-Align, LipFD, AVAD | audio-video | workable | not yet |
 | AASIST, AASIST-L | audio | ready, wave 1 | settled |
 | XLS-R + AASIST | audio | workable, wave 1 | settled |
 | XLS-R + SLS, XLSR-Mamba, AASIST3, AntiDeepfake MMS-300M and w2v2 small, DF Arena 500M and 1B | audio | workable | settled |
 | AltFreezing, TALL | video | blocked, no adapter | |
 
-A score direction is settled once the model scores above chance on a reproduction evalset. Every video model's waits on FF++ test or Celeb-DF v2, both on request ([Datasets](datasets.md#requests-to-send)).
+A score direction is settled once the model scores above chance on a reproduction evalset. The video models' were settled on 2026-11-27 on Celeb-DF v2's official test list, where the 20 scored there score 0.68 to 0.98 ([Results](results.md#reproductions)). GenConViT trained on Celeb-DF v2, FF++ and DFDC, so the guard refuses it on all of them. The four audio-visual models' wait on an audio-visual reproduction set: FakeAVCeleb is on request ([Datasets](datasets.md#requests-to-send)), and HAVIC, trained on part of it, is refused there.
 
 Both blocked models wait on weights. AltFreezing's are only on RecDrive and Baidu (password `altf`), and issues #7 and #8 report the file gone, with no reply or other mirror (rechecked 2026-10-05); someone with a working session has to fetch them. TALL has released none.
 
