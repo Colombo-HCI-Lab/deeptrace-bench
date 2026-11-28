@@ -497,7 +497,7 @@ models:
     venue: arXiv 2023
     summary: >-
       ConvNeXt and Swin features combined with an autoencoder and a VAE whose reconstructions
-      feed the classifier; trained on DFDC, FF++ and DeepfakeTIMIT.
+      feed the classifier; trained on DFDC, FF++, DeepfakeTIMIT, TrustedMedia and Celeb-DF v2.
     architecture: >-
       224 px face crops, 15 frames per video, ConvNeXt-Swin hybrid with autoencoder and VAE
       branches, two-way classifier averaged over frames

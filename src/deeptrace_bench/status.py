@@ -122,7 +122,7 @@ def _model_hashes(model: ModelConfig) -> set[str]:
         kept = {k: v for k, v in config.items() if k not in _DESCRIPTIVE_MODEL_FIELDS}
         # where a weight is fetched from doesn't change it: weights.lock.yaml pins each file's sha256
         kept["weights"] = [w["name"] for w in config.get("weights") or []]
-        # training data changes the guard's verdict, not the scores; scored_runs re-checks that
+        # training data changes the guard's verdict, not the scores; scored_runs drops refused pairs
         kept.pop("training_data", None)
         return kept
 

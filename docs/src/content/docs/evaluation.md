@@ -84,6 +84,7 @@ What it refuses today:
 | Models | Refused on | Why |
 | --- | --- | --- |
 | HAVIC | FakeAVCeleb | fine-tuned on an unpublished 70% of it |
+| GenConViT | Celeb-DF v2 (`celeb_df_v2_test`) | trained on a random split of it, so the official test videos may be among them |
 | AASIST3, DF Arena 500M and 1B, both AntiDeepfake models | MLAAD (`mlaad_*`) | trained on it |
 | DF Arena 500M and 1B, both AntiDeepfake models | ASVspoof 2019 LA eval | DF Arena doesn't name its training partitions; AntiDeepfake trained on all of it |
 

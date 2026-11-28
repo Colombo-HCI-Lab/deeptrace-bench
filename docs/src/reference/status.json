@@ -1814,7 +1814,7 @@
    "adapter": true,
    "blocked": false,
    "licence": "MIT code; CC BY-NC 4.0 weights (model card)",
-   "summary": "ConvNeXt and Swin features combined with an autoencoder and a VAE whose reconstructions feed the classifier; trained on DFDC, FF++ and DeepfakeTIMIT.",
+   "summary": "ConvNeXt and Swin features combined with an autoencoder and a VAE whose reconstructions feed the classifier; trained on DFDC, FF++, DeepfakeTIMIT, TrustedMedia and Celeb-DF v2.",
    "why": "Trained on DFDC as well as FF++, so it pairs with the DFDC winner to test whether more varied training faces carry over to South Asian ones.",
    "cut": false,
    "catches": [

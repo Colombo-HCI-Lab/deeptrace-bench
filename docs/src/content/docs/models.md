@@ -221,6 +221,7 @@ What a reader of each adapter's scores should know: where the weights come from,
 | | |
 | --- | --- |
 | Weights | `genconvit_ed_inference.pth` from `Deressa/GenConViT` (CC BY-NC 4.0 weights over MIT code) |
+| Training | DFDC, FF++, DeepfakeTIMIT, TrustedMedia and a random split of Celeb-DF v2 (paper, Section IV); the config missed the last two until 2026-11-28, so its Celeb-DF v2 run was withdrawn and its score direction can't be settled here |
 | Branch scored | only ED, upstream's `--net ed`: the VAE branch draws `torch.randn_like` noise in its encoder at test time, so its scores differ between runs |
 | Load | upstream's `GenConViTED` is built with `pretrained=False`; the Swin embedder it attaches as the ConvNeXt's `patch_embed` is never called by ConvNeXt's forward, but its weights are loaded strictly. The checkpoint was saved with timm 0.6.5, so conversion runs timm's own Swin `checkpoint_filter_fn` on both copies of the embedder, then saves one copy of the shared tensors |
 | P(fake) | class 0 is fake: the sigmoid of logit 0 |
