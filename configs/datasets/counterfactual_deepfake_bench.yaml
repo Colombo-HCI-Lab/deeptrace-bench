@@ -8,10 +8,14 @@ access:
   page: https://huggingface.co/datasets/machine-intelligence-lab-wvu/counterfactual-deepfake-bench
   repo: machine-intelligence-lab-wvu/counterfactual-deepfake-bench
   revision: 613e158914ec8e04560c239d82259414f6128d96
+  # Clips and the metadata table only: the 7,056 JSON sidecars would double the Hub requests.
+  allow_patterns: [metadata.csv, synthetic/*.mp4]
 licence: CC BY-NC 4.0
 licence_terms:
   - Non-commercial use only.
 contains: [fake]
-size_gb: null
-derived_from: [celebv_hq]
-notes: 7,056 fully synthetic talking-head clips in 56 prompted cells, seven perceived-race groups (Black, East Asian, Indian, Latino, MENA, Southeast Asian, White) by two genders and four age bands, from four text-to-video generators (LTX 2.3 and 2.5 with audio, Wan 2.2, HunyuanVideo 1.5). The only open set with an explicit Indian cell, so it asks whether the miss rate changes with the face alone, same generator and same prompt. The people are synthetic and the labels are prompted presentation, not self-reported. Its real half (CelebV-HQ, FairFace labels) isn't redistributed, so an evalset needs CelebV-HQ fetched separately. Ungated on the Hub, checked 2026-10-28.
+size_gb: 4.6
+# Fully generated: no reference photo or real footage went into any clip (dataset card).
+derived_from: []
+builder: deeptrace_bench.datasets.counterfactual_deepfake_bench:build_manifest
+notes: 7,056 fully synthetic talking-head clips in 56 prompted cells, seven perceived-race groups (Black, East Asian, Indian, Latino, MENA, Southeast Asian, White) by two genders and four age bands, from four text-to-video generators (LTX 2.3 and 2.5 with audio, Wan 2.2, HunyuanVideo 1.5). The only open set with an explicit Indian cell, so it asks whether the miss rate changes with the face alone, same generator and same prompt. The people are synthetic and the labels are prompted presentation, not self-reported. Its real half (CelebV-HQ, FairFace labels) isn't redistributed, so an evalset pairs the fakes with reals from another corpus (the authors used CelebV-HQ). Ungated on the Hub, checked 2026-10-28; 6,435 clips pass the authors' QC (split primary), about 4.6 GB of clips (checked 2026-11-28).

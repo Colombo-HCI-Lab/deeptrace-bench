@@ -509,6 +509,30 @@ def test_hidf_labels_fakes_by_the_face_on_screen(tmp_path):
     assert (df.loc["fake", "subject_id"], df.loc["fake", "source_subject_id"]) == ("c0001", "f0009")
 
 
+def test_counterfactual_bench_reads_cell_and_qc_split(tmp_path):
+    from deeptrace_bench.datasets import counterfactual_deepfake_bench as cfdb
+
+    clip = "synthetic/wan22/indian_f_60+/wan22__indian__f__60+__g003.mp4"
+    _tree(tmp_path, [clip, clip.replace(".mp4", ".json"), "synthetic/ltx23/white_m_18-29/a.mp4"])
+    (tmp_path / "metadata.csv").write_text(
+        "file_name,model,race,gender,age_band,lighting,duration_s,primary\n"
+        f"{clip},wan22,indian,f,60+,backlit,6.06,0\n"
+    )
+    df = cfdb.build_manifest(tmp_path)
+    validate_manifest(df, "counterfactual_deepfake_bench")
+    assert len(df) == 2  # the JSON sidecar is no item
+    row = df.set_index("rel_path").loc[clip]
+    assert (row["method"], row["g_race"], row["g_gender"], row["g_age"]) == (
+        "wan22",
+        "indian",
+        "female",
+        "60+",
+    )
+    assert row["split"] == "excluded"
+    assert pd.isna(df.set_index("method").loc["ltx23", "g_race"])  # no metadata row: null
+    assert cfdb.sample_stratum(clip) == "wan22/indian"
+
+
 @pytest.mark.parametrize(
     ("path", "label"),
     [

@@ -1,0 +1,27 @@
+id: counterfactual_t2v_quick
+modality: video
+role: south_asian
+pairing: cross_corpus
+components:
+  - dataset: counterfactual_deepfake_bench
+    filter: {split: primary}
+    label: fake
+  - dataset: mavos_dd_hi
+    filter: {label: real}
+    label: real
+group_by: [method, g_race, g_gender, g_age, g_lighting]
+status: ready
+subset:
+  per_stratum: 350
+  strata: [component, method]
+  seed: 0
+notes: >-
+  The first fully generated (text-to-video) set (2026-11-28). 1,400 Counterfactual-Deepfake-Bench
+  fakes, 350 per generator (LTX 2.3, LTX 2.5, Wan 2.2, HunyuanVideo 1.5), from the authors' QC
+  set, against 350 real Hindi YouTube videos from MAVOS-DD, which the worker already holds.
+  Cross-corpus: the fakes are 1280x704 synthetic portraits and the reals YouTube footage, so the
+  overall AUC can reward format rather than generation and is never a headline. The number to
+  read is the fake detection rate per requested race at the run's threshold (by_g_race), since
+  every race shares the same reals and the same prompts; Indian against the other six asks
+  whether a detector misses South Asian faces more when nothing else changes. The race is the
+  cell the prompt asked for, which the generator drew only 28 to 48% of the time (dataset card).
